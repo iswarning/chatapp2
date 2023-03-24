@@ -9,16 +9,7 @@ const firebaseConfig = {
     storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
     messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID
-  };
-
-// const firebaseConfig = {
-//     apiKey: "AIzaSyAJDAsjGHkKm_H1ErW_gq_s2UlnBpeJ2eQ",
-//     authDomain: "chatapp-6142d.firebaseapp.com",
-//     projectId: "chatapp-6142d",
-//     storageBucket: "chatapp-6142d.appspot.com",
-//     messagingSenderId: "348770708072",
-//     appId: "1:348770708072:web:37ac790686602f06bd29dd"
-// };
+};
 
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 

@@ -12,13 +12,35 @@ import Chat from './Chat';
 
 function Sidebar() {
 
-    const [user] = useAuthState(auth);
+    // const [user] = useAuthState(auth);
 
     const [chatData, setChatData] = useState<Array<object>>([]);
 
-    // useEffect(() => {
-    //     console.log(chatData);
-    // },[])
+    useEffect(() => {
+        getListChat();
+    },[])
+
+    // storage chat data to firebase
+    // const getListChat = () => {
+    //     getDocs(collection(db, 'chats'))
+    //       .then((querySnapshot) => {
+    //             querySnapshot.forEach((doc) => {
+    //                 setChatData([...chatData, doc.data()]);
+    //             });
+    //         })
+    //       .catch((error) => {
+    //             console.log('Error getting documents: ', error);
+    //         });
+    // }
+
+    // storage chat data to local storage
+    const getListChat = () => {
+        if(localStorage.getItem('listChat') === null) {
+            localStorage.setItem('listChat', JSON.stringify([]))
+        } else { 
+            setChatData(JSON.parse(localStorage.getItem('listChat') || ''))
+        }
+    }
 
     const createChat = async () => {
         const input = prompt(
@@ -28,6 +50,8 @@ function Sidebar() {
         if (!input) return null;
 
         addUserToChatRoom(input);
+
+        console.log(chatData);
         
     };
 
@@ -39,15 +63,12 @@ function Sidebar() {
                     addDoc(collection(db, "chats"),{
                         users: [user?.email, input]
                     });
+                    let chatData = JSON.parse(localStorage.getItem('listChat') || '');
+                    chatData.push({ users: [user?.email, input] });
+                    localStorage.setItem('listChat', JSON.stringify(chatData));
+                    getListChat(); 
                 }
             }).catch((err) => console.log(err));
-        }
-        if(chatData.length > 0) { 
-            let data = chatData;
-            data.push({ users: [user?.email, input]});
-            setChatData(data);
-        } else {
-            setChatData([{ users: [user?.email, input]}])
         }
     }
 
