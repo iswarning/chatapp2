@@ -5,15 +5,16 @@ import ChatIcon from '@mui/icons-material/Chat';
 import SearchIcon from '@mui/icons-material/Search';
 import * as EmailValidator from 'email-validator';
 import { auth, db } from '../firebase';
-import { collection, query, where, addDoc, getDocs } from 'firebase/firestore/lite';
 import { useAuthState } from 'react-firebase-hooks/auth';
+import { useCollection } from 'react-firebase-hooks/firestore';
 import { useEffect, useState } from 'react';
 import Chat from './Chat';
 
 function Sidebar() {
 
-    // const [user] = useAuthState(auth);
-
+    const [user] = useAuthState(auth);
+    const userChatRef = db.collection('chats').where('users', 'array-contains', user.email);
+    const [chatSnapshot] = useCollection(userChatRef); 
     const [chatData, setChatData] = useState<Array<object>>([]);
 
     useEffect(() => {
@@ -49,33 +50,26 @@ function Sidebar() {
 
         if (!input) return null;
 
-        addUserToChatRoom(input);
+        if(EmailValidator.validate(input) && !chatAlreadyExists(input) && input !== user?.email) {
+            db.collection('chats').add({
+                users: [user?.email, input]
+            });
+        }
 
         console.log(chatData);
         
     };
 
-    const addUserToChatRoom = (input: string) => {
-        if(EmailValidator.validate(input) && input !== user?.email) { 
-            const docsQuery = query(collection(db, "chats"), where("users", 'array-contains', input));
-            getDocs(docsQuery).then((doc) => {
-                if(doc.empty) {
-                    addDoc(collection(db, "chats"),{
-                        users: [user?.email, input]
-                    });
-                    let chatData = JSON.parse(localStorage.getItem('listChat') || '');
-                    chatData.push({ users: [user?.email, input] });
-                    localStorage.setItem('listChat', JSON.stringify(chatData));
-                    getListChat(); 
-                }
-            }).catch((err) => console.log(err));
-        }
+    const chatAlreadyExists = (recipientEmail: string): boolean => {
+        return !!chatSnapshot?.docs.find(
+            (chat: any) => chat.data().users.find(
+                (user: any) => user === recipientEmail)?.length > 0);
     }
 
     return (
         <Container>
             <Header>
-                <UserAvatar onClick={() => auth.signOut()} />
+                <UserAvatar src={user.photoURL} onClick={() => auth.signOut()} />
                 <IconsContainer>
                     <IconButton>
                         <ChatIcon/>
@@ -91,7 +85,7 @@ function Sidebar() {
             </Search>
             <SidebarButton onClick={createChat}>Start a new chat</SidebarButton>
             
-            {chatData.length > 0 ? chatData.map( (chat: any) => 
+            {chatSnapshot ? chatData.map( (chat: any) => 
                 <Chat key={chat.id} id={chat.id} users={chat.users} />
             ) : null}
         </Container>
@@ -100,7 +94,21 @@ function Sidebar() {
 
 export default Sidebar;
 
-const Container = styled.div``;
+const Container = styled.div`
+    flex: 0.45s;
+    border-right: 1px solid whitesmoke;
+    height: 100vh;
+    min-width: 300px;
+    max-width: 350px;
+    overflow-y: scroll;
+
+    ::-webkit-scrollbar {
+        display: none;
+    }
+
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+`;
 
 const Search = styled.div`
     display: flex;

@@ -1,24 +1,10 @@
 import styled from "styled-components";
 import Head from 'next/head'
 import { Button } from "@mui/material";
-import { auth, db, provider } from "@/firebase";
-import { User, signInWithPopup } from "firebase/auth";
-import { collection, doc, serverTimestamp, setDoc } from "firebase/firestore/lite";
+import { auth, provider } from "../firebase";
 
 const signIn = () => {
-    signInWithPopup(auth, provider).then((user) => {
-        createNewUser(user.user)
-    }).catch(alert);
-}
-
-const createNewUser = async (user: User) => {
-    const userCollection = collection(db, 'users');
-    const userDoc = doc(userCollection, 'users');
-    await setDoc(userDoc, {
-      email: user?.email,
-      lastSeen: serverTimestamp(),
-      photoURL: user?.photoURL,
-    }, { merge: true });
+    auth.signInWithPopup(provider).catch(alert);
 }
 
 function Login() {
