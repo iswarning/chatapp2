@@ -1,6 +1,5 @@
 import { auth, db } from "@/firebase";
-import { IconButton } from "@material-ui/core";
-import { Avatar } from "@mui/material";
+import { IconButton, Avatar } from "@mui/material";
 import { useRouter } from "next/router";
 import { useAuthState } from "react-firebase-hooks/auth";
 import styled from "styled-components";
@@ -18,8 +17,8 @@ import TimeAgo from "timeago-react";
 export default function ChatScreen({chat, messages}: any) {
     const [user] = useAuthState(auth);
     const [input, setInput] = useState('');
-    const router = useRouter();
-    const endOfMessageRef = useRef(null);
+    const router: any = useRouter();
+    const endOfMessageRef: any = useRef(null);
 
     const [messageSnapshot] = useCollection(
         db
@@ -55,7 +54,7 @@ export default function ChatScreen({chat, messages}: any) {
     }
 
     const ScrollToBottom = () => {
-        endOfMessageRef.current.scrollIntoView({
+        endOfMessageRef.current?.scrollIntoView({
             behavior: "smooth",
             block: "start",
         });
@@ -64,15 +63,15 @@ export default function ChatScreen({chat, messages}: any) {
     const sendMessage = (e: any) => {
         e.preventDefault();
 
-        db.collection('users').doc(user.uid).set({
+        db.collection('users').doc(user?.uid).set({
             lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
         }, { merge: true });
 
         db.collection('chats').doc(router.query.id).collection('messages').add({
             timestamp: firebase.firestore.FieldValue.serverTimestamp(),
             message: input,
-            user: user.email,
-            photoURL: user.photoURL
+            user: user?.email,
+            photoURL: user?.photoURL
         });
         
         setInput('');

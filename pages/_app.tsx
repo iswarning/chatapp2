@@ -17,11 +17,11 @@ export default function App({ Component, pageProps }: AppProps) {
   },[user]);
 
   const createNewUser = async () => {
-    db.collection('users').doc(user.uid).set(
+    db.collection('users').doc(user?.uid).set(
       {
-        email: user.email,
+        email: user?.email,
         lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
-        photoURL: user.photoURL,
+        photoURL: user?.photoURL,
       },
       { merge: true }
     )

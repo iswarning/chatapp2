@@ -11,7 +11,7 @@ export default function Chat({chat , messages}: any) {
     return (
         <Container>
             <Head>
-            <title>Chat with {getRecipientEmail({chat.users, user})}</title>
+            <title>Chat with {getRecipientEmail(chat.users, user)}</title>
             </Head>
             <Sidebar />
             <ChatContainer>

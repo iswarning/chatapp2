@@ -11,11 +11,11 @@ export default function Chat({ id, users }: any) {
     const router = useRouter();
     const [user] = useAuthState(auth);
     const [recipientSnapshot] = useCollection(
-        db.collection('users').where('email', '==', getRecipientEmail({users, user}))
+        db.collection('users').where('email', '==', getRecipientEmail(users, user))
     );
 
     const recipient = recipientSnapshot?.docs?.[0]?.data();
-    const recipientEmail = getRecipientEmail({users, user}); 
+    const recipientEmail = getRecipientEmail(users, user); 
 
     const enterChat = () => {
         router.push(`/chat/${id}`)

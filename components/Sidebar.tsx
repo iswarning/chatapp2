@@ -7,41 +7,13 @@ import * as EmailValidator from 'email-validator';
 import { auth, db } from '../firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { useCollection } from 'react-firebase-hooks/firestore';
-import { useEffect, useState } from 'react';
 import Chat from './Chat';
 
 function Sidebar() {
 
     const [user] = useAuthState(auth);
-    const userChatRef = db.collection('chats').where('users', 'array-contains', user.email);
+    const userChatRef = db.collection('chats').where('users', 'array-contains', user?.email);
     const [chatSnapshot] = useCollection(userChatRef); 
-    const [chatData, setChatData] = useState<Array<object>>([]);
-
-    useEffect(() => {
-        getListChat();
-    },[])
-
-    // storage chat data to firebase
-    // const getListChat = () => {
-    //     getDocs(collection(db, 'chats'))
-    //       .then((querySnapshot) => {
-    //             querySnapshot.forEach((doc) => {
-    //                 setChatData([...chatData, doc.data()]);
-    //             });
-    //         })
-    //       .catch((error) => {
-    //             console.log('Error getting documents: ', error);
-    //         });
-    // }
-
-    // storage chat data to local storage
-    const getListChat = () => {
-        if(localStorage.getItem('listChat') === null) {
-            localStorage.setItem('listChat', JSON.stringify([]))
-        } else { 
-            setChatData(JSON.parse(localStorage.getItem('listChat') || ''))
-        }
-    }
 
     const createChat = async () => {
         const input = prompt(
@@ -54,10 +26,7 @@ function Sidebar() {
             db.collection('chats').add({
                 users: [user?.email, input]
             });
-        }
-
-        console.log(chatData);
-        
+        }    
     };
 
     const chatAlreadyExists = (recipientEmail: string): boolean => {
@@ -69,7 +38,7 @@ function Sidebar() {
     return (
         <Container>
             <Header>
-                <UserAvatar src={user.photoURL} onClick={() => auth.signOut()} />
+                <UserAvatar src={user?.photoURL!} onClick={() => auth.signOut()} />
                 <IconsContainer>
                     <IconButton>
                         <ChatIcon/>
@@ -85,9 +54,9 @@ function Sidebar() {
             </Search>
             <SidebarButton onClick={createChat}>Start a new chat</SidebarButton>
             
-            {chatSnapshot ? chatData.map( (chat: any) => 
-                <Chat key={chat.id} id={chat.id} users={chat.users} />
-            ) : null}
+            {chatSnapshot?.docs.map( (chat: any) => 
+                <Chat key={chat.id} id={chat.id} users={chat.data().users} />
+            )}
         </Container>
     );
 }

@@ -1,8 +1,6 @@
 import Head from 'next/head'
 import { Inter } from 'next/font/google'
 import Sidebar from '@/components/Sidebar'
-import { useEffect } from 'react'
-import { auth } from '@/firebase'
 
 const inter = Inter({ subsets: ['latin'] })
 
