@@ -1,21 +1,27 @@
 import styled from 'styled-components';
-import { Avatar, IconButton } from '@mui/material';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
-import ChatIcon from '@mui/icons-material/Chat';
 import SearchIcon from '@mui/icons-material/Search';
 import * as EmailValidator from 'email-validator';
 import { auth, db } from '../firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { useCollection } from 'react-firebase-hooks/firestore';
+import AddIcon from '@mui/icons-material/Add';
+import GroupAddIcon from '@mui/icons-material/GroupAdd';
 import Chat from './Chat';
+import Menu from './Menu';
+import { useState } from 'react';
+import User from './User';
 
 function Sidebar() {
 
     const [user] = useAuthState(auth);
+    const [searchInput, setSearchInput] = useState('');
     const userChatRef = db.collection('chats').where('users', 'array-contains', user?.email);
     const [chatSnapshot] = useCollection(userChatRef); 
-
-    const createChat = async () => {
+    const [userSnapshotFiltered] = useCollection(
+        db.collection('users').where('email','==',searchInput)
+    );
+    
+    const createChat = () => {
         const input = prompt(
             "Please enter an email address for the user you wish to chat with"
         );
@@ -24,10 +30,20 @@ function Sidebar() {
 
         if(EmailValidator.validate(input) && !chatAlreadyExists(input) && input !== user?.email) {
             db.collection('chats').add({
-                users: [user?.email, input]
+                users: [user?.email, input],
+                isGroup: false,
             });
         }    
     };
+
+    const createNewFriend = (recipientId: string) => {
+        db.collection('friends').add({
+            users: [user?.uid, recipientId],
+            isAccept: false,
+            isUnFriend: false,
+            isBlocked: false,
+        })
+    }
 
     const chatAlreadyExists = (recipientEmail: string): boolean => {
         return !!chatSnapshot?.docs.find(
@@ -35,35 +51,70 @@ function Sidebar() {
                 (user: any) => user === recipientEmail)?.length > 0);
     }
 
+    const handleSearch = () => {
+        if(searchInput.length >= 3) {
+
+        }
+    }
+
+    // const createNewGroup = () => {
+
+    // }
+
     return (
         <Container>
-            <Header>
-                <UserAvatar src={user?.photoURL!} onClick={() => auth.signOut()} />
-                <IconsContainer>
-                    <IconButton>
-                        <ChatIcon/>
-                    </IconButton>
-                    <IconButton>
-                        <MoreVertIcon />
-                    </IconButton>
-                </IconsContainer>
-            </Header>
-            <Search>
-                <SearchIcon />
-                <SearchInput placeholder='Search in chats' />
-            </Search>
-            <SidebarButton onClick={createChat}>Start a new chat</SidebarButton>
-            
-            {chatSnapshot?.docs.map( (chat: any) => 
-                <Chat key={chat.id} id={chat.id} users={chat.data().users} />
-            )}
+            <MenuContainer>
+                <Menu />
+            </MenuContainer>
+            <SidebarContainer>
+                <Header>
+                    <IconsContainer>
+                        <ButtonCustom>
+                            <AddIcon/>
+                        </ButtonCustom>
+                        <ButtonCustom >
+                            <GroupAddIcon/>
+                        </ButtonCustom>
+                    </IconsContainer>
+                </Header>
+                <Search>
+                    <SearchIcon />
+                    <SearchInput placeholder='Enter at least 3 characters to search' value={searchInput} onChange={handleSearch}/>
+                </Search>
+                <SidebarButton onClick={createChat}>Start a new chat</SidebarButton>
+                { 
+                    (searchInput.length < 3) ? chatSnapshot?.docs.map( (chat: any) => 
+                        <Chat key={chat.id} id={chat.id} users={chat.data().users} />
+                    ) : null 
+                }
+                {
+                    (searchInput.length >= 3 && !userSnapshotFiltered?.empty) ? userSnapshotFiltered?.docs.map( (user) => 
+                        <User key={user.id} id={user.id} />
+                    ) : null
+                }
+            </SidebarContainer>
         </Container>
     );
 }
 
 export default Sidebar;
 
+const ButtonCustom = styled.a`
+    cursor: pointer;
+    color: rgba(0, 0, 0, 0.54);
+    :hover {
+        color: #00d7c3;
+    }
+    padding: 5px;
+`;
+
+const MenuContainer = styled.div``;
+
 const Container = styled.div`
+    display: flex;
+`;
+
+const SidebarContainer = styled.div`
     flex: 0.45s;
     border-right: 1px solid whitesmoke;
     height: 100vh;
@@ -111,14 +162,6 @@ const Header = styled.div`
     padding: 15px;
     height: 80px;
     border-bottom: 1px solid whitesmoke;
-`;
-
-const UserAvatar = styled(Avatar)`
-    cursor: pointer;
-
-    :hover {
-        opacity: 0.8;
-    }
 `;
 
 const IconsContainer = styled.div``;

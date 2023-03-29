@@ -6,7 +6,7 @@ import styled from "styled-components"
 export default function Message({user, message}: any) {
     const [userLoggedIn] = useAuthState(auth);
 
-    const TypeOfMessage = user === userLoggedIn.email ? Sender : Reciever;
+    const TypeOfMessage = user === userLoggedIn?.email ? Sender : Reciever;
 
     return (
         <Container>
@@ -30,7 +30,7 @@ const MessageElement = styled.p`
     min-width: 60px;
     padding-bottom: 26px;
     position: relative;
-    text-align: right;
+    text-align: left;
 `;
 
 const Sender = styled(MessageElement)`
