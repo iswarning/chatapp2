@@ -4,6 +4,7 @@ import { Avatar } from "@mui/material";
 import { useRouter } from "next/router";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useCollection } from "react-firebase-hooks/firestore";
+import * as EmailValidator from 'email-validator';
 import styled from "styled-components";
 
 export default function Chat({ id, users }: any) {
@@ -17,8 +18,32 @@ export default function Chat({ id, users }: any) {
     const recipient = recipientSnapshot?.docs?.[0]?.data();
     const recipientEmail = getRecipientEmail(users, user); 
 
+    const [chatSnapshot] = useCollection(
+        db
+        .collection('chats')
+        .where('users', 'array-contains', user?.email)
+    );
+
+    const createChat = () => {
+        if(EmailValidator.validate(recipientEmail) && recipientEmail !== user?.email) {
+            db.collection('chats').add({
+                users: [user?.email, recipientEmail],
+            });
+        }    
+    };
+
+    const chatAlreadyExists = (): boolean => {
+        return !!chatSnapshot?.docs.find(
+            (chat: any) => chat.data().users.find(
+                (user: any) => user === recipientEmail)?.length > 0);
+    }
+
     const enterChat = () => {
-        router.push(`/chat/${id}`)
+        if (chatAlreadyExists()) {
+            router.push(`/chat/${id}`)
+        } else {
+            createChat();
+        }
     }
 
     return (
@@ -28,7 +53,7 @@ export default function Chat({ id, users }: any) {
             ): (
                 <UserAvatar>{recipientEmail[0]}</UserAvatar>
             )}
-            <TextEmail>{recipientEmail}</TextEmail>
+            <TextEmail style={{marginTop: !router.query.id ? '15px' : ''}}>{recipientEmail}</TextEmail>
         </Container>
     )
 }

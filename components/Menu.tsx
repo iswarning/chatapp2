@@ -19,10 +19,11 @@ const initialState = {
     activedManageAccountsBtn: false,
 }
 
-export default function Menu() {
+export default function Menu({ active }: any) {
 
     const [user] = useAuthState(auth);
     const [isOpen, setIsOpen] = useState(false);
+    const router = useRouter();
     
     const [ 
         { activedChatBtn, 
@@ -36,7 +37,23 @@ export default function Menu() {
     }
 
     useEffect(() => {
-        setState(prevState => ({ ...prevState, activedChatBtn: true }));
+        switch(active){
+            case 'Chat':
+                onChangeActivedChatBtn();
+                break;
+            case 'ListFriendAndGroup':
+                onChangeActivedListFriendAndGroupBtn();
+                break;
+            case 'ListAddFriend':
+                onChangeActivedListAddFriendBtn();
+                break;
+            case 'ManageAccounts':
+                onChangeActivedManageAccountsBtn();
+                break;
+            default:
+                onChangeActivedChatBtn();
+                break;
+        }
     },[])
 
     const onChangeActivedChatBtn = () => {
@@ -50,6 +67,7 @@ export default function Menu() {
         if (!activedListFriendAndGroupBtn) {
             clearState();
             setState(prevState => ({ ...prevState, activedListFriendAndGroupBtn: !activedListFriendAndGroupBtn }));
+            router.push('/friends')
         }
     }
 
