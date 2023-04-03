@@ -1,40 +1,46 @@
 import { auth, db } from "@/firebase"
-import { useAuthState } from "react-firebase-hooks/auth";
+import firebase from "firebase";
 import { useCollection } from "react-firebase-hooks/firestore";
+import { getUserById } from "./UserService";
 
-const createFriend = ({ userId1, userId2, email1, email2 }: any) => {
+const createFriend = ({ senderId, recipientId }: any) => {
 
-    db
-    .collection('users')
-    .doc(userId1)
-    .collection('friends')
-    .add({
-        userId: userId2,
-        email: email2
-    });
+    try {
+        db
+        .collection('users')
+        .doc(senderId)
+        .collection('friends')
+        .add({
+            userId: recipientId,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        });
 
-    db
-    .collection('users')
-    .doc(userId2)
-    .collection('friends')
-    .add({
-        userId: userId1,
-        email: email1
-    });
-
+        db
+        .collection('users')
+        .doc(recipientId)
+        .collection('friends')
+        .add({
+            userId: senderId,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        });
+    } catch (error) {
+        console.log(error);
+    }
+    
 }
 
-const findFriendByKeyWord = (keyWord: string, userId: string | undefined) => {
-    const [friendSnapshotFiltered] = useCollection(db
-    .collection('users')
-    .doc(userId)
-    .collection('friends')
-    .where('email', '==' , keyWord));
-    return friendSnapshotFiltered?.docs || undefined;
+const findFriendByKeyWord = async ({ userId, keyWord }: any) => {
+    return getAllFriendCurrentUser(userId)?.filter((item) => 
+        {
+            let userById: firebase.firestore.DocumentData = {};
+            getUserById(item.data().userId).then((user) => userById = user);
+            return userById.data().email === keyWord;
+        }
+    )
 }
 
-const getAllFriendCurrentUser = (userId: string | undefined) => {
-    const [friendSnapshot] = useCollection(
+const getAllFriendCurrentUser = ({ userId }: any) => {
+    const [friendSnapshot] =  useCollection(
         db
         .collection('users')
         .doc(userId)
@@ -42,6 +48,8 @@ const getAllFriendCurrentUser = (userId: string | undefined) => {
     );
     return friendSnapshot?.docs || undefined;
 }
+
+
 
 export { createFriend,
     getAllFriendCurrentUser,

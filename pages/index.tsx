@@ -1,8 +1,6 @@
 import Head from 'next/head'
 import { Inter } from 'next/font/google'
-import Sidebar from '@/components/Sidebar'
-import Menu from '@/components/Menu'
-import styled from 'styled-components'
+import Sidebar from '@/components/SidebarMessage/SidebarMessage'
 
 const inter = Inter({ subsets: ['latin'] })
 

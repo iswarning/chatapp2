@@ -1,18 +1,6 @@
 import styled from "styled-components";
 
-export const Container = styled.div`
-    display: flex;
-`;
-
-export const MenuContainer = styled.div`
-    height: 100%;
-`;
-
-export const HorizontalLine = styled.hr`
-    width: 100%;
-`;
-
-export const ButtonCustom = styled.a`
+const ButtonCustom = styled.a`
     cursor: pointer;
     color: rgba(0, 0, 0, 0.54);
     :hover {
@@ -21,7 +9,13 @@ export const ButtonCustom = styled.a`
     padding: 5px;
 `;
 
-export const SidebarContainer = styled.div`
+const MenuContainer = styled.div``;
+
+const Container = styled.div`
+    display: flex;
+`;
+
+const SidebarContainer = styled.div`
     flex: 0.45s;
     border-right: 1px solid whitesmoke;
     height: 100vh;
@@ -37,14 +31,16 @@ export const SidebarContainer = styled.div`
     scrollbar-width: none;
 `;
 
-export const Search = styled.div`
+const Search = styled.div`
     display: flex;
     align-items: center;
     padding: 20px;
     border-radius: 2px;
+    height: 60px;
+    border-bottom: 1px solid whitesmoke;
 `;
 
-export const SidebarButton = styled.button`
+const SidebarButton = styled.button`
     width: 100%;
     &&& {
         border-top: 1px solid whitesmoke;
@@ -52,13 +48,13 @@ export const SidebarButton = styled.button`
     }
 `;
 
-export const SearchInput = styled.input`
+const SearchInput = styled.input`
     outline-width: 0;
     border: none;
     flex: 1;
 `;
 
-export const Header = styled.div`
+const Header = styled.div`
     display: flex;
     position: sticky;
     top: 0;
@@ -71,4 +67,14 @@ export const Header = styled.div`
     border-bottom: 1px solid whitesmoke;
 `;
 
-export const IconsContainer = styled.div``;
+const IconsContainer = styled.div``;
+
+export { IconsContainer, 
+    Header, 
+    SearchInput, 
+    SidebarButton, 
+    SidebarContainer, 
+    Search, 
+    Container, 
+    MenuContainer, 
+    ButtonCustom }

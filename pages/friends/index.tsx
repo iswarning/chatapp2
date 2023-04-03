@@ -5,39 +5,46 @@ import SearchIcon from '@mui/icons-material/Search';
 import { ButtonCustom, 
     Container, 
     Header, 
-    HorizontalLine, 
     IconsContainer, 
+    ItemContainer, 
     MenuContainer, 
     Search, 
     SearchInput, 
-    SidebarContainer } from "./ListFriendStyled";
+    SidebarContainer, 
+    Text} from "./styled";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth, db } from "@/firebase";
 import { useState } from "react";
-import Friend from "@/components/Friend/Friend";
-import { findFriendByKeyWord, getAllFriendCurrentUser } from "@/services/FriendService";
+// import { findFriendByKeyWord, getAllFriendCurrentUser } from "@/services/FriendService";
 
 export default function ListFriend() {
 
     const [user] = useAuthState(auth);
     const [searchInput, setSearchInput] = useState('');
 
-    const friendSnapshot = getAllFriendCurrentUser(user?.uid);
+    // const friendSnapshot = getAllFriendCurrentUser(user?.uid);
 
-    const friendSnapshotFiltered = findFriendByKeyWord(searchInput, user?.uid);
+    // const friendSnapshotFiltered = findFriendByKeyWord(searchInput, user?.uid);
 
 // users {
 //     email: ''
 //     friends: [
 //         {
-//             userId:
-//             email:
+//             uid: '',
+//             friendsList: [],
 //         },
 //         {
 //             userId:
-//             email:
 //         }
 //     ]
+// }
+
+// db.collection('friends').where('userId1','==',)
+
+// friends {
+//     userId1: '',
+//     userId2: '',
+
 // }
 
 // requests_add_friend {
@@ -47,37 +54,33 @@ export default function ListFriend() {
 //     isCancel
 // }
 
+// messages {
+//     users: [
+
+//     ],
+//     message: '',
+//     photoURL: '',
+//     sentAt: '',
+//     senderEmail: '',
+//     isGroup: '',
+// }
+
+    // db.collection('users').doc('wrwrwrwrwwr').get().then((u) => {
+    //     setSearchInput(u);
+    // })
+
     return (
         <Container>
             <MenuContainer>
-                <Menu active='ListFriendAndGroup' />
+                <Menu active='Contact' />
             </MenuContainer>
             <SidebarContainer>
-                <Header>
-                    <IconsContainer>
-                        <ButtonCustom>
-                            <AddIcon/>
-                        </ButtonCustom>
-                        <ButtonCustom >
-                            <GroupAddIcon/>
-                        </ButtonCustom>
-                    </IconsContainer>
-                </Header>
-                <Search>
-                    <SearchIcon />
-                    <SearchInput placeholder='Find in friends' value={searchInput} onChange={(e) => setSearchInput(e.currentTarget.value)}/>
-                </Search>
-                <HorizontalLine />
-                { 
-                    (searchInput.length < 3 && friendSnapshot !== undefined) ? friendSnapshot?.map( friend => 
-                        <Friend key={friend.id} userId={friend.data().userId} email={friend.data().email}/>
-                    ) : null 
-                }
-                {
-                    (searchInput.length >= 3 && friendSnapshotFiltered !== undefined) ? friendSnapshotFiltered?.map( friend => 
-                        <Friend key={friend.id} userId={friend.data().userId} email={friend.data().email}/>
-                    ) : null
-                }
+                <ItemContainer>
+                    <Text>Friends List</Text>
+                </ItemContainer>
+                <ItemContainer>
+                    <Text>Group List</Text>
+                </ItemContainer>
             </SidebarContainer>
         </Container>
     )

@@ -1,5 +1,5 @@
 import ChatScreen from "@/components/ChatScreen";
-import Sidebar from "@/components/Sidebar";
+import Sidebar from "@/components/SidebarMessage/SidebarMessage";
 import { auth, db } from "@/firebase";
 import getRecipientEmail from "@/utils/getRecipientEmail";
 import Head from "next/head";

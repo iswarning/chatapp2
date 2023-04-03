@@ -1,35 +1,25 @@
 import { Avatar } from "@mui/material";
 import ChatIcon from '@mui/icons-material/Chat';
 import styled from "styled-components";
-import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
-import PeopleIcon from '@mui/icons-material/People';
-import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@/firebase";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import ReactModal, { Styles } from "react-modal";
-import Profile from "./Profile";
+import ContactsIcon from '@mui/icons-material/Contacts';
 
 const initialState = {
-    activedProfileBtn: false,
     activedChatBtn: false,
-    activedListFriendAndGroupBtn: false,
-    activedListAddFriendBtn: false,
-    activedManageAccountsBtn: false,
+    activedContact: false,
 }
 
 export default function Menu({ active }: any) {
 
     const [user] = useAuthState(auth);
-    const [isOpen, setIsOpen] = useState(false);
     const router = useRouter();
     
     const [ 
         { activedChatBtn, 
-        activedListFriendAndGroupBtn, 
-        activedListAddFriendBtn, 
-        activedManageAccountsBtn }
+        activedContact }
         , setState ] = useState(initialState);
 
     const clearState = () => {
@@ -41,14 +31,8 @@ export default function Menu({ active }: any) {
             case 'Chat':
                 onChangeActivedChatBtn();
                 break;
-            case 'ListFriendAndGroup':
-                onChangeActivedListFriendAndGroupBtn();
-                break;
-            case 'ListAddFriend':
-                onChangeActivedListAddFriendBtn();
-                break;
-            case 'ManageAccounts':
-                onChangeActivedManageAccountsBtn();
+            case 'Contact':
+                onChangeActivedContactBtn()
                 break;
             default:
                 onChangeActivedChatBtn();
@@ -57,38 +41,21 @@ export default function Menu({ active }: any) {
     },[])
 
     const onChangeActivedChatBtn = () => {
-        if (!activedChatBtn) {
+        if (!activedChatBtn && active.length > 0) {
             clearState();
             setState(prevState => ({ ...prevState, activedChatBtn: !activedChatBtn }));
+            if(router.asPath.indexOf('/chat/') === -1) {
+                router.push('/');
+            }
         }
     }
 
-    const onChangeActivedListFriendAndGroupBtn = () => {
-        if (!activedListFriendAndGroupBtn) {
+    const onChangeActivedContactBtn = () => {
+        if (!activedContact && active.length > 0) {
             clearState();
-            setState(prevState => ({ ...prevState, activedListFriendAndGroupBtn: !activedListFriendAndGroupBtn }));
-            router.push('/friends')
+            setState(prevState => ({ ...prevState, activedContact: !activedContact }));
+            router.push('/friends');
         }
-    }
-
-    const onChangeActivedListAddFriendBtn = () => {
-        if (!activedListAddFriendBtn) {
-            clearState();
-            setState(prevState => ({ ...prevState, activedListAddFriendBtn: !activedListAddFriendBtn }));
-        }
-    }
-
-    const onChangeActivedManageAccountsBtn = () => {
-        if (!activedManageAccountsBtn) {
-            clearState();
-            setState(prevState => ({ ...prevState, activedManageAccountsBtn: !activedManageAccountsBtn }));
-            setIsOpen(!isOpen);
-        }
-    }
-
-    const onCloseModal = () => {
-        setIsOpen(!isOpen);
-        onChangeActivedChatBtn();
     }
     
     return (
@@ -103,27 +70,15 @@ export default function Menu({ active }: any) {
                 <ChatIcon fontSize="large"/>
             </ButtonCustom>
             <ButtonCustom
-                onClick={onChangeActivedListFriendAndGroupBtn}
-                style={{color: !activedListFriendAndGroupBtn ? "white" : "#00d7c3", background: !activedListFriendAndGroupBtn ? "#008060" : "rgb(69 96 69 / 40%)" }}
+                onClick={onChangeActivedContactBtn}
+                style={{color: !activedContact ? "white" : "#00d7c3", background: !activedContact ? "#008060" : "rgb(69 96 69 / 40%)" }}
             >
-                <PeopleIcon fontSize="large"/>
-            </ButtonCustom>
-            <ButtonCustom
-                onClick={onChangeActivedListAddFriendBtn}
-                style={{color: !activedListAddFriendBtn ? "white" : "#00d7c3", background: !activedListAddFriendBtn ? "#008060" : "rgb(69 96 69 / 40%)" }}
-            >
-                <PersonAddIcon fontSize="large"/>
-            </ButtonCustom>
-            <ButtonCustom
-                onClick={onChangeActivedManageAccountsBtn}
-                style={{color: !activedManageAccountsBtn ? "white" : "#00d7c3", background: !activedManageAccountsBtn ? "#008060" : "rgb(69 96 69 / 40%)" }}
-            >
-                <ManageAccountsIcon fontSize="large"/>
+                <ContactsIcon fontSize="large"/>
             </ButtonCustom>
             
-            <ReactModal isOpen={isOpen} onRequestClose={onCloseModal} style={modalStyle}>
+            {/* <ReactModal isOpen={isOpen} onRequestClose={onCloseModal} style={modalStyle}>
                 <Profile />
-            </ReactModal>
+            </ReactModal> */}
         </Container>
     )
 }
@@ -142,14 +97,17 @@ const AvatarButton = styled.button`
     border: none;
     padding: 10px;
     background: #008060;
+    margin: 0;
+    padding: 4px 0;
 `;
 
 const ButtonCustom = styled.button`
     width: 70px;
-    padding-top: 20px;
+    padding-top: 15px;
     padding-bottom: 20px;
     border: none;
     cursor: pointer;
+    height: 60px;
 `;
 
 const UserAvatar = styled(Avatar)`
@@ -161,10 +119,10 @@ const UserAvatar = styled(Avatar)`
     }
 `;
 
-const modalStyle: Styles = {
-    content: {
-        width: '400px',
-        textAlign: 'center',
-        margin: '100px auto'
-    }
-}
+// const modalStyle: Styles = {
+//     content: {
+//         width: '400px',
+//         textAlign: 'center',
+//         margin: '100px auto'
+//     }
+// }
