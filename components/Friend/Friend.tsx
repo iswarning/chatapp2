@@ -1,6 +1,7 @@
 import { db } from "@/firebase";
-import { Container, TextEmail, UserAvatar } from "./FriendStyled";
+import { CardContentCustom, Container, SendMessageBtn, UnfriendBtn } from "./FriendStyled";
 import { useState } from "react";
+import { Card, CardMedia, Typography, Button } from "@mui/material";
 
 export default function Friend({ userId, email }: any) {
 
@@ -12,8 +13,20 @@ export default function Friend({ userId, email }: any) {
 
     return (
         <Container>
-            <UserAvatar src={userById?.photoURL} />
-            <TextEmail >{email}</TextEmail>
+            <Card sx={{ maxWidth: 345 }}>
+                <CardMedia
+                    sx={{ height: 140 }}
+                    image="https://static1.cbrimages.com/wordpress/wp-content/uploads/2021/12/Jujutsu-Kaisen-0-Yuta-3.jpg"
+                    title="green iguana"
+                />
+                <CardContentCustom>
+                    <Typography gutterBottom variant="h5" component="div">
+                    Lizard
+                    </Typography>
+                    <SendMessageBtn>Send Message</SendMessageBtn>
+                    <UnfriendBtn>Unfriend</UnfriendBtn>
+                </CardContentCustom>
+            </Card>
         </Container>
     )
 }

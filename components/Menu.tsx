@@ -54,7 +54,7 @@ export default function Menu({ active }: any) {
         if (!activedContact && active.length > 0) {
             clearState();
             setState(prevState => ({ ...prevState, activedContact: !activedContact }));
-            router.push('/friends');
+            router.push('/contacts');
         }
     }
     
@@ -65,13 +65,13 @@ export default function Menu({ active }: any) {
             </AvatarButton>
             <ButtonCustom
                 onClick={onChangeActivedChatBtn}
-                style={{color: !activedChatBtn ? "white" : "#00d7c3", background: !activedChatBtn ? "#008060" : "rgb(69 96 69 / 40%)" }}
+                style={{color: !activedChatBtn ? "white" : "rgb(4, 110, 148)", background: !activedChatBtn ? "#0DA3BA" : "rgb(182, 236, 255)" }}
             >
                 <ChatIcon fontSize="large"/>
             </ButtonCustom>
             <ButtonCustom
                 onClick={onChangeActivedContactBtn}
-                style={{color: !activedContact ? "white" : "#00d7c3", background: !activedContact ? "#008060" : "rgb(69 96 69 / 40%)" }}
+                style={{color: !activedContact ? "white" : "rgb(4, 110, 148)", background: !activedContact ? "#0DA3BA" : "rgb(182, 236, 255)" }}
             >
                 <ContactsIcon fontSize="large"/>
             </ButtonCustom>
@@ -89,14 +89,14 @@ const Container = styled.div`
     width: 70px;
     align-items: center;
     padding: 20px;
-    background-color: #008060;
+    background-color: #0DA3BA;
     height: 100%;
 `;
 
 const AvatarButton = styled.button`
     border: none;
     padding: 10px;
-    background: #008060;
+    background: #0DA3BA;
     margin: 0;
     padding: 4px 0;
 `;
@@ -108,6 +108,9 @@ const ButtonCustom = styled.button`
     border: none;
     cursor: pointer;
     height: 60px;
+    :hover {
+        opacity: 0.5;
+    }
 `;
 
 const UserAvatar = styled(Avatar)`
@@ -115,7 +118,7 @@ const UserAvatar = styled(Avatar)`
     width: 50px;
     height: 50px;
     :hover {
-        opacity: 0.8;
+        opacity: 0.5;
     }
 `;
 

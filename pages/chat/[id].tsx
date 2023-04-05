@@ -1,5 +1,5 @@
 import ChatScreen from "@/components/ChatScreen";
-import Sidebar from "@/components/SidebarMessage/SidebarMessage";
+import SidebarMessage from "@/components/SidebarMessage/SidebarMessage";
 import { auth, db } from "@/firebase";
 import getRecipientEmail from "@/utils/getRecipientEmail";
 import Head from "next/head";
@@ -13,7 +13,7 @@ export default function Chat({chat , messages}: any) {
             <Head>
             <title>Chat with {getRecipientEmail(chat.users, user)}</title>
             </Head>
-            <Sidebar />
+            <SidebarMessage />
             <ChatContainer>
                 <ChatScreen chat={chat} messages={messages}/>
             </ChatContainer>
