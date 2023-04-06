@@ -14,48 +14,37 @@ export default function ListFriend() {
     // const friendSnapshotFiltered = findFriendByKeyWord(searchInput, user?.uid);
 
 // users {
-//     email: ''
-//     friends: [
-//         {
-//             uid: '',
-//             userId: '',
-//         },
-//         {
-//             uid: '',
-//             userId: '',
-//         }
-//     ]
+//     email: '',
+//     photoURL: '',
+//     created_at: '',
 // }
 
-// db.collection('friends').where('userId1','==',)
+// chats {
+//     users: ['chivinh1998@gmail.com', 'hacker20001235@gmail.com'],
+//     photoURL: '',
+//     is_group: false,
+//     created_at: '',
+// }
 
 // friends {
-//     userId1: '',
-//     userId2: '',
-
+//     users: ['chivinh1998@gmail.com', 'hacker20001235@gmail.com'],
+//      is_delete: false
 // }
 
-// requests_add_friend {
-//     senderEmail,
-//     recipientId,
-//     isAccept,
-//     isCancel
+// friend_requests {
+//     users: ['chivinh1998@gmail.com', 'hacker20001235@gmail.com'],
+//     is_accept: false,
+//     is_delete: false,
+//     created_at: '',
 // }
 
 // messages {
-//     users: [
-
-//     ],
-//     message: '',
+//     users: ['chivinh1998@gmail.com', 'hacker20001235@gmail.com'],
+//     content: 'Hello world',
 //     photoURL: '',
 //     sentAt: '',
-//     senderEmail: '',
-//     isGroup: '',
+//     senderEmail: 'chivinh1998@gmail.com',
 // }
-
-    // db.collection('users').doc('wrwrwrwrwwr').get().then((u) => {
-    //     setSearchInput(u);
-    // })
 
     return (
         

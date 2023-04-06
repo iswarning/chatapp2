@@ -1,9 +1,9 @@
 import { db } from "@/firebase";
-import { CardContentCustom, Container, SendMessageBtn, UnfriendBtn } from "./FriendStyled";
+import { CardContentCustom, Container, AcceptBtn, CancelBtn } from "./FriendRequestStyled";
 import { useState } from "react";
 import { Card, CardMedia, Typography } from "@mui/material";
 
-export default function Friend({ userId, email, calledComponent }: any) {
+function FriendRequest({ userId, email, calledComponent }: any) {
 
     const [userById, setUserById]: any = useState();
 
@@ -21,12 +21,14 @@ export default function Friend({ userId, email, calledComponent }: any) {
                 />
                 <CardContentCustom>
                     <Typography gutterBottom variant="h5" component="div">
-                    Lizard
+                    Dragon
                     </Typography>
-                    <SendMessageBtn>Send Message</SendMessageBtn>
-                    <UnfriendBtn>Unfriend</UnfriendBtn>
+                    <AcceptBtn>Accept</AcceptBtn>
+                    <CancelBtn>Cancel</CancelBtn>
                 </CardContentCustom>
             </Card>
         </Container>
     )
 }
+
+export default FriendRequest;

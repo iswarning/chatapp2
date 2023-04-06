@@ -6,6 +6,7 @@ import { auth } from "@/firebase";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import ContactsIcon from '@mui/icons-material/Contacts';
+import PeopleAltIcon from '@mui/icons-material/PeopleAlt'
 
 const initialState = {
     activedChatBtn: false,
@@ -63,22 +64,25 @@ export default function Menu({ active }: any) {
             <AvatarButton>
                 <UserAvatar src={user?.photoURL!} onClick={() => auth.signOut()} />
             </AvatarButton>
-            <ButtonCustom
-                onClick={onChangeActivedChatBtn}
-                style={{color: !activedChatBtn ? "white" : "rgb(4, 110, 148)", background: !activedChatBtn ? "#0DA3BA" : "rgb(182, 236, 255)" }}
-            >
-                <ChatIcon fontSize="large"/>
-            </ButtonCustom>
-            <ButtonCustom
-                onClick={onChangeActivedContactBtn}
-                style={{color: !activedContact ? "white" : "rgb(4, 110, 148)", background: !activedContact ? "#0DA3BA" : "rgb(182, 236, 255)" }}
-            >
-                <ContactsIcon fontSize="large"/>
-            </ButtonCustom>
+
+            { !activedChatBtn ? 
+                <ButtonCustom onClick={onChangeActivedChatBtn}>
+                    <ChatIcon fontSize="large"/>
+                </ButtonCustom> : 
+                <ButtonCustomActive onClick={onChangeActivedChatBtn}>
+                    <ChatIcon fontSize="large"/> 
+                </ButtonCustomActive> 
+            }
             
-            {/* <ReactModal isOpen={isOpen} onRequestClose={onCloseModal} style={modalStyle}>
-                <Profile />
-            </ReactModal> */}
+            { !activedContact ? 
+                <ButtonCustom onClick={onChangeActivedContactBtn}>
+                    <PeopleAltIcon fontSize="large"/>
+                </ButtonCustom> : 
+                <ButtonCustomActive onClick={onChangeActivedContactBtn}>
+                    <PeopleAltIcon fontSize="large"/> 
+                </ButtonCustomActive> 
+            }
+
         </Container>
     )
 }
@@ -95,9 +99,8 @@ const Container = styled.div`
 
 const AvatarButton = styled.button`
     border: none;
-    padding: 10px;
     background: #0DA3BA;
-    margin: 0;
+    margin-bottom: 2px;
     padding: 4px 0;
 `;
 
@@ -108,9 +111,22 @@ const ButtonCustom = styled.button`
     border: none;
     cursor: pointer;
     height: 60px;
+    color: white;
+    background: #0DA3BA;
     :hover {
-        opacity: 0.5;
+        opacity: 0.7;
     }
+`;
+
+const ButtonCustomActive = styled.button`
+    width: 70px;
+    padding-top: 15px;
+    padding-bottom: 20px;
+    border: none;
+    cursor: pointer;
+    height: 60px;
+    color: rgb(4, 110, 148);
+    background: rgb(182, 236, 255);
 `;
 
 const UserAvatar = styled(Avatar)`

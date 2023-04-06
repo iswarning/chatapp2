@@ -3,7 +3,7 @@ import styled from "styled-components"
 const Container = styled.div.attrs(() => ({
     className: 'container'
 }))`
-    /* background-color: whitesmoke; */
+    
 `;
 
 const Row = styled.div.attrs(() => ({
