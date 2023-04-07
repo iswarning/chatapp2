@@ -13,11 +13,11 @@ const MenuContainer = styled.div`
 const SidebarContainer = styled.div`
     padding-top: 20px;
     flex: 0.45s;
-    box-shadow: whitesmoke;
     height: 100vh;
     min-width: 300px;
     max-width: 350px;
     overflow-y: scroll;
+    border-right: 1px solid whitesmoke;
 
     ::-webkit-scrollbar {
         display: none;
@@ -26,7 +26,6 @@ const SidebarContainer = styled.div`
     @media (max-width: 1600px) {
         display: none;
     }
-    box-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2), 0px 1px 1px 0px rgba(0,0,0,0.14), 0px 1px 3px 0px rgba(0,0,0,0.12);
 `;
 
 const ItemContainer = styled.div`
@@ -65,7 +64,6 @@ const MainContent = styled.div`
     width: 78%;
     float: right;
     padding: 20px;
-    background: whitesmoke;
 `
 
 const IconsContainer = styled.div`

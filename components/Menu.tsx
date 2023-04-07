@@ -7,6 +7,8 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import ContactsIcon from '@mui/icons-material/Contacts';
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt'
+import Profile from "./Profile/Profile";
+import ReactModal from "react-modal";
 
 const initialState = {
     activedChatBtn: false,
@@ -17,6 +19,7 @@ export default function Menu({ active }: any) {
 
     const [user] = useAuthState(auth);
     const router = useRouter();
+    const [isOpen, setIsOpen] = useState(false);
     
     const [ 
         { activedChatBtn, 
@@ -58,11 +61,13 @@ export default function Menu({ active }: any) {
             router.push('/contacts');
         }
     }
+
+    
     
     return (
         <Container>
             <AvatarButton>
-                <UserAvatar src={user?.photoURL!} onClick={() => auth.signOut()} />
+                <UserAvatar src={user?.photoURL!} onClick={() => setIsOpen(true)} />
             </AvatarButton>
 
             { !activedChatBtn ? 
@@ -82,7 +87,7 @@ export default function Menu({ active }: any) {
                     <PeopleAltIcon fontSize="large"/> 
                 </ButtonCustomActive> 
             }
-
+            
         </Container>
     )
 }

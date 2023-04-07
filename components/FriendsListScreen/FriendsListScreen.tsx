@@ -11,15 +11,9 @@ export default function FriendsListScreen() {
     const [user] = useAuthState(auth);
     const [friendList, setFriendList]: any = useState([]);
 
-    const [friendSnapshot] =  useCollection(
-        db
-        .collection('users')
-        .doc(user?.uid)
-        .collection('friends')
-    );
-
     useEffect(() => {
-        getAllFriendCurrentUser(user?.uid).then((friends) => setFriendList(friends))
+        getAllFriendCurrentUser(user?.email!)
+        .then((friends) => setFriendList(friends))
     },[])
 
     return (
@@ -27,7 +21,7 @@ export default function FriendsListScreen() {
             <Row>
                 { friendList.length > 0 ? friendList.map((friend: any) => 
                     <Col key={friend.id}>
-                        <Friend userId={friend.data().userId} email={friend.data().email} />
+                        <Friend email={friend.data().email} />
                     </Col>
                 ) : null}
                 <Col>

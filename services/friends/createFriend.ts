@@ -1,7 +1,7 @@
 import { db } from "@/firebase";
 import firebase from "firebase";
 
-const createFriend = ({ senderEmail, recipientEmail }: any) => {
+async function createFriend({ senderEmail, recipientEmail }: any) {
 
     try {
         db

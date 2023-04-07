@@ -1,15 +1,16 @@
 import { db } from "@/firebase";
 import { CardContentCustom, Container, SendMessageBtn, UnfriendBtn } from "./FriendStyled";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardMedia, Typography } from "@mui/material";
+import getUserByEmail from "@/services/users/getUserByEmail";
 
-export default function Friend({ userId, email, calledComponent }: any) {
+export default function Friend(email: any) {
 
-    const [userById, setUserById]: any = useState();
+    const [userInfo, setUserInfo]: any = useState();
 
-    db.collection('users').doc(userId).get().then((u) => {
-        setUserById(u.data());
-    });
+    useEffect(() => {
+        getUserByEmail(email).then((userData) => setUserInfo(userData));
+    },[]);
 
     return (
         <Container>

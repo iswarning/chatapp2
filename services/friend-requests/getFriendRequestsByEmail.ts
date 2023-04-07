@@ -1,11 +1,11 @@
 import { db } from "@/firebase";
 
-async function getFriendRequestsByEmail({ emailLoggedIn }: any) {
+async function getFriendRequestsByEmail(recipientEmail: string) {
     let data = await db
         .collection('friend_requests')
-        .where('users', 'array-contains', emailLoggedIn)
-        .where('is_accept', 'array-contains', false)
-        .where('is_delete', 'array-contains', false)
+        .where('recipientEmail', '==', recipientEmail)
+        .where('accepted', '==', false)
+        .where('deleted', '==', false)
         .get();
     return data.docs || [];
 }

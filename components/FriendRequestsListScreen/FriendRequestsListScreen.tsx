@@ -1,59 +1,27 @@
 import { useEffect, useState } from "react";
-import Friend from "../Friend/Friend";
 import { Col, Container, Row } from "../FriendsListScreen/FriendsListScreenStyled";
-import getAllFriendCurrentUser from "@/services/friends/getAllFriendCurrentUser";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@/firebase";
-import RequestAddFriend from "../FriendRequest/FriendRequest";
+import FriendRequest from "../FriendRequest/FriendRequest";
+import getFriendRequestsByEmail from "@/services/friend-requests/getFriendRequestsByEmail";
 
 function FriendRequestsListScreen() {
 
     const [user] = useAuthState(auth);
-    const [friendList, setFriendList]: any = useState([]);
+    const [data, setData]: any = useState([]);
 
     useEffect(() => {
-        getAllFriendCurrentUser(user?.uid).then((friends) => setFriendList(friends))
+        getFriendRequestsByEmail(user?.email!).then((res) => setData(res))
     },[])
 
     return (
         <Container>
             <Row>
-                { friendList.length > 0 ? friendList.map((friend: any) => 
-                    <Col key={friend.id}>
-                        <RequestAddFriend userId={friend.data().userId} email={friend.data().email} />
+                { data.length > 0 ? data.map((friendRequest: any) => 
+                    <Col key={friendRequest.id}>
+                        <FriendRequest email={friendRequest.data().email} />
                     </Col>
                 ) : null}
-                <Col>
-                    <RequestAddFriend />
-                </Col>
-                <Col>
-                    <RequestAddFriend />
-                </Col>
-                <Col>
-                    <RequestAddFriend />
-                </Col>
-                
-                <Col>
-                    <RequestAddFriend />
-                </Col>
-                <Col>
-                    <RequestAddFriend />
-                </Col>
-                <Col>
-                    <RequestAddFriend />
-                </Col>
-                <Col>
-                    <RequestAddFriend />
-                </Col>
-                <Col>
-                    <RequestAddFriend />
-                </Col>
-                <Col>
-                    <RequestAddFriend />
-                </Col>
-                <Col>
-                    <RequestAddFriend />
-                </Col>
             </Row>
             
         </Container>

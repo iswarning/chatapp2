@@ -32,14 +32,6 @@ export default function SidebarMessage() {
         .collection('chats')
         .where('users', 'array-contains', searchInput)
     )
-    
-    // const [userSnapshot] = useCollection(
-    //     db
-    //     .collection('users')
-    //     .where('email','==', searchInput)
-    // );
-    
-    
 
     return (
         <Container>
@@ -61,8 +53,6 @@ export default function SidebarMessage() {
                     <SearchIcon />
                     <SearchInput placeholder='Find in chats' value={searchInput} onChange={(e) => setSearchInput(e.currentTarget.value)}/>
                 </Search>
-                {/* <SidebarButton onClick={createChat}>Start a new chat</SidebarButton> */}
-                {/* <HorizontalLine /> */}
                 { 
                     (searchInput.length < 3) ? chatSnapshot?.docs.map( chat => 
                         <Chat key={chat.id} id={chat.id} users={chat.data().users} />

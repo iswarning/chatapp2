@@ -28,13 +28,14 @@ export default function ListFriend() {
 
 // friends {
 //     users: ['chivinh1998@gmail.com', 'hacker20001235@gmail.com'],
-//      is_delete: false
+//     deleted: false
 // }
 
 // friend_requests {
-//     users: ['chivinh1998@gmail.com', 'hacker20001235@gmail.com'],
-//     is_accept: false,
-//     is_delete: false,
+//     senderEmail: 'chivinh1998@gmail.com',
+//     recipientEmail: 'hacker20001235@gmail.com',
+//     accepted: false,
+//     deleted: false,
 //     created_at: '',
 // }
 
