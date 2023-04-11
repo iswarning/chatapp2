@@ -6,7 +6,7 @@ import AddIcon from '@mui/icons-material/Add';
 import GroupAddIcon from '@mui/icons-material/GroupAdd';
 import Chat from '../Chat';
 import Menu from '../Menu';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ButtonCustom, 
     Container, 
     Header, 
@@ -15,23 +15,35 @@ import { ButtonCustom,
     Search, 
     SearchInput, 
     SidebarContainer } from './SidebarMessageStyled';
+import getChatByEmail from '@/services/chats/getChatByEmail';
+import findChatByKeyWord from '@/services/chats/findChatByKeyWord';
 
 export default function SidebarMessage() {
 
     const [user] = useAuthState(auth);
     const [searchInput, setSearchInput] = useState('');
-
-    const [chatSnapshot] = useCollection(
-        db
-        .collection('chats')
-        .where('users', 'array-contains', user?.email)
-    );
+    const [chatData, setChatData] = useState([]);
     
     const [chatSnapshotFiltered] = useCollection(
         db
         .collection('chats')
         .where('users', 'array-contains', searchInput)
     )
+
+    const handleSearch = (e: any) => {
+        setSearchInput(e.target.value);
+        if(searchInput.length >= 3) {
+            let result = chatData.filter((chat: any) => {
+                return chat.data().users.indexOf(e.target.value) !== -1
+            });
+            console.log(result);
+            setChatData(result);
+        }
+    }
+
+    useEffect(() => {
+        getChatByEmail(user?.email!).then((u: any) => setChatData(u))
+    },[chatData])
 
     return (
         <Container>
@@ -51,17 +63,12 @@ export default function SidebarMessage() {
                 </Header>
                 <Search>
                     <SearchIcon />
-                    <SearchInput placeholder='Find in chats' value={searchInput} onChange={(e) => setSearchInput(e.currentTarget.value)}/>
+                    <SearchInput placeholder='Find in chats' value={searchInput} onChange={handleSearch}/>
                 </Search>
                 { 
-                    (searchInput.length < 3) ? chatSnapshot?.docs.map( chat => 
+                    chatData.length > 0 ? chatData.map( (chat:any) => 
                         <Chat key={chat.id} id={chat.id} users={chat.data().users} />
                     ) : null 
-                }
-                {
-                    (searchInput.length >= 3 && !chatSnapshotFiltered?.empty) ? chatSnapshotFiltered?.docs.map( chatData => 
-                        <Chat key={chatData.id} id={chatData.id} users={chatData.data().users} />
-                    ) : null
                 }
             </SidebarContainer>
         </Container>

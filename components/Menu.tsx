@@ -5,25 +5,25 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@/firebase";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import ContactsIcon from '@mui/icons-material/Contacts';
-import PeopleAltIcon from '@mui/icons-material/PeopleAlt'
-import Profile from "./Profile/Profile";
-import ReactModal from "react-modal";
+import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
+import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
+import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 
 const initialState = {
     activedChatBtn: false,
-    activedContact: false,
+    activedContactBtn: false,
+    activedSettingBtn: false,
 }
 
 export default function Menu({ active }: any) {
 
     const [user] = useAuthState(auth);
     const router = useRouter();
-    const [isOpen, setIsOpen] = useState(false);
     
     const [ 
         { activedChatBtn, 
-        activedContact }
+        activedContactBtn,
+        activedSettingBtn }
         , setState ] = useState(initialState);
 
     const clearState = () => {
@@ -38,6 +38,9 @@ export default function Menu({ active }: any) {
             case 'Contact':
                 onChangeActivedContactBtn()
                 break;
+            case 'Setting':
+                onChangeActivedSettingBtn()
+                break;
             default:
                 onChangeActivedChatBtn();
                 break;
@@ -45,7 +48,7 @@ export default function Menu({ active }: any) {
     },[])
 
     const onChangeActivedChatBtn = () => {
-        if (!activedChatBtn && active.length > 0) {
+        if (!activedChatBtn) {
             clearState();
             setState(prevState => ({ ...prevState, activedChatBtn: !activedChatBtn }));
             if(router.asPath.indexOf('/chat/') === -1) {
@@ -55,39 +58,58 @@ export default function Menu({ active }: any) {
     }
 
     const onChangeActivedContactBtn = () => {
-        if (!activedContact && active.length > 0) {
+        if (!activedContactBtn) {
             clearState();
-            setState(prevState => ({ ...prevState, activedContact: !activedContact }));
+            setState(prevState => ({ ...prevState, activedContactBtn: !activedContactBtn }));
             router.push('/contacts');
         }
     }
 
-    
+    const onChangeActivedSettingBtn = () => {
+        if (!activedSettingBtn) {
+            clearState();
+            setState(prevState => ({ ...prevState, activedSettingBtn: !activedSettingBtn }));
+            router.push('/settings');
+        }
+    }
     
     return (
         <Container>
             <AvatarButton>
-                <UserAvatar src={user?.photoURL!} onClick={() => setIsOpen(true)} />
+                <UserAvatar src={user?.photoURL!} />
             </AvatarButton>
 
             { !activedChatBtn ? 
                 <ButtonCustom onClick={onChangeActivedChatBtn}>
-                    <ChatIcon fontSize="large"/>
+                    <ChatIcon fontSize="large" titleAccess="Messages"/>
                 </ButtonCustom> : 
                 <ButtonCustomActive onClick={onChangeActivedChatBtn}>
-                    <ChatIcon fontSize="large"/> 
+                    <ChatIcon fontSize="large" titleAccess="Messages"/> 
                 </ButtonCustomActive> 
             }
             
-            { !activedContact ? 
+            { !activedContactBtn ? 
                 <ButtonCustom onClick={onChangeActivedContactBtn}>
-                    <PeopleAltIcon fontSize="large"/>
+                    <PeopleAltIcon fontSize="large" titleAccess="Contacts"/>
                 </ButtonCustom> : 
                 <ButtonCustomActive onClick={onChangeActivedContactBtn}>
-                    <PeopleAltIcon fontSize="large"/> 
+                    <PeopleAltIcon fontSize="large" titleAccess="Contacts"/> 
                 </ButtonCustomActive> 
             }
-            
+
+            { !activedSettingBtn ? 
+                <ButtonCustom onClick={onChangeActivedSettingBtn}>
+                    <ManageAccountsIcon fontSize="large" titleAccess="Settings"/>
+                </ButtonCustom> : 
+                <ButtonCustomActive onClick={onChangeActivedSettingBtn}>
+                    <ManageAccountsIcon fontSize="large" titleAccess="Settings"/> 
+                </ButtonCustomActive> 
+            }
+
+            <LogoutBtn onClick={() => auth.signOut()}>
+                <PowerSettingsNewIcon fontSize="large" titleAccess="Logout"/>
+            </LogoutBtn>
+
         </Container>
     )
 }
@@ -143,10 +165,6 @@ const UserAvatar = styled(Avatar)`
     }
 `;
 
-// const modalStyle: Styles = {
-//     content: {
-//         width: '400px',
-//         textAlign: 'center',
-//         margin: '100px auto'
-//     }
-// }
+const LogoutBtn = styled(ButtonCustom)`
+    margin-top: auto;
+`;

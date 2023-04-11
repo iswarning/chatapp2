@@ -5,7 +5,7 @@ export default function GroupListScreen() {
 
     return (
         <Container>
-            <Profile />
+            
         </Container>
     )
 }

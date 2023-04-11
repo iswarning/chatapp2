@@ -9,7 +9,8 @@ async function createFriend({ senderEmail, recipientEmail }: any) {
         .add({
             users: [senderEmail, recipientEmail],
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            isDelete: false
+            accepted: false,
+            deleted: false
         });
     } catch (error) {
         throw new Error(JSON.stringify(error));

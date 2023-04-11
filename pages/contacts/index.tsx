@@ -1,51 +1,7 @@
-import { useAuthState } from "react-firebase-hooks/auth";
-import { auth, db } from "@/firebase";
-import { useState } from "react";
 import Head from "next/head";
 import SidebarContact from "@/components/SidebarContact/SidebarContact";
 
-export default function ListFriend() {
-
-    const [user] = useAuthState(auth);
-    const [searchInput, setSearchInput] = useState('');
-
-    // const friendSnapshot = getAllFriendCurrentUser(user?.uid);
-
-    // const friendSnapshotFiltered = findFriendByKeyWord(searchInput, user?.uid);
-
-// users {
-//     email: '',
-//     photoURL: '',
-//     created_at: '',
-// }
-
-// chats {
-//     users: ['chivinh1998@gmail.com', 'hacker20001235@gmail.com'],
-//     photoURL: '',
-//     is_group: false,
-//     created_at: '',
-// }
-
-// friends {
-//     users: ['chivinh1998@gmail.com', 'hacker20001235@gmail.com'],
-//     deleted: false
-// }
-
-// friend_requests {
-//     senderEmail: 'chivinh1998@gmail.com',
-//     recipientEmail: 'hacker20001235@gmail.com',
-//     accepted: false,
-//     deleted: false,
-//     created_at: '',
-// }
-
-// messages {
-//     users: ['chivinh1998@gmail.com', 'hacker20001235@gmail.com'],
-//     content: 'Hello world',
-//     photoURL: '',
-//     sentAt: '',
-//     senderEmail: 'chivinh1998@gmail.com',
-// }
+export default function ContactPage() {
 
     return (
         

@@ -2,8 +2,7 @@ import { useEffect, useState } from "react";
 import Friend from "../Friend/Friend";
 import { Col, Container, Row } from "./FriendsListScreenStyled";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { auth, db } from "@/firebase";
-import { useCollection } from "react-firebase-hooks/firestore";
+import { auth } from "@/firebase";
 import getAllFriendCurrentUser from "@/services/friends/getAllFriendCurrentUser";
 
 export default function FriendsListScreen() {

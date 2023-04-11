@@ -35,7 +35,7 @@ export default function Chat({ id, users }: any) {
     const chatAlreadyExists = (): boolean => {
         return !!chatSnapshot?.docs.find(
             (chat: any) => chat.data().users.find(
-                (user: any) => user === recipientEmail)?.length > 0);
+                (email: any) => email === recipientEmail)?.length > 0);
     }
 
     const enterChat = () => {
@@ -53,7 +53,7 @@ export default function Chat({ id, users }: any) {
             ): (
                 <UserAvatar>{recipientEmail[0]}</UserAvatar>
             )}
-            <TextEmail style={{marginTop: !router.query.id ? '15px' : ''}}>{recipientEmail}</TextEmail>
+            <TextEmail>{recipientEmail}</TextEmail>
         </Container>
     )
 }
@@ -64,17 +64,17 @@ const Container = styled.div`
     cursor: pointer;
     padding: 15px;
     word-break: break-word;
-
+    height: 60px;
     :hover {
         background-color: #e9eaeb;
     }
 `;
 
 const TextEmail = styled.p`
-    
+    margin-top: 15px;
 `;
 
 const UserAvatar = styled(Avatar)`
     margin: 5px;
-    margin-right: 15px;
+    margin-right: 10px;
 `;

@@ -1,6 +1,11 @@
 import { db } from "@/firebase";
 
-const getUserById = async (id: string) => 
-    (await db.collection('users').doc(id).get()).data();
+async function getUserById(id: string) {
+    let data = await db
+        .collection('users')
+        .doc(id)
+        .get();
+    return data.data() || [];
+}
 
 export default getUserById;

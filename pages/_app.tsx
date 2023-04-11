@@ -6,6 +6,7 @@ import Login from './login';
 import Loading from '@/components/Loading';
 import { useEffect } from 'react';
 import createNewUser from '@/services/users/createNewUser';
+import 'bootstrap/dist/css/bootstrap.css'
 
 export default function App({ Component, pageProps }: AppProps) {
   const [user, loading] = useAuthState(auth);

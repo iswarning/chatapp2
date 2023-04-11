@@ -9,7 +9,7 @@ import ListIcon from '@mui/icons-material/List';
 
 export default function SidebarContact() {
 
-    const [selectedContact, setSelectedContact] = useState('All friends');
+    const [selectedContact, setSelectedContact] = useState('');
 
     return (
         <Container>

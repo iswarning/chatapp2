@@ -90,7 +90,7 @@ export default function ChatScreen({chat, messages}: any) {
                     <Avatar>{recipientEmail[0]}</Avatar>
                 )}
                 <HeaderInformation>
-                    <h3>{recipientEmail}</h3>
+                    <TextEmail>{recipientEmail}</TextEmail>
                     {recipientSnapshot ? (
                         <p>Last active: {''}
                         {recipient?.lastSeen?.toDate() ? (
@@ -130,6 +130,11 @@ export default function ChatScreen({chat, messages}: any) {
 }
 
 const Container = styled.div``;
+
+const TextEmail = styled.label`
+    margin-top: 10px;
+    font-weight: 500;
+`; 
 
 const Input = styled.input`
     flex: 1;
