@@ -1,9 +1,8 @@
 import { db } from "@/firebase";
 
-async function getFriendRequestsByEmail(senderEmail: string, recipientEmail: string) {
+async function getFriendRequestsRecipientByEmail(recipientEmail: string) {
     let data = await db
         .collection('friend_requests')
-        .where('senderEmail', '==', senderEmail)
         .where('recipientEmail', '==', recipientEmail)
         .where('isAccept', '==', false)
         .where('isDelete', '==', false)
@@ -11,4 +10,4 @@ async function getFriendRequestsByEmail(senderEmail: string, recipientEmail: str
     return data.docs || [];
 }
 
-export default getFriendRequestsByEmail;
+export default getFriendRequestsRecipientByEmail;

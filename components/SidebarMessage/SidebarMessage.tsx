@@ -7,7 +7,7 @@ import GroupAddIcon from '@mui/icons-material/GroupAdd';
 import Chat from '../Chat';
 import Menu from '../Menu';
 import { useEffect, useState } from 'react';
-import { ButtonCustom, 
+import { 
     Container, 
     Header, 
     IconsContainer, 
@@ -16,13 +16,21 @@ import { ButtonCustom,
     SearchInput, 
     SidebarContainer } from './SidebarMessageStyled';
 import getChatByEmail from '@/services/chats/getChatByEmail';
-import findChatByKeyWord from '@/services/chats/findChatByKeyWord';
+import { IconButton } from '@mui/material';
+import createNewChat from '@/services/chats/createNewChat';
 
 export default function SidebarMessage() {
 
     const [user] = useAuthState(auth);
     const [searchInput, setSearchInput] = useState('');
     const [chatData, setChatData] = useState([]);
+    const [searchData, setSearchData]: any = useState([]);
+    const [recipientEmail, setRecipientEmail] = useState('');
+    const [isOpen, setIsOpen] = useState(false);
+
+    useEffect(() => {
+        getChatByEmail(user?.email!).then((u: any) => setChatData(u));
+    },[chatData])
     
     const [chatSnapshotFiltered] = useCollection(
         db
@@ -33,17 +41,19 @@ export default function SidebarMessage() {
     const handleSearch = (e: any) => {
         setSearchInput(e.target.value);
         if(searchInput.length >= 3) {
-            let result = chatData.filter((chat: any) => {
-                return chat.data().users.indexOf(e.target.value) !== -1
-            });
-            console.log(result);
-            setChatData(result);
+            setChatData(chatData.filter((chat: any) => 
+                chat.data().users[1].indexOf(e.target.value) > -1
+            ));
         }
     }
 
-    useEffect(() => {
-        getChatByEmail(user?.email!).then((u: any) => setChatData(u))
-    },[chatData])
+    const newChat = () => {
+        try {
+            createNewChat(user?.email!, recipientEmail, user?.photoURL!)
+        } catch (error) {
+            console.log(error);
+        }
+    }
 
     return (
         <Container>
@@ -53,12 +63,12 @@ export default function SidebarMessage() {
             <SidebarContainer>
                 <Header>
                     <IconsContainer>
-                        <ButtonCustom>
-                            <AddIcon/>
-                        </ButtonCustom>
-                        <ButtonCustom >
-                            <GroupAddIcon/>
-                        </ButtonCustom>
+                        <IconButton >
+                            <AddIcon titleAccess='New Chat' onClick={() => setIsOpen(!isOpen)}/>
+                        </IconButton>
+                        <IconButton>
+                            <GroupAddIcon titleAccess='New Group'/>
+                        </IconButton>
                     </IconsContainer>
                 </Header>
                 <Search>
@@ -66,11 +76,14 @@ export default function SidebarMessage() {
                     <SearchInput placeholder='Find in chats' value={searchInput} onChange={handleSearch}/>
                 </Search>
                 { 
-                    chatData.length > 0 ? chatData.map( (chat:any) => 
+                    chatData?.length > 0 ? chatData.map( (chat:any) => 
                         <Chat key={chat.id} id={chat.id} users={chat.data().users} />
                     ) : null 
                 }
             </SidebarContainer>
+            {/* <ModalContainer isOpen={isOpen} onRequestClose={() => setIsOpen(!isOpen)}>
+                    <EnterEmailInput type='text' />
+            </ModalContainer> */}
         </Container>
     );
 }

@@ -6,6 +6,8 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { useCollection } from "react-firebase-hooks/firestore";
 import * as EmailValidator from 'email-validator';
 import styled from "styled-components";
+import getUserByEmail from "@/services/users/getUserByEmail";
+import { getRecipientUserName } from "@/utils/getRecipientUserName";
 
 export default function Chat({ id, users }: any) {
 
@@ -47,14 +49,25 @@ export default function Chat({ id, users }: any) {
     }
 
     return (
-        <Container onClick={enterChat}>
-            {recipient ? (
-                <UserAvatar src={recipient.photoURL} />
-            ): (
-                <UserAvatar>{recipientEmail[0]}</UserAvatar>
-            )}
-            <TextEmail>{recipientEmail}</TextEmail>
-        </Container>
+        <>
+            {
+                router.query.id === id ? <ChatActive onClick={enterChat}>
+                    {recipient ? (
+                        <UserAvatar src={recipient.photoURL} />
+                    ): (
+                        <UserAvatar>{getRecipientUserName(recipientEmail[0])}</UserAvatar>
+                    )}
+                    <TextEmail>{recipientEmail}</TextEmail>
+                </ChatActive> : <Container onClick={enterChat}>
+                    {recipient ? (
+                        <UserAvatar src={recipient.photoURL} />
+                    ): (
+                        <UserAvatar>{getRecipientUserName(recipientEmail[0])}</UserAvatar>
+                    )}
+                    <TextEmail>{recipientEmail}</TextEmail>
+                </Container>
+            }
+        </>
     )
 }
 
@@ -68,6 +81,16 @@ const Container = styled.div`
     :hover {
         background-color: #e9eaeb;
     }
+`;
+
+const ChatActive = styled(Container)`
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 15px;
+    word-break: break-word;
+    height: 60px;
+    background-color: #e9eaeb;;
 `;
 
 const TextEmail = styled.p`

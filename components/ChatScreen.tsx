@@ -105,9 +105,6 @@ export default function ChatScreen({chat, messages}: any) {
                 </HeaderInformation>
                 <HeaderIcons>
                     <IconButton>
-                        <AttachFileIcon />
-                    </IconButton>
-                    <IconButton>
                         <MoreVertIcon />
                     </IconButton>
                 </HeaderIcons>
@@ -120,10 +117,17 @@ export default function ChatScreen({chat, messages}: any) {
             </MessageContainer>
 
             <InputContainer>
-                <InsertEmoticonIcon />
+                <IconButton>
+                    <InsertEmoticonIcon />
+                </IconButton>
+                <IconButton>
+                    <AttachFileIcon />
+                </IconButton>
+                <IconButton>
+                    <MicIcon />
+                </IconButton>
                 <Input value={input} onChange={(e) => setInput(e.target.value)}/>
                 <button hidden disabled={!input} type="submit" onClick={sendMessage}>Send Message</button>
-                <MicIcon />
             </InputContainer>
         </Container>
     )

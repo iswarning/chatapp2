@@ -8,10 +8,12 @@ import { useRouter } from "next/router";
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
+import PersonSearchIcon from '@mui/icons-material/PersonSearch';
 
 const initialState = {
     activedChatBtn: false,
     activedContactBtn: false,
+    activedUserBtn: false,
     activedSettingBtn: false,
 }
 
@@ -23,7 +25,8 @@ export default function Menu({ active }: any) {
     const [ 
         { activedChatBtn, 
         activedContactBtn,
-        activedSettingBtn }
+        activedUserBtn,
+        activedSettingBtn, }
         , setState ] = useState(initialState);
 
     const clearState = () => {
@@ -38,6 +41,9 @@ export default function Menu({ active }: any) {
             case 'Contact':
                 onChangeActivedContactBtn()
                 break;
+            case 'User':
+                onChangeActivedUserBtn()
+                break;
             case 'Setting':
                 onChangeActivedSettingBtn()
                 break;
@@ -50,6 +56,7 @@ export default function Menu({ active }: any) {
     const onChangeActivedChatBtn = () => {
         if (!activedChatBtn) {
             clearState();
+            console.log(user?.photoURL);
             setState(prevState => ({ ...prevState, activedChatBtn: !activedChatBtn }));
             if(router.asPath.indexOf('/chat/') === -1) {
                 router.push('/');
@@ -62,6 +69,16 @@ export default function Menu({ active }: any) {
             clearState();
             setState(prevState => ({ ...prevState, activedContactBtn: !activedContactBtn }));
             router.push('/contacts');
+        }
+    }
+
+    const onChangeActivedUserBtn = () => {
+        if (!activedUserBtn) {
+            clearState();
+            setState(prevState => ({ ...prevState, activedUserBtn: !activedUserBtn }));
+            if(router.asPath.indexOf('/users/') === -1) {
+                router.push('/users');
+            }
         }
     }
 
@@ -94,6 +111,15 @@ export default function Menu({ active }: any) {
                 </ButtonCustom> : 
                 <ButtonCustomActive onClick={onChangeActivedContactBtn}>
                     <PeopleAltIcon fontSize="large" titleAccess="Contacts"/> 
+                </ButtonCustomActive> 
+            }
+
+            { !activedUserBtn ? 
+                <ButtonCustom onClick={onChangeActivedUserBtn}>
+                    <PersonSearchIcon fontSize="large" titleAccess="Search User"/>
+                </ButtonCustom> : 
+                <ButtonCustomActive onClick={onChangeActivedUserBtn}>
+                    <PersonSearchIcon fontSize="large" titleAccess="Search User"/> 
                 </ButtonCustomActive> 
             }
 

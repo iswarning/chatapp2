@@ -1,6 +1,7 @@
+import ReactModal from "react-modal";
 import styled from "styled-components";
 
-const ButtonCustom = styled.a`
+export const ButtonCustom = styled.a`
     cursor: pointer;
     color: rgba(0, 0, 0, 0.54);
     :hover {
@@ -9,13 +10,13 @@ const ButtonCustom = styled.a`
     padding: 5px;
 `;
 
-const MenuContainer = styled.div``;
+export const MenuContainer = styled.div``;
 
-const Container = styled.div`
+export const Container = styled.div`
     display: flex;
 `;
 
-const SidebarContainer = styled.div`
+export const SidebarContainer = styled.div`
     flex: 0.45s;
     border-right: 1px solid whitesmoke;
     height: 100vh;
@@ -31,7 +32,7 @@ const SidebarContainer = styled.div`
     scrollbar-width: none;
 `;
 
-const Search = styled.div`
+export const Search = styled.div`
     display: flex;
     align-items: center;
     padding: 20px;
@@ -40,7 +41,7 @@ const Search = styled.div`
     border-bottom: 1px solid whitesmoke;
 `;
 
-const SidebarButton = styled.button`
+export const SidebarButton = styled.button`
     width: 100%;
     &&& {
         border-top: 1px solid whitesmoke;
@@ -48,13 +49,13 @@ const SidebarButton = styled.button`
     }
 `;
 
-const SearchInput = styled.input`
+export const SearchInput = styled.input`
     outline-width: 0;
     border: none;
     flex: 1;
 `;
 
-const Header = styled.div`
+export const Header = styled.div`
     display: flex;
     position: sticky;
     top: 0;
@@ -67,14 +68,14 @@ const Header = styled.div`
     border-bottom: 1px solid whitesmoke;
 `;
 
-const IconsContainer = styled.div``;
+export const IconsContainer = styled.div``;
 
-export { IconsContainer, 
-    Header, 
-    SearchInput, 
-    SidebarButton, 
-    SidebarContainer, 
-    Search, 
-    Container, 
-    MenuContainer, 
-    ButtonCustom }
+export const EnterEmailInput = styled.input``;
+
+export const ModalContainer = styled(ReactModal)`
+    margin-top: 250px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 300px;
+    height: 300px;
+`

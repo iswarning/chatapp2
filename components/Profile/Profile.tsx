@@ -8,11 +8,11 @@ export default function Profile({userInfo}: any) {
     return (
         <Container>
             <Upper>
-                {/* <UpperImage src={userInfo?.upperImage ?? '/images/upper-image-default.png'} /> */}
+                <UpperImage src={userInfo?.upperImage ?? '/images/upper-image-default.png'} />
             </Upper>
             <UserContainer>
                 <UserProfile>
-                    {/* <UserAvatar src={userInfo?.avatar ?? '/images/avatar-default.jpg'} /> */}
+                    <UserAvatar src={userInfo?.avatar ?? '/images/avatar-default.jpg'} />
                 </UserProfile>
             </UserContainer>
             
@@ -31,9 +31,9 @@ export default function Profile({userInfo}: any) {
                 <TextGroupRow>
                     <TextGroupCol>
                         <TextGroup>
-                            <Label>Birthdate:</Label>
+                            <Label>Birthday:</Label>
                             <ValueContainer>
-                                <Value>{ userInfo?.birthdate ? userInfo?.birthdate : '21/12/2012'}</Value>
+                                <Value>{ userInfo?.birthday ? userInfo?.birthday : '21-12-2012'}</Value>
                             </ValueContainer>
                         </TextGroup>
                     </TextGroupCol>
@@ -41,9 +41,9 @@ export default function Profile({userInfo}: any) {
                 <TextGroupRow>
                     <TextGroupCol>
                         <TextGroup>
-                            <Label>Birth Place:</Label>
+                            <Label>Address:</Label>
                             <ValueContainer>
-                                <Value>{ userInfo?.birth_place ? userInfo?.birth_place : 'Los Angeles California San Fransisco'}</Value>
+                                <Value>{ userInfo?.address ? userInfo?.address : 'Los Angeles California San Fransisco'}</Value>
                             </ValueContainer>
                         </TextGroup>
                     </TextGroupCol>
@@ -64,6 +64,16 @@ export default function Profile({userInfo}: any) {
                             <Label>Phone:</Label>
                             <ValueContainer>
                                 <Value>{ userInfo?.phone ? userInfo?.phone : '0903123456'}</Value>
+                            </ValueContainer>
+                        </TextGroup>
+                    </TextGroupCol>
+                </TextGroupRow>
+                <TextGroupRow>
+                    <TextGroupCol>
+                        <TextGroup>
+                            <Label>Last update:</Label>
+                            <ValueContainer>
+                                <Value>{ userInfo?.updated_at ? userInfo?.updated_at : '12/04/2023'}</Value>
                             </ValueContainer>
                         </TextGroup>
                     </TextGroupCol>

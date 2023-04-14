@@ -11,13 +11,13 @@ export default function User({ id, photoURL, email }: any) {
 
     const showUserProfile = () => {
         if(userLogged?.uid !== id) {
-            router.push(`/user/${id}`)
+            router.push(`/users/${id}`)
         }
     }
 
     return (
         <Container onClick={showUserProfile}>
-            <UserAvatar src={photoURL} />
+            <UserAvatar src={photoURL ?? ''} />
             <TextEmail>{email}</TextEmail>
         </Container>
     )

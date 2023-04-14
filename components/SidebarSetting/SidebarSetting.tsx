@@ -54,8 +54,8 @@ function SidebarSetting() {
                 </SidebarContainer>
             </FixedMenu>
             <MainContent>
-                { selectedSetting == 'My Profile' ? <Profile userInfo={user} /> : null }
-                { selectedSetting == 'App Settings' ? <AppSettingsScreen /> : null }
+                { selectedSetting === 'My Profile' ? <Profile userInfo={user} /> : null }
+                { selectedSetting === 'App Settings' ? <AppSettingsScreen /> : null }
             </MainContent>
         </Container>
     )

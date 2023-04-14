@@ -3,7 +3,7 @@ import { Col, Container, Row } from "../FriendsListScreen/FriendsListScreenStyle
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@/firebase";
 import FriendRequest from "../FriendRequest/FriendRequest";
-import getFriendRequestsByEmail from "@/services/friend-requests/getFriendRequestsByEmail";
+import getFriendRequestsByEmail from "@/services/friend-requests/getFriendRequestsRecipientByEmail";
 
 function FriendRequestsListScreen() {
 

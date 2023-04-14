@@ -24,7 +24,7 @@ const Container = styled.div``;
 
 const MessageElement = styled.p`
     width: fit-content;
-    padding: 15px;
+    padding: 15px 15px 20px 15px;
     border-radius: 8px;
     margin: 10px;
     min-width: 60px;
@@ -45,8 +45,8 @@ const Reciever = styled(MessageElement)`
 
 const Timestamp = styled.span`
     color: gray;
-    padding: 10px;
-    font-size: 9px;
+    padding: 5px;
+    font-size: 12px;
     position: absolute;
     bottom: 0;
     text-align: right;
