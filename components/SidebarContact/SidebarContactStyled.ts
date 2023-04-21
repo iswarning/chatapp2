@@ -49,8 +49,9 @@ const ItemContainerActive = styled.div`
 `;
 
 const TextItem = styled.div`
-    font-weight: 700;
-    margin-top: 5px;
+    font-weight: 500;
+    font-size: 17px;
+    margin-top: 2px;
 `;
 
 const FixedMenu = styled.div`

@@ -9,7 +9,6 @@ export default function createNewFriendRequest(senderEmail: string, recipientEma
         .add({
             senderEmail: senderEmail,
             recipientEmail: recipientEmail,
-            isAccept: false,
             isDelete: false,
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         })

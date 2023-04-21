@@ -1,14 +1,8 @@
-import { db } from "@/firebase";
+import getFriendRequestsSenderByEmail from "./getFriendRequestsSenderByEmail";
 
 async function getFriendRequestsByEmail(senderEmail: string, recipientEmail: string) {
-    let data = await db
-        .collection('friend_requests')
-        .where('senderEmail', '==', senderEmail)
-        .where('recipientEmail', '==', recipientEmail)
-        .where('isAccept', '==', false)
-        .where('isDelete', '==', false)
-        .get();
-    return data.docs || [];
+    const data = await getFriendRequestsSenderByEmail(senderEmail)
+    return data.find(d => d.data().recipientEmail === recipientEmail) || null;
 }
 
 export default getFriendRequestsByEmail;

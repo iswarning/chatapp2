@@ -24,7 +24,7 @@ export const TextGroup = styled.div.attrs(() => ({
 }))``;
 
 export const ValueContainer = styled.div.attrs(() => ({
-    className: 'col-sm-10 col-12'
+    className: 'col-sm-9 col-12'
 }))``;
 
 export const Value = styled.p.attrs(() => ({
@@ -32,7 +32,7 @@ export const Value = styled.p.attrs(() => ({
 }))``;
 
 export const Label = styled.label.attrs(() => ({
-    className: 'col-sm-2 col-12 col-form-label'
+    className: 'col-sm-3 col-12 col-form-label'
 }))`
     
 `;

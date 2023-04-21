@@ -1,7 +1,7 @@
 import { db } from "@/firebase";
 import firebase from "firebase";
 
-async function createFriend({ senderEmail, recipientEmail }: any) {
+function createFriend(senderEmail: string, recipientEmail: string) {
 
     try {
         db
@@ -9,8 +9,7 @@ async function createFriend({ senderEmail, recipientEmail }: any) {
         .add({
             users: [senderEmail, recipientEmail],
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            accepted: false,
-            deleted: false
+            isDelete: false
         });
     } catch (error) {
         throw new Error(JSON.stringify(error));

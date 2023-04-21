@@ -2,11 +2,11 @@ import { Avatar, CardContent } from "@mui/material";
 import styled from "styled-components";
 
 
-const Container = styled.div`
+export const Container = styled.div`
     margin-bottom: 20px;
 `;
 
-const ButtonCustom = styled.button`
+export const ButtonCustom = styled.button`
     width: 100%;
     border: none;
     height: 40px;
@@ -16,34 +16,31 @@ const ButtonCustom = styled.button`
     }
 `
 
-const AcceptBtn = styled(ButtonCustom)`
+export const AcceptBtn = styled(ButtonCustom)`
     background: #0DA3BA;
     color: white;
 `
 
-const CancelBtn = styled(ButtonCustom)`
+export const CancelBtn = styled(ButtonCustom)`
     margin-top: 10px;
     /* background: red;
     color: white; */
 `
 
-const CardContentCustom = styled(CardContent)`
+export const CardContentCustom = styled(CardContent)`
     text-align: center;
     padding: 10px;
+    margin-top: 50px;
 `
 
-const TextEmail = styled.p`
+export const TextEmail = styled.p`
     
 `;
 
-const UserAvatar = styled(Avatar)`
-    
+export const UserAvatar = styled(Avatar)`
+    width: 100px;
+    height: 100px;
+    position: absolute;
+    margin-top: 10%;
+    margin-left: 5.7%;
 `;
-
-export { Container, 
-    TextEmail, 
-    UserAvatar, 
-    ButtonCustom, 
-    CardContentCustom, 
-    AcceptBtn, 
-    CancelBtn }

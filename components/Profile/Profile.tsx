@@ -3,8 +3,6 @@ import { BtnContainer, Container, InformationContainer, Label, TextGroup, TextGr
 
 export default function Profile({userInfo}: any) {
 
-
-
     return (
         <Container>
             <Upper>
@@ -12,12 +10,12 @@ export default function Profile({userInfo}: any) {
             </Upper>
             <UserContainer>
                 <UserProfile>
-                    <UserAvatar src={userInfo?.avatar ?? '/images/avatar-default.jpg'} />
+                    <UserAvatar src={userInfo?.photoURL ?? '/images/avatar-default.jpg'} />
                 </UserProfile>
             </UserContainer>
             
             <InformationContainer>
-                <TextName>{ userInfo?.name ? userInfo?.name : 'Albert Einstein'}</TextName>
+                <TextName>{ userInfo?.fullName ? userInfo?.fullName : 'Albert Einstein'}</TextName>
                 <TextGroupRow>
                     <TextGroupCol>
                         <TextGroup>
@@ -31,7 +29,7 @@ export default function Profile({userInfo}: any) {
                 <TextGroupRow>
                     <TextGroupCol>
                         <TextGroup>
-                            <Label>Birthday:</Label>
+                            <Label>Ngày sinh:</Label>
                             <ValueContainer>
                                 <Value>{ userInfo?.birthday ? userInfo?.birthday : '21-12-2012'}</Value>
                             </ValueContainer>
@@ -41,7 +39,7 @@ export default function Profile({userInfo}: any) {
                 <TextGroupRow>
                     <TextGroupCol>
                         <TextGroup>
-                            <Label>Address:</Label>
+                            <Label>Địa chỉ:</Label>
                             <ValueContainer>
                                 <Value>{ userInfo?.address ? userInfo?.address : 'Los Angeles California San Fransisco'}</Value>
                             </ValueContainer>
@@ -51,7 +49,7 @@ export default function Profile({userInfo}: any) {
                 <TextGroupRow>
                     <TextGroupCol>
                         <TextGroup>
-                            <Label>Gender:</Label>
+                            <Label>Giới tính:</Label>
                             <ValueContainer>
                                 <Value>{ userInfo?.gender ? userInfo?.gender : 'Male'}</Value>
                             </ValueContainer>
@@ -61,9 +59,9 @@ export default function Profile({userInfo}: any) {
                 <TextGroupRow>
                     <TextGroupCol>
                         <TextGroup>
-                            <Label>Phone:</Label>
+                            <Label>Số điện thoại:</Label>
                             <ValueContainer>
-                                <Value>{ userInfo?.phone ? userInfo?.phone : '0903123456'}</Value>
+                                <Value>{ userInfo?.phoneNumber ? userInfo?.phoneNumber : '0903123456'}</Value>
                             </ValueContainer>
                         </TextGroup>
                     </TextGroupCol>
@@ -71,7 +69,7 @@ export default function Profile({userInfo}: any) {
                 <TextGroupRow>
                     <TextGroupCol>
                         <TextGroup>
-                            <Label>Last update:</Label>
+                            <Label>Cập nhật lần cuối:</Label>
                             <ValueContainer>
                                 <Value>{ userInfo?.updated_at ? userInfo?.updated_at : '12/04/2023'}</Value>
                             </ValueContainer>

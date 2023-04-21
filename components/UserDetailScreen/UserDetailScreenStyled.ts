@@ -2,6 +2,7 @@
 import styled from "styled-components";
 import { SendMessageBtn } from "../Friend/FriendStyled";
 import { CancelBtn } from "../FriendRequest/FriendRequestStyled";
+import { Avatar } from "@mui/material";
 
 export const Container = styled.div.attrs(() => ({
     className: 'container'
@@ -62,11 +63,11 @@ export const UserProfile = styled.div`
     display: flex;
 `;
 
-// export const UserAvatar = styled(Avatar)`
-//     width: 150px;
-//     height: 150px;
-//     border: 5px solid #fff;
-// `;
+export const UserAvatar = styled(Avatar)`
+    width: 150px;
+    height: 150px;
+    border: 5px solid #fff;
+`;
 
 export const TextName = styled.h3`
     /* margin-top: auto;
@@ -92,7 +93,7 @@ export const UpdateButton = styled.button`
 export const InformationContainer = styled.div.attrs(() => ({
     className: 'shadow-sm p-3 mb-5 bg-white rounded'
 }))`
-    margin-top: 8%;
+    margin-top: 10%;
     /* padding: 10px auto; */
 `;
 
@@ -116,12 +117,15 @@ export const UserBtnGroup = styled.div`
 
 export const StatusFriendBtn = styled(SendMessageBtn)`
     width: 150px;
-    margin: 0 10px;
+    margin: 10px 0 10px 10px;
     padding-top: auto;
     padding-bottom: auto;
     /* padding: 20px; */
 `;
 
 export const SendMessageBtnUser = styled(CancelBtn)`
+    margin: 10px 0 10px 10px;
     width: 150px;
 `;
+
+

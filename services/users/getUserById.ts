@@ -1,6 +1,6 @@
 import { db } from "@/firebase";
 
-async function getUserById(id: any) {
+async function getUserById(id: string) {
     let data = await db
         .collection('users')
         .doc(id)

@@ -3,7 +3,7 @@ import Friend from "../Friend/Friend";
 import { Col, Container, Row } from "./FriendsListScreenStyled";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@/firebase";
-import getAllFriendCurrentUser from "@/services/friends/getAllFriendCurrentUser";
+import getAllFriendOfUser from "@/services/friends/getAllFriendOfUser";
 
 export default function FriendsListScreen() {
 
@@ -11,7 +11,7 @@ export default function FriendsListScreen() {
     const [friendList, setFriendList]: any = useState([]);
 
     useEffect(() => {
-        getAllFriendCurrentUser(user?.email!)
+        getAllFriendOfUser(user?.email!)
         .then((friends) => setFriendList(friends))
     },[])
 
@@ -20,61 +20,9 @@ export default function FriendsListScreen() {
             <Row>
                 { friendList.length > 0 ? friendList.map((friend: any) => 
                     <Col key={friend.id}>
-                        <Friend email={friend.data().email} />
+                        <Friend users={friend.data().users} />
                     </Col>
                 ) : null}
-                <Col>
-                    <Friend />
-                </Col>
-                <Col>
-                    <Friend />
-                </Col>
-                <Col>
-                    <Friend />
-                </Col>
-                
-                <Col>
-                    <Friend />
-                </Col>
-                <Col>
-                    <Friend />
-                </Col>
-                <Col>
-                    <Friend />
-                </Col>
-                <Col>
-                    <Friend />
-                </Col>
-                <Col>
-                    <Friend />
-                </Col>
-                <Col>
-                    <Friend />
-                </Col>
-                <Col>
-                    <Friend />
-                </Col>
-                <Col>
-                    <Friend />
-                </Col>
-                <Col>
-                    <Friend />
-                </Col>
-                <Col>
-                    <Friend />
-                </Col>
-                <Col>
-                    <Friend />
-                </Col>
-                <Col>
-                    <Friend />
-                </Col>
-                <Col>
-                    <Friend />
-                </Col>
-                <Col>
-                    <Friend />
-                </Col>
             </Row>
             
         </Container>

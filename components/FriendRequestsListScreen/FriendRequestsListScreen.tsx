@@ -3,7 +3,7 @@ import { Col, Container, Row } from "../FriendsListScreen/FriendsListScreenStyle
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@/firebase";
 import FriendRequest from "../FriendRequest/FriendRequest";
-import getFriendRequestsByEmail from "@/services/friend-requests/getFriendRequestsRecipientByEmail";
+import getFriendRequestsRecipientByEmail from "@/services/friend-requests/getFriendRequestsRecipientByEmail";
 
 function FriendRequestsListScreen() {
 
@@ -11,7 +11,7 @@ function FriendRequestsListScreen() {
     const [data, setData]: any = useState([]);
 
     useEffect(() => {
-        getFriendRequestsByEmail(user?.email!).then((res) => setData(res))
+        getFriendRequestsRecipientByEmail(user?.email!).then((res) => setData(res));
     },[])
 
     return (
@@ -19,7 +19,7 @@ function FriendRequestsListScreen() {
             <Row>
                 { data.length > 0 ? data.map((friendRequest: any) => 
                     <Col key={friendRequest.id}>
-                        <FriendRequest email={friendRequest.data().email} />
+                        <FriendRequest senderEmail={friendRequest.data().senderEmail} recipientEmail={friendRequest.data().recipientEmail} />
                     </Col>
                 ) : null}
             </Row>

@@ -34,9 +34,15 @@ export default function ChatScreen({chat, messages}: any) {
         .where('email','==',getRecipientEmail(chat.users, user))
     )
 
+    // const checkShowAvatar = (data: any, index: number) => {
+    //     return data?.docs?.[index]?.data()?.user === data.docs?.[index+1]?.data()?.user
+    //     && index !== data?.docs?.length - 1
+    //     && index !== 0;
+    // }
+
     const showMessage = () => {
         if(messageSnapshot) {
-            return messageSnapshot.docs.map((message: any) => (
+            return messageSnapshot.docs.map((message: any, i) => (
                 <Message 
                     key={message.id} 
                     user={message.data().user} 
@@ -44,6 +50,7 @@ export default function ChatScreen({chat, messages}: any) {
                         ...message.data(), 
                         timestamp: message.data().timestamp?.toDate().getTime()
                     }}
+                    // showAvatar={checkShowAvatar(messageSnapshot, i)}
                 />
             ))
         } else {
@@ -133,7 +140,9 @@ export default function ChatScreen({chat, messages}: any) {
     )
 }
 
-const Container = styled.div``;
+const Container = styled.div`
+    font-size: 18px;
+`;
 
 const TextEmail = styled.label`
     margin-top: 10px;
@@ -189,7 +198,8 @@ const EndOfMessage = styled.div`
 `;
 const HeaderIcons = styled.div``;
 const MessageContainer = styled.div`
-    padding: 30px;
+    padding: 20px 10px 20px 30px;
     background-color: #ddebeb;
     min-height: 90vh;
+    /* max-width: 1250px; */
 `;
