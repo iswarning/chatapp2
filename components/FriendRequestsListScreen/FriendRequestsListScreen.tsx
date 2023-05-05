@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
-import { Col, Container, Row } from "../FriendsListScreen/FriendsListScreenStyled";
+
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@/firebase";
 import FriendRequest from "../FriendRequest/FriendRequest";
 import getFriendRequestsRecipientByEmail from "@/services/friend-requests/getFriendRequestsRecipientByEmail";
+import { Row } from "../FriendsListScreen/FriendsListScreenStyled";
+import { Col } from "./FriendRequestsListScreenStyled";
 
 function FriendRequestsListScreen() {
 
@@ -15,16 +17,13 @@ function FriendRequestsListScreen() {
     },[])
 
     return (
-        <Container>
-            <Row>
-                { data.length > 0 ? data.map((friendRequest: any) => 
-                    <Col key={friendRequest.id}>
-                        <FriendRequest senderEmail={friendRequest.data().senderEmail} recipientEmail={friendRequest.data().recipientEmail} />
-                    </Col>
-                ) : null}
-            </Row>
-            
-        </Container>
+        <Row>
+            { data.length > 0 ? data.map((friendRequest: any) => 
+                <Col key={friendRequest.id}>
+                    <FriendRequest senderEmail={friendRequest.data().senderEmail} recipientEmail={friendRequest.data().recipientEmail} />
+                </Col>
+            ) : null}
+        </Row>
     )
 }
 

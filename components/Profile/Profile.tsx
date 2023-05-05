@@ -1,27 +1,60 @@
 import EditIcon from '@mui/icons-material/Edit';
-import { BtnContainer, Container, InformationContainer, Label, TextGroup, TextGroupCol, TextGroupRow, TextName, UpdateButton, Upper, UpperImage, UserAvatar, UserContainer, UserProfile, Value, ValueContainer } from "./ProfileStyled";
+import { InformationContainer,
+    UserContainer,
+    Container,
+    UpperImage,
+    UserProfile,
+    UserAvatar,
+    UserInfo,
+    TextName,
+    TextFriend,
+    TextGroupRow,
+    TextGroupCol,
+    TextGroup,
+    Label,
+    ValueContainer,
+    Value} from '../UserDetailScreen/UserDetailScreenStyled';
+import { useEffect, useState } from 'react';
+import getFriendByEmails from '@/services/friends/getFriendByEmails';
+import getAllFriendOfUser from '@/services/friends/getAllFriendOfUser';
+import { AcceptBtn } from '../FriendRequest/FriendRequestStyled';
+import styled from 'styled-components';
+
 
 export default function Profile({userInfo}: any) {
 
+    const [amountFriends, setAmountFriends] = useState(0);
+
+    useEffect(() => {
+        getListFriend();
+    },[])
+
+    const getListFriend = async() => {
+        const f = await getAllFriendOfUser(userInfo?.email);
+        if(f.length > 0) {
+            setAmountFriends(f.length);
+        }
+    }
+
     return (
         <Container>
-            <Upper>
-                <UpperImage src={userInfo?.upperImage ?? '/images/upper-image-default.png'} />
-            </Upper>
             <UserContainer>
+                <UpperImage src={userInfo?.upperImage ?? '/images/upper-image-default.png'} />
                 <UserProfile>
                     <UserAvatar src={userInfo?.photoURL ?? '/images/avatar-default.jpg'} />
+                    <UserInfo>
+                        <TextName>{ userInfo?.fullName ?? 'Albert Einstein'}</TextName>
+                        <TextFriend>{amountFriends} friend</TextFriend>
+                    </UserInfo>
                 </UserProfile>
             </UserContainer>
-            
-            <InformationContainer>
-                <TextName>{ userInfo?.fullName ? userInfo?.fullName : 'Albert Einstein'}</TextName>
+            <InformationContainer>           
                 <TextGroupRow>
                     <TextGroupCol>
                         <TextGroup>
                             <Label>Email:</Label>
                             <ValueContainer>
-                                <Value>{ userInfo?.email ? userInfo?.email : 'mail@gmail.com'}</Value>
+                                <Value>{ userInfo?.email ?? 'mail@gmail.com'}</Value>
                             </ValueContainer>
                         </TextGroup>
                     </TextGroupCol>
@@ -29,9 +62,9 @@ export default function Profile({userInfo}: any) {
                 <TextGroupRow>
                     <TextGroupCol>
                         <TextGroup>
-                            <Label>Ngày sinh:</Label>
+                            <Label>Birthday:</Label>
                             <ValueContainer>
-                                <Value>{ userInfo?.birthday ? userInfo?.birthday : '21-12-2012'}</Value>
+                                <Value>{ userInfo?.birthday ?? '21-12-2012'}</Value>
                             </ValueContainer>
                         </TextGroup>
                     </TextGroupCol>
@@ -39,9 +72,9 @@ export default function Profile({userInfo}: any) {
                 <TextGroupRow>
                     <TextGroupCol>
                         <TextGroup>
-                            <Label>Địa chỉ:</Label>
+                            <Label>Address:</Label>
                             <ValueContainer>
-                                <Value>{ userInfo?.address ? userInfo?.address : 'Los Angeles California San Fransisco'}</Value>
+                                <Value>{ userInfo?.address ?? 'Los Angeles California San Fransisco'}</Value>
                             </ValueContainer>
                         </TextGroup>
                     </TextGroupCol>
@@ -49,19 +82,9 @@ export default function Profile({userInfo}: any) {
                 <TextGroupRow>
                     <TextGroupCol>
                         <TextGroup>
-                            <Label>Giới tính:</Label>
+                            <Label>Gender:</Label>
                             <ValueContainer>
-                                <Value>{ userInfo?.gender ? userInfo?.gender : 'Male'}</Value>
-                            </ValueContainer>
-                        </TextGroup>
-                    </TextGroupCol>
-                </TextGroupRow>             
-                <TextGroupRow>
-                    <TextGroupCol>
-                        <TextGroup>
-                            <Label>Số điện thoại:</Label>
-                            <ValueContainer>
-                                <Value>{ userInfo?.phoneNumber ? userInfo?.phoneNumber : '0903123456'}</Value>
+                                <Value>{ userInfo?.gender ?? 'Male'}</Value>
                             </ValueContainer>
                         </TextGroup>
                     </TextGroupCol>
@@ -69,22 +92,33 @@ export default function Profile({userInfo}: any) {
                 <TextGroupRow>
                     <TextGroupCol>
                         <TextGroup>
-                            <Label>Cập nhật lần cuối:</Label>
+                            <Label>Phone:</Label>
                             <ValueContainer>
-                                <Value>{ userInfo?.updated_at ? userInfo?.updated_at : '12/04/2023'}</Value>
+                                <Value>{ userInfo?.phoneNumber ?? '0909999000'}</Value>
                             </ValueContainer>
                         </TextGroup>
                     </TextGroupCol>
                 </TextGroupRow>
-                <BtnContainer>
-                    <UpdateButton>
-                        <EditIcon fontSize="medium" />&nbsp;Edit Information
-                    </UpdateButton>
-                </BtnContainer>
+                <UpdateButton><EditIcon fontSize='small'/>Edit Information</UpdateButton>
             </InformationContainer>
         </Container>
     )
 }
+
+const UpdateButton = styled.button`
+    color: white;
+    background-color: #0DA3BA;
+    padding: 5px 7px 5px 7px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    width: max-content;
+    height: 40px;
+    
+    :hover {
+        opacity: 0.7;
+    }
+`;
 
 
 

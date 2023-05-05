@@ -7,6 +7,7 @@ import Loading from '@/components/Loading';
 import { useEffect } from 'react';
 import createNewUser from '@/services/users/createNewUser';
 import 'bootstrap/dist/css/bootstrap.css'
+import getNotificationMessage from '@/utils/getNotificationMessage';
 
 export default function App({ Component, pageProps }: AppProps) {
   const [user, loading] = useAuthState(auth);
@@ -14,6 +15,7 @@ export default function App({ Component, pageProps }: AppProps) {
   useEffect(() => {
     if(user) {
       createNewUser(user);
+      getNotificationMessage(user);
     }
   },[user]);
 

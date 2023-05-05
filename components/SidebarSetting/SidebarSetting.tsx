@@ -1,12 +1,14 @@
 import { useState } from "react";
 import Menu from "../Menu";
-import { Container, FixedMenu, IconsContainer, IconsContainerActive, ItemContainer, ItemContainerActive, MainContent, MenuContainer, SidebarContainer, TextItem } from "../SidebarContact/SidebarContactStyled";
+import { Container, FixedMenu, IconsContainer, IconsContainerActive, ItemContainer, ItemContainerActive, MenuContainer, SidebarContainer, TextItem } from "../SidebarContact/SidebarContactStyled";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import SettingsIcon from '@mui/icons-material/Settings';
 import Profile from "../Profile/Profile";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@/firebase";
 import AppSettingsScreen from "../AppSettingsScreen/AppSettingsScreen";
+import styled from "@emotion/styled";
+import { UserDetailContainer } from "../SidebarUser/SidebarUserStyled";
 
 function SidebarSetting() {
 
@@ -60,5 +62,7 @@ function SidebarSetting() {
         </Container>
     )
 }
+
+const MainContent = styled(UserDetailContainer)``;
 
 export default SidebarSetting;

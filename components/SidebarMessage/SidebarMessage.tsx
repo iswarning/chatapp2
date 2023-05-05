@@ -1,23 +1,25 @@
 import SearchIcon from '@mui/icons-material/Search';
-import { auth, db } from '../../firebase';
+import { auth } from '../../firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import GroupAddIcon from '@mui/icons-material/GroupAdd';
 import Chat from '../Chat';
 import Menu from '../Menu';
 import { useEffect, useState } from 'react';
 import { 
+    ChatContainer,
     Container, 
     Header, 
     IconsContainer, 
     MenuContainer, 
+    ModalContainer, 
     Search, 
     SearchInput, 
-    SidebarContainer } from './SidebarMessageStyled';
+    SidebarContainer} from './SidebarMessageStyled';
 import getChatByEmail from '@/services/chats/getChatByEmail';
 import { IconButton } from '@mui/material';
-import ReactModal from 'react-modal';
-import styled from '@emotion/styled';
-import AddUserToGroupScreen from '../AddUserToGroupScreen/AddUserToGroupScreen';
+import CreateGroupScreen from '../CreateGroupScreen/CreateGroupScreen';
+import getMessagesByChatId from '@/services/messages/getMessagesByChatId';
+import ChatScreen from '../ChatScreen';
 
 export default function SidebarMessage() {
 
@@ -25,9 +27,11 @@ export default function SidebarMessage() {
     const [searchInput, setSearchInput] = useState('');
     const [chatData, setChatData] = useState([]);
     const [isOpen, setIsOpen] = useState(false);
+    const [messData, setMessData]: any = useState(null);
+    const [chatInfo, setChatInfo]: any = useState({});
 
     useEffect(() => {
-        getChatByEmail(user?.email!).then((u: any) => setChatData(u));
+        getListChat();
     },[])
 
     const handleSearch = (e: any) => {
@@ -38,9 +42,31 @@ export default function SidebarMessage() {
             ));
         }
     }
+    
 
-    const onNewGroupChat = () => {
+    const getListChat = async() => {
+        getChatByEmail(user?.email!).then((chats: any) => {
+            setChatData(chats);
+        });
+    }
 
+    const onClose = () => {
+        setIsOpen(false);
+        getListChat();
+    }
+
+    const showMessages = (chat: any) => {
+        setChatInfo(chat);
+        getMessageData(chat.id);
+    }
+
+    const getMessageData = async(chatId: string) => {
+        const messages = await getMessagesByChatId(chatId);
+        if(messages.length > 0) {
+            setMessData(messages);
+        } else {
+            setMessData([])
+        }
     }
 
     return (
@@ -60,25 +86,28 @@ export default function SidebarMessage() {
                     <SearchIcon />
                     <SearchInput placeholder='Tìm kiếm tin nhắn' value={searchInput} onChange={handleSearch}/>
                 </Search>
-                { 
-                    chatData?.length > 0 ? chatData.map( (chat:any) => 
-                        <Chat key={chat.id} id={chat.id} users={chat.data().users} />
-                    ) : null 
+                {
+                    chatData?.length > 0 ? chatData.map((chat:any) => 
+                        <Chat 
+                            key={chat.id} 
+                            id={chat.id} 
+                            data={chat.data()} 
+                            onShowMessage={() => showMessages(chat)} 
+                            active={chat.id === chatInfo.id} />
+                    ) : null
                 }
             </SidebarContainer>
+            {
+                messData ? 
+                    <ChatContainer>
+                        <ChatScreen chatId={chatInfo.id} chat={chatInfo.data()} messages={messData} onSend={() => getMessageData(chatInfo.id)}/>
+                    </ChatContainer>
+                : null
+            }
             <ModalContainer isOpen={isOpen} onRequestClose={() => setIsOpen(false)}>
-                <AddUserToGroupScreen />
+                <CreateGroupScreen onClose={onClose}/>
             </ModalContainer>
         </Container>
     );
 }
-
-const ModalContainer = styled(ReactModal)`
-    margin-left: auto;
-    margin-right: auto;
-    margin-top: 100px;
-    width: 350px;
-    height: 600px;
-    background-color: white;
-`
 

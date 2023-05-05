@@ -42,23 +42,6 @@ export const SearchInput = styled.input`
     flex: 1;
 `;
 
-export const FriendContainer = styled.div`
-    display: flex;
-    align-items: center;
-    padding: 15px;
-    word-break: break-word;
-    height: 60px;
-`;
-
-export const TextEmail = styled.p`
-    margin-top: 15px;
-`;
-
-export const UserAvatar = styled(Avatar)`
-    margin: 5px;
-    margin-right: 15px;
-`;
-
 export const BtnContainer = styled.div`
     margin-top: auto;
     padding: 10px;
@@ -71,16 +54,6 @@ export const CountMemberContainer = styled.div`
 export const Label = styled.label`
 `;
 export const CountMemberValue = styled.label``;
-export const BtnAdd = styled(AddCircleIcon)`
-    margin-left: auto;
-    cursor: pointer;
-    color: #0DA3BA;
-`;
-export const BtnRemove = styled(RemoveCircleIcon)`
-    margin-left: auto;
-    cursor: pointer;
-    color: #0DA3BA;
-`;
 export const GroupNameContainer = styled.div`
     padding: 15px 20px 0 20px;
     
@@ -119,5 +92,32 @@ export const SidebarFixed = styled.div`
 export const ListMemberScreen = styled.div`
     
 `
+
+export const UserContainer = styled.div`
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    word-break: break-word;
+    height: 60px;
+`;
+
+export const TextEmail = styled.p`
+    margin-top: 15px;
+`;
+
+export const UserAvatar = styled(Avatar)`
+    margin: 5px;
+    margin-right: 15px;
+`;
+export const BtnAdd = styled(AddCircleIcon)`
+    margin-left: auto;
+    cursor: pointer;
+    color: #0DA3BA;
+`;
+export const BtnRemove = styled(RemoveCircleIcon)`
+    margin-left: auto;
+    cursor: pointer;
+    color: #0DA3BA;
+`;
 
 

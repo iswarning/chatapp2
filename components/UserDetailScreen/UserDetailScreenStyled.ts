@@ -5,9 +5,9 @@ import { CancelBtn } from "../FriendRequest/FriendRequestStyled";
 import { Avatar } from "@mui/material";
 
 export const Container = styled.div.attrs(() => ({
-    className: 'container'
+    // className: 'container'
 }))`
-    padding-top: 20px;
+    padding: 20px;
 `;
 
 export const BtnContainer = styled.div`
@@ -42,22 +42,24 @@ export const Label = styled.label.attrs(() => ({
     
 `;
 
-export const UpperImage = styled.img`
+export const UpperImage = styled.img.attrs(() => ({
+    // className: 'col-md-12'
+}))`
     top: 0;
-    left: 0;
+    position: relative;
     height: 400px;
-    width: 1295px;
     border-radius: 10px;
+    width: 100%;
 `;
 
-export const UserContainer = styled.div`
+export const UserContainer = styled.div.attrs(() => ({
+    // className: 'row'
+}))`
     position: relative;
-    /* padding-left: 20px; */
 `;
 
 export const UserProfile = styled.div`
-    top: 0;
-    margin-top: 28%;
+    top: 90%;
     margin-left: 2%;
     position: absolute;
     display: flex;
@@ -70,9 +72,6 @@ export const UserAvatar = styled(Avatar)`
 `;
 
 export const TextName = styled.h3`
-    /* margin-top: auto;
-    margin-bottom: auto; */
-    /* margin: 10px 0 15px 540px; */
 `;
 
 export const UpdateButton = styled.button`

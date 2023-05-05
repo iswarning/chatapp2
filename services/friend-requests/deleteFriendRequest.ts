@@ -1,6 +1,6 @@
 import { db } from "@/firebase";
 
-export default async function deleteFriendRequest(friendRequestId: string) {
+export default function deleteFriendRequest(friendRequestId: string) {
     try {
         db
         .collection('friend_requests')

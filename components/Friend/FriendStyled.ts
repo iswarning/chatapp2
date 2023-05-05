@@ -1,4 +1,4 @@
-import { Avatar, Button, CardContent, Typography } from "@mui/material";
+import { CardContent } from "@mui/material";
 import styled from "styled-components";
 
 
@@ -23,24 +23,14 @@ export const SendMessageBtn = styled(ButtonCustom)`
 
 export const UnfriendBtn = styled(ButtonCustom)`
     margin-top: 10px;
-    /* background: red;
-    color: white; */
 `
 
 export const CardContentCustom = styled(CardContent)`
     text-align: center;
     padding: 10px;
-    margin-top: 50px;
+    margin-top: 10px;
 `
 
 export const TextEmail = styled.p`
     
-`;
-
-export const UserAvatar = styled(Avatar)`
-    width: 100px;
-    height: 100px;
-    position: absolute;
-    margin-top: 10%;
-    margin-left: 5.7%;
 `;

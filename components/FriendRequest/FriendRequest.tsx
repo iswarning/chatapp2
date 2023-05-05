@@ -1,4 +1,4 @@
-import { CardContentCustom, Container, AcceptBtn, CancelBtn, UserAvatar } from "./FriendRequestStyled";
+import { CardContentCustom, Container, SendMessageBtn, UnfriendBtn } from "../Friend/FriendStyled";
 import { useEffect, useState } from "react";
 import { Card, CardMedia, Typography } from "@mui/material";
 import getUserByEmail from "@/services/users/getUserByEmail";
@@ -30,17 +30,16 @@ export default function FriendRequest({senderEmail, recipientEmail}: any) {
             <Card sx={{ maxWidth: 345 }}>
                 <CardMedia
                     sx={{ height: 220 }}
-                    image={userInfo?.upperImage ?? '/images/upper-image-default.png'}
+                    image={userInfo?.photoURL ?? ''}
                     title="Avatar"
                 >
-                    <UserAvatar src={userInfo?.photoURL ?? ''} />
                 </CardMedia>
                 <CardContentCustom>
                     <Typography gutterBottom variant="h5" component="div">
                     {userInfo?.fullName ?? 'Albert Einstein'}
                     </Typography>
-                    <AcceptBtn onClick={onAccept}>Chấp nhận</AcceptBtn>
-                    <CancelBtn onClick={onCancel}>Từ chối</CancelBtn>
+                    <SendMessageBtn onClick={onAccept}>Chấp nhận</SendMessageBtn>
+                    <UnfriendBtn onClick={onCancel}>Từ chối</UnfriendBtn>
                 </CardContentCustom>
             </Card>
         </Container>

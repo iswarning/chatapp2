@@ -10,18 +10,23 @@ import HowToRegIcon from '@mui/icons-material/HowToReg';
 import deleteFriendRequest from "@/services/friend-requests/deleteFriendRequest";
 import deleteFriend from "@/services/friends/deleteFriend";
 import getFriendByEmails from "@/services/friends/getFriendByEmails";
+import { useEffect, useState } from "react";
 
 export default function UserDetailScreen({userInfo, statusFriend}: any) {
+
+    const [status, setStatus] = useState(statusFriend);
 
     const [user] = useAuthState(auth);
 
     const onAddFriend = () => {
         createNewFriendRequest(user?.email!, String(userInfo?.email));
+        setStatus('isFriendRequest');
     }
 
     const onCancelFriendRequest = () => {
         getFriendRequestsByEmail(user?.email!, String(userInfo?.email)).then((friendRequest: any) => {
             deleteFriendRequest(friendRequest.id);
+            setStatus('isStranger');
         });
     }
 
@@ -30,13 +35,14 @@ export default function UserDetailScreen({userInfo, statusFriend}: any) {
             getFriendByEmails(user?.email!, String(userInfo?.email)).then((friend) => {
                 if(friend?.exists) {
                     deleteFriend(friend?.id);
+                    setStatus('isStranger');
                 }
             });
         }
     }
 
     const showStatusFriend = () => {
-        switch(statusFriend) {
+        switch(status) {
             case 'isStranger':
                 return <UserBtnGroup>
                             <StatusFriendBtn onClick={onAddFriend}><PersonAddIcon />&nbsp; Thêm bạn bè</StatusFriendBtn>
@@ -54,8 +60,8 @@ export default function UserDetailScreen({userInfo, statusFriend}: any) {
                         </UserBtnGroup>
             case 'isPendingAccept':
                 return <UserBtnGroup>
-                            <SendMessageBtnUser disabled>Đang chờ xác nhận</SendMessageBtnUser>
-                            <SendMessageBtnUser><MessageIcon />&nbsp; Gửi tin nhắn</SendMessageBtnUser>
+                            <SendMessageBtnUser disabled>Pending Accept...</SendMessageBtnUser>
+                            <StatusFriendBtn><MessageIcon />&nbsp; Gửi tin nhắn</StatusFriendBtn>
                         </UserBtnGroup>
                 
         }
@@ -68,11 +74,12 @@ export default function UserDetailScreen({userInfo, statusFriend}: any) {
                 <UserProfile>
                     <UserAvatar src={userInfo?.photoURL ?? '/images/avatar-default.jpg'} />
                     <UserInfo>
-                        <TextName>{ userInfo?.name ? userInfo?.name : 'Albert Einstein'}</TextName>
+                        <TextName>{ userInfo?.fullName ?? 'Albert Einstein'}</TextName>
                         <TextFriend>100 Bạn bè</TextFriend>
                     </UserInfo>
+                      
                 </UserProfile>
-                {showStatusFriend()}            
+                {showStatusFriend()} 
             </UserContainer>
             <InformationContainer>           
                 <TextGroupRow>
@@ -80,7 +87,7 @@ export default function UserDetailScreen({userInfo, statusFriend}: any) {
                         <TextGroup>
                             <Label>Email:</Label>
                             <ValueContainer>
-                                <Value>{ userInfo?.email ? userInfo?.email : 'mail@gmail.com'}</Value>
+                                <Value>{ userInfo?.email ?? 'mail@gmail.com'}</Value>
                             </ValueContainer>
                         </TextGroup>
                     </TextGroupCol>
@@ -90,7 +97,7 @@ export default function UserDetailScreen({userInfo, statusFriend}: any) {
                         <TextGroup>
                             <Label>Birthday:</Label>
                             <ValueContainer>
-                                <Value>{ userInfo?.birthday ? userInfo?.birthday : '21-12'}</Value>
+                                <Value>{ userInfo?.birthday ?? '21-12'}</Value>
                             </ValueContainer>
                         </TextGroup>
                     </TextGroupCol>
@@ -100,7 +107,7 @@ export default function UserDetailScreen({userInfo, statusFriend}: any) {
                         <TextGroup>
                             <Label>Gender:</Label>
                             <ValueContainer>
-                                <Value>{ userInfo?.gender ? userInfo?.gender : 'Male'}</Value>
+                                <Value>{ userInfo?.gender ?? 'Male'}</Value>
                             </ValueContainer>
                         </TextGroup>
                     </TextGroupCol>

@@ -9,55 +9,59 @@ import InsertEmoticonIcon from '@mui/icons-material/InsertEmoticon';
 import MicIcon from '@mui/icons-material/Mic';
 import { useCollection } from "react-firebase-hooks/firestore";
 import Message from "./Message";
-import { useRef, useState } from "react";
-import firebase from "firebase";
+import { useEffect, useRef, useState } from "react";
 import getRecipientEmail from "@/utils/getRecipientEmail";
 import TimeAgo from "timeago-react";
+import getMessagesByChatId from "@/services/messages/getMessagesByChatId";
+import createNewMessage from "@/services/messages/createNewMessage";
+import getUserByEmail from "@/services/users/getUserByEmail";
+import CallIcon from '@mui/icons-material/Call';
+import firebase from "firebase";
+import { io } from "socket.io-client";
 
-export default function ChatScreen({chat, messages}: any) {
+export default function ChatScreen({ chatId, chat, messages, onSend}: any) {
     const [user] = useAuthState(auth);
     const [input, setInput] = useState('');
-    const router: any = useRouter();
     const endOfMessageRef: any = useRef(null);
+    const [messageData, setMessageData]: any = useState([])
+    const [recipientUser, setRecipientUser]: any = useState({})
+    const [showEmoji, setShowEmoji] = useState(false);
+    const emojiData = [
+        '&#128513;',
+        '&#128514;',
+        '&#128515;',
+        '&#128516;',
+        '&#128517;',
+        '&#128544;',
+    ];
 
-    const [messageSnapshot] = useCollection(
-        db
-        .collection('chats')
-        .doc(router.query.id)
-        .collection('messages')
-        .orderBy('timestamp')
-    );
+    useEffect(() => {
+        getRecipientUser();
+        ScrollToBottom();
+    },[onSend])
 
-    const [recipientSnapshot] = useCollection(
-        db
-        .collection('users')
-        .where('email','==',getRecipientEmail(chat.users, user))
-    )
+    const getRecipientUser = async() => {
+        const u = await getUserByEmail(getRecipientEmail(chat.users, user));
+        if(u) {
+            setRecipientUser(u.data());
+        }
+    }
 
-    // const checkShowAvatar = (data: any, index: number) => {
-    //     return data?.docs?.[index]?.data()?.user === data.docs?.[index+1]?.data()?.user
-    //     && index !== data?.docs?.length - 1
-    //     && index !== 0;
-    // }
+    const checkShowAvatar = (data: any, index: number) => 
+         data[index]?.data()?.user === data[index+1]?.data()?.user
 
     const showMessage = () => {
-        if(messageSnapshot) {
-            return messageSnapshot.docs.map((message: any, i) => (
-                <Message 
-                    key={message.id} 
-                    user={message.data().user} 
-                    message={{
-                        ...message.data(), 
-                        timestamp: message.data().timestamp?.toDate().getTime()
-                    }}
-                    // showAvatar={checkShowAvatar(messageSnapshot, i)}
-                />
-            ))
-        } else {
-            return JSON.parse(messages).map((message: any) => (
-                <Message key={message.id} user={message.user} message={message} />
-            ))
-        } 
+        return messages.map((message: any, index: number) => (
+            <Message 
+                key={message.id} 
+                user={message.data().user} 
+                message={{
+                    ...message.data(), 
+                    timestamp: message.data().timestamp?.toDate().getTime()
+                }}
+                showAvatar={checkShowAvatar(messages, index)}
+            />
+        ))
     }
 
     const ScrollToBottom = () => {
@@ -67,64 +71,79 @@ export default function ChatScreen({chat, messages}: any) {
         });
     }
 
-    const sendMessage = (e: any) => {
+    const sendMessage = async(e: any) => {
         e.preventDefault();
 
-        db.collection('users').doc(user?.uid).set({
-            lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
-        }, { merge: true });
-
-        db.collection('chats').doc(router.query.id).collection('messages').add({
-            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-            message: input,
-            user: user?.email,
-            photoURL: user?.photoURL
-        });
+        await createNewMessage(chatId, input, user?.email!, user?.photoURL!);
+        
+        sendNotification();
         
         setInput('');
-        ScrollToBottom();
+
+        if(messageData.length! > 0) {
+            ScrollToBottom();
+        }
+        
+        onSend()
     }
 
-    const recipient = recipientSnapshot?.docs?.[0]?.data();
-    const recipientEmail = getRecipientEmail(chat.users, user);
+    const sendNotification = () => {
+        const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
+        let listRecipientNotify = chat.users.filter((email: any) => email !== user?.email)
+        let dataNofity = {
+            message: input,
+            recipient: chat.isGroup ? listRecipientNotify : getRecipientEmail(chat.users, user),
+            name: chat.isGroup ? chat.name : user?.displayName
+        }
+        socket.emit('chat message', JSON.stringify(dataNofity));
+    }
+
+    const setEmojiToInput = (e: string) => {
+        setInput(input + e);
+        setShowEmoji(false);
+    }
 
     return (
         <Container>
             <Header>
-                {recipient ? (
-                    <Avatar src={recipient?.photoURL} />
-                ) : (
-                    <Avatar>{recipientEmail[0]}</Avatar>
-                )}
+                <UserAvatar src={chat?.isGroup ? chat?.photoURL : recipientUser.photoURL} />
                 <HeaderInformation>
-                    <TextEmail>{recipientEmail}</TextEmail>
-                    {recipientSnapshot ? (
-                        <p>Last active: {''}
-                        {recipient?.lastSeen?.toDate() ? (
-                            <TimeAgo datetime={recipient?.lastSeen?.toDate()} />
-                        ) : (
-                            "Unavailable"
-                        )}
-                        </p>
+                    <TextEmail>{chat?.isGroup ? chat.name : recipientUser.fullName}</TextEmail>
+                    <p>Active {''}
+                    {recipientUser?.lastSeen?.toDate() ? (
+                        <TimeAgo datetime={recipientUser?.lastSeen?.toDate()} />
                     ) : (
-                        <p>Loading Last active...</p>
+                        "Unavailable"
                     )}
+                    </p>
                 </HeaderInformation>
                 <HeaderIcons>
+                    <IconButton>
+                        <CallIcon titleAccess="Call video"/>
+                    </IconButton>
                     <IconButton>
                         <MoreVertIcon />
                     </IconButton>
                 </HeaderIcons>
             </Header>
             
-
             <MessageContainer>
                 {showMessage()}
                 <EndOfMessage ref={endOfMessageRef} />
             </MessageContainer>
 
             <InputContainer>
-                <IconButton>
+                {
+                    showEmoji ? <EmojiContainer>
+                        {emojiData.length > 0 ? emojiData.map((e) => 
+                            <EmojiElement key={e} onClick={() => setEmojiToInput(e)}>
+                                <Emoji dangerouslySetInnerHTML={{__html: e}} />
+                            </EmojiElement>
+                        )    
+                        : null}
+                    </EmojiContainer> : null
+                }
+                <IconButton onClick={() => setShowEmoji(!showEmoji)}>
                     <InsertEmoticonIcon />
                 </IconButton>
                 <IconButton>
@@ -139,6 +158,48 @@ export default function ChatScreen({chat, messages}: any) {
         </Container>
     )
 }
+
+const EmojiContainer = styled.div.attrs(() => ({
+    className: ''
+}))`
+    position: absolute;
+    width: 250px;
+    /* max-width: 250px; */
+    height: 150px;
+    background-color: white;
+    border-radius: 10px;
+    padding: 10px;
+    margin-bottom: 250px;
+    margin-left: 5px;
+    overflow: scroll;
+    ::-webkit-scrollbar {
+        display: none;
+    }
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    display: flex;
+    flex-wrap: wrap;
+`
+
+const EmojiElement = styled.div.attrs(() => ({
+    className: ''
+}))`
+    width: 25%;
+    cursor: pointer;
+    :hover {
+        border-radius: 10px;
+        background-color: #ddebeb;
+    }
+`
+
+const Emoji = styled.div`
+    font-size: 40px;
+`
+
+const UserAvatar = styled(Avatar)`
+    width: 50px;
+    height: 50px;
+`
 
 const Container = styled.div`
     font-size: 18px;
@@ -163,10 +224,11 @@ const InputContainer = styled.form`
     display: flex;
     align-items: center;
     padding: 10px;
-    position: sticky;
+    position: fixed;
     bottom: 0;
     background-color: white;
     z-index: 100;
+    width: 100%;
 `;
 
 const Header = styled.div`
@@ -198,8 +260,8 @@ const EndOfMessage = styled.div`
 `;
 const HeaderIcons = styled.div``;
 const MessageContainer = styled.div`
-    padding: 20px 10px 20px 30px;
+    padding: 20px 10px 40px 30px;
     background-color: #ddebeb;
     min-height: 90vh;
-    /* max-width: 1250px; */
+    
 `;

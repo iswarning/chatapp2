@@ -5,5 +5,6 @@ export interface User{
     gender: number;
     upperImage: string;
     photoURL: string;
+    phoneNumber: string;
     createdAt: string;
 }

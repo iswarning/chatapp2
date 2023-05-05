@@ -1,9 +1,8 @@
-import { Container, Header, MenuContainer, Search, SearchInput, SidebarContainer } from "@/components/SidebarMessage/SidebarMessageStyled";
 import { useState } from "react";
 import Menu from "../Menu";
 import SearchIcon from '@mui/icons-material/Search';
 import UserDetailScreen from "../UserDetailScreen/UserDetailScreen";
-import { TextEmail, UserAvatar, UserContainer } from "./SidebarUserStyled";
+import { Container, Header, MenuContainer, Search, SearchInput, SidebarContainer, TextEmail, UserAvatar, UserContainer, UserDetailContainer } from "./SidebarUserStyled";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@/firebase";
 import getStatusFriend from "@/utils/getStatusFriend";
@@ -59,7 +58,11 @@ export default function SidebarUser() {
                 }
             </SidebarContainer>
             {
-                Object.keys(userInfo).length > 0 ? <UserDetailScreen userInfo={userInfo} statusFriend={statusFriend} /> : null
+                Object.keys(userInfo).length > 0 ?
+                    <UserDetailContainer>
+                        <UserDetailScreen userInfo={userInfo} statusFriend={statusFriend}/>
+                    </UserDetailContainer>
+                : null
             }
         </Container>
     )

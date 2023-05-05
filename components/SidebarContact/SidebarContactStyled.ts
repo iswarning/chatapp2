@@ -2,7 +2,7 @@ import styled from "styled-components";
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 
 const Container = styled.div`
-    
+    display: flex;
 `;
 
 const MenuContainer = styled.div`
@@ -56,15 +56,22 @@ const TextItem = styled.div`
 
 const FixedMenu = styled.div`
     display: flex;
-    position: fixed;
-    z-index: 1;
-    width: 22%;
 `;
 
-const MainContent = styled.div`
-    width: 78%;
-    float: right;
-    padding: 20px;
+const MainContent = styled.div.attrs(() => ({
+    // className: 'container'
+}))`
+    padding: 20px 20px 0 20px;
+    width: 100%;
+    flex: 1;
+    overflow: scroll;
+    height: 100vh;
+
+    ::-webkit-scrollbar {
+        display: none;
+    }
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 `
 
 const IconsContainer = styled.div`

@@ -1,3 +1,4 @@
+import { Avatar } from "@mui/material";
 import ReactModal from "react-modal";
 import styled from "styled-components";
 
@@ -57,7 +58,6 @@ export const SearchInput = styled.input`
 
 export const Header = styled.div`
     display: flex;
-    position: sticky;
     top: 0;
     background-color: white;
     z-index: 1;
@@ -73,9 +73,55 @@ export const IconsContainer = styled.div``;
 export const EnterEmailInput = styled.input``;
 
 export const ModalContainer = styled(ReactModal)`
-    margin-top: 250px;
     margin-left: auto;
     margin-right: auto;
-    width: 300px;
-    height: 300px;
+    margin-top: 100px;
+    width: 350px;
+    height: 600px;
+    background-color: white;
 `
+
+export const ChatContainer = styled.div`
+    flex: 1;
+    overflow: scroll;
+    height: 100vh;
+
+    ::-webkit-scrollbar {
+        display: none;
+    }
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+`;
+
+export const UserContainer = styled.div`
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 15px;
+    word-break: break-word;
+    height: 60px;
+    :hover {
+        background-color: #e9eaeb;
+    }
+`;
+
+export const ChatActive = styled(Container)`
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 15px;
+    word-break: break-word;
+    height: 60px;
+    background-color: #e9eaeb;;
+`;
+
+export const TextEmail = styled.p`
+    margin-top: 15px;
+`;
+
+export const UserAvatar = styled(Avatar)`
+    margin: 5px;
+    margin-right: 10px;
+`;
+
+

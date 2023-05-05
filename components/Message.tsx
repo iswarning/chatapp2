@@ -6,7 +6,7 @@ import { Avatar } from "@mui/material";
 import { useEffect, useState } from "react";
 import getUserByEmail from "@/services/users/getUserByEmail";
 
-export default function Message({user, message}: any) {
+export default function Message({user, message, showAvatar}: any) {
 
     const [userLoggedIn] = useAuthState(auth);
 
@@ -18,27 +18,33 @@ export default function Message({user, message}: any) {
                 setUserInfo(u.data());
             }
         })
+        console.log(showAvatar);
     },[])
+
+    const formatDate = (dt: any) => {
+        let d = new Date(dt);
+        return d.getHours() + ":" + d.getMinutes();
+    }
 
     return (
         <Container>
             {
                 user === userLoggedIn?.email ? <ContainerSender>
-                    <Sender>
-                        {message.message}
+                    <Sender style={{marginRight: showAvatar ? '65px' : ''}}>
+                        <MessageContent dangerouslySetInnerHTML={{__html: message.message}}></MessageContent>
                         <Timestamp>
-                            {message.timestamp ? moment(message.timestamp).format('LT') : '...'}
+                            {message.timestamp ? formatDate(message.timestamp) : '...'}
                         </Timestamp>
                     </Sender>
-                    <UserAvatarSender src={userLoggedIn?.photoURL ?? ''} />
+                    { !showAvatar ? <UserAvatarSender src={userLoggedIn?.photoURL ?? ''} /> : null }
                 </ContainerSender> 
                 : 
                 <ContainerReciever>
-                    <UserAvatarReciever src={userInfo?.photoURL ?? ''} />
-                    <Reciever>
-                        {message.message}
+                    { !showAvatar ? <UserAvatarReciever src={userInfo?.photoURL ?? ''} /> : null }
+                    <Reciever style={{marginLeft: showAvatar ? '65px' : ''}}>
+                        <MessageContent dangerouslySetInnerHTML={{__html: message.message}}></MessageContent>
                         <Timestamp>
-                            {message.timestamp ? moment(message.timestamp).format('LT') : '...'}
+                            {message.timestamp ? formatDate(message.timestamp) : '...'}
                         </Timestamp>
                     </Reciever>
                 </ContainerReciever>
@@ -48,12 +54,15 @@ export default function Message({user, message}: any) {
     )
 }
 
+const MessageContent = styled.div``
+
 const Container = styled.div`
     display: flex;
 `;
 
 const ContainerSender = styled(Container)`
     margin-left: auto;
+    margin-right: 15px;
 `;
 const ContainerReciever = styled(Container)`
     
@@ -77,6 +86,8 @@ const MessageElement = styled.p`
     position: relative;
     text-align: left;
     max-width: 1000px;
+    min-width: 80px;
+    min-height: 75px;
 `;
 
 const Sender = styled(MessageElement)`
@@ -95,7 +106,6 @@ const Timestamp = styled.span`
     padding: 5px;
     font-size: 12px;
     position: absolute;
-    bottom: 0;
-    text-align: right;
-    right: 10px;
+    bottom: 5px;
+    left: 10px;
 `;

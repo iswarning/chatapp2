@@ -3,18 +3,23 @@
         "users": ["chivinh1998@gmail.com", "hacker20001235@gmail.com"],
         "photoURL": "",
         "isGroup": false,
-        "createdAt": "",
+        "name": "",
+        "admin": "chivinh1998@gmail.com",
         "messages": {
             "message": "Hello world",
             "type": "text",
-            "timestamp": "chivinh1998@gmail.com"
+            "photoURL": "",
+            "user": "chivinh1998@gmail.com",
+            "timestamp": ""
         }
     },
 
     "users": {
         "email": "",
         "photoURL": "",
-        "createdAt": ""
+        "fullName": "",
+        "phoneNumber": "",
+        "lastSeen": ""
     }, 
 
     "friends": [
