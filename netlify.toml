@@ -1,6 +1,2 @@
-[build]
-    command = "npm run build && npm run start"
-    publish = ".next/static/chunks/pages"
-
 [build.environment]
 NETLIFY_NEXT_PLUGIN_SKIP = "true"
