@@ -8,6 +8,9 @@ import { auth } from "@/firebase";
 import getRecipientEmail from "@/utils/getRecipientEmail";
 import getUserByEmail from "@/services/users/getUserByEmail";
 import createNewGroupChat from "@/services/chat-groups/createNewGroupChat";
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import { IconButton } from "@mui/material";
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 export default function CreateGroupScreen({onClose}: any) {
 
@@ -47,7 +50,7 @@ export default function CreateGroupScreen({onClose}: any) {
         setSearchInput(value);
         if(value.length === 10) {
             const d = friendData?.find((f) => f.phoneNumber === value)
-            if(d !== undefined) { 
+            if(d !== undefined && listMember.length > 0 && listMember.filter((mem: any) => mem.email === d.email).length === 0) { 
                 setSearchData(d)
             } else {
                 setSearchData({});
@@ -82,16 +85,16 @@ export default function CreateGroupScreen({onClose}: any) {
             <SidebarContainer>
                 <Search>
                     <SearchIcon />
-                    <SearchInput placeholder='Nhập số điện thoại để tìm bạn bè' value={searchInput} onChange={(e) => handleSearch(e.currentTarget.value)}/>
+                    <SearchInput placeholder='Enter phone number to search' value={searchInput} onChange={(e) => handleSearch(e.currentTarget.value)}/>
                 </Search>
                 <GroupNameContainer>
-                    <GroupNameInput title="Tên nhóm" placeholder=" Nhập tên nhóm" value={groupName} hidden={listMember?.length! < 3} onChange={(e) => setGroupName(e.target.value)}/>
+                    <GroupNameInput title="Group Name" placeholder=" Enter group name" value={groupName} hidden={listMember?.length! < 3} onChange={(e) => setGroupName(e.target.value)}/>
                 </GroupNameContainer>
                 <CountMemberContainer>
-                    <Label>Tổng thành viên:</Label>
+                    <Label>Total members:</Label>
                     <CountMemberValue>&nbsp; {listMember?.length!}</CountMemberValue>
-                    { statusView === 'viewFriend' ? <BtnViewListMember onClick={() => setStatusView('viewListMember')}>Xem</BtnViewListMember> : null}
-                    { statusView === 'viewListMember' ? <BtnBack onClick={() => setStatusView('viewFriend')}>Quay lai</BtnBack> : null}
+                    { statusView === 'viewFriend' ? <IconButton style={{marginLeft: 'auto'}} onClick={() => setStatusView('viewListMember')}><VisibilityIcon/></IconButton> : null}
+                    { statusView === 'viewListMember' ? <IconButton style={{marginLeft: 'auto'}} onClick={() => setStatusView('viewFriend')}><ArrowBackIcon /></IconButton> : null}
                 </CountMemberContainer>
                 <ListMemberScreen style={{overflowY: listMember?.length! > 7 && statusView === 'viewListMember' ? 'scroll' : 'unset'}}>
                 {   
@@ -99,7 +102,7 @@ export default function CreateGroupScreen({onClose}: any) {
                         <UserContainer key={searchData?.id}>
                             <UserAvatar src={searchData?.photoURL} />
                             <TextEmail>{searchData?.phoneNumber}</TextEmail>
-                            <BtnAdd titleAccess="Thêm" onClick={() => handleAddUser(searchData)}/>
+                            <BtnAdd titleAccess="Add" onClick={() => handleAddUser(searchData)}/>
                         </UserContainer>
                     : null
                 }  

@@ -49,11 +49,17 @@ export const BtnContainer = styled.div`
 `
 
 export const CountMemberContainer = styled.div`
-    margin: 15px 0 5px 20px;
+    margin-left: 20px;
+    display: flex;
 `;
 export const Label = styled.label`
+    margin-top: auto;
+    margin-bottom: auto;
 `;
-export const CountMemberValue = styled.label``;
+export const CountMemberValue = styled.label`
+    margin-top: auto;
+    margin-bottom: auto;
+`;
 export const GroupNameContainer = styled.div`
     padding: 15px 20px 0 20px;
     

@@ -8,7 +8,6 @@ async function createNewUser(user: firebase.User) {
                 email: user?.email,
                 lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
                 photoURL: user?.photoURL,
-                phoneNumber: user?.phoneNumber,
                 fullName: user?.displayName
             },
             { merge: true }

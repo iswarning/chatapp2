@@ -115,7 +115,7 @@ export const ChatActive = styled(Container)`
     background-color: #e9eaeb;;
 `;
 
-export const TextEmail = styled.p`
+export const TextEmail = styled.div`
     margin-top: 15px;
 `;
 

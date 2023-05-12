@@ -18,7 +18,6 @@ export default function Message({user, message, showAvatar}: any) {
                 setUserInfo(u.data());
             }
         })
-        console.log(showAvatar);
     },[])
 
     const formatDate = (dt: any) => {
@@ -32,11 +31,13 @@ export default function Message({user, message, showAvatar}: any) {
                 user === userLoggedIn?.email ? <ContainerSender>
                     <Sender style={{marginRight: showAvatar ? '65px' : ''}}>
                         <MessageContent dangerouslySetInnerHTML={{__html: message.message}}></MessageContent>
+                        
                         <Timestamp>
                             {message.timestamp ? formatDate(message.timestamp) : '...'}
                         </Timestamp>
                     </Sender>
                     { !showAvatar ? <UserAvatarSender src={userLoggedIn?.photoURL ?? ''} /> : null }
+                    
                 </ContainerSender> 
                 : 
                 <ContainerReciever>
@@ -49,10 +50,10 @@ export default function Message({user, message, showAvatar}: any) {
                     </Reciever>
                 </ContainerReciever>
             }
-            
         </Container>
     )
 }
+
 
 const MessageContent = styled.div``
 
@@ -78,9 +79,10 @@ const UserAvatarReciever = styled(Avatar)`
     height: 50px;
 `;
 
-const MessageElement = styled.p`
+const MessageElement = styled.div`
     width: fit-content;
     padding: 10px 15px 30px 15px;
+    margin: 5px 0;
     border-radius: 8px;
     min-width: 60px;
     position: relative;

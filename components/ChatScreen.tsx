@@ -7,23 +7,22 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import InsertEmoticonIcon from '@mui/icons-material/InsertEmoticon';
 import MicIcon from '@mui/icons-material/Mic';
-import { useCollection } from "react-firebase-hooks/firestore";
 import Message from "./Message";
 import { useEffect, useRef, useState } from "react";
 import getRecipientEmail from "@/utils/getRecipientEmail";
 import TimeAgo from "timeago-react";
-import getMessagesByChatId from "@/services/messages/getMessagesByChatId";
 import createNewMessage from "@/services/messages/createNewMessage";
 import getUserByEmail from "@/services/users/getUserByEmail";
 import CallIcon from '@mui/icons-material/Call';
-import firebase from "firebase";
 import { io } from "socket.io-client";
+import ReactModal from "react-modal";
+import VideoCallScreen from "./VideoCallScreen/VideoCallScreen";
+import CheckIcon from '@mui/icons-material/Check';
 
 export default function ChatScreen({ chatId, chat, messages, onSend}: any) {
     const [user] = useAuthState(auth);
     const [input, setInput] = useState('');
     const endOfMessageRef: any = useRef(null);
-    const [messageData, setMessageData]: any = useState([])
     const [recipientUser, setRecipientUser]: any = useState({})
     const [showEmoji, setShowEmoji] = useState(false);
     const emojiData = [
@@ -34,6 +33,8 @@ export default function ChatScreen({ chatId, chat, messages, onSend}: any) {
         '&#128517;',
         '&#128544;',
     ];
+    const [isOpen, setIsOpen] = useState(false);
+    const [statusSend, setStatusSend] = useState('');
 
     useEffect(() => {
         getRecipientUser();
@@ -71,20 +72,24 @@ export default function ChatScreen({ chatId, chat, messages, onSend}: any) {
         });
     }
 
-    const sendMessage = async(e: any) => {
+    const sendMessage = (e: any) => {
         e.preventDefault();
+        setStatusSend('sending');
+        createNewMessage(chatId, input, user?.email!, user?.photoURL!).then(() => {
 
-        await createNewMessage(chatId, input, user?.email!, user?.photoURL!);
+            sendNotification();
         
-        sendNotification();
-        
-        setInput('');
+            setInput('');
 
-        if(messageData.length! > 0) {
-            ScrollToBottom();
-        }
+            if(messages.length! > 0) {
+                ScrollToBottom();
+            }
+            
+            onSend();
+
+            setStatusSend('sent');
+        }).catch((er) => console.log(er))
         
-        onSend()
     }
 
     const sendNotification = () => {
@@ -103,6 +108,10 @@ export default function ChatScreen({ chatId, chat, messages, onSend}: any) {
         setShowEmoji(false);
     }
 
+    const handleVideoCall = () => {
+        setIsOpen(!isOpen)
+    }
+
     return (
         <Container>
             <Header>
@@ -118,7 +127,7 @@ export default function ChatScreen({ chatId, chat, messages, onSend}: any) {
                     </p>
                 </HeaderInformation>
                 <HeaderIcons>
-                    <IconButton>
+                    <IconButton onClick={handleVideoCall}>
                         <CallIcon titleAccess="Call video"/>
                     </IconButton>
                     <IconButton>
@@ -129,6 +138,12 @@ export default function ChatScreen({ chatId, chat, messages, onSend}: any) {
             
             <MessageContainer>
                 {showMessage()}
+                {
+                    statusSend.length > 0 ? <StatusSendContainer>
+                        <TextStatusSend>{statusSend === 'sending' ? 'Đang gửi ...' : ''}</TextStatusSend>
+                        <TextStatusSend>{statusSend === 'sent' ? 'Đã gửi ' : ''} <CheckIcon fontSize="small"/></TextStatusSend>
+                    </StatusSendContainer> : null
+                }
                 <EndOfMessage ref={endOfMessageRef} />
             </MessageContainer>
 
@@ -153,11 +168,38 @@ export default function ChatScreen({ chatId, chat, messages, onSend}: any) {
                     <MicIcon />
                 </IconButton>
                 <Input value={input} onChange={(e) => setInput(e.target.value)}/>
-                <button hidden disabled={!input} type="submit" onClick={sendMessage}>Send Message</button>
+                <BtnSend hidden disabled={!input} type="submit" onClick={sendMessage}>Send Message</BtnSend>
             </InputContainer>
+
+            <VideoCallContainer isOpen={isOpen} onRequestClose={() => setIsOpen(false)}>
+                <VideoCallScreen />
+            </VideoCallContainer>
+            
         </Container>
     )
 }
+
+const StatusSendContainer = styled.div`
+    text-align: right;
+    padding-right: 80px;
+`;
+
+const TextStatusSend = styled.span`
+    font-size: 14px;
+    color: gray;
+`;
+
+
+const VideoCallContainer = styled(ReactModal)`
+    width: 400px;
+    height: 700px;
+    background-color: #0DA3BA;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 100px;
+`;
+
+const BtnSend = styled.button``;
 
 const EmojiContainer = styled.div.attrs(() => ({
     className: ''
