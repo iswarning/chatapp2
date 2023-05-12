@@ -1,3 +1,6 @@
+[build]
+  command = "next build && next export"
+  publish = ".next"
 
 [build.environment]
 NETLIFY_NEXT_PLUGIN_SKIP = "true"
