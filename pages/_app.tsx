@@ -15,7 +15,7 @@ export default function App({ Component, pageProps }: AppProps) {
   useEffect(() => {
     if(user) {
       createNewUser(user);
-      getNotificationMessage(user);
+      // getNotificationMessage(user);
     }
   },[user]);
 
