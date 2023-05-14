@@ -41,8 +41,8 @@ export default function Friend({users, onGetListFriend}: any) {
                     <Typography gutterBottom variant="h5" component="div">
                     {userInfo?.fullName ?? ''}
                     </Typography>
-                    <SendMessageBtn>Gửi tin nhắn</SendMessageBtn>
-                    <UnfriendBtn onClick={onUnfriend}>Hủy bạn bè</UnfriendBtn>
+                    <SendMessageBtn>Send Message</SendMessageBtn>
+                    <UnfriendBtn onClick={onUnfriend}>Unfriend</UnfriendBtn>
                 </CardContentCustom>
             </Card>
         </Container>

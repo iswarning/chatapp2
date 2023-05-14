@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Menu from "../Menu";
+import Menu from "../Menu/Menu";
 import { Container, FixedMenu, IconsContainer, IconsContainerActive, ItemContainer, ItemContainerActive, MenuContainer, SidebarContainer, TextItem } from "../SidebarContact/SidebarContactStyled";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import SettingsIcon from '@mui/icons-material/Settings';

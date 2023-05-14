@@ -14,8 +14,7 @@ function Login() {
                 <title>Login</title>
             </Head>
             <LoginContainer>
-                <Logo src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/WhatsApp.svg/768px-WhatsApp.svg.png" />
-                <Button onClick={signIn} variant="outlined">Sign in with Google</Button>
+                <Button variant="outlined" color="success" onClick={signIn}>Sign In with Google Account</Button>
             </LoginContainer>
         </Container>
     )
@@ -31,17 +30,5 @@ const Container = styled.div`
 `;
 
 const LoginContainer = styled.div`
-    padding: 100px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background-color: white;
-    border-radius: 5px;
-    box-shadow: 0px 4px 14px -3px rgba(0, 0, 0, 0.7);
-`;
-
-const Logo = styled.img`
-    height: 200px;
-    width: 200px;
-    margin-bottom: 50px;
+    
 `;

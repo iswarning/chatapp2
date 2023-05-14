@@ -1,13 +1,11 @@
-import { auth, db } from "@/firebase";
-import { IconButton, Avatar } from "@mui/material";
-import { useRouter } from "next/router";
+import { auth } from "@/firebase";
+import { IconButton } from "@mui/material";
 import { useAuthState } from "react-firebase-hooks/auth";
-import styled from "styled-components";
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import InsertEmoticonIcon from '@mui/icons-material/InsertEmoticon';
 import MicIcon from '@mui/icons-material/Mic';
-import Message from "./Message";
+import Message from "../Message/Message";
 import { useEffect, useRef, useState } from "react";
 import getRecipientEmail from "@/utils/getRecipientEmail";
 import TimeAgo from "timeago-react";
@@ -15,9 +13,9 @@ import createNewMessage from "@/services/messages/createNewMessage";
 import getUserByEmail from "@/services/users/getUserByEmail";
 import CallIcon from '@mui/icons-material/Call';
 import { io } from "socket.io-client";
-import ReactModal from "react-modal";
-import VideoCallScreen from "./VideoCallScreen/VideoCallScreen";
+import VideoCallScreen from "../VideoCallScreen/VideoCallScreen";
 import CheckIcon from '@mui/icons-material/Check';
+import { BtnSend, Container, Emoji, EmojiContainer, EmojiElement, EndOfMessage, Header, HeaderIcons, HeaderInformation, Input, InputContainer, MessageContainer, StatusSendContainer, TextEmail, TextStatusSend, UserAvatar, VideoCallContainer } from "./ChatScreenStyled";
 
 export default function ChatScreen({ chatId, chat, messages, onSend}: any) {
     const [user] = useAuthState(auth);
@@ -140,8 +138,8 @@ export default function ChatScreen({ chatId, chat, messages, onSend}: any) {
                 {showMessage()}
                 {
                     statusSend.length > 0 ? <StatusSendContainer>
-                        <TextStatusSend>{statusSend === 'sending' ? 'Đang gửi ...' : ''}</TextStatusSend>
-                        <TextStatusSend>{statusSend === 'sent' ? 'Đã gửi ' : ''} <CheckIcon fontSize="small"/></TextStatusSend>
+                        <TextStatusSend>{statusSend === 'sending' ? 'Sending...' : ''}</TextStatusSend>
+                        <TextStatusSend>{statusSend === 'sent' ? 'Sent ' : ''} <CheckIcon fontSize="small"/></TextStatusSend>
                     </StatusSendContainer> : null
                 }
                 <EndOfMessage ref={endOfMessageRef} />
@@ -179,131 +177,3 @@ export default function ChatScreen({ chatId, chat, messages, onSend}: any) {
     )
 }
 
-const StatusSendContainer = styled.div`
-    text-align: right;
-    padding-right: 80px;
-`;
-
-const TextStatusSend = styled.span`
-    font-size: 14px;
-    color: gray;
-`;
-
-
-const VideoCallContainer = styled(ReactModal)`
-    width: 400px;
-    height: 700px;
-    background-color: #0DA3BA;
-    margin-left: auto;
-    margin-right: auto;
-    margin-top: 100px;
-`;
-
-const BtnSend = styled.button``;
-
-const EmojiContainer = styled.div.attrs(() => ({
-    className: ''
-}))`
-    position: absolute;
-    width: 250px;
-    /* max-width: 250px; */
-    height: 150px;
-    background-color: white;
-    border-radius: 10px;
-    padding: 10px;
-    margin-bottom: 250px;
-    margin-left: 5px;
-    overflow: scroll;
-    ::-webkit-scrollbar {
-        display: none;
-    }
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-    display: flex;
-    flex-wrap: wrap;
-`
-
-const EmojiElement = styled.div.attrs(() => ({
-    className: ''
-}))`
-    width: 25%;
-    cursor: pointer;
-    :hover {
-        border-radius: 10px;
-        background-color: #ddebeb;
-    }
-`
-
-const Emoji = styled.div`
-    font-size: 40px;
-`
-
-const UserAvatar = styled(Avatar)`
-    width: 50px;
-    height: 50px;
-`
-
-const Container = styled.div`
-    font-size: 18px;
-`;
-
-const TextEmail = styled.label`
-    margin-top: 10px;
-    font-weight: 500;
-`; 
-
-const Input = styled.input`
-    flex: 1;
-    outline: 0;
-    border: none;
-    border-radius: 10px;
-    background-color: whitesmoke;
-    padding: 20px;
-    margin-left: 15px;
-`;
-
-const InputContainer = styled.form`
-    display: flex;
-    align-items: center;
-    padding: 10px;
-    position: fixed;
-    bottom: 0;
-    background-color: white;
-    z-index: 100;
-    width: 100%;
-`;
-
-const Header = styled.div`
-    position: sticky;
-    background-color: white;
-    z-index: 100;
-    top: 0;
-    display: flex;
-    padding: 11px;
-    height: 80px;
-    align-items: center;
-    border-bottom: 1px solid whitesmoke;
-`;
-const HeaderInformation = styled.div`
-    margin-left: 15px;
-    flex: 1;
-
-    > h3 {
-        margin-bottom: 3px;
-    }
-
-    > p {
-        font-size: 14px;
-        color: gray;
-    }
-`;
-const EndOfMessage = styled.div`
-    margin-bottom: 50px;
-`;
-const HeaderIcons = styled.div``;
-const MessageContainer = styled.div`
-    padding: 20px 10px 40px 30px;
-    background-color: #ddebeb;
-    min-height: 90vh;
-    
-`;

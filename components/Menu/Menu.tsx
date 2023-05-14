@@ -1,6 +1,4 @@
-import { Avatar } from "@mui/material";
 import ChatIcon from '@mui/icons-material/Chat';
-import styled from "styled-components";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@/firebase";
 import React, { useEffect, useState } from "react";
@@ -9,6 +7,7 @@ import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import PersonSearchIcon from '@mui/icons-material/PersonSearch';
+import { AvatarButton, ButtonCustom, ButtonCustomActive, Container, LogoutBtn, UserAvatar } from "./MenuStyled";
 
 const initialState = {
     activedChatBtn: false,
@@ -140,57 +139,3 @@ export default function Menu({ active }: any) {
     )
 }
 
-const Container = styled.div`
-    display: flex;
-    flex-direction: column;
-    width: 70px;
-    align-items: center;
-    padding: 20px;
-    background-color: #0DA3BA;
-    height: 100%;
-`;
-
-const AvatarButton = styled.button`
-    border: none;
-    background: #0DA3BA;
-    margin-bottom: 2px;
-    padding: 4px 0;
-`;
-
-const ButtonCustom = styled.button`
-    width: 70px;
-    padding-top: 15px;
-    padding-bottom: 20px;
-    border: none;
-    cursor: pointer;
-    height: 60px;
-    color: white;
-    background: #0DA3BA;
-    :hover {
-        opacity: 0.7;
-    }
-`;
-
-const ButtonCustomActive = styled.button`
-    width: 70px;
-    padding-top: 15px;
-    padding-bottom: 20px;
-    border: none;
-    cursor: pointer;
-    height: 60px;
-    color: rgb(4, 110, 148);
-    background: rgb(182, 236, 255);
-`;
-
-const UserAvatar = styled(Avatar)`
-    cursor: pointer;
-    width: 50px;
-    height: 50px;
-    :hover {
-        opacity: 0.5;
-    }
-`;
-
-const LogoutBtn = styled(ButtonCustom)`
-    margin-top: auto;
-`;

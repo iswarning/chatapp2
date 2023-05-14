@@ -38,8 +38,8 @@ export default function FriendRequest({senderEmail, recipientEmail}: any) {
                     <Typography gutterBottom variant="h5" component="div">
                     {userInfo?.fullName ?? 'Albert Einstein'}
                     </Typography>
-                    <SendMessageBtn onClick={onAccept}>Chấp nhận</SendMessageBtn>
-                    <UnfriendBtn onClick={onCancel}>Từ chối</UnfriendBtn>
+                    <SendMessageBtn onClick={onAccept}>Accept</SendMessageBtn>
+                    <UnfriendBtn onClick={onCancel}>Cancel</UnfriendBtn>
                 </CardContentCustom>
             </Card>
         </Container>

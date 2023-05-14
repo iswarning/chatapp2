@@ -11,12 +11,18 @@ import deleteFriendRequest from "@/services/friend-requests/deleteFriendRequest"
 import deleteFriend from "@/services/friends/deleteFriend";
 import getFriendByEmails from "@/services/friends/getFriendByEmails";
 import { useEffect, useState } from "react";
+import getAllFriendOfUser from "@/services/friends/getAllFriendOfUser";
 
 export default function UserDetailScreen({userInfo, statusFriend}: any) {
 
     const [status, setStatus] = useState(statusFriend);
+    const [amountFriends, setAmountFriends] = useState(0);
 
     const [user] = useAuthState(auth);
+
+    useEffect(() => {
+        getListFriend();
+    },[])
 
     const onAddFriend = () => {
         createNewFriendRequest(user?.email!, String(userInfo?.email));
@@ -41,27 +47,34 @@ export default function UserDetailScreen({userInfo, statusFriend}: any) {
         }
     }
 
+    const getListFriend = async() => {
+        const f = await getAllFriendOfUser(userInfo?.email);
+        if(f.length > 0) {
+            setAmountFriends(f.length);
+        }
+    }
+
     const showStatusFriend = () => {
         switch(status) {
             case 'isStranger':
                 return <UserBtnGroup>
-                            <StatusFriendBtn onClick={onAddFriend}><PersonAddIcon />&nbsp; Thêm bạn bè</StatusFriendBtn>
+                            <StatusFriendBtn onClick={onAddFriend}><PersonAddIcon />&nbsp; Add Friend</StatusFriendBtn>
                             <SendMessageBtnUser><MessageIcon />&nbsp; Gửi tin nhắn</SendMessageBtnUser>
                         </UserBtnGroup> 
             case 'isFriendRequest':
                 return <UserBtnGroup>
-                            <SendMessageBtnUser onClick={onCancelFriendRequest}><BlockIcon />&nbsp; Hủy yêu cầu</SendMessageBtnUser>
+                            <SendMessageBtnUser onClick={onCancelFriendRequest}><BlockIcon />&nbsp; Cancel Request</SendMessageBtnUser>
                             <StatusFriendBtn><MessageIcon />&nbsp; Gửi tin nhắn</StatusFriendBtn>
                         </UserBtnGroup> 
             case 'isFriend':
                 return <UserBtnGroup>
-                            <SendMessageBtnUser onClick={onUnFriend}><HowToRegIcon />&nbsp; Bạn bè</SendMessageBtnUser>
-                            <StatusFriendBtn><MessageIcon />&nbsp; Gửi tin nhắn</StatusFriendBtn>
+                            <SendMessageBtnUser onClick={onUnFriend}><HowToRegIcon />&nbsp; Friend</SendMessageBtnUser>
+                            <StatusFriendBtn><MessageIcon />&nbsp; Send Message</StatusFriendBtn>
                         </UserBtnGroup>
             case 'isPendingAccept':
                 return <UserBtnGroup>
                             <SendMessageBtnUser disabled>Pending Accept...</SendMessageBtnUser>
-                            <StatusFriendBtn><MessageIcon />&nbsp; Gửi tin nhắn</StatusFriendBtn>
+                            <StatusFriendBtn><MessageIcon />&nbsp; Send Message</StatusFriendBtn>
                         </UserBtnGroup>
                 
         }
@@ -75,7 +88,7 @@ export default function UserDetailScreen({userInfo, statusFriend}: any) {
                     <UserAvatar src={userInfo?.photoURL ?? '/images/avatar-default.jpg'} />
                     <UserInfo>
                         <TextName>{ userInfo?.fullName ?? 'Albert Einstein'}</TextName>
-                        <TextFriend>100 Bạn bè</TextFriend>
+                        <TextFriend>{amountFriends} Friend</TextFriend>
                     </UserInfo>
                       
                 </UserProfile>

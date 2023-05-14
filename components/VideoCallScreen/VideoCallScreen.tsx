@@ -123,13 +123,7 @@ export default function VideoCallScreen() {
                     }
                     <StatusCalling>
                         {
-                            statusVideo === 'Calling' ? 'Đang gọi' : null
-                        }
-                        {
-                            statusVideo === 'Incoming Call' ? 'Cuộc gọi đến' : null
-                        }
-                        {
-                            statusVideo === 'Called' ? '00.00' : null
+                            statusVideo === 'Called' ? '00.00' : statusVideo
                         }
                     </StatusCalling>
                     {

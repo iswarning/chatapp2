@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import Menu from "../Menu";
+import Menu from "../Menu/Menu";
 import { Container, FixedMenu, ItemContainer, IconsContainer, MainContent, MenuContainer, SidebarContainer, TextItem, IconsContainerActive, ItemContainerActive } from "./SidebarContactStyled";
 import FriendsListScreen from "../FriendsListScreen/FriendsListScreen";
 import GroupListScreen from "../GroupListScreen/GroupListScreen";
@@ -24,14 +24,14 @@ export default function SidebarContact() {
                             <IconsContainerActive>
                                 <PersonAddIcon />
                             </IconsContainerActive>
-                            <TextItem>&nbsp; Lời mời kết bạn</TextItem>
+                            <TextItem>&nbsp; Request Add Friend</TextItem>
                         </ItemContainerActive>
                     : 
                         <ItemContainer onClick={() => setSelectedContact('Friend Requests')}>
                             <IconsContainer>
                                 <PersonAddIcon />
                             </IconsContainer>
-                            <TextItem>&nbsp; Lời mời kết bạn</TextItem>
+                            <TextItem>&nbsp; Request Add Friend</TextItem>
                         </ItemContainer>
                     }
                     { selectedContact === 'All friends' ? 
@@ -39,14 +39,14 @@ export default function SidebarContact() {
                             <IconsContainerActive>
                                 <ListIcon />
                             </IconsContainerActive>
-                            <TextItem>&nbsp; Bạn bè</TextItem>
+                            <TextItem>&nbsp; List friends</TextItem>
                         </ItemContainerActive>
                     : 
                         <ItemContainer onClick={() => setSelectedContact('All friends')}>
                             <IconsContainer>
                                 <ListIcon />
                             </IconsContainer>
-                            <TextItem>&nbsp; Bạn bè</TextItem>
+                            <TextItem>&nbsp; List friends</TextItem>
                         </ItemContainer>
                     }
                     { selectedContact === 'Groups' ? 
@@ -54,14 +54,14 @@ export default function SidebarContact() {
                             <IconsContainerActive>
                                 <GroupsIcon />
                             </IconsContainerActive>
-                            <TextItem>&nbsp; Nhóm chat</TextItem>
+                            <TextItem>&nbsp; List Group Chat</TextItem>
                         </ItemContainerActive>
                     : 
                         <ItemContainer onClick={() => setSelectedContact('Groups')}>
                             <IconsContainer>
                                 <GroupsIcon />
                             </IconsContainer>
-                            <TextItem>&nbsp; Nhóm chat</TextItem>
+                            <TextItem>&nbsp; List Group Chat</TextItem>
                         </ItemContainer>
                     }
                 </SidebarContainer>

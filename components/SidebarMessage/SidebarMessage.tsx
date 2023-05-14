@@ -3,7 +3,7 @@ import { auth } from '../../firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import GroupAddIcon from '@mui/icons-material/GroupAdd';
 import Chat from '../Chat';
-import Menu from '../Menu';
+import Menu from '../Menu/Menu';
 import { useEffect, useState } from 'react';
 import { 
     ChatContainer,
@@ -19,7 +19,8 @@ import getChatByEmail from '@/services/chats/getChatByEmail';
 import { IconButton } from '@mui/material';
 import CreateGroupScreen from '../CreateGroupScreen/CreateGroupScreen';
 import getMessagesByChatId from '@/services/messages/getMessagesByChatId';
-import ChatScreen from '../ChatScreen';
+import ChatScreen from '../ChatScreen/ChatScreen';
+import Loading from '../Loading';
 
 export default function SidebarMessage() {
 
@@ -29,8 +30,10 @@ export default function SidebarMessage() {
     const [isOpen, setIsOpen] = useState(false);
     const [messData, setMessData]: any = useState(null);
     const [chatInfo, setChatInfo]: any = useState({});
+    const [showSpinner, setShowSpinner] = useState(false);
 
     useEffect(() => {
+        setShowSpinner(true);
         getListChat();
     },[])
 
@@ -47,6 +50,7 @@ export default function SidebarMessage() {
     const getListChat = async() => {
         getChatByEmail(user?.email!).then((chats: any) => {
             setChatData(chats);
+            setShowSpinner(false);
         });
     }
 
@@ -56,6 +60,7 @@ export default function SidebarMessage() {
     }
 
     const showMessages = (chat: any) => {
+        setShowSpinner(true);
         setChatInfo(chat);
         getMessageData(chat.id);
     }
@@ -67,6 +72,7 @@ export default function SidebarMessage() {
         } else {
             setMessData([])
         }
+        setShowSpinner(false);
     }
 
     return (
@@ -78,13 +84,13 @@ export default function SidebarMessage() {
                 <Header>
                     <IconsContainer onClick={() => setIsOpen(true)}>
                         <IconButton>
-                            <GroupAddIcon titleAccess='Tạo nhóm chat'/>
+                            <GroupAddIcon titleAccess='Create Group Chat'/>
                         </IconButton>
                     </IconsContainer>
                 </Header>
                 <Search>
                     <SearchIcon />
-                    <SearchInput placeholder='Tìm kiếm tin nhắn' value={searchInput} onChange={handleSearch}/>
+                    <SearchInput placeholder='Search' value={searchInput} onChange={handleSearch}/>
                 </Search>
                 {
                     chatData?.length > 0 ? chatData.map((chat:any) => 
@@ -107,6 +113,7 @@ export default function SidebarMessage() {
             <ModalContainer isOpen={isOpen} onRequestClose={() => setIsOpen(false)}>
                 <CreateGroupScreen onClose={onClose}/>
             </ModalContainer>
+            <Loading isShow={showSpinner} />
         </Container>
     );
 }

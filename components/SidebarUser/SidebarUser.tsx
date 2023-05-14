@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Menu from "../Menu";
+import Menu from "../Menu/Menu";
 import SearchIcon from '@mui/icons-material/Search';
 import UserDetailScreen from "../UserDetailScreen/UserDetailScreen";
 import { Container, Header, MenuContainer, Search, SearchInput, SidebarContainer, TextEmail, UserAvatar, UserContainer, UserDetailContainer } from "./SidebarUserStyled";
@@ -46,7 +46,7 @@ export default function SidebarUser() {
                 </Header>
                 <Search>
                     <SearchIcon />
-                    <SearchInput placeholder='Nhập số điện thoại để tìm kiếm' value={searchInput} onChange={(e) => handleSearch(e.target.value)}/>
+                    <SearchInput placeholder='Enter phone number to search' value={searchInput} onChange={(e) => handleSearch(e.target.value)}/>
                 </Search>
                 { 
                     Object.keys(searchData).length > 0 && searchInput.length >= 3 ? 

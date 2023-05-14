@@ -111,7 +111,7 @@ export default function CreateGroupScreen({onClose}: any) {
                         <UserContainer key={mem?.id}>
                             <UserAvatar src={mem?.photoURL} />
                             <TextEmail>{mem?.email}</TextEmail>
-                            <BtnRemove titleAccess="Xoa" onClick={() => handleRemoveUser(mem)} style={{display: mem.id === user?.uid ? 'none': 'block'}}/>
+                            <BtnRemove titleAccess="Remove" onClick={() => handleRemoveUser(mem)} style={{display: mem.id === user?.uid ? 'none': 'block'}}/>
                         </UserContainer>
                     ) : null
                 }    
