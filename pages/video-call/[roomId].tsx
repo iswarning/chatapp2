@@ -1,20 +1,23 @@
-import { Video, VideoGrid } from "@/components/VideoCallScreen/VideoCallScreenStyled";
+import { ActionBtn, ActionBtnActive, Video, VideoGrid } from "@/components/VideoCallScreen/VideoCallScreenStyled";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
+import styled from "styled-components";
+import VideoCameraFrontIcon from '@mui/icons-material/VideoCameraFront';
+import MicIcon from '@mui/icons-material/Mic';
 
 export default function VideoCall() {
 
     const router = useRouter();
+    const [showCam, setShowCam] = useState(false);
+    const [showMic, setShowMic] = useState(false);
 
     import('peerjs').then(({ default: Peer }) => {
         const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
         const videoGrid = document.getElementById('video-grid');
         const peers: any = {};
         const myPeer = new Peer(undefined!, {
-            host: '/',
-            path: '/peerjs',
-            port: 443
+            host: '/'
         });
         const myVideo = document.createElement('video');
         myVideo.style.width = '100%';
@@ -40,9 +43,9 @@ export default function VideoCall() {
                 })
             })
 
-            // socket.on('user-connected', userId => {
-            //     connectToNewUser(userId, stream);
-            // })
+            socket.on('user-connected', userId => {
+                connectToNewUser(userId, stream);
+            })
         })
 
         socket.on('user-disconnected', userId => {
@@ -77,9 +80,40 @@ export default function VideoCall() {
         }
     });
 
+    const handleShowCam = () => {
+
+    }
+
+    const handleShowMic = () => {
+        
+    }
+
     return (
-        <VideoGrid id='video-grid'>
-        </VideoGrid>
+        <>
+            <VideoGrid id='video-grid'>
+            </VideoGrid>
+            {
+                showCam ? <ActionBtnActive onClick={handleShowCam}>
+                    <VideoCameraFrontIcon fontSize="large" />
+                </ActionBtnActive> : <ActionBtn onClick={handleShowCam}>
+                    <VideoCameraFrontIcon fontSize="large" />
+                </ActionBtn>
+            }
+            {
+                showMic ? <ActionBtnActive onClick={handleShowMic}>
+                    <MicIcon fontSize="large" />
+                </ActionBtnActive> : <ActionBtn onClick={handleShowMic}>
+                    <MicIcon fontSize="large" />
+                </ActionBtn>
+            }
+        </>
     )
     
 }
+
+const ShowCamBtn = styled.button`
+    border-radius: 50%;
+    border: none;
+    padding: 15px;
+    color: white;
+`

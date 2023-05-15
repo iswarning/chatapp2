@@ -23,7 +23,7 @@ export default function VideoCallScreen() {
 
     useEffect(() => {
         getVideoStream();
-    },[showCam])
+    },[])
 
     const handleAcceptCall = () => {
     }
@@ -36,7 +36,7 @@ export default function VideoCallScreen() {
             const peers: any = {};
 
             const myPeer = new Peer(undefined!, {
-                host: process.env.NEXT_PUBLIC_SOCKET_IO_URL,
+                host: '/',
             });
 
             const myVideo = document.createElement('video');
@@ -99,6 +99,8 @@ export default function VideoCallScreen() {
                 videoGrid?.append(video);
             }
         })
+
+        console.log(111)
     }
 
     const handleShowCam = () => {

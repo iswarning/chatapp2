@@ -33,7 +33,6 @@ export default function SidebarMessage() {
     const [showSpinner, setShowSpinner] = useState(false);
 
     useEffect(() => {
-        setShowSpinner(true);
         getListChat();
     },[])
 
@@ -50,7 +49,6 @@ export default function SidebarMessage() {
     const getListChat = async() => {
         getChatByEmail(user?.email!).then((chats: any) => {
             setChatData(chats);
-            setShowSpinner(false);
         });
     }
 
@@ -60,7 +58,6 @@ export default function SidebarMessage() {
     }
 
     const showMessages = (chat: any) => {
-        setShowSpinner(true);
         setChatInfo(chat);
         getMessageData(chat.id);
     }

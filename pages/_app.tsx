@@ -9,16 +9,17 @@ import getNotificationMessage from '@/utils/getNotificationMessage';
 import { auth } from '@/firebase';
 
 export default function App({ Component, pageProps }: AppProps) {
-  const [user, loading] = useAuthState(auth);
+  const [user] = useAuthState(auth);
 
   useEffect(() => {
     if(user) {
       createNewUser(user);
-      // getNotificationMessage(user);
+      getNotificationMessage(user);
     }
   },[user]);
 
   if(!user) return <Login/>
+
   
   return <Component {...pageProps} />
 }

@@ -2,7 +2,7 @@ import { io } from "socket.io-client";
 
 export default function getNotificationMessage(userLoggedIn: any) {
     const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
-      socket.on('chat message', msg => {
+      socket.on('recieve-message', msg => {
         const data = JSON.parse(msg);
         if(data.recipient.includes(userLoggedIn?.email)) {
             const options: any = {
