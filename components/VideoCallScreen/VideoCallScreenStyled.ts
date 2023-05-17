@@ -51,7 +51,7 @@ export const BtnAcceptCall = styled.button`
 `;
 
 export const StatusCalling = styled.h3`
-    margin-top: 20px;
+    margin-top: 100px;
     text-align: center;
     color: white;
 `;
@@ -92,40 +92,7 @@ export const RecipientName = styled.h2`
     color: white;
 `;
 
-export const Pulse = styled.div`
-    height: 100px;
-    width: 100px;
-    background-color: orange;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-
-    &:before {
-        content: "";
-        position: absolute;
-        border: 1px solid orange;
-        width: calc(100% + 40px);
-        height: calc(100% + 40px);
-        border-radius: 50%;
-        animation: pulse 1s linear infinite
-    }
-
-    &:after {
-        content: "";
-        position: absolute;
-        border: 1px solid ORANGE;
-        width: calc(100% + 40px);
-        height: calc(100% + 40px);
-        border-radius: 50%;
-        animation: pulse 1s linear infinite;
-        animation-delay: 0.3s
-    }
-
-`;
-
-const PulseAnimation = keyframes`
+const pulse = keyframes`
     0% {
         transform: scale(0.5);
         opacity: 0
@@ -142,10 +109,41 @@ const PulseAnimation = keyframes`
     }
 `
 
-export const ContentCenter = styled.div`
-    height: 100vh;
+export const Pulse = styled.div`
+    height: 200px;
+    width: 200px;
+    background-color: orange;
+    border-radius: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #eee
+    position: relative;
+
+    &:before {
+        content: "";
+        position: absolute;
+        border: 1px solid yellow;
+        width: calc(100% + 40px);
+        height: calc(100% + 40px);
+        border-radius: 50%;
+        animation: ${pulse} 1s linear infinite
+    }
+
+    &:after {
+        content: "";
+        position: absolute;
+        border: 1px solid yellow;
+        width: calc(100% + 40px);
+        height: calc(100% + 40px);
+        border-radius: 50%;
+        animation: ${pulse} 1s linear infinite;
+        animation-delay: 0.3s
+    }
+
+`;
+
+export const ContentCenter = styled.div`
+    display: flex;
+    justify-content: center;
+    align-items: center;
 `

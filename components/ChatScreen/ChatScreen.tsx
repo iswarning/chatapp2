@@ -30,6 +30,7 @@ export default function ChatScreen({ chatId, chat, messages, onSend}: any) {
     const [isOpen, setIsOpen] = useState(false);
     const [statusSend, setStatusSend] = useState('');
     const router = useRouter();
+    const socketRef: any = useRef();
 
     useEffect(() => {
         getRecipientUser();
@@ -68,11 +69,13 @@ export default function ChatScreen({ chatId, chat, messages, onSend}: any) {
     }
 
     const sendMessage = (e: any) => {
+        socketRef.current = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
+        socketRef.current.emit('sendDataClient', "hello wolrd");
         e.preventDefault();
         setStatusSend('sending');
         createNewMessage(chatId, input, user?.email!, user?.photoURL!).then(() => {
 
-            sendNotification();
+            // sendNotification();
         
             setInput('');
 
@@ -87,14 +90,14 @@ export default function ChatScreen({ chatId, chat, messages, onSend}: any) {
     }
 
     const sendNotification = () => {
-        const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
+        socketRef.current = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
         let listRecipientNotify = chat.users.filter((email: any) => email !== user?.email)
         let dataNofity = {
             message: input,
             recipient: chat.isGroup ? listRecipientNotify : getRecipientEmail(chat.users, user),
             name: chat.isGroup ? chat.name : user?.displayName
         }
-        socket.emit('message', JSON.stringify(dataNofity));
+        socketRef.current.emit('message', JSON.stringify(dataNofity));
     }
 
     const handleVideoCall = () => {

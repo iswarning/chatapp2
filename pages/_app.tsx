@@ -12,11 +12,12 @@ import { io } from 'socket.io-client';
 
 export default function App({ Component, pageProps }: AppProps) {
   const [user, loading] = useAuthState(auth);
+  const socketRef: any = useRef();
 
   useEffect(() => {
     if(user) {
       createNewUser(user);
-      getNotificationMessage(user);
+      // getNotificationMessage(user);
       
     }
   },[user]);

@@ -46,7 +46,7 @@ export default function VideoCallScreen({statusCall,photoURL,recipientName}: any
             myVideo.style.paddingLeft = 'auto';
             myVideo.style.paddingRight = 'auto';
             myVideo.muted = true;
-
+            
             navigator.mediaDevices.getUserMedia({
                 video: showCam,
                 audio: showMic
@@ -64,6 +64,7 @@ export default function VideoCallScreen({statusCall,photoURL,recipientName}: any
                     })
                 })
                 socket.on('user-connected', userId => {
+                    
                     connectToNewUser(userId, stream);
                 })
             })
@@ -99,6 +100,7 @@ export default function VideoCallScreen({statusCall,photoURL,recipientName}: any
                 videoGrid?.append(video);
             }
         })
+
     }
 
     const handleShowCam = () => {
@@ -113,21 +115,23 @@ export default function VideoCallScreen({statusCall,photoURL,recipientName}: any
             <VideoCalling>
                 <UserContainer>
 
-                
-                    {
+                    <ContentCenter>
+                        <Pulse> <UserAvatar src={photoURL}/> </Pulse>
+                    </ContentCenter>
+                    {/* {
                         showCam ?  <VideoGrid id='video-grid'>
                             
                         </VideoGrid>
-                        : <>
+                        : 
                             <ContentCenter>
                                 <Pulse> <UserAvatar src={photoURL}/> </Pulse>
                             </ContentCenter>
-                        </>
-                    }
+                        
+                    } */}
                     
                     <StatusCalling>
                         {
-                            statusVideo === 'Called' ? '00.00' : <><div className="spinner-grow text-muted" style={{marginTop: '50px',width: '50px',height: '50px'}}></div></> 
+                            statusVideo === 'Called' ? '00.00' : statusVideo
                         }
                     </StatusCalling>
                     {
@@ -155,7 +159,7 @@ export default function VideoCallScreen({statusCall,photoURL,recipientName}: any
                             </BtnRejectCall>
                             <BtnAcceptCall onClick={handleAcceptCall}>
                                 <CallIcon fontSize="large"/>
-                            </BtnAcceptCall></> : <BtnRejectCall>
+                            </BtnAcceptCall></> : <BtnRejectCall title="Cancel">
                                 <CallEndIcon fontSize="large"/>
                             </BtnRejectCall>
                         }
