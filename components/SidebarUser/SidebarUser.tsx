@@ -7,6 +7,7 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@/firebase";
 import getStatusFriend from "@/utils/getStatusFriend";
 import getUserByPhoneNumber from "@/services/users/getUserByPhoneNumber";
+import { useRouter } from "next/router";
 
 export default function SidebarUser() {
     const [user] = useAuthState(auth);
@@ -14,7 +15,8 @@ export default function SidebarUser() {
     const [searchData, setSearchData]: any = useState({});
     const [userInfo, setUserInfo]: any = useState({});
     const [statusFriend, setStatusFriend]: any = useState('');
-
+    const router = useRouter();
+    
     const handleSearch = (value :any) => {
         setSearchData({});
         setSearchInput(value);
@@ -34,6 +36,8 @@ export default function SidebarUser() {
             setUserInfo(userDetail?.data());
         }
     }
+
+    
 
     return (
         <Container>

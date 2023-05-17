@@ -71,7 +71,9 @@ export const UserAvatar = styled(Avatar)`
     border: 5px solid #fff;
 `;
 
-export const TextName = styled.h3`
+export const TextName = styled.div`
+    font-size: 25px;
+    font-weight: 600;
 `;
 
 export const UpdateButton = styled.button`
@@ -105,6 +107,7 @@ export const UserInfo = styled.div`
     margin-top: auto;
     margin-bottom: auto;
     flex-direction: column;
+    margin-left: 10px;
 `;
 
 export const UserBtnGroup = styled.div`
@@ -115,7 +118,7 @@ export const UserBtnGroup = styled.div`
 `;
 
 export const StatusFriendBtn = styled(SendMessageBtn)`
-    width: 150px;
+    width: 170px;
     margin: 10px 0 10px 10px;
     padding-top: auto;
     padding-bottom: auto;
@@ -124,7 +127,7 @@ export const StatusFriendBtn = styled(SendMessageBtn)`
 
 export const SendMessageBtnUser = styled(CancelBtn)`
     margin: 10px 0 10px 10px;
-    width: 150px;
+    width: 170px;
 `;
 
 

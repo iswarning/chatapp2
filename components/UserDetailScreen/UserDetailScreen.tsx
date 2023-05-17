@@ -12,8 +12,9 @@ import deleteFriend from "@/services/friends/deleteFriend";
 import getFriendByEmails from "@/services/friends/getFriendByEmails";
 import { useEffect, useState } from "react";
 import getAllFriendOfUser from "@/services/friends/getAllFriendOfUser";
+import { withRouter } from "next/router";
 
-export default function UserDetailScreen({userInfo, statusFriend}: any) {
+function UserDetailScreen({userInfo, statusFriend}: any) {
 
     const [status, setStatus] = useState(statusFriend);
     const [amountFriends, setAmountFriends] = useState(0);
@@ -128,4 +129,6 @@ export default function UserDetailScreen({userInfo, statusFriend}: any) {
             </InformationContainer>
         </Container>
     )
+
 }
+export default UserDetailScreen

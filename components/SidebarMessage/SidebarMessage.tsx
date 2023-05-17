@@ -30,7 +30,6 @@ export default function SidebarMessage() {
     const [isOpen, setIsOpen] = useState(false);
     const [messData, setMessData]: any = useState(null);
     const [chatInfo, setChatInfo]: any = useState({});
-    const [showSpinner, setShowSpinner] = useState(false);
 
     useEffect(() => {
         getListChat();
@@ -69,7 +68,6 @@ export default function SidebarMessage() {
         } else {
             setMessData([])
         }
-        setShowSpinner(false);
     }
 
     return (
@@ -110,7 +108,6 @@ export default function SidebarMessage() {
             <ModalContainer isOpen={isOpen} onRequestClose={() => setIsOpen(false)}>
                 <CreateGroupScreen onClose={onClose}/>
             </ModalContainer>
-            <Loading isShow={showSpinner} />
         </Container>
     );
 }

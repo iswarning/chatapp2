@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { ActionBtn, ActionBtnActive, ActionGroup, BtnAcceptCall, BtnContainer, BtnRejectCall, StatusCalling, UserAvatar, UserContainer, Video, VideoCalling, VideoGrid } from "./VideoCallScreenStyled";
+import { ActionBtn, ActionBtnActive, ActionGroup, BtnAcceptCall, BtnContainer, BtnRejectCall, ContentCenter, Pulse, RecipientName, StatusCalling, UserAvatar, UserContainer, Video, VideoCalling, VideoGrid } from "./VideoCallScreenStyled";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@/firebase";
 import CallIcon from '@mui/icons-material/Call';
@@ -10,9 +10,9 @@ import { useRouter } from "next/router";
 import { v4 as uuidv4 } from 'uuid';
 import { io } from "socket.io-client";
 
-export default function VideoCallScreen() {
+export default function VideoCallScreen({statusCall,photoURL,recipientName}: any) {
 
-    const [statusVideo, setStatusVideo] = useState('Called');
+    const [statusVideo, setStatusVideo] = useState(statusCall);
 
     const [user] = useAuthState(auth);
     
@@ -99,8 +99,6 @@ export default function VideoCallScreen() {
                 videoGrid?.append(video);
             }
         })
-
-        console.log(111)
     }
 
     const handleShowCam = () => {
@@ -114,18 +112,22 @@ export default function VideoCallScreen() {
     return (
             <VideoCalling>
                 <UserContainer>
+
+                
                     {
                         showCam ?  <VideoGrid id='video-grid'>
                             
                         </VideoGrid>
                         : <>
-                            <UserAvatar src={user?.photoURL!}/>
-                            
+                            <ContentCenter>
+                                <Pulse> <UserAvatar src={photoURL}/> </Pulse>
+                            </ContentCenter>
                         </>
                     }
+                    
                     <StatusCalling>
                         {
-                            statusVideo === 'Called' ? '00.00' : statusVideo
+                            statusVideo === 'Called' ? '00.00' : <><div className="spinner-grow text-muted" style={{marginTop: '50px',width: '50px',height: '50px'}}></div></> 
                         }
                     </StatusCalling>
                     {

@@ -13,14 +13,19 @@ function FriendRequestsListScreen() {
     const [data, setData]: any = useState([]);
 
     useEffect(() => {
-        getFriendRequestsRecipientByEmail(user?.email!).then((res) => setData(res));
+        getFriendRequest()
     },[])
+
+    const getFriendRequest = () => {
+        getFriendRequestsRecipientByEmail(user?.email!)
+        .then((res) => setData(res));
+    }
 
     return (
         <Row>
             { data.length > 0 ? data.map((friendRequest: any) => 
                 <Col key={friendRequest.id}>
-                    <FriendRequest senderEmail={friendRequest.data().senderEmail} recipientEmail={friendRequest.data().recipientEmail} />
+                    <FriendRequest senderEmail={friendRequest.data().senderEmail} recipientEmail={friendRequest.data().recipientEmail} onGetFriendRequest={getFriendRequest} />
                 </Col>
             ) : null}
         </Row>

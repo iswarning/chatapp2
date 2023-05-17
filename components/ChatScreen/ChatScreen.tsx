@@ -17,6 +17,9 @@ import VideoCallScreen from "../VideoCallScreen/VideoCallScreen";
 import CheckIcon from '@mui/icons-material/Check';
 import { BtnSend, Container, Emoji, EmojiContainer, EmojiElement, EndOfMessage, Header, HeaderIcons, HeaderInformation, Input, InputContainer, MessageContainer, StatusSendContainer, TextEmail, TextStatusSend, UserAvatar, VideoCallContainer } from "./ChatScreenStyled";
 import { useRouter } from "next/router";
+import Picker from "@emoji-mart/react";
+import data from '@emoji-mart/data'
+import popupCenter from "@/utils/popupCenter";
 
 export default function ChatScreen({ chatId, chat, messages, onSend}: any) {
     const [user] = useAuthState(auth);
@@ -24,14 +27,6 @@ export default function ChatScreen({ chatId, chat, messages, onSend}: any) {
     const endOfMessageRef: any = useRef(null);
     const [recipientUser, setRecipientUser]: any = useState({})
     const [showEmoji, setShowEmoji] = useState(false);
-    const emojiData = [
-        '&#128513;',
-        '&#128514;',
-        '&#128515;',
-        '&#128516;',
-        '&#128517;',
-        '&#128544;',
-    ];
     const [isOpen, setIsOpen] = useState(false);
     const [statusSend, setStatusSend] = useState('');
     const router = useRouter();
@@ -102,41 +97,20 @@ export default function ChatScreen({ chatId, chat, messages, onSend}: any) {
         socket.emit('message', JSON.stringify(dataNofity));
     }
 
-    const setEmojiToInput = (e: string) => {
-        setInput(input + e);
-        setShowEmoji(false);
-    }
-
     const handleVideoCall = () => {
         // setIsOpen(!isOpen);
         // window.open(router.basePath + "/video-call/" + chatId , "_blank", "width:200,height:500,top:0,left:40")
         popupCenter({url: router.basePath + "/video-call/" + chatId , title: '_blank', w: 400, h: 900});  
     }
 
-    const popupCenter = ({url, title, w, h}) => {
-        // Fixes dual-screen position                             Most browsers      Firefox
-        const dualScreenLeft = window.screenLeft !==  undefined ? window.screenLeft : window.screenX;
-        const dualScreenTop = window.screenTop !==  undefined   ? window.screenTop  : window.screenY;
-    
-        const width = window.innerWidth ? window.innerWidth : document.documentElement.clientWidth ? document.documentElement.clientWidth : screen.width;
-        const height = window.innerHeight ? window.innerHeight : document.documentElement.clientHeight ? document.documentElement.clientHeight : screen.height;
-    
-        const systemZoom = width / window.screen.availWidth;
-        const left = (width - w) / 2 / systemZoom + dualScreenLeft
-        const top = (height - h) / 2 / systemZoom + dualScreenTop
-        const newWindow = window.open(url, title, 
-          `
-          scrollbars=yes,
-          width=${w / systemZoom}, 
-          height=${h / systemZoom}, 
-          top=${top}, 
-          left=${left},
-          resizeable=no
-          `
-        )
-    
-        if (window.focus) newWindow.focus();
-    }
+    const addEmoji = (e: any) => {
+        let sym = e.unified.split("-");
+        let codesArray: any = [];
+        sym.forEach((el: any) => codesArray.push("0x" + el));
+        let emoji = String.fromCodePoint(...codesArray);
+        setInput(input + emoji);
+        setShowEmoji(false);
+    };
 
     return (
         <Container>
@@ -153,7 +127,7 @@ export default function ChatScreen({ chatId, chat, messages, onSend}: any) {
                     </p>
                 </HeaderInformation>
                 <HeaderIcons>
-                    <IconButton onClick={handleVideoCall}>
+                    <IconButton onClick={() => setIsOpen(!isOpen)}>
                         <CallIcon titleAccess="Call video"/>
                     </IconButton>
                     <IconButton>
@@ -176,16 +150,11 @@ export default function ChatScreen({ chatId, chat, messages, onSend}: any) {
             <InputContainer>
                 {
                     showEmoji ? <EmojiContainer>
-                        {emojiData.length > 0 ? emojiData.map((e) => 
-                            <EmojiElement key={e} onClick={() => setEmojiToInput(e)}>
-                                <Emoji dangerouslySetInnerHTML={{__html: e}} />
-                            </EmojiElement>
-                        )    
-                        : null}
+                        <Picker data={data} onEmojiSelect={addEmoji} />  
                     </EmojiContainer> : null
                 }
-                <IconButton onClick={() => setShowEmoji(!showEmoji)}>
-                    <InsertEmoticonIcon />
+                <IconButton onClick={() => setShowEmoji(!showEmoji)} >
+                    <InsertEmoticonIcon style={{color: showEmoji ? '#0DA3BA' : ''}}/>
                 </IconButton>
                 <IconButton>
                     <AttachFileIcon />
@@ -198,9 +167,8 @@ export default function ChatScreen({ chatId, chat, messages, onSend}: any) {
             </InputContainer>
 
             <VideoCallContainer isOpen={isOpen} onRequestClose={() => setIsOpen(false)}>
-                <VideoCallScreen />
+                <VideoCallScreen statusCall={'Calling'} photoURL={chat.isGroup ? '' : recipientUser.photoURL} recipientName={chat.isGroup ? '' : recipientUser.fullName} />
             </VideoCallContainer>
-            
         </Container>
     )
 }

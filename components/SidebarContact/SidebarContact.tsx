@@ -7,10 +7,15 @@ import GroupsIcon from '@mui/icons-material/Groups';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import ListIcon from '@mui/icons-material/List';
 import FriendRequestsListScreen from "../FriendRequestsListScreen/FriendRequestsListScreen";
+import { io } from "socket.io-client";
+import { useRouter } from "next/router";
+
+const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!)
 
 export default function SidebarContact() {
 
     const [selectedContact, setSelectedContact] = useState('');
+    const router = useRouter();
 
     return (
         <Container>
@@ -20,7 +25,7 @@ export default function SidebarContact() {
                 </MenuContainer>
                 <SidebarContainer>
                     { selectedContact === 'Friend Requests' ? 
-                        <ItemContainerActive onClick={() => setSelectedContact('Friend Requests')}>
+                        <ItemContainerActive >
                             <IconsContainerActive>
                                 <PersonAddIcon />
                             </IconsContainerActive>
@@ -35,7 +40,7 @@ export default function SidebarContact() {
                         </ItemContainer>
                     }
                     { selectedContact === 'All friends' ? 
-                        <ItemContainerActive onClick={() => setSelectedContact('All friends')}>
+                        <ItemContainerActive >
                             <IconsContainerActive>
                                 <ListIcon />
                             </IconsContainerActive>
@@ -50,7 +55,7 @@ export default function SidebarContact() {
                         </ItemContainer>
                     }
                     { selectedContact === 'Groups' ? 
-                        <ItemContainerActive onClick={() => setSelectedContact('Groups')}>
+                        <ItemContainerActive>
                             <IconsContainerActive>
                                 <GroupsIcon />
                             </IconsContainerActive>

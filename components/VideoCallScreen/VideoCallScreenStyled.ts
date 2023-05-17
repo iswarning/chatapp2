@@ -1,5 +1,5 @@
 import { Avatar, IconButton } from "@mui/material";
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 
 export const VideoCalling = styled.div``;
 
@@ -50,8 +50,8 @@ export const BtnAcceptCall = styled.button`
     color: white;
 `;
 
-export const StatusCalling = styled.h2`
-    margin-top: 50px;
+export const StatusCalling = styled.h3`
+    margin-top: 20px;
     text-align: center;
     color: white;
 `;
@@ -85,3 +85,67 @@ export const ActionGroup = styled.div`
     display: flex;
     margin: 0px 20px;
 `;
+
+export const RecipientName = styled.h2`
+    margin-top: 20px;
+    text-align: center;
+    color: white;
+`;
+
+export const Pulse = styled.div`
+    height: 100px;
+    width: 100px;
+    background-color: orange;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+
+    &:before {
+        content: "";
+        position: absolute;
+        border: 1px solid orange;
+        width: calc(100% + 40px);
+        height: calc(100% + 40px);
+        border-radius: 50%;
+        animation: pulse 1s linear infinite
+    }
+
+    &:after {
+        content: "";
+        position: absolute;
+        border: 1px solid ORANGE;
+        width: calc(100% + 40px);
+        height: calc(100% + 40px);
+        border-radius: 50%;
+        animation: pulse 1s linear infinite;
+        animation-delay: 0.3s
+    }
+
+`;
+
+const PulseAnimation = keyframes`
+    0% {
+        transform: scale(0.5);
+        opacity: 0
+    }
+
+    50% {
+        transform: scale(1);
+        opacity: 1
+    }
+
+    100% {
+        transform: scale(1.3);
+        opacity: 0
+    }
+`
+
+export const ContentCenter = styled.div`
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #eee
+`

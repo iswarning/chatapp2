@@ -14,7 +14,12 @@ function Login() {
                 <title>Login</title>
             </Head>
             <LoginContainer>
-                <Button variant="outlined" color="success" onClick={signIn}>Sign In with Google Account</Button>
+                <center className="d-flex flex-column">
+                    <div>
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/WhatsApp.svg/768px-WhatsApp.svg.png" alt="" style={{ marginBottom: '50px' }} height={200} width={200} />
+                    </div>
+                    <Button variant="outlined" color="success" onClick={signIn}>Sign In with Google Account</Button>
+                </center>
             </LoginContainer>
         </Container>
     )

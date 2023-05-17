@@ -6,7 +6,7 @@ import createFriend from "@/services/friends/createFriend";
 import deleteFriendRequest from "@/services/friend-requests/deleteFriendRequest";
 import getFriendRequestsByEmail from "@/services/friend-requests/getFriendRequestsByEmail";
 
-export default function FriendRequest({senderEmail, recipientEmail}: any) {
+export default function FriendRequest({senderEmail, recipientEmail, onGetFriendRequest}: any) {
 
     const [userInfo, setUserInfo]: any = useState({});
 
@@ -15,13 +15,15 @@ export default function FriendRequest({senderEmail, recipientEmail}: any) {
     },[]);
 
     const onAccept = () => {
-        createFriend(senderEmail, recipientEmail);
+        createFriend(senderEmail, recipientEmail)
         onCancel();
+        onGetFriendRequest();
     }
 
     const onCancel = () => {
         getFriendRequestsByEmail(senderEmail, recipientEmail).then((friendRequest: any) => {
             deleteFriendRequest(friendRequest.id);
+            onGetFriendRequest();
         });
     }
 

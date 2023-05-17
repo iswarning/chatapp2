@@ -28,13 +28,13 @@ export const EmojiContainer = styled.div.attrs(() => ({
     className: ''
 }))`
     position: absolute;
-    width: 250px;
+    width: max-content;
     /* max-width: 250px; */
-    height: 150px;
+    height: max-content;
     background-color: white;
     border-radius: 10px;
-    padding: 10px;
-    margin-bottom: 250px;
+    /* padding: 10px; */
+    margin-bottom: 500px;
     margin-left: 5px;
     overflow: scroll;
     ::-webkit-scrollbar {
