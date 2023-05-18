@@ -15,25 +15,66 @@ import { InformationContainer,
     ValueContainer,
     Value} from '../UserDetailScreen/UserDetailScreenStyled';
 import { useEffect, useState } from 'react';
-import getFriendByEmails from '@/services/friends/getFriendByEmails';
 import getAllFriendOfUser from '@/services/friends/getAllFriendOfUser';
-import { AcceptBtn } from '../FriendRequest/FriendRequestStyled';
 import styled from 'styled-components';
+import ReactModal from 'react-modal';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { auth, db } from '@/firebase';
+import getUserById from '@/services/users/getUserById';
+import createNewUser from '@/services/users/createNewUser';
+import firebase from 'firebase';
 
 
-export default function Profile({userInfo}: any) {
+export default function Profile() {
 
     const [amountFriends, setAmountFriends] = useState(0);
+    const [isOpenModal, setIsOpenModal] = useState(false);
+    const [phoneNumber, setPhoneNumber] = useState('');
+    const [userInfo, setUserInfo]: any = useState({});
+    const [user] = useAuthState(auth);
 
     useEffect(() => {
         getListFriend();
+        getUserInfo();
     },[])
 
+    const getUserInfo = async() => {
+        const data = await getUserById(user?.uid!);
+        if(data) {
+            setUserInfo(data);
+        }
+    }
+
     const getListFriend = async() => {
-        const f = await getAllFriendOfUser(userInfo?.email);
+        const f = await getAllFriendOfUser(user?.email!);
         if(f.length > 0) {
             setAmountFriends(f.length);
         }
+    }
+
+    const updateInfo = (e: any) => {
+        e.preventDefault()
+        // let userExist: firebase.User = {
+        //     email: user?.email,
+        //     photoURL: user?.photoURL,
+        //     fullName: user?.displayName,
+        //     phoneNumber: phoneNumber
+        // }
+        db.collection("users").where("id", "==", user?.uid)
+        .get()
+        .then(function(querySnapshot) {
+            querySnapshot.forEach(function(doc) {
+                console.log(doc.id, " => ", doc.data());
+                doc.ref.update({ phoneNumber: phoneNumber })
+            });
+        }).catch(err => console.log(err))
+        getUserInfo();
+        setIsOpenModal(!isOpenModal);
+    }
+
+    const handleOpenModal = () => {
+        setIsOpenModal(!isOpenModal);
+        setPhoneNumber(userInfo.phoneNumber)
     }
 
     return (
@@ -43,8 +84,8 @@ export default function Profile({userInfo}: any) {
                 <UserProfile>
                     <UserAvatar src={userInfo?.photoURL ?? '/images/avatar-default.jpg'} />
                     <UserInfo>
-                        <TextName>{ userInfo?.fullName ?? 'Albert Einstein'}</TextName>
-                        <TextFriend>{amountFriends} friend</TextFriend>
+                        <TextName>{ userInfo?.displayName ?? 'Albert Einstein'}</TextName>
+                        <TextFriend>{amountFriends} Friends</TextFriend>
                     </UserInfo>
                 </UserProfile>
             </UserContainer>
@@ -99,11 +140,40 @@ export default function Profile({userInfo}: any) {
                         </TextGroup>
                     </TextGroupCol>
                 </TextGroupRow>
-                <UpdateButton><EditIcon fontSize='small'/>Edit Information</UpdateButton>
+                <UpdateButton onClick={handleOpenModal}><EditIcon fontSize='small'/> Edit Information</UpdateButton>
             </InformationContainer>
+            <ModalUpdateInfo isOpen={isOpenModal} onRequestClose={() => setIsOpenModal(false)}>
+                <h3>Update Information</h3>
+                <form role="form" method="POST" action="">
+                    <input type="hidden" name="_token" value=""/>
+                    <div className="form-group my-3">
+                        <label className="control-label">Phone Number</label>
+                        <div>
+                            <input type="number" className="form-control input-lg" name="email" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)}/>
+                        </div>
+                    </div>
+                    <div className="form-group my-3">
+                        <div>
+                            <button type="button" className="btn" style={{background: '#0DA3BA', color: 'white'}} onClick={(e) => updateInfo(e)}>Update</button>
+                        </div>
+                    </div>
+                </form>
+            </ModalUpdateInfo>
         </Container>
     )
 }
+
+const ModalUpdateInfo = styled(ReactModal)`
+border-radius: 10px;
+    border: 1px solid whitesmoke;
+    width: 400px;
+    height: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 100px;
+    background-color: white;
+    padding: 30px;
+`
 
 const UpdateButton = styled.button`
     color: white;

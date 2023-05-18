@@ -108,9 +108,9 @@ export default function ChatScreen({ chatId, chat, messages, onReloadMessages}: 
     }
 
     const handleVideoCall = () => {
-        // setIsOpen(!isOpen);
+        setIsOpen(!isOpen);
         // window.open(router.basePath + "/video-call/" + chatId , "_blank", "width:200,height:500,top:0,left:40")
-        popupCenter({url: router.basePath + "/video-call/" + chatId , title: '_blank', w: 400, h: 900});  
+        // popupCenter({url: router.basePath + "/video-call/" + chatId , title: '_blank', w: 400, h: 900});  
     }
 
     const addEmoji = (e: any) => {
@@ -150,8 +150,7 @@ export default function ChatScreen({ chatId, chat, messages, onReloadMessages}: 
                 {showMessage()}
                 {
                     statusSend.length > 0 ? <StatusSendContainer>
-                        <TextStatusSend>{statusSend === 'sending' ? 'Sending...' : ''}</TextStatusSend>
-                        <TextStatusSend>{statusSend === 'sent' ? 'Sent ' : ''} <CheckIcon fontSize="small"/></TextStatusSend>
+                        <TextStatusSend>{statusSend === 'sent' ? 'Sent' : ''} <CheckIcon fontSize="small"/></TextStatusSend>
                     </StatusSendContainer> : null
                 }
                 <EndOfMessage ref={endOfMessageRef} />
@@ -176,7 +175,7 @@ export default function ChatScreen({ chatId, chat, messages, onReloadMessages}: 
             </InputContainer>
 
             <VideoCallContainer isOpen={isOpen} onRequestClose={() => setIsOpen(false)}>
-                <VideoCallScreen statusCall={'Calling'} photoURL={chat.isGroup ? '' : recipientUser.photoURL} recipientName={chat.isGroup ? '' : recipientUser.fullName} />
+                <VideoCallScreen statusCall={'Incoming Call'} photoURL={chat.isGroup ? '' : recipientUser.photoURL} recipientName={chat.isGroup ? '' : recipientUser.fullName} />
             </VideoCallContainer>
         </Container>
     )

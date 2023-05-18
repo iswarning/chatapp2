@@ -27,24 +27,16 @@ export default function Message({user, message, showAvatar}: any) {
         <Container>
             {
                 user === userLoggedIn?.email ? <ContainerSender>
-                    <Sender style={{marginRight: showAvatar ? '65px' : ''}}>
+                    <Sender style={{marginRight: showAvatar ? '65px' : ''}} title={'Sent at ' +  formatDate(message.timestamp)}>
                         <MessageContent dangerouslySetInnerHTML={{__html: message.message}}></MessageContent>
-                        
-                        <Timestamp>
-                            {message.timestamp ? formatDate(message.timestamp) : '...'}
-                        </Timestamp>
                     </Sender>
                     { !showAvatar ? <UserAvatarSender src={userLoggedIn?.photoURL ?? ''} /> : null }
-                    
                 </ContainerSender> 
                 : 
                 <ContainerReciever>
                     { !showAvatar ? <UserAvatarReciever src={userInfo?.photoURL ?? ''} /> : null }
-                    <Reciever style={{marginLeft: showAvatar ? '65px' : ''}}>
+                    <Reciever style={{marginLeft: showAvatar ? '65px' : ''}} title={'Sent at ' +  formatDate(message.timestamp)}>
                         <MessageContent dangerouslySetInnerHTML={{__html: message.message}}></MessageContent>
-                        <Timestamp>
-                            {message.timestamp ? formatDate(message.timestamp) : '...'}
-                        </Timestamp>
                     </Reciever>
                 </ContainerReciever>
             }

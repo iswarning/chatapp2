@@ -1,15 +1,13 @@
-import { db } from "@/firebase";
-import firebase from "firebase";
+import { db } from "@/firebase"
 
-async function createNewUser(user: firebase.User) {
+export default function UpdateUser(user: any) {
     try {
         db.collection('users').doc(user?.uid).set(
             {
                 email: user?.email,
                 lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
                 photoURL: user?.photoURL,
-                fullName: user?.displayName,
-                phoneNumber: user?.phoneNumber ?? ''
+                fullName: user?.displayName
             },
             { merge: true }
         )
@@ -17,5 +15,3 @@ async function createNewUser(user: firebase.User) {
         throw new Error(JSON.stringify(error))
     }
 }
-
-export default createNewUser;
