@@ -14,8 +14,6 @@ function SidebarSetting() {
 
     const [selectedSetting, setSelectedSetting] = useState('');
 
-    const [user] = useAuthState(auth);
-
     return (
         <Container>
             <FixedMenu>
@@ -56,7 +54,7 @@ function SidebarSetting() {
                 </SidebarContainer>
             </FixedMenu>
             <MainContent>
-                { selectedSetting === 'My Profile' ? <Profile userInfo={user} /> : null }
+                { selectedSetting === 'My Profile' ? <Profile /> : null }
                 { selectedSetting === 'App Settings' ? <AppSettingsScreen /> : null }
             </MainContent>
         </Container>
