@@ -1,32 +1,27 @@
-import { useEffect, useRef } from "react";
-import { io } from "socket.io-client";
+import Head from "next/head";
+import { toast } from "react-toastify";
+import styled from "styled-components";
+import { useState } from "react";
 
 export default function Hello() {
 
-    const socketRef: any = useRef();
+    const [show, setShow] = useState(false);
 
-    useEffect(() => {
-        // socketRef.current = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
-  
-        // socketRef.current.on('message', (msg) => {
-        //   console.log(msg)
-        // }) // phần này đơn giản để gán id cho mỗi phiên kết nối vào page. Mục đích chính là để phân biệt đoạn nào là của mình đang chat.
-  
-        // return () => {
-        //   socketRef.current.disconnect();
-        // }; 
-        socketRef.current = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
-  
-        socketRef.current.on('sendDataServer', data => {
-            console.log("sendDataServersendDataServersendDataServer")
-        }) // phần này đơn giản để gán id cho mỗi phiên kết nối vào page. Mục đích chính là để phân biệt đoạn nào là của mình đang chat.
-
-        return () => {
-            socketRef.current.disconnect();
-        };
-    },[]);
+    const handleClick = () => {
+        setShow(!show);
+        if(show) {
+            document.getElementById("snackbar")?.classList.add("show")
+        } else {
+            document.getElementById("snackbar")?.classList.remove("show")
+        }
+    }
 
     return (
-        <div><button type="button">CLick</button></div>
+        <>
+            <button onClick={handleClick}>Show Snackbar</button><div id="snackbar">Some text some message..</div>
+        </>
+        
     )
 }
+
+

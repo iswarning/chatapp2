@@ -8,7 +8,8 @@ import 'bootstrap/dist/css/bootstrap.css';
 import getNotificationMessage from '@/utils/getNotificationMessage';
 import { auth } from '@/firebase';
 import Loading from '@/components/Loading';
-import { io } from 'socket.io-client';
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from 'react-toastify';
 
 export default function App({ Component, pageProps }: AppProps) {
   const [user, loading] = useAuthState(auth);
@@ -17,8 +18,7 @@ export default function App({ Component, pageProps }: AppProps) {
   useEffect(() => {
     if(user) {
       createNewUser(user);
-      // getNotificationMessage(user);
-      
+      getNotificationMessage(user, socketRef)
     }
   },[user]);
 
@@ -26,5 +26,9 @@ export default function App({ Component, pageProps }: AppProps) {
 
   if(loading) return <Loading />
   
-  return <Component {...pageProps} />
+  return <>
+    <Component {...pageProps} />
+    <ToastContainer />
+  </> 
+  
 }

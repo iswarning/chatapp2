@@ -21,7 +21,7 @@ import Picker from "@emoji-mart/react";
 import data from '@emoji-mart/data'
 import popupCenter from "@/utils/popupCenter";
 
-export default function ChatScreen({ chatId, chat, messages, onSend}: any) {
+export default function ChatScreen({ chatId, chat, messages, onReloadMessages}: any) {
     const [user] = useAuthState(auth);
     const [input, setInput] = useState('');
     const endOfMessageRef: any = useRef(null);
@@ -31,11 +31,21 @@ export default function ChatScreen({ chatId, chat, messages, onSend}: any) {
     const [statusSend, setStatusSend] = useState('');
     const router = useRouter();
     const socketRef: any = useRef();
+    socketRef.current = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
 
     useEffect(() => {
         getRecipientUser();
         ScrollToBottom();
-    },[onSend])
+        socketRef.current.on("responseMessage", (msg: any) => {
+            const data = JSON.parse(msg);
+            if(data.recipient.includes(user?.email)) {
+                onReloadMessages()
+            }
+          });
+        return () => {
+            socketRef.current.disconnect();
+        };
+    },[onReloadMessages])
 
     const getRecipientUser = async() => {
         const u = await getUserByEmail(getRecipientEmail(chat.users, user));
@@ -69,13 +79,11 @@ export default function ChatScreen({ chatId, chat, messages, onSend}: any) {
     }
 
     const sendMessage = (e: any) => {
-        socketRef.current = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
-        socketRef.current.emit('sendDataClient', "hello wolrd");
         e.preventDefault();
         setStatusSend('sending');
         createNewMessage(chatId, input, user?.email!, user?.photoURL!).then(() => {
 
-            // sendNotification();
+            sendNotification();
         
             setInput('');
 
@@ -83,21 +91,20 @@ export default function ChatScreen({ chatId, chat, messages, onSend}: any) {
                 ScrollToBottom();
             }
             
-            onSend();
+            onReloadMessages();
 
             setStatusSend('sent');
         }).catch((er) => console.log(er))
     }
 
     const sendNotification = () => {
-        socketRef.current = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
         let listRecipientNotify = chat.users.filter((email: any) => email !== user?.email)
         let dataNofity = {
             message: input,
             recipient: chat.isGroup ? listRecipientNotify : getRecipientEmail(chat.users, user),
-            name: chat.isGroup ? chat.name : user?.displayName
+            name: chat.isGroup ? chat.name : user?.displayName,
         }
-        socketRef.current.emit('message', JSON.stringify(dataNofity));
+        socketRef.current.emit('sendMessage', JSON.stringify(dataNofity));
     }
 
     const handleVideoCall = () => {
@@ -149,7 +156,6 @@ export default function ChatScreen({ chatId, chat, messages, onSend}: any) {
                 }
                 <EndOfMessage ref={endOfMessageRef} />
             </MessageContainer>
-
             <InputContainer>
                 {
                     showEmoji ? <EmojiContainer>

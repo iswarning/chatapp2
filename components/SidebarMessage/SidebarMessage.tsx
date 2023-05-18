@@ -101,7 +101,7 @@ export default function SidebarMessage() {
             {
                 messData ? 
                     <ChatContainer>
-                        <ChatScreen chatId={chatInfo.id} chat={chatInfo.data()} messages={messData} onSend={() => getMessageData(chatInfo.id)}/>
+                        <ChatScreen chatId={chatInfo.id} chat={chatInfo.data()} messages={messData} onReloadMessages={() => getMessageData(chatInfo.id)}/>
                     </ChatContainer>
                 : null
             }
