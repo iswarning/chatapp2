@@ -50,7 +50,10 @@ export default function ChatScreen({ chatId, chat, messages, onReloadMessages}: 
     const getRecipientUser = async() => {
         const u = await getUserByEmail(getRecipientEmail(chat.users, user));
         if(u) {
-            setRecipientUser(u.data());
+            setRecipientUser({
+                id: u.id,
+                ...u.data()
+            });
         }
     }
 
@@ -175,7 +178,7 @@ export default function ChatScreen({ chatId, chat, messages, onReloadMessages}: 
             </InputContainer>
 
             <VideoCallContainer isOpen={isOpen} onRequestClose={() => setIsOpen(false)}>
-                <VideoCallScreen statusCall={'Incoming Call'} photoURL={chat.isGroup ? '' : recipientUser.photoURL} recipientName={chat.isGroup ? '' : recipientUser.fullName} />
+                <VideoCallScreen statusCall={'Calling'} photoURL={chat.isGroup ? '' : recipientUser.photoURL} recipientId={recipientUser.id} />
             </VideoCallContainer>
         </Container>
     )

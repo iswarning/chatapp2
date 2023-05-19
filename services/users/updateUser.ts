@@ -1,16 +1,10 @@
 import { db } from "@/firebase"
 
-export default function UpdateUser(user: any) {
+export default function UpdateUser(user: any, data: any) {
     try {
-        db.collection('users').doc(user?.uid).set(
-            {
-                email: user?.email,
-                lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
-                photoURL: user?.photoURL,
-                fullName: user?.displayName
-            },
-            { merge: true }
-        )
+        db.collection("users").doc(user?.uid).update({ 
+            ...data 
+        });
     } catch (error) {
         throw new Error(JSON.stringify(error))
     }

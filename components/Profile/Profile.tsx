@@ -23,6 +23,7 @@ import { auth, db } from '@/firebase';
 import getUserById from '@/services/users/getUserById';
 import createNewUser from '@/services/users/createNewUser';
 import firebase from 'firebase';
+import UpdateUser from '@/services/users/updateUser';
 
 
 export default function Profile() {
@@ -36,7 +37,7 @@ export default function Profile() {
     useEffect(() => {
         getListFriend();
         getUserInfo();
-    },[])
+    },[userInfo])
 
     const getUserInfo = async() => {
         const data = await getUserById(user?.uid!);
@@ -52,23 +53,9 @@ export default function Profile() {
         }
     }
 
-    const updateInfo = (e: any) => {
-        e.preventDefault()
-        // let userExist: firebase.User = {
-        //     email: user?.email,
-        //     photoURL: user?.photoURL,
-        //     fullName: user?.displayName,
-        //     phoneNumber: phoneNumber
-        // }
-        db.collection("users").where("id", "==", user?.uid)
-        .get()
-        .then(function(querySnapshot) {
-            querySnapshot.forEach(function(doc) {
-                console.log(doc.id, " => ", doc.data());
-                doc.ref.update({ phoneNumber: phoneNumber })
-            });
-        }).catch(err => console.log(err))
-        getUserInfo();
+    const updateInfo = async(e: any) => {
+        e.preventDefault();
+        db.collection("users").doc(user?.uid).update({ phoneNumber: phoneNumber });
         setIsOpenModal(!isOpenModal);
     }
 
@@ -144,8 +131,8 @@ export default function Profile() {
             </InformationContainer>
             <ModalUpdateInfo isOpen={isOpenModal} onRequestClose={() => setIsOpenModal(false)}>
                 <h3>Update Information</h3>
-                <form role="form" method="POST" action="">
-                    <input type="hidden" name="_token" value=""/>
+                {/* <form role="form" method="POST" action=""> */}
+                    {/* <input type="hidden" name="_token" value=""/> */}
                     <div className="form-group my-3">
                         <label className="control-label">Phone Number</label>
                         <div>
@@ -157,14 +144,14 @@ export default function Profile() {
                             <button type="button" className="btn" style={{background: '#0DA3BA', color: 'white'}} onClick={(e) => updateInfo(e)}>Update</button>
                         </div>
                     </div>
-                </form>
+                {/* </form> */}
             </ModalUpdateInfo>
         </Container>
     )
 }
 
 const ModalUpdateInfo = styled(ReactModal)`
-border-radius: 10px;
+    border-radius: 10px;
     border: 1px solid whitesmoke;
     width: 400px;
     height: 600px;
