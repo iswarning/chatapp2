@@ -1,4 +1,5 @@
-import { db } from "@/firebase"
+import { db } from "@/firebase";
+import firebase from "firebase";
 
 export default function UpdateUser(user: any) {
     try {

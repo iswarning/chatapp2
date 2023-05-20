@@ -17,6 +17,14 @@ export default function VideoCallScreen({ statusCall, photoURL, senderId, recipi
     const [minute, setMinute] = useState(0);
     const router = useRouter();
 
+    useInterval(() => {
+        setSecond(second + 1);
+        if(second == 59) {
+            setSecond(0);
+            setMinute((oldMinute) => oldMinute + 1)
+        }
+    }, 1000);
+
     const getUserInfo = async(id: any) => {
         const data = await getUserById(id);
         if(data) {
@@ -50,13 +58,7 @@ export default function VideoCallScreen({ statusCall, photoURL, senderId, recipi
 
     const handleAcceptCall = () => {
         setStatusVideo('Called');
-        useInterval(() => {
-            setSecond(second + 1);
-            if(second == 59) {
-                setSecond(0);
-                setMinute((oldMinute) => oldMinute + 1)
-            }
-        }, 1000);
+        setSecond(0);
         popupCenter({url: router.basePath + "/video-call/" + chatId , title: '_blank', w: 400, h: 900});
     }
 

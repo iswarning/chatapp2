@@ -20,7 +20,7 @@ const popupCenter = ({url, title, w, h}: any) => {
       `
     )
 
-    if (window.focus) newWindow?.focus();
+    if (window.focus!) newWindow?.focus();
 }
 
 export default popupCenter;
