@@ -1,6 +1,6 @@
 import { ActionBtn, ActionBtnActive, Video, VideoGrid } from "@/components/VideoCallScreen/VideoCallScreenStyled";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import styled from "styled-components";
 import VideoCameraFrontIcon from '@mui/icons-material/VideoCameraFront';
@@ -11,10 +11,12 @@ export default function VideoCall({callVideoStatus}: any) {
     const router = useRouter();
     const [showCam, setShowCam] = useState(false);
     const [showMic, setShowMic] = useState(true);
-
+    const socketRef: any = useRef();
+    
     // const callVideoOneToOne = () => {
         import('peerjs').then(({ default: Peer }) => {
-            const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL! ?? router.basePath);
+            
+            socketRef.current = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
             // const videoGrid = document.getElementById('video-grid');
             const peers: any = {};
             const myPeer = new Peer(undefined!, {
@@ -36,17 +38,17 @@ export default function VideoCall({callVideoStatus}: any) {
                     })
                 })
     
-                socket.on('user-connected', userId => {
+                socketRef.current.on('user-connected', (userId: any) => {
                     connectToNewUser(userId, stream);
                 })
             })
     
-            socket.on('user-disconnected', userId => {
+            socketRef.current.on('user-disconnected', (userId: any) => {
                 if(peers[userId]) peers[userId].close()
             })
     
             myPeer.on('open', id => {
-                socket.emit('join-room', router.query.roomId, id);
+                socketRef.current.emit('join-room', router.query.roomId, id);
             })
     
             const connectToNewUser = (userId: any, stream: any) => {

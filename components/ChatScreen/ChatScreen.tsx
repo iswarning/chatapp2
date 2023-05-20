@@ -31,27 +31,27 @@ export default function ChatScreen({ chatId, chat, messages, onReloadMessages}: 
     const [isOpen, setIsOpen] = useState(false);
     const [statusSend, setStatusSend] = useState('');
     const router = useRouter();
-    const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL ?? router.basePath  ,{
-        path: "/api/socketio"
-    });
+
+    const socketRef: any = useRef();
+    socketRef.current = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
 
     useEffect(() => {
         getRecipientUser();
         ScrollToBottom();
-        socket.on("response-message", (msg: any) => {
+        socketRef.current.on("response-message", (msg: any) => {
             const data = JSON.parse(msg);
             if(data.recipient.includes(user?.email)) {
                 onReloadMessages()
             }
         });
-        socket.on('response-reject', (recipientCall, recipientName, chatId) => {
+        socketRef.current.on('response-reject', (recipientCall: any, recipientName: any, chatId: any) => {
             if(recipientCall === user?.uid) {
               setIsOpen(false);
               toast(`${recipientName} rejected the call !`, { hideProgressBar: true, autoClose: 5000, type: 'info' })
             }
         })
         return () => {
-            socket.disconnect();
+            socketRef.current.disconnect();
         };
     },[onReloadMessages])
 
@@ -115,12 +115,12 @@ export default function ChatScreen({ chatId, chat, messages, onReloadMessages}: 
             recipient: chat.isGroup ? listRecipientNotify : getRecipientEmail(chat.users, user),
             name: chat.isGroup ? chat.name : user?.displayName,
         }
-        socket.emit('send-message', JSON.stringify(dataNofity));
+        socketRef.current.emit('send-message', JSON.stringify(dataNofity));
     }
 
     const handleVideoCall = () => {
         setIsOpen(!isOpen);
-        socket.emit("call-video", user?.uid, recipientUser.id, chatId); 
+        socketRef.current.emit("call-video", user?.uid, recipientUser.id, chatId); 
     }
 
     const addEmoji = (e: any) => {

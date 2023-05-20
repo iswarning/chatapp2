@@ -16,6 +16,7 @@ export default function VideoCallScreen({ statusCall, photoURL, senderId, recipi
     const [second, setSecond] = useState(0);
     const [minute, setMinute] = useState(0);
     const router = useRouter();
+    const socketRef: any = useRef();
 
     useInterval(() => {
         setSecond(second + 1);
@@ -66,19 +67,17 @@ export default function VideoCallScreen({ statusCall, photoURL, senderId, recipi
 
         onClose();
         
-        const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL! ?? router.basePath,{
-            path: "/api/socketio"
-        });
+        socketRef.current = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
 
         if (statusVideo === "Calling") {
             getUserInfo(senderId).then((d) => {
-                socket.emit("reject-call", recipientId, d?.fullName, "Calling", chatId)
+                socketRef.current.emit("reject-call", recipientId, d?.fullName, "Calling", chatId)
             })
         }
 
         if (statusVideo === "Incoming Call") {
             getUserInfo(recipientId).then((d) => {
-                socket.emit("reject-call", senderId, d?.fullName, "Incoming Call", chatId)
+                socketRef.current.emit("reject-call", senderId, d?.fullName, "Incoming Call", chatId)
             })
         }
         

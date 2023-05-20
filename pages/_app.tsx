@@ -2,7 +2,7 @@ import '@/styles/globals.css'
 import type { AppProps } from 'next/app'
 import { useAuthState } from 'react-firebase-hooks/auth'
 import Login from './login';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import createNewUser from '@/services/users/createNewUser';
 import 'bootstrap/dist/css/bootstrap.css';
 import getNotificationMessage from '@/utils/getNotificationMessage';
@@ -23,17 +23,16 @@ export default function App({ Component, pageProps }: AppProps) {
   const [senderId, setSenderId] = useState('')
   const router = useRouter();
 
-  const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL! ?? router.basePath,{
-    path: "/api/socketio"
-  });
+  const socketRef: any = useRef();
+  socketRef.current = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
 
   useEffect(() => {
 
     if(user) {
       createNewUser(user);
-      getNotificationMessage(user, socket);
+      getNotificationMessage(user, socketRef.current);
       
-      socket.on("response-call", (senderCall, recipientCall, chatId) => {
+      socketRef.current.on("response-call", ({senderCall, recipientCall, chatId}: any) => {
         if(recipientCall === user?.uid) {
             setChatRoomId(chatId);
             setSenderId(senderCall);
@@ -41,7 +40,7 @@ export default function App({ Component, pageProps }: AppProps) {
         }
       });
 
-      socket.on('response-reject', (recipientCall, recipientName, statusCall, chatId) => {
+      socketRef.current.on('response-reject', ({recipientCall, recipientName, statusCall, chatId}: any) => {
         if(recipientCall === user?.uid) {
           setIsOpen(false);
           if(statusCall === 'Calling') {
@@ -50,9 +49,9 @@ export default function App({ Component, pageProps }: AppProps) {
         }
       });
 
-      return () => {
-        socket.disconnect()
-      }
+      // return () => {
+      //   socketRef.current.disconnect()
+      // }
 
     }
   },[user]);
