@@ -1,9 +1,11 @@
 import { toast } from "react-toastify";
 import { io } from "socket.io-client";
 
-export default function getNotificationMessage(userLoggedIn: any, socketRef: any) {
-    socketRef.current = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
-    socketRef.current.on("responseMessage", (msg: any) => {
+export default function getNotificationMessage(userLoggedIn: any) {
+    const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!,{
+      path: process.env.NEXT_PUBLIC_SOCKET_IO_PATH
+    });
+    socket.on("response-message", (msg: any) => {
       const data = JSON.parse(msg);
       if(data.recipient.includes(userLoggedIn?.email)) {
           const options: any = {
@@ -13,6 +15,6 @@ export default function getNotificationMessage(userLoggedIn: any, socketRef: any
         }
     });
     return () => {
-      socketRef.current.disconnect();
+      socket.disconnect();
     };
 }

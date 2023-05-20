@@ -29,28 +29,31 @@ export default function ChatScreen({ chatId, chat, messages, onReloadMessages}: 
     const [showEmoji, setShowEmoji] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
     const [statusSend, setStatusSend] = useState('');
-    const router = useRouter();
-    const socketRef: any = useRef();
-    socketRef.current = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
+    const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!,{
+        path: process.env.NEXT_PUBLIC_SOCKET_IO_PATH
+    });
 
     useEffect(() => {
         getRecipientUser();
         ScrollToBottom();
-        socketRef.current.on("responseMessage", (msg: any) => {
+        socket.on("response-message", (msg: any) => {
             const data = JSON.parse(msg);
             if(data.recipient.includes(user?.email)) {
                 onReloadMessages()
             }
           });
         return () => {
-            socketRef.current.disconnect();
+            socket.disconnect();
         };
     },[onReloadMessages])
 
     const getRecipientUser = async() => {
         const u = await getUserByEmail(getRecipientEmail(chat.users, user));
         if(u) {
-            setRecipientUser(u.data());
+            setRecipientUser({
+                id: u.id,
+                ...u.data()
+            });
         }
     }
 
@@ -104,11 +107,12 @@ export default function ChatScreen({ chatId, chat, messages, onReloadMessages}: 
             recipient: chat.isGroup ? listRecipientNotify : getRecipientEmail(chat.users, user),
             name: chat.isGroup ? chat.name : user?.displayName,
         }
-        socketRef.current.emit('sendMessage', JSON.stringify(dataNofity));
+        socket.emit('send-message', JSON.stringify(dataNofity));
     }
 
     const handleVideoCall = () => {
         setIsOpen(!isOpen);
+        socket.emit("call-video", user?.uid, recipientUser.id, chatId);
         // window.open(router.basePath + "/video-call/" + chatId , "_blank", "width:200,height:500,top:0,left:40")
         // popupCenter({url: router.basePath + "/video-call/" + chatId , title: '_blank', w: 400, h: 900});  
     }
@@ -137,7 +141,7 @@ export default function ChatScreen({ chatId, chat, messages, onReloadMessages}: 
                     </p>
                 </HeaderInformation>
                 <HeaderIcons>
-                    <IconButton onClick={() => setIsOpen(!isOpen)}>
+                    <IconButton onClick={handleVideoCall}>
                         <CallIcon titleAccess="Call video"/>
                     </IconButton>
                     <IconButton>
@@ -174,8 +178,8 @@ export default function ChatScreen({ chatId, chat, messages, onReloadMessages}: 
                 <BtnSend hidden disabled={!input} type="submit" onClick={sendMessage}>Send Message</BtnSend>
             </InputContainer>
 
-            <VideoCallContainer isOpen={isOpen} onRequestClose={() => setIsOpen(false)}>
-                <VideoCallScreen statusCall={'Incoming Call'} photoURL={chat.isGroup ? '' : recipientUser.photoURL} recipientName={chat.isGroup ? '' : recipientUser.fullName} />
+            <VideoCallContainer isOpen={isOpen} >
+                <VideoCallScreen statusCall={'Calling'} photoURL={chat.isGroup ? '' : recipientUser.photoURL} senderId={user?.uid} recipientId={recipientUser.id} chatId={chatId} onClose={() => setIsOpen(false)} />
             </VideoCallContainer>
         </Container>
     )

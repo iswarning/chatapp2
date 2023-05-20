@@ -9,10 +9,8 @@ import MicIcon from '@mui/icons-material/Mic';
 export default function VideoCall({callVideoStatus}: any) {
 
     const router = useRouter();
-    const [showCam, setShowCam] = useState(true);
+    const [showCam, setShowCam] = useState(false);
     const [showMic, setShowMic] = useState(true);
-
-
 
     // const callVideoOneToOne = () => {
         import('peerjs').then(({ default: Peer }) => {
