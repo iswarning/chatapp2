@@ -14,14 +14,16 @@ import { io } from 'socket.io-client';
 import { VideoCallContainer } from '@/components/ChatScreen/ChatScreenStyled';
 import VideoCallScreen from '@/components/VideoCallScreen/VideoCallScreen';
 import EventEmitter from 'events';
+import { useRouter } from 'next/router';
 
 export default function App({ Component, pageProps }: AppProps) {
   const [user, loading] = useAuthState(auth);
   const [isOpen, setIsOpen] = useState(false);
   const [chatRoomId, setChatRoomId] = useState('')
   const [senderId, setSenderId] = useState('')
+  const router = useRouter();
 
-  const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL! ?? window.location.host,{
+  const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL! ?? router.basePath,{
     path: process.env.NEXT_PUBLIC_SOCKET_IO_PATH!
   });
 

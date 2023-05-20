@@ -14,7 +14,7 @@ export default function VideoCall({callVideoStatus}: any) {
 
     // const callVideoOneToOne = () => {
         import('peerjs').then(({ default: Peer }) => {
-            const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL! ?? window.location.host);
+            const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL! ?? router.basePath);
             // const videoGrid = document.getElementById('video-grid');
             const peers: any = {};
             const myPeer = new Peer(undefined!, {

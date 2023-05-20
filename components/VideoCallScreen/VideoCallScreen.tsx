@@ -66,7 +66,7 @@ export default function VideoCallScreen({ statusCall, photoURL, senderId, recipi
 
         onClose();
         
-        const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!,{
+        const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL! ?? router.basePath,{
             path: process.env.NEXT_PUBLIC_SOCKET_IO_PATH
         });
 
