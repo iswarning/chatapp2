@@ -1,20 +1,15 @@
 import { useEffect, useRef, useState } from "react"
-import { ActionBtn, ActionBtnActive, ActionGroup, BtnAcceptCall, BtnContainer, BtnRejectCall, ContentCenter, Pulse, RecipientName, StatusCalling, UserAvatar, UserContainer, Video, VideoCalling, VideoGrid } from "./VideoCallScreenStyled";
-import { useAuthState } from "react-firebase-hooks/auth";
-import { auth } from "@/firebase";
+import { BtnAcceptCall, BtnContainer, BtnRejectCall, ContentCenter, Pulse, StatusCalling, UserAvatar, UserContainer, VideoCalling } from "./VideoCallScreenStyled";
 import CallIcon from '@mui/icons-material/Call';
 import CallEndIcon from '@mui/icons-material/CallEnd';
-import VideoCameraFrontIcon from '@mui/icons-material/VideoCameraFront';
-import MicIcon from '@mui/icons-material/Mic';
-import { useRouter } from "next/router";
-import { v4 as uuidv4 } from 'uuid';
 import { io } from "socket.io-client";
+import getUserById from "@/services/users/getUserById";
+import popupCenter from "@/utils/popupCenter";
+import { useRouter } from "next/router";
 
 export default function VideoCallScreen({ statusCall, photoURL, senderId, recipientId, chatId, onClose }: any) {
 
     const [statusVideo, setStatusVideo] = useState(statusCall);
-
-    const [user] = useAuthState(auth);
     
     const [showCam, setShowCam] = useState(false);
     const [showMic, setShowMic] = useState(true);
@@ -22,13 +17,13 @@ export default function VideoCallScreen({ statusCall, photoURL, senderId, recipi
     const [minute, setMinute] = useState(0);
     const router = useRouter();
 
-    useInterval(() => {
-        setSecond(second + 1);
-        if(second == 59) {
-            setSecond(0);
-            setMinute((oldMinute) => oldMinute + 1)
+    const getUserInfo = async(id: any) => {
+        const data = await getUserById(id);
+        if(data) {
+            return data;
         }
-    }, 1000);
+        return null;
+    }
 
     function formatNumber(num: number){
         if(num.toString().length === 1) 
@@ -36,7 +31,7 @@ export default function VideoCallScreen({ statusCall, photoURL, senderId, recipi
         return num;
     }
 
-    function useInterval(callback, delay) {
+    function useInterval(callback: any, delay: any) {
         const savedCallback: any = useRef();
       
         // Remember the latest callback.
@@ -55,6 +50,14 @@ export default function VideoCallScreen({ statusCall, photoURL, senderId, recipi
 
     const handleAcceptCall = () => {
         setStatusVideo('Called');
+        useInterval(() => {
+            setSecond(second + 1);
+            if(second == 59) {
+                setSecond(0);
+                setMinute((oldMinute) => oldMinute + 1)
+            }
+        }, 1000);
+        popupCenter({url: router.basePath + "/video-call/" + chatId , title: '_blank', w: 400, h: 900});
     }
 
     const handleRejectCall = () => {
@@ -66,11 +69,15 @@ export default function VideoCallScreen({ statusCall, photoURL, senderId, recipi
         });
 
         if (statusVideo === "Calling") {
-            socket.emit("reject-call", senderId, recipientId, chatId)
+            getUserInfo(senderId).then((d) => {
+                socket.emit("reject-call", recipientId, d?.fullName, "Calling", chatId)
+            })
         }
 
         if (statusVideo === "Incoming Call") {
-            socket.emit("reject-call", recipientId, senderId, chatId)
+            getUserInfo(recipientId).then((d) => {
+                socket.emit("reject-call", senderId, d?.fullName, "Incoming Call", chatId)
+            })
         }
         
     }

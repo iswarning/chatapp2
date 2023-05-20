@@ -1,10 +1,7 @@
 import { toast } from "react-toastify";
 import { io } from "socket.io-client";
 
-export default function getNotificationMessage(userLoggedIn: any) {
-    const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!,{
-      path: process.env.NEXT_PUBLIC_SOCKET_IO_PATH
-    });
+export default function getNotificationMessage(userLoggedIn: any, socket: any) {
     socket.on("response-message", (msg: any) => {
       const data = JSON.parse(msg);
       if(data.recipient.includes(userLoggedIn?.email)) {
@@ -14,7 +11,4 @@ export default function getNotificationMessage(userLoggedIn: any) {
           toast(options.body, { hideProgressBar: true, autoClose: 5000, type: 'info' })
         }
     });
-    return () => {
-      socket.disconnect();
-    };
 }

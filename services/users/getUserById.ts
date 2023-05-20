@@ -5,7 +5,7 @@ async function getUserById(id: string) {
         .collection('users')
         .doc(id)
         .get();
-    return data.data() || [];
+    return data.data();
 }
 
 export default getUserById;

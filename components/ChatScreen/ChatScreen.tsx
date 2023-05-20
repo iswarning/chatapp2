@@ -20,6 +20,7 @@ import { useRouter } from "next/router";
 import Picker from "@emoji-mart/react";
 import data from '@emoji-mart/data'
 import popupCenter from "@/utils/popupCenter";
+import { toast } from "react-toastify";
 
 export default function ChatScreen({ chatId, chat, messages, onReloadMessages}: any) {
     const [user] = useAuthState(auth);
@@ -41,7 +42,13 @@ export default function ChatScreen({ chatId, chat, messages, onReloadMessages}: 
             if(data.recipient.includes(user?.email)) {
                 onReloadMessages()
             }
-          });
+        });
+        socket.on('response-reject', (recipientCall, recipientName, chatId) => {
+            if(recipientCall === user?.uid) {
+              setIsOpen(false);
+              toast(`${recipientName} rejected the call !`, { hideProgressBar: true, autoClose: 5000, type: 'info' })
+            }
+        })
         return () => {
             socket.disconnect();
         };
@@ -112,9 +119,7 @@ export default function ChatScreen({ chatId, chat, messages, onReloadMessages}: 
 
     const handleVideoCall = () => {
         setIsOpen(!isOpen);
-        socket.emit("call-video", user?.uid, recipientUser.id, chatId);
-        // window.open(router.basePath + "/video-call/" + chatId , "_blank", "width:200,height:500,top:0,left:40")
-        // popupCenter({url: router.basePath + "/video-call/" + chatId , title: '_blank', w: 400, h: 900});  
+        socket.emit("call-video", user?.uid, recipientUser.id, chatId); 
     }
 
     const addEmoji = (e: any) => {

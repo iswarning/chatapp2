@@ -15,7 +15,7 @@ export default function VideoCall({callVideoStatus}: any) {
     // const callVideoOneToOne = () => {
         import('peerjs').then(({ default: Peer }) => {
             const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
-            const videoGrid = document.getElementById('video-grid');
+            // const videoGrid = document.getElementById('video-grid');
             const peers: any = {};
             const myPeer = new Peer(undefined!, {
                 host: '/'
@@ -25,18 +25,14 @@ export default function VideoCall({callVideoStatus}: any) {
                 video: true,
                 audio: true
             }).then(stream => {
-                // console.log('user-call')
                 myPeer.on('call', call => {
                     call.answer(stream)
-                    console.log('user-call')
-                    const video = document.createElement('video')
-                    video.style.width = '100%';
-                    video.style.height = '100%';
-                    video.style.objectFit = 'cover';
-                    video.style.borderRadius = '10px';
-    
+
+                    const video: HTMLVideoElement = document.getElementById('video-element') as HTMLVideoElement
+                    video.muted = true;
+                    
                     call.on('stream', userVideoStream => {
-                        addVideoStream(video, userVideoStream);
+                        setVideoStream(video, userVideoStream);
                     })
                 })
     
@@ -60,7 +56,7 @@ export default function VideoCall({callVideoStatus}: any) {
                 video.style.height = '300px';
                 video.style.objectFit = 'cover';
                 call.on('stream', userVideoStream => {
-                    addVideoStream(video, userVideoStream);
+                    setVideoStream(video, userVideoStream);
                 })
                 call.on('close', () => {
                     video.remove();
@@ -68,12 +64,12 @@ export default function VideoCall({callVideoStatus}: any) {
                 peers[userId] = call
             }
     
-            const addVideoStream = (video: any, stream: any) => {
+            const setVideoStream = (video: any, stream: any) => {
                 video.srcObject = stream;
                 video.addEventListener('loadedmetadata', () => {
                     video.play()
                 })
-                videoGrid?.append(video)
+                // videoGrid?.append(video)
             }
         });
     // }
@@ -172,8 +168,11 @@ export default function VideoCall({callVideoStatus}: any) {
             {
                 callVideoStatus === 'one-to-many' ? <Video></Video> : null
             } */}
-            <VideoGrid id='video-grid'>
-            </VideoGrid>
+            {/* <VideoGrid id='video-grid'>
+            </VideoGrid> */}
+            <Video id='video-element'>
+
+            </Video>
             <div className="d-flex mt-2">
                 {
                     showCam ? <ActionBtnActive onClick={handleShowCam}>

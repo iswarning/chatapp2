@@ -3,6 +3,7 @@ import { NextApiResponseServerIO } from "../types/next";
 import { Server as ServerIO } from "socket.io";
 import { Server as NetServer } from "http";
 import { PeerServer } from "peer";
+import EventEmitter from "events";
 
 export const config = {
   api: {
@@ -37,8 +38,8 @@ export default async (req: NextApiRequest, res: NextApiResponseServerIO) => {
             io.emit("response-call", senderCall, recipientCall, chatId)
         });
 
-        socket.on('reject-call', (senderCall, recipientCall, chatId) => {
-            io.emit("response-reject", senderCall, recipientCall, chatId)
+        socket.on('reject-call', (recipientCall, recipientName, statusCall, chatId) => {
+            io.emit("response-reject", recipientCall, recipientName, statusCall, chatId)
         });
     
         socket.on('join-room', (roomId, userId, recipientId) => {
@@ -52,5 +53,8 @@ export default async (req: NextApiRequest, res: NextApiResponseServerIO) => {
 
     res.socket.server.io = io;
   }
+
+  EventEmitter.setMaxListeners(100);
+  
   res.end();
 };
