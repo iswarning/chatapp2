@@ -32,7 +32,7 @@ export default function ChatScreen({ chatId, chat, messages, onReloadMessages}: 
     const [statusSend, setStatusSend] = useState('');
     const router = useRouter();
     const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL ?? router.basePath  ,{
-        path: process.env.NEXT_PUBLIC_SOCKET_IO_PATH
+        path: "/api/socketio"
     });
 
     useEffect(() => {
