@@ -10,8 +10,6 @@ import FriendRequestsListScreen from "../FriendRequestsListScreen/FriendRequests
 import { io } from "socket.io-client";
 import { useRouter } from "next/router";
 
-const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!)
-
 export default function SidebarContact() {
 
     const [selectedContact, setSelectedContact] = useState('');

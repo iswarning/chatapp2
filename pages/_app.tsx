@@ -21,7 +21,7 @@ export default function App({ Component, pageProps }: AppProps) {
   const [chatRoomId, setChatRoomId] = useState('')
   const [senderId, setSenderId] = useState('')
 
-  const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!,{
+  const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL! ?? window.location.host,{
     path: process.env.NEXT_PUBLIC_SOCKET_IO_PATH!
   });
 
