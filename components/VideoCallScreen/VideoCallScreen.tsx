@@ -7,7 +7,7 @@ import getUserById from "@/services/users/getUserById";
 import popupCenter from "@/utils/popupCenter";
 import { useRouter } from "next/router";
 
-export default function VideoCallScreen({ statusCall, photoURL, senderId, recipientId, chatId, onClose }: any) {
+export default function VideoCallScreen({ statusCall, photoURL, senderId, recipientId, chatId, currentScreen, onClose }: any) {
 
     const [statusVideo, setStatusVideo] = useState(statusCall);
     
@@ -71,13 +71,27 @@ export default function VideoCallScreen({ statusCall, photoURL, senderId, recipi
 
         if (statusVideo === "Calling") {
             getUserInfo(senderId).then((d) => {
-                socketRef.current.emit("reject-call", recipientId, d?.fullName, "Calling", chatId)
+                let data: any = {
+                    recipientId: recipientId,
+                    name: d?.fullName,
+                    statusCall: "Calling",
+                    currentScreen: currentScreen,
+                    chatId: chatId
+                }
+                socketRef.current.emit("reject-call", JSON.stringify(data))
             })
         }
 
         if (statusVideo === "Incoming Call") {
             getUserInfo(recipientId).then((d) => {
-                socketRef.current.emit("reject-call", senderId, d?.fullName, "Incoming Call", chatId)
+                let data: any = {
+                    recipientId: senderId,
+                    name: d?.fullName,
+                    statusCall: "Incoming Call",
+                    currentScreen: currentScreen,
+                    chatId: chatId
+                }
+                socketRef.current.emit("reject-call", JSON.stringify(data))
             })
         }
         

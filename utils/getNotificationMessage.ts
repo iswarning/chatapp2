@@ -11,4 +11,7 @@ export default function getNotificationMessage(userLoggedIn: any, socket: any) {
           toast(options.body, { hideProgressBar: true, autoClose: 5000, type: 'info' })
         }
     });
+    return () => {
+      socket.current.disconnect()
+    }
 }

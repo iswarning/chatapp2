@@ -25,6 +25,7 @@ export default function App({ Component, pageProps }: AppProps) {
 
   const socketRef: any = useRef();
   socketRef.current = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
+  // socketRef.current = io("http://localhost:9000");
 
   useEffect(() => {
 
@@ -32,7 +33,7 @@ export default function App({ Component, pageProps }: AppProps) {
       createNewUser(user);
       getNotificationMessage(user, socketRef.current);
       
-      socketRef.current.on("response-call", ({senderCall, recipientCall, chatId}: any) => {
+      socketRef.current.on("response-call", (senderCall: any, recipientCall: any, chatId: any) => {
         if(recipientCall === user?.uid) {
             setChatRoomId(chatId);
             setSenderId(senderCall);
@@ -40,18 +41,17 @@ export default function App({ Component, pageProps }: AppProps) {
         }
       });
 
-      socketRef.current.on('response-reject', ({recipientCall, recipientName, statusCall, chatId}: any) => {
-        if(recipientCall === user?.uid) {
+      socketRef.current.on('response-reject', (res: string) => {
+        let data = JSON.parse(res);
+        if(data.recipientId === user?.uid) {
           setIsOpen(false);
-          if(statusCall === 'Calling') {
-            toast(`${recipientName} rejected the call !`, { hideProgressBar: true, autoClose: 5000, type: 'info' })
-          }
+          toast(`${data.name} rejected the call !`, { hideProgressBar: true, autoClose: 5000, type: 'info' })
         }
       });
 
-      // return () => {
-      //   socketRef.current.disconnect()
-      // }
+      return () => {
+        socketRef.current.disconnect()
+      }
 
     }
   },[user]);
@@ -63,8 +63,8 @@ export default function App({ Component, pageProps }: AppProps) {
   return <>
     <Component {...pageProps} />
     <ToastContainer />
-    <VideoCallContainer isOpen={isOpen} >
-        <VideoCallScreen statusCall='Incoming Call' photoURL={user?.photoURL} senderId={senderId} recipientId={user?.uid} chatId={chatRoomId} onClose={() => setIsOpen(false)} />
+    <VideoCallContainer isOpen={isOpen} ariaHideApp={false}>
+        <VideoCallScreen statusCall='Incoming Call' photoURL={user?.photoURL} senderId={senderId} recipientId={user?.uid}  chatId={chatRoomId} currentScreen="any"  onClose={() => setIsOpen(false)} />
     </VideoCallContainer>
   </> 
   

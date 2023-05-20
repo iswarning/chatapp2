@@ -38,18 +38,21 @@ export default function ChatScreen({ chatId, chat, messages, onReloadMessages}: 
     useEffect(() => {
         getRecipientUser();
         ScrollToBottom();
+
         socketRef.current.on("response-message", (msg: any) => {
             const data = JSON.parse(msg);
             if(data.recipient.includes(user?.email)) {
                 onReloadMessages()
             }
         });
-        socketRef.current.on('response-reject', (recipientCall: any, recipientName: any, chatId: any) => {
-            if(recipientCall === user?.uid) {
+        
+        socketRef.current.on('response-reject', (res: string) => {
+            let data = JSON.parse(res);
+            if(data.recipientId === user?.uid) {
               setIsOpen(false);
-              toast(`${recipientName} rejected the call !`, { hideProgressBar: true, autoClose: 5000, type: 'info' })
             }
         })
+        
         return () => {
             socketRef.current.disconnect();
         };
@@ -159,7 +162,7 @@ export default function ChatScreen({ chatId, chat, messages, onReloadMessages}: 
             <MessageContainer>
                 {showMessage()}
                 {
-                    statusSend.length > 0 ? <StatusSendContainer>
+                    statusSend.length > 0 && messages[messages.length - 1].data().user === user?.email ? <StatusSendContainer>
                         <TextStatusSend>{statusSend === 'sent' ? 'Sent' : ''} <CheckIcon fontSize="small"/></TextStatusSend>
                     </StatusSendContainer> : null
                 }
@@ -185,7 +188,7 @@ export default function ChatScreen({ chatId, chat, messages, onReloadMessages}: 
             </InputContainer>
 
             <VideoCallContainer isOpen={isOpen} >
-                <VideoCallScreen statusCall={'Calling'} photoURL={chat.isGroup ? '' : recipientUser.photoURL} senderId={user?.uid} recipientId={recipientUser.id} chatId={chatId} onClose={() => setIsOpen(false)} />
+                <VideoCallScreen statusCall={'Calling'} photoURL={chat.isGroup ? '' : recipientUser.photoURL} senderId={user?.uid} recipientId={recipientUser.id} chatId={chatId} currentScreen="ChatScreen" onClose={() => setIsOpen(false)} />
             </VideoCallContainer>
         </Container>
     )
