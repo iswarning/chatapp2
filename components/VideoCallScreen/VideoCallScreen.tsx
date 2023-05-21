@@ -6,8 +6,9 @@ import { io } from "socket.io-client";
 import getUserById from "@/services/users/getUserById";
 import popupCenter from "@/utils/popupCenter";
 import { useRouter } from "next/router";
+import getUserByEmail from "@/services/users/getUserByEmail";
 
-export default function VideoCallScreen({ statusCall, photoURL, senderId, recipientId, chatId, currentScreen, onClose }: any) {
+export default function VideoCallScreen({ statusCall, photoURL, sender, recipient, chatId, onClose, isGroup }: any) {
 
     const [statusVideo, setStatusVideo] = useState(statusCall);
     
@@ -26,10 +27,10 @@ export default function VideoCallScreen({ statusCall, photoURL, senderId, recipi
         }
     }, 1000);
 
-    const getUserInfo = async(id: any) => {
-        const data = await getUserById(id);
+    const getUserInfo = async(email: string) => {
+        const data = await getUserByEmail(email);
         if(data) {
-            return data;
+            return data.data();
         }
         return null;
     }
@@ -70,26 +71,24 @@ export default function VideoCallScreen({ statusCall, photoURL, senderId, recipi
         socketRef.current = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
 
         if (statusVideo === "Calling") {
-            getUserInfo(senderId).then((d) => {
+            getUserInfo(sender).then((d) => {
                 let data: any = {
-                    recipientId: recipientId,
+                    recipient: recipient,
                     name: d?.fullName,
-                    statusCall: "Calling",
-                    currentScreen: currentScreen,
-                    chatId: chatId
+                    chatId: chatId,
+                    isGroup: isGroup
                 }
                 socketRef.current.emit("reject-call", JSON.stringify(data))
             })
         }
 
         if (statusVideo === "Incoming Call") {
-            getUserInfo(recipientId).then((d) => {
+            getUserInfo(recipient).then((d) => {
                 let data: any = {
-                    recipientId: senderId,
+                    recipient: sender,
                     name: d?.fullName,
-                    statusCall: "Incoming Call",
-                    currentScreen: currentScreen,
-                    chatId: chatId
+                    chatId: chatId,
+                    isGroup: isGroup
                 }
                 socketRef.current.emit("reject-call", JSON.stringify(data))
             })

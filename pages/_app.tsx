@@ -13,15 +13,14 @@ import { ToastContainer, toast } from 'react-toastify';
 import { io } from 'socket.io-client';
 import { VideoCallContainer } from '@/components/ChatScreen/ChatScreenStyled';
 import VideoCallScreen from '@/components/VideoCallScreen/VideoCallScreen';
-import EventEmitter from 'events';
-import { useRouter } from 'next/router';
 
 export default function App({ Component, pageProps }: AppProps) {
   const [user, loading] = useAuthState(auth);
   const [isOpen, setIsOpen] = useState(false);
   const [chatRoomId, setChatRoomId] = useState('')
-  const [senderId, setSenderId] = useState('')
-  const router = useRouter();
+  const [sender, setSender] = useState('')
+  const [recipient, setRecipient] = useState([])
+  const [isGroup, setIsGroup] = useState(false);
 
   const socketRef: any = useRef();
   socketRef.current = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
@@ -33,17 +32,22 @@ export default function App({ Component, pageProps }: AppProps) {
       createNewUser(user);
       getNotificationMessage(user, socketRef.current);
       
-      socketRef.current.on("response-call", (senderCall: any, recipientCall: any, chatId: any) => {
-        if(recipientCall === user?.uid) {
-            setChatRoomId(chatId);
-            setSenderId(senderCall);
-            setIsOpen(true);
+      socketRef.current.on("response-call", (res: string) => {
+        let data = JSON.parse(res);
+        if(data.recipient.includes(user?.email)) {
+            setChatRoomId(data.chatId);
+            setSender(data.sender);
+            setRecipient(data.recipient);
+            setIsGroup(data.isGroup);
+            if(!isOpen) {
+              setIsOpen(true);
+            }
         }
       });
 
       socketRef.current.on('response-reject', (res: string) => {
         let data = JSON.parse(res);
-        if(data.recipientId === user?.uid) {
+        if(data.recipient.includes(user?.email)) {
           setIsOpen(false);
           toast(`${data.name} rejected the call !`, { hideProgressBar: true, autoClose: 5000, type: 'info' })
         }
@@ -54,7 +58,7 @@ export default function App({ Component, pageProps }: AppProps) {
       }
 
     }
-  },[user]);
+  },[user,isOpen]);
 
   if(!user) return <Login/>
 
@@ -64,7 +68,7 @@ export default function App({ Component, pageProps }: AppProps) {
     <Component {...pageProps} />
     <ToastContainer />
     <VideoCallContainer isOpen={isOpen} ariaHideApp={false}>
-        <VideoCallScreen statusCall='Incoming Call' photoURL={user?.photoURL} senderId={senderId} recipientId={user?.uid}  chatId={chatRoomId} currentScreen="any"  onClose={() => setIsOpen(false)} />
+        <VideoCallScreen statusCall='Incoming Call' photoURL={user?.photoURL} sender={sender} recipient={recipient}  chatId={chatRoomId}  onClose={() => setIsOpen(false)} isGroup={isGroup} />
     </VideoCallContainer>
   </> 
   
