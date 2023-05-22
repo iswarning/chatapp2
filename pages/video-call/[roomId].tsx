@@ -1,6 +1,6 @@
 import { ActionBtn, ActionBtnActive, Video, VideoGrid } from "@/components/VideoCallScreen/VideoCallScreenStyled";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import styled from "styled-components";
 import VideoCameraFrontIcon from '@mui/icons-material/VideoCameraFront';
@@ -9,15 +9,15 @@ import MicIcon from '@mui/icons-material/Mic';
 export default function VideoCall({callVideoStatus}: any) {
 
     const router = useRouter();
-    const [showCam, setShowCam] = useState(true);
+    const [showCam, setShowCam] = useState(false);
     const [showMic, setShowMic] = useState(true);
-
-
-
+    const socketRef: any = useRef();
+    
     // const callVideoOneToOne = () => {
         import('peerjs').then(({ default: Peer }) => {
-            const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
-            const videoGrid = document.getElementById('video-grid');
+            
+            socketRef.current = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
+            // const videoGrid = document.getElementById('video-grid');
             const peers: any = {};
             const myPeer = new Peer(undefined!, {
                 host: '/'
@@ -27,32 +27,28 @@ export default function VideoCall({callVideoStatus}: any) {
                 video: true,
                 audio: true
             }).then(stream => {
-                // console.log('user-call')
                 myPeer.on('call', call => {
                     call.answer(stream)
-                    console.log('user-call')
-                    const video = document.createElement('video')
-                    video.style.width = '100%';
-                    video.style.height = '100%';
-                    video.style.objectFit = 'cover';
-                    video.style.borderRadius = '10px';
-    
+
+                    const video: HTMLVideoElement = document.getElementById('video-element') as HTMLVideoElement
+                    video.muted = true;
+                    
                     call.on('stream', userVideoStream => {
-                        addVideoStream(video, userVideoStream);
+                        setVideoStream(video, userVideoStream);
                     })
                 })
     
-                socket.on('user-connected', userId => {
+                socketRef.current.on('user-connected', (userId: any) => {
                     connectToNewUser(userId, stream);
                 })
             })
     
-            socket.on('user-disconnected', userId => {
+            socketRef.current.on('user-disconnected', (userId: any) => {
                 if(peers[userId]) peers[userId].close()
             })
     
             myPeer.on('open', id => {
-                socket.emit('join-room', router.query.roomId, id);
+                socketRef.current.emit('join-room', router.query.roomId, id);
             })
     
             const connectToNewUser = (userId: any, stream: any) => {
@@ -62,7 +58,7 @@ export default function VideoCall({callVideoStatus}: any) {
                 video.style.height = '300px';
                 video.style.objectFit = 'cover';
                 call.on('stream', userVideoStream => {
-                    addVideoStream(video, userVideoStream);
+                    setVideoStream(video, userVideoStream);
                 })
                 call.on('close', () => {
                     video.remove();
@@ -70,12 +66,12 @@ export default function VideoCall({callVideoStatus}: any) {
                 peers[userId] = call
             }
     
-            const addVideoStream = (video: any, stream: any) => {
+            const setVideoStream = (video: any, stream: any) => {
                 video.srcObject = stream;
                 video.addEventListener('loadedmetadata', () => {
                     video.play()
                 })
-                videoGrid?.append(video)
+                // videoGrid?.append(video)
             }
         });
     // }
@@ -174,8 +170,11 @@ export default function VideoCall({callVideoStatus}: any) {
             {
                 callVideoStatus === 'one-to-many' ? <Video></Video> : null
             } */}
-            <VideoGrid id='video-grid'>
-            </VideoGrid>
+            {/* <VideoGrid id='video-grid'>
+            </VideoGrid> */}
+            <Video id='video-element'>
+
+            </Video>
             <div className="d-flex mt-2">
                 {
                     showCam ? <ActionBtnActive onClick={handleShowCam}>

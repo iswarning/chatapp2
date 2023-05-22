@@ -9,35 +9,56 @@ import getNotificationMessage from '@/utils/getNotificationMessage';
 import { auth } from '@/firebase';
 import Loading from '@/components/Loading';
 import 'react-toastify/dist/ReactToastify.css';
-import { ToastContainer } from 'react-toastify';
+import { ToastContainer, toast } from 'react-toastify';
 import { io } from 'socket.io-client';
-import VideoCallScreen from '@/components/VideoCallScreen/VideoCallScreen';
 import { VideoCallContainer } from '@/components/ChatScreen/ChatScreenStyled';
+import VideoCallScreen from '@/components/VideoCallScreen/VideoCallScreen';
 
 export default function App({ Component, pageProps }: AppProps) {
   const [user, loading] = useAuthState(auth);
-  const [isOpenModal, setIsOpenModal] = useState(false)
-  const socketRef: any = useRef();
+  const [isOpen, setIsOpen] = useState(false);
   const [chatRoomId, setChatRoomId] = useState('')
-  const [reciId, setReciId] = useState('')
+  const [sender, setSender] = useState('')
+  const [recipient, setRecipient] = useState([])
+  const [isGroup, setIsGroup] = useState(false);
+
+  const socketRef: any = useRef();
   socketRef.current = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
+  // socketRef.current = io("http://localhost:9000");
 
   useEffect(() => {
+
     if(user) {
       createNewUser(user);
-      getNotificationMessage(user, socketRef);
-      socketRef.current.on("response-call", (userId, recipientId, chatId) => {
-        if(recipientId === user.uid) {
-          setChatRoomId(chatId)
-          setReciId(recipientId)
-          setIsOpenModal(!isOpenModal)
+      getNotificationMessage(user, socketRef.current);
+      
+      socketRef.current.on("response-call", (res: string) => {
+        let data = JSON.parse(res);
+        if(data.recipient.includes(user?.email)) {
+            setChatRoomId(data.chatId);
+            setSender(data.sender);
+            setRecipient(data.recipient);
+            setIsGroup(data.isGroup);
+            if(!isOpen) {
+              setIsOpen(true);
+            }
         }
-      })
+      });
+
+      socketRef.current.on('response-reject', (res: string) => {
+        let data = JSON.parse(res);
+        if(data.recipient.includes(user?.email)) {
+          setIsOpen(false);
+          toast(`${data.name} rejected the call !`, { hideProgressBar: true, autoClose: 5000, type: 'info' })
+        }
+      });
+
       return () => {
-        socketRef.current.disconnect();
-      };
+        socketRef.current.disconnect()
+      }
+
     }
-  },[user]);
+  },[user,isOpen]);
 
   if(!user) return <Login/>
 
@@ -46,8 +67,8 @@ export default function App({ Component, pageProps }: AppProps) {
   return <>
     <Component {...pageProps} />
     <ToastContainer />
-    <VideoCallContainer isOpen={isOpenModal} onRequestClose={() => setIsOpenModal(!isOpenModal)}>
-      <VideoCallScreen statusCall='Incoming Call' photoURL={user?.photoURL} recipiendId={reciId} chatId={chatRoomId} />
+    <VideoCallContainer isOpen={isOpen} ariaHideApp={false}>
+        <VideoCallScreen statusCall='Incoming Call' photoURL={user?.photoURL} sender={sender} recipient={recipient}  chatId={chatRoomId}  onClose={() => setIsOpen(false)} isGroup={isGroup} />
     </VideoCallContainer>
   </> 
   

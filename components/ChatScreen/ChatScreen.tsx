@@ -20,6 +20,7 @@ import { useRouter } from "next/router";
 import Picker from "@emoji-mart/react";
 import data from '@emoji-mart/data'
 import popupCenter from "@/utils/popupCenter";
+import { toast } from "react-toastify";
 
 export default function ChatScreen({ chatId, chat, messages, onReloadMessages}: any) {
     const [user] = useAuthState(auth);
@@ -29,19 +30,28 @@ export default function ChatScreen({ chatId, chat, messages, onReloadMessages}: 
     const [showEmoji, setShowEmoji] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
     const [statusSend, setStatusSend] = useState('');
-    const router = useRouter();
+
     const socketRef: any = useRef();
     socketRef.current = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
 
     useEffect(() => {
         getRecipientUser();
         ScrollToBottom();
-        socketRef.current.on("responseMessage", (msg: any) => {
+
+        socketRef.current.on("response-message", (msg: any) => {
             const data = JSON.parse(msg);
             if(data.recipient.includes(user?.email)) {
                 onReloadMessages()
             }
-          });
+        });
+        
+        socketRef.current.on('response-reject', (res: string) => {
+            let data = JSON.parse(res);
+            if(data.recipient.includes(user?.email)) {
+              setIsOpen(false);
+            }
+        })
+        
         return () => {
             socketRef.current.disconnect();
         };
@@ -101,19 +111,47 @@ export default function ChatScreen({ chatId, chat, messages, onReloadMessages}: 
     }
 
     const sendNotification = () => {
-        let listRecipientNotify = chat.users.filter((email: any) => email !== user?.email)
+        let listRecipient = chat.users.filter((email: any) => email !== user?.email)
         let dataNofity = {
             message: input,
-            recipient: chat.isGroup ? listRecipientNotify : getRecipientEmail(chat.users, user),
+            recipient: chat.isGroup ? listRecipient : getRecipientEmail(chat.users, user),
             name: chat.isGroup ? chat.name : user?.displayName,
+            isGroup: chat.isGroup,
         }
-        socketRef.current.emit('sendMessage', JSON.stringify(dataNofity));
+        socketRef.current.emit('send-message', JSON.stringify(dataNofity));
     }
 
-    const handleVideoCall = () => {
-        setIsOpen(!isOpen);
-        // window.open(router.basePath + "/video-call/" + chatId , "_blank", "width:200,height:500,top:0,left:40")
-        // popupCenter({url: router.basePath + "/video-call/" + chatId , title: '_blank', w: 400, h: 900});  
+    const handleVideoCall = async() => {
+
+        const response = await fetch(`${process.env.NEXT_PUBLIC_SOCKET_IO_URL}/getUserBusy`, {
+            method: 'GET',
+            headers: {
+                accept: 'application/json',
+            },
+        });
+            
+        let userBusy = await response.json();
+        
+        if(!isOpen) {       
+
+            if(userBusy.includes(recipientUser.email)) {
+
+                toast(`${recipientUser.fullName} is busy`, { hideProgressBar: true, autoClose: 5000, type: 'info' })
+                return;
+
+            } else {
+                setIsOpen(true);
+                let listRecipient = chat.users.filter((email: any) => email !== user?.email);
+                let data = {
+                    sender: user?.email,
+                    recipient: chat.isGroup ? listRecipient : getRecipientEmail(chat.users, user),
+                    chatId: chatId,
+                    isGroup: chat.isGroup
+                }
+                socketRef.current.emit("call-video", JSON.stringify(data));
+            }
+        }
+
     }
 
     const addEmoji = (e: any) => {
@@ -140,7 +178,7 @@ export default function ChatScreen({ chatId, chat, messages, onReloadMessages}: 
                     </p>
                 </HeaderInformation>
                 <HeaderIcons>
-                    <IconButton onClick={() => setIsOpen(!isOpen)}>
+                    <IconButton onClick={handleVideoCall}>
                         <CallIcon titleAccess="Call video"/>
                     </IconButton>
                     <IconButton>
@@ -152,7 +190,7 @@ export default function ChatScreen({ chatId, chat, messages, onReloadMessages}: 
             <MessageContainer>
                 {showMessage()}
                 {
-                    statusSend.length > 0 ? <StatusSendContainer>
+                    statusSend.length > 0 && messages[messages.length - 1].data().user === user?.email ? <StatusSendContainer>
                         <TextStatusSend>{statusSend === 'sent' ? 'Sent' : ''} <CheckIcon fontSize="small"/></TextStatusSend>
                     </StatusSendContainer> : null
                 }
@@ -177,8 +215,8 @@ export default function ChatScreen({ chatId, chat, messages, onReloadMessages}: 
                 <BtnSend hidden disabled={!input} type="submit" onClick={sendMessage}>Send Message</BtnSend>
             </InputContainer>
 
-            <VideoCallContainer isOpen={isOpen} onRequestClose={() => setIsOpen(false)}>
-                <VideoCallScreen statusCall={'Calling'} photoURL={chat.isGroup ? '' : recipientUser.photoURL} recipientId={recipientUser.id} />
+            <VideoCallContainer isOpen={isOpen} >
+                <VideoCallScreen statusCall={'Calling'} photoURL={chat.isGroup ? chat.photoURL : recipientUser.photoURL} sender={user?.email} recipient={chat.users.filter((email: any) => email !== user?.email)} chatId={chatId} onClose={() => setIsOpen(false)} isGroup={chat.isGroup} />
             </VideoCallContainer>
         </Container>
     )

@@ -1,119 +1,100 @@
 import { useEffect, useRef, useState } from "react"
-import { ActionBtn, ActionBtnActive, ActionGroup, BtnAcceptCall, BtnContainer, BtnRejectCall, ContentCenter, Pulse, RecipientName, StatusCalling, UserAvatar, UserContainer, Video, VideoCalling, VideoGrid } from "./VideoCallScreenStyled";
-import { useAuthState } from "react-firebase-hooks/auth";
-import { auth } from "@/firebase";
+import { BtnAcceptCall, BtnContainer, BtnRejectCall, ContentCenter, Pulse, StatusCalling, UserAvatar, UserContainer, VideoCalling } from "./VideoCallScreenStyled";
 import CallIcon from '@mui/icons-material/Call';
 import CallEndIcon from '@mui/icons-material/CallEnd';
-import VideoCameraFrontIcon from '@mui/icons-material/VideoCameraFront';
-import MicIcon from '@mui/icons-material/Mic';
-import { useRouter } from "next/router";
-import { v4 as uuidv4 } from 'uuid';
 import { io } from "socket.io-client";
+import getUserById from "@/services/users/getUserById";
 import popupCenter from "@/utils/popupCenter";
+import { useRouter } from "next/router";
+import getUserByEmail from "@/services/users/getUserByEmail";
 
-export default function VideoCallScreen({statusCall,photoURL,recipientId , chatId}: any) {
+export default function VideoCallScreen({ statusCall, photoURL, sender, recipient, chatId, onClose, isGroup }: any) {
 
     const [statusVideo, setStatusVideo] = useState(statusCall);
-
-    const [user] = useAuthState(auth);
     
     const [showCam, setShowCam] = useState(false);
     const [showMic, setShowMic] = useState(true);
+    const [second, setSecond] = useState(0);
+    const [minute, setMinute] = useState(0);
+    const router = useRouter();
     const socketRef: any = useRef();
 
-    const router = useRouter();
-
-    useEffect(() => {
-        if(statusCall === 'Calling') {
-            console.log(1212121)
-            socketRef.current = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
-            socketRef.current.emit("call-video", user?.uid, recipientId, chatId);
+    useInterval(() => {
+        setSecond(second + 1);
+        if(second == 59) {
+            setSecond(0);
+            setMinute((oldMinute) => oldMinute + 1)
         }
-        
-        // getVideoStream();
-    },[])
+    }, 1000);
 
-    const handleAcceptCall = () => {
-
+    const getUserInfo = async(email: string) => {
+        const data = await getUserByEmail(email);
+        if(data) {
+            return data.data();
+        }
+        return null;
     }
 
-    // const getVideoStream = () => {
-    //     import('peerjs').then(({ default: Peer }) => { 
-            
-    //         const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
-    //         const videoGrid = document.getElementById('video-grid');
-    //         const peers: any = {};
+    function formatNumber(num: number){
+        if(num.toString().length === 1) 
+            return '0' + num;
+        return num;
+    }
 
-    //         const myPeer = new Peer(undefined!, {
-    //             host: '/',
-    //         });
+    function useInterval(callback: any, delay: any) {
+        const savedCallback: any = useRef();
+      
+        // Remember the latest callback.
+        useEffect(() => {
+          savedCallback.current = callback;
+        }, [callback]);
+      
+        // Set up the interval.
+        useEffect(() => {
+          let id = setInterval(() => {
+            savedCallback.current();
+          }, delay);
+          return () => clearInterval(id);
+        }, [delay]);
+    }
 
-    //         const myVideo = document.createElement('video');
-    //         myVideo.style.width = '100%';
-    //         myVideo.style.height = '100%';
-    //         myVideo.style.objectFit = 'cover';
-    //         myVideo.style.paddingLeft = 'auto';
-    //         myVideo.style.paddingRight = 'auto';
-    //         myVideo.muted = !showMic;
-            
-    //         navigator.mediaDevices.getUserMedia({
-    //             video: showCam,
-    //             audio: true
-    //         }).then((stream: any) => {
-    //             myPeer.on('call', call => {
-    //                 call.answer(stream)
-    //                 const video = document.createElement('video')
-    //                 video.style.width = '100%';
-    //                 video.style.height = '100%';
-    //                 video.style.objectFit = 'cover';
-    //                 call.on('stream', userVideoStream => {
-    //                     addVideoStream(video, userVideoStream);
-    //                 })
-    //             })
-    //             socket.on('user-connected', userId => {
-    //                 connectToNewUser(userId, stream);
-    //             })
-    //         })
+    const handleAcceptCall = () => {
+        setStatusVideo('Called');
+        setSecond(0);
+        popupCenter({url: router.basePath + "/video-call/" + chatId , title: '_blank', w: 400, h: 900});
+    }
 
-    //         socket.on('user-disconnected', userId => {
-    //             if(peers[userId]) peers[userId].close()
-    //         })
+    const handleRejectCall = () => {
 
-    //         myPeer.on('open', id => {
-    //             socket.emit('join-room', uuidv4(), user?.email);
-    //         })
+        onClose();
+        
+        socketRef.current = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
 
-    //         const connectToNewUser = (userId: any, stream: any) => {
-    //             const call = myPeer.call(userId, stream);
-    //             const video = document.createElement('video');
-    //             video.style.width = '100%';
-    //             video.style.height = '100%';
-    //             video.style.objectFit = 'cover';
-    //             call.on('stream', userVideoStream => {
-    //                 addVideoStream(video, userVideoStream);
-    //             })
-    //             call.on('close', () => {
-    //                 video.remove();
-    //             })
-    //             peers[userId] = call
-    //         }
+        if (statusVideo === "Calling") {
+            getUserInfo(sender).then((d) => {
+                let data: any = {
+                    recipient: recipient,
+                    name: d?.fullName,
+                    chatId: chatId,
+                    isGroup: isGroup
+                }
+                socketRef.current.emit("reject-call", JSON.stringify(data))
+            })
+        }
 
-    //         const addVideoStream = (video: any, stream: any) => {
-    //             video.srcObject = stream;
-    //             video.addEventListener('loadedmetadata', () => {
-    //                 video.play()
-    //             })
-    //             videoGrid?.append(video);
-    //         }
-    //     })
-
-    // }
-
-    // const handleShowCam = () => {
-    //     if(showCam || showMic) {
-    //         popupCenter({url: router.basePath + "/video-call/" + chatId , title: '_blank', w: 400, h: 900});
-    //     }
-    // }
+        if (statusVideo === "Incoming Call") {
+            getUserInfo(recipient).then((d) => {
+                let data: any = {
+                    recipient: sender,
+                    name: d?.fullName,
+                    chatId: chatId,
+                    isGroup: isGroup
+                }
+                socketRef.current.emit("reject-call", JSON.stringify(data))
+            })
+        }
+        
+    }
 
     // const handleShowMic = () => {
     //     if(!showCam && !showMic) {
@@ -127,49 +108,20 @@ export default function VideoCallScreen({statusCall,photoURL,recipientId , chatI
 
                     <ContentCenter>
                         <Pulse> <UserAvatar src={photoURL}/> </Pulse>
-                    </ContentCenter>
-                    {/* {
-                        showCam ?  <VideoGrid id='video-grid'>
-                            
-                        </VideoGrid>
-                        : 
-                            <ContentCenter>
-                                <Pulse> <UserAvatar src={photoURL}/> </Pulse>
-                            </ContentCenter>
-                        
-                    } */}
-                    
+                    </ContentCenter>                  
                     <StatusCalling>
                         {
-                            statusVideo === 'Called' ? '' : statusVideo
+                            statusVideo === 'Called' ? formatNumber(minute) + ':' + formatNumber(second) : statusVideo
                         }
                     </StatusCalling>
-                    {/* {
-                        statusVideo === 'Called' ? <ActionGroup>
-                            {
-                                showCam ? <ActionBtnActive onClick={handleShowCam}>
-                                    <VideoCameraFrontIcon fontSize="large" />
-                                </ActionBtnActive> : <ActionBtn onClick={handleShowCam}>
-                                    <VideoCameraFrontIcon fontSize="large" />
-                                </ActionBtn>
-                            }
-                            {
-                                showMic ? <ActionBtnActive onClick={handleShowMic}>
-                                    <MicIcon fontSize="large" />
-                                </ActionBtnActive> : <ActionBtn onClick={handleShowMic}>
-                                    <MicIcon fontSize="large" />
-                                </ActionBtn>
-                            }
-                        </ActionGroup>  : null
-                    } */}
                     <BtnContainer>
                         {
-                            statusVideo === 'Incoming Call' ? <><BtnRejectCall>
+                            statusVideo === 'Incoming Call' ? <><BtnRejectCall title="Cancel" onClick={handleRejectCall}>
                                 <CallEndIcon fontSize="large"/>
                             </BtnRejectCall>
                             <BtnAcceptCall onClick={handleAcceptCall}>
                                 <CallIcon fontSize="large"/>
-                            </BtnAcceptCall></> : <BtnRejectCall title="Cancel">
+                            </BtnAcceptCall></> : <BtnRejectCall title="Cancel" onClick={handleRejectCall}>
                                 <CallEndIcon fontSize="large"/>
                             </BtnRejectCall>
                         }
