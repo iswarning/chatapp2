@@ -13,6 +13,9 @@ import { ToastContainer, toast } from 'react-toastify';
 import { io } from 'socket.io-client';
 import { VideoCallContainer } from '@/components/ChatScreen/ChatScreenStyled';
 import VideoCallScreen from '@/components/VideoCallScreen/VideoCallScreen';
+import getUserBusy from '@/utils/getUserBusy';
+import popupCenter from '@/utils/popupCenter';
+import { useRouter } from 'next/router';
 
 export default function App({ Component, pageProps }: AppProps) {
   const [user, loading] = useAuthState(auth);
@@ -21,10 +24,10 @@ export default function App({ Component, pageProps }: AppProps) {
   const [sender, setSender] = useState('')
   const [recipient, setRecipient] = useState([])
   const [isGroup, setIsGroup] = useState(false);
+  const router = useRouter();
 
   const socketRef: any = useRef();
   socketRef.current = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
-  // socketRef.current = io("http://localhost:9000");
 
   useEffect(() => {
 
@@ -32,7 +35,7 @@ export default function App({ Component, pageProps }: AppProps) {
       createNewUser(user);
       getNotificationMessage(user, socketRef.current);
       
-      socketRef.current.on("response-call", (res: string) => {
+      socketRef.current.on("response-call-video", (res: string) => {
         let data = JSON.parse(res);
         if(data.recipient.includes(user?.email)) {
             setChatRoomId(data.chatId);
@@ -45,20 +48,35 @@ export default function App({ Component, pageProps }: AppProps) {
         }
       });
 
-      socketRef.current.on('response-reject', (res: string) => {
+      socketRef.current.on('response-reject-call', (res: string) => {
         let data = JSON.parse(res);
         if(data.recipient.includes(user?.email)) {
-          setIsOpen(false);
+          if (!data.isGroup) {
+            setIsOpen(false);
+          } else {
+            getUserBusy().then((d) => {
+              if(d.length === 1) {
+                setIsOpen(false);
+              }
+            })
+          }
           toast(`${data.name} rejected the call !`, { hideProgressBar: true, autoClose: 5000, type: 'info' })
         }
       });
+
+      socketRef.current.on("response-accept-call", (res: string) => {
+        let data = JSON.parse(res);
+        if(data.recipient.includes(user?.email)) {
+          window.open(router.basePath + "/video-call/" + data.chatId);
+        }
+      })
 
       return () => {
         socketRef.current.disconnect()
       }
 
     }
-  },[user,isOpen]);
+  },[user]);
 
   if(!user) return <Login/>
 

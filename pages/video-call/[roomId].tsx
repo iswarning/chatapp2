@@ -9,19 +9,17 @@ import MicIcon from '@mui/icons-material/Mic';
 export default function VideoCall({callVideoStatus}: any) {
 
     const router = useRouter();
-    const [showCam, setShowCam] = useState(false);
+    const [showCam, setShowCam] = useState(true);
     const [showMic, setShowMic] = useState(true);
     const socketRef: any = useRef();
-    
-    // const callVideoOneToOne = () => {
+    const videoRef: any = useRef(null);
+
+    useEffect(() => {
         import('peerjs').then(({ default: Peer }) => {
             
             socketRef.current = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
-            // const videoGrid = document.getElementById('video-grid');
             const peers: any = {};
-            const myPeer = new Peer(undefined!, {
-                host: '/'
-            });
+            const myPeer = new Peer();
     
             navigator.mediaDevices.getUserMedia({
                 video: true,
@@ -30,11 +28,10 @@ export default function VideoCall({callVideoStatus}: any) {
                 myPeer.on('call', call => {
                     call.answer(stream)
 
-                    const video: HTMLVideoElement = document.getElementById('video-element') as HTMLVideoElement
-                    video.muted = true;
+                    videoRef.current.muted = true;
                     
                     call.on('stream', userVideoStream => {
-                        setVideoStream(video, userVideoStream);
+                        videoRef.current.srcObject = userVideoStream;
                     })
                 })
     
@@ -43,9 +40,9 @@ export default function VideoCall({callVideoStatus}: any) {
                 })
             })
     
-            socketRef.current.on('user-disconnected', (userId: any) => {
-                if(peers[userId]) peers[userId].close()
-            })
+            // socketRef.current.on('user-disconnected', (userId: any) => {
+            //     if(peers[userId]) peers[userId].close()
+            // })
     
             myPeer.on('open', id => {
                 socketRef.current.emit('join-room', router.query.roomId, id);
@@ -53,128 +50,26 @@ export default function VideoCall({callVideoStatus}: any) {
     
             const connectToNewUser = (userId: any, stream: any) => {
                 const call = myPeer.call(userId, stream);
-                const video = document.createElement('video');
-                video.style.width = '300px';
-                video.style.height = '300px';
-                video.style.objectFit = 'cover';
                 call.on('stream', userVideoStream => {
-                    setVideoStream(video, userVideoStream);
+                    videoRef.current.srcObject = userVideoStream;
                 })
-                call.on('close', () => {
-                    video.remove();
-                })
-                peers[userId] = call
+                // peers[userId] = call
             }
     
-            const setVideoStream = (video: any, stream: any) => {
-                video.srcObject = stream;
-                video.addEventListener('loadedmetadata', () => {
-                    video.play()
-                })
-                // videoGrid?.append(video)
-            }
         });
-    // }
-
-    // const callVideoOneToOne = () => {
-
-    // }
-
-    const callVideoOneToMany = () => {
-
-    }
-
-    // import('peerjs').then(({ default: Peer }) => {
-    //     const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
-    //     const videoGrid = document.getElementById('video-grid');
-    //     const peers: any = {};
-    //     const myPeer = new Peer(undefined!, {
-    //         host: '/'
-    //     });
-    //     const myVideo = document.createElement('video');
-    //     myVideo.style.width = '100%';
-    //     myVideo.style.height = '100%';
-    //     myVideo.style.objectFit = 'cover';
-    //     myVideo.style.borderRadius = '10px';
-    //     myVideo.muted = true;
-
-    //     navigator.mediaDevices.getUserMedia({
-    //         video: true,
-    //         audio: true
-    //     }).then(stream => {
-    //         addVideoStream(myVideo, stream)
-            
-    //         myPeer.on('call', call => {
-    //             call.answer(stream)
-    //             const video = document.createElement('video')
-    //             video.style.width = '100%';
-    //             video.style.height = '100%';
-    //             video.style.objectFit = 'cover';
-    //             myVideo.style.borderRadius = '10px';
-
-    //             call.on('stream', userVideoStream => {
-    //                 addVideoStream(video, userVideoStream);
-    //             })
-    //         })
-
-    //         socket.on('user-connected', userId => {
-    //             connectToNewUser(userId, stream);
-    //         })
-    //     })
-
-    //     socket.on('user-disconnected', userId => {
-    //         if(peers[userId]) peers[userId].close()
-    //     })
-
-    //     myPeer.on('open', id => {
-    //         socket.emit('join-room', router.query.roomId, id);
-    //     })
-
-    //     const connectToNewUser = (userId: any, stream: any) => {
-    //         const call = myPeer.call(userId, stream);
-    //         const video = document.createElement('video');
-    //         video.style.width = '100%';
-    //         video.style.height = '100%';
-    //         video.style.objectFit = 'cover';
-    //         call.on('stream', userVideoStream => {
-    //             addVideoStream(video, userVideoStream);
-    //         })
-    //         call.on('close', () => {
-    //             video.remove();
-    //         })
-    //         peers[userId] = call
-    //     }
-
-    //     const addVideoStream = (video: any, stream: any) => {
-    //         video.srcObject = stream;
-    //         video.addEventListener('loadedmetadata', () => {
-    //             video.play()
-    //         })
-    //         videoGrid?.append(video)
-    //     }
-    // });
+    },[])
 
     const handleShowCam = () => {
-
+        setShowCam(!showCam);
     }
 
     const handleShowMic = () => {
-        
+        setShowCam(!showMic);
     }
 
     return (
         <>
-            {/* {
-                callVideoStatus === 'one-to-one' ? <Video></Video> : null
-            }
-            {
-                callVideoStatus === 'one-to-many' ? <Video></Video> : null
-            } */}
-            {/* <VideoGrid id='video-grid'>
-            </VideoGrid> */}
-            <Video id='video-element'>
-
-            </Video>
+            <Video ref={videoRef} autoPlay />
             <div className="d-flex mt-2">
                 {
                     showCam ? <ActionBtnActive onClick={handleShowCam}>

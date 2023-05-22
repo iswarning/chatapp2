@@ -21,6 +21,7 @@ import Picker from "@emoji-mart/react";
 import data from '@emoji-mart/data'
 import popupCenter from "@/utils/popupCenter";
 import { toast } from "react-toastify";
+import getUserBusy from "@/utils/getUserBusy";
 
 export default function ChatScreen({ chatId, chat, messages, onReloadMessages}: any) {
     const [user] = useAuthState(auth);
@@ -45,10 +46,18 @@ export default function ChatScreen({ chatId, chat, messages, onReloadMessages}: 
             }
         });
         
-        socketRef.current.on('response-reject', (res: string) => {
+        socketRef.current.on('response-reject-call', (res: string) => {
             let data = JSON.parse(res);
             if(data.recipient.includes(user?.email)) {
-              setIsOpen(false);
+                if (!data.isGroup) {
+                    setIsOpen(false);
+                } else {
+                    getUserBusy().then((d) => {
+                        if(d.length === 1) {
+                            setIsOpen(false);
+                        }
+                    })
+                }
             }
         })
         
@@ -123,14 +132,7 @@ export default function ChatScreen({ chatId, chat, messages, onReloadMessages}: 
 
     const handleVideoCall = async() => {
 
-        const response = await fetch(`${process.env.NEXT_PUBLIC_SOCKET_IO_URL}/getUserBusy`, {
-            method: 'GET',
-            headers: {
-                accept: 'application/json',
-            },
-        });
-            
-        let userBusy = await response.json();
+        let userBusy = await getUserBusy();
         
         if(!isOpen) {       
 

@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { SendMessageBtn } from "../Friend/FriendStyled";
 import { CancelBtn } from "../FriendRequest/FriendRequestStyled";
 import { Avatar } from "@mui/material";
+import Image from "next/image";
 
 export const Container = styled.div.attrs(() => ({
     // className: 'container'
@@ -42,7 +43,7 @@ export const Label = styled.label.attrs(() => ({
     
 `;
 
-export const UpperImage = styled.img.attrs(() => ({
+export const UpperImage = styled(Image).attrs(() => ({
     // className: 'col-md-12'
 }))`
     top: 0;
