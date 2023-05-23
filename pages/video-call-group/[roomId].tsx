@@ -78,6 +78,10 @@ export default function VideoCall({callVideoStatus}: any) {
             })
             videoGrid?.append(video)
         }
+
+        return () => {
+            socketRef.current.disconnect();
+        }
     });
 
     const handleShowCam = () => {

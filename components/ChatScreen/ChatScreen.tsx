@@ -31,6 +31,8 @@ export default function ChatScreen({ chatId, chat, messages, onReloadMessages}: 
     const [showEmoji, setShowEmoji] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
     const [statusSend, setStatusSend] = useState('');
+    const [statusCall, setStatusCall] = useState('Calling');
+    const router = useRouter();
 
     const socketRef: any = useRef();
     socketRef.current = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
@@ -59,11 +61,19 @@ export default function ChatScreen({ chatId, chat, messages, onReloadMessages}: 
                     })
                 }
             }
+        });
+
+        socketRef.current.on("response-accept-call", (res: string) => {
+            let data = JSON.parse(res);
+            if(data.recipient.includes(user?.email)) {
+                setIsOpen(false);
+                window.open(router.basePath + "/video-call/" + data.chatId)
+            }
         })
-        
+
         return () => {
-            socketRef.current.disconnect();
-        };
+            socketRef.current.disconnect()
+        }
     },[onReloadMessages])
 
     const getRecipientUser = async() => {
@@ -102,7 +112,6 @@ export default function ChatScreen({ chatId, chat, messages, onReloadMessages}: 
 
     const sendMessage = (e: any) => {
         e.preventDefault();
-        setStatusSend('sending');
         createNewMessage(chatId, input, user?.email!, user?.photoURL!).then(() => {
 
             sendNotification();
@@ -115,11 +124,11 @@ export default function ChatScreen({ chatId, chat, messages, onReloadMessages}: 
             
             onReloadMessages();
 
-            setStatusSend('sent');
         }).catch((er) => console.log(er))
     }
 
     const sendNotification = () => {
+        socketRef.current = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
         let listRecipient = chat.users.filter((email: any) => email !== user?.email)
         let dataNofity = {
             message: input,
@@ -131,9 +140,8 @@ export default function ChatScreen({ chatId, chat, messages, onReloadMessages}: 
     }
 
     const handleVideoCall = async() => {
-
         let userBusy = await getUserBusy();
-        
+
         if(!isOpen) {       
 
             if(userBusy.includes(recipientUser.email)) {
@@ -142,6 +150,7 @@ export default function ChatScreen({ chatId, chat, messages, onReloadMessages}: 
                 return;
 
             } else {
+                socketRef.current = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
                 setIsOpen(true);
                 let listRecipient = chat.users.filter((email: any) => email !== user?.email);
                 let data = {
@@ -153,7 +162,6 @@ export default function ChatScreen({ chatId, chat, messages, onReloadMessages}: 
                 socketRef.current.emit("call-video", JSON.stringify(data));
             }
         }
-
     }
 
     const addEmoji = (e: any) => {
@@ -191,11 +199,6 @@ export default function ChatScreen({ chatId, chat, messages, onReloadMessages}: 
             
             <MessageContainer>
                 {showMessage()}
-                {
-                    statusSend.length > 0 && messages[messages.length - 1].data().user === user?.email ? <StatusSendContainer>
-                        <TextStatusSend>{statusSend === 'sent' ? 'Sent' : ''} <CheckIcon fontSize="small"/></TextStatusSend>
-                    </StatusSendContainer> : null
-                }
                 <EndOfMessage ref={endOfMessageRef} />
             </MessageContainer>
             <InputContainer>
@@ -218,7 +221,7 @@ export default function ChatScreen({ chatId, chat, messages, onReloadMessages}: 
             </InputContainer>
 
             <VideoCallContainer isOpen={isOpen} >
-                <VideoCallScreen statusCall={'Calling'} photoURL={chat.isGroup ? chat.photoURL : recipientUser.photoURL} sender={user?.email} recipient={chat.users.filter((email: any) => email !== user?.email)} chatId={chatId} onClose={() => setIsOpen(false)} isGroup={chat.isGroup} />
+                <VideoCallScreen statusCall={statusCall} photoURL={chat.isGroup ? chat.photoURL : recipientUser.photoURL} sender={user?.email} recipient={chat.users.filter((email: any) => email !== user?.email)} chatId={chatId} onClose={() => setIsOpen(false)} isGroup={chat.isGroup} />
             </VideoCallContainer>
         </Container>
     )

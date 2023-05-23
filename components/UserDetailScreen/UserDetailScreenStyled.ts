@@ -43,7 +43,7 @@ export const Label = styled.label.attrs(() => ({
     
 `;
 
-export const UpperImage = styled(Image).attrs(() => ({
+export const UpperImage = styled.img.attrs(() => ({
     // className: 'col-md-12'
 }))`
     top: 0;

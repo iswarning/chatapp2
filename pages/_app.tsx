@@ -64,12 +64,12 @@ export default function App({ Component, pageProps }: AppProps) {
         }
       });
 
-      socketRef.current.on("response-accept-call", (res: string) => {
-        let data = JSON.parse(res);
-        if(data.recipient.includes(user?.email)) {
-          window.open(router.basePath + "/video-call/" + data.chatId);
-        }
-      })
+      // socketRef.current.on("response-accept-call", (res: string) => {
+      //   let data = JSON.parse(res);
+      //   if(data.recipient.includes(user?.email)) {
+      //     window.open(router.basePath + "/video-call/" + data.chatId);
+      //   }
+      // })
 
       return () => {
         socketRef.current.disconnect()

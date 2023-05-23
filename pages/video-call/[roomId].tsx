@@ -5,74 +5,71 @@ import { io } from "socket.io-client";
 import styled from "styled-components";
 import VideoCameraFrontIcon from '@mui/icons-material/VideoCameraFront';
 import MicIcon from '@mui/icons-material/Mic';
+import { useAuthState } from "react-firebase-hooks/auth";
+import { auth } from "@/firebase";
+import OneToOneScreen from "@/components/OneToOneScreen/OneToOneScreen";
 
 export default function VideoCall({callVideoStatus}: any) {
-
-    const router = useRouter();
-    const [showCam, setShowCam] = useState(true);
+    
+    const [user] = useAuthState(auth);
+    
+    const [showCam, setShowCam] = useState(false);
     const [showMic, setShowMic] = useState(true);
-    const socketRef: any = useRef();
-    const videoRef: any = useRef(null);
+
+    const [second, setSecond] = useState(0);
+    const [minute, setMinute] = useState(0);
 
     useEffect(() => {
-        import('peerjs').then(({ default: Peer }) => {
-            
-            socketRef.current = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
-            const peers: any = {};
-            const myPeer = new Peer();
-    
-            navigator.mediaDevices.getUserMedia({
-                video: true,
-                audio: true
-            }).then(stream => {
-                myPeer.on('call', call => {
-                    call.answer(stream)
-
-                    videoRef.current.muted = true;
-                    
-                    call.on('stream', userVideoStream => {
-                        videoRef.current.srcObject = userVideoStream;
-                    })
-                })
-    
-                socketRef.current.on('user-connected', (userId: any) => {
-                    connectToNewUser(userId, stream);
-                })
-            })
-    
-            // socketRef.current.on('user-disconnected', (userId: any) => {
-            //     if(peers[userId]) peers[userId].close()
-            // })
-    
-            myPeer.on('open', id => {
-                socketRef.current.emit('join-room', router.query.roomId, id);
-            })
-    
-            const connectToNewUser = (userId: any, stream: any) => {
-                const call = myPeer.call(userId, stream);
-                call.on('stream', userVideoStream => {
-                    videoRef.current.srcObject = userVideoStream;
-                })
-                // peers[userId] = call
-            }
-    
-        });
+        console.log(showCam);
     },[])
+
+    useInterval(() => {
+        setSecond(second + 1);
+        if(second == 59) {
+            setSecond(0);
+            setMinute((oldMinute) => oldMinute + 1)
+        }
+    }, 1000);
+
+    function formatNumber(num: number){
+        if(num.toString().length === 1) 
+            return '0' + num;
+        return num;
+    }
+
+    function useInterval(callback: any, delay: any) {
+        const savedCallback: any = useRef();
+      
+        // Remember the latest callback.
+        useEffect(() => {
+          savedCallback.current = callback;
+        }, [callback]);
+      
+        // Set up the interval.
+        useEffect(() => {
+          let id = setInterval(() => {
+            savedCallback.current();
+          }, delay);
+          return () => clearInterval(id);
+        }, [delay]);
+    }
 
     const handleShowCam = () => {
         setShowCam(!showCam);
+        console.log(showCam);
     }
 
     const handleShowMic = () => {
-        setShowCam(!showMic);
+        setShowMic(!showMic);
     }
 
     return (
         <>
-            <Video ref={videoRef} autoPlay />
+            { !showCam && !showMic ?  null : <OneToOneScreen cam={showCam} mic={showMic} /> }
             <div className="d-flex mt-2">
+                { formatNumber(minute) + ":" + formatNumber(second) }
                 {
-                    showCam ? <ActionBtnActive onClick={handleShowCam}>
+                    showCam ? <ActionBtnActive onClick={() => setShowCam(true)}>
                         <VideoCameraFrontIcon fontSize="large" />
                     </ActionBtnActive> : <ActionBtn onClick={handleShowCam}>
                         <VideoCameraFrontIcon fontSize="large" />

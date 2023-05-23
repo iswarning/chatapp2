@@ -12,8 +12,9 @@ export const VideoGrid = styled.div`
 `;
 
 export const Video = styled.video`
-    width: 100%;
-    height: 100%;
+    margin: 20px;
+    width: 1650px;
+    height: 700px;
     object-fit: cover;
     border-radius: 5px;
 `;
@@ -58,6 +59,7 @@ export const StatusCalling = styled.h3`
 `;
 
 export const ActionBtn = styled.div`
+    background-color: silver;
     color: white;
     border-radius: 50%;
     width: 50px;
