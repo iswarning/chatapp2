@@ -29,13 +29,11 @@ export const EmojiContainer = styled.div.attrs(() => ({
 }))`
     position: absolute;
     width: max-content;
-    /* max-width: 250px; */
-    height: max-content;
+    max-width: 400px;
     background-color: white;
     border-radius: 10px;
-    /* padding: 10px; */
+    padding: 20px;
     margin-bottom: 500px;
-    margin-left: 5px;
     overflow: scroll;
     ::-webkit-scrollbar {
         display: none;
@@ -44,6 +42,7 @@ export const EmojiContainer = styled.div.attrs(() => ({
     scrollbar-width: none;
     display: flex;
     flex-wrap: wrap;
+    max-height: 400px;
 `
 
 export const EmojiElement = styled.div.attrs(() => ({
@@ -51,6 +50,8 @@ export const EmojiElement = styled.div.attrs(() => ({
 }))`
     width: 25%;
     cursor: pointer;
+    font-size: 50px;
+    padding-left: 10px;
     :hover {
         border-radius: 10px;
         background-color: #ddebeb;

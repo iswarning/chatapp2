@@ -23,6 +23,26 @@ import popupCenter from "@/utils/popupCenter";
 import { toast } from "react-toastify";
 import getUserBusy from "@/utils/getUserBusy";
 
+let emojiData: any = [
+    0x1F600,
+    0x1F604,
+    0x1F605,
+    0x1F606,
+    0x1F923,
+    0x1F602,
+    0x1F642,
+    0x1F970,
+    0x1F618,
+    0x1F60D,
+    0x1F60B,
+    0x1F917,
+    0x1F644,
+    0x1F611,
+    0x1F60C,
+    0x1F634,
+    0x1F62A,
+]
+
 export default function ChatScreen({ chatId, chat, messages, onReloadMessages}: any) {
     const [user] = useAuthState(auth);
     const [input, setInput] = useState('');
@@ -165,11 +185,7 @@ export default function ChatScreen({ chatId, chat, messages, onReloadMessages}: 
     }
 
     const addEmoji = (e: any) => {
-        let sym = e.unified.split("-");
-        let codesArray: any = [];
-        sym.forEach((el: any) => codesArray.push("0x" + el));
-        let emoji = String.fromCodePoint(...codesArray);
-        setInput(input + emoji);
+        setInput(input + String.fromCodePoint(e));
         setShowEmoji(false);
     };
 
@@ -204,7 +220,9 @@ export default function ChatScreen({ chatId, chat, messages, onReloadMessages}: 
             <InputContainer>
                 {
                     showEmoji ? <EmojiContainer>
-                        <Picker data={data} onEmojiSelect={addEmoji} />  
+                        {emojiData.map((e: any) => <EmojiElement onClick={() => addEmoji(e)}>
+                            {String.fromCodePoint(e)}
+                        </EmojiElement>)}
                     </EmojiContainer> : null
                 }
                 <IconButton onClick={() => setShowEmoji(!showEmoji)} >

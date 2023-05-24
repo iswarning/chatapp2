@@ -10,10 +10,19 @@ export default function Chat({ id, data, active, onShowMessage }: any) {
 
     const [user] = useAuthState(auth);
     const [recipientUser, setRecipientUser]: any = useState({});
+    const [lastMessage, setLastMessage] = useState('This is Messagesssssssssssssssssssssssssssssssssssssssssssssssssssssssss')
 
     useEffect(() => {
         getUserByEmail(getRecipientEmail(data.users, user)).then((u) => setRecipientUser(u.data()));         
+        handleMessageTooLong();
     },[])
+
+
+    const handleMessageTooLong = () => {
+        if(lastMessage.length > 25) {
+            setLastMessage(lastMessage.substring(0, 25) + "...");
+        }
+    }
 
     return (
         <>
@@ -21,25 +30,53 @@ export default function Chat({ id, data, active, onShowMessage }: any) {
                 data.isGroup ? 
                 <UserContainer onClick={() => onShowMessage()} style={{backgroundColor: active ? '#e9eaeb' : ''}}>
                     <UserAvatar src={data.photoURL}/>
-                    <TextEmail>{data.name}</TextEmail>
+                    <ContainerText>
+                        <TextEmail>{data.name}</TextEmail>
+                        <TextMess>{lastMessage}</TextMess>
+                    </ContainerText>
+                    <Dot>&#x2022;</Dot>
                 </UserContainer>
                 : 
                 <UserContainer onClick={() => onShowMessage()} style={{backgroundColor: active ? '#e9eaeb' : ''}}>
                     <UserAvatar src={recipientUser.photoURL}/>
-                    <TextEmail>{recipientUser.fullName}</TextEmail>
+                    <ContainerText>
+                        <TextEmail>{recipientUser.fullName}</TextEmail>
+                        <TextMess>{lastMessage}</TextMess>
+                    </ContainerText>
+                    <Dot>&#x2022;</Dot>
                 </UserContainer>
             }
         </>
     )
+
 }
 
-const TextEmail = styled.p`
-    margin-top: 15px;
+const Dot = styled.span`
+    font-size: 30px;
+    color: #0DA3BA;
+    margin-left: auto;
+`
+
+const ContainerText = styled.div`
+    display: flex;
+    flex-direction: column;
+`
+
+const TextMess = styled.span`
+    font-size: 14px;
+    color: black;
+    font-weight: 500;
+    text-overflow: ellipsis
+`
+
+const TextEmail = styled.span`
 `;
 
 const UserAvatar = styled(Avatar)`
     margin: 5px;
     margin-right: 10px;
+    width: 50px;
+    height: 50px;
 `;
 
 const UserContainer = styled.div`
@@ -48,7 +85,7 @@ const UserContainer = styled.div`
     cursor: pointer;
     padding: 15px;
     word-break: break-word;
-    height: 60px;
+    height: 80px;
     :hover {
         background-color: #e9eaeb;
     }
