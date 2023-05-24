@@ -55,7 +55,6 @@ export default function Menu({ active }: any) {
     const onChangeActivedChatBtn = () => {
         if (!activedChatBtn) {
             clearState();
-            console.log(user?.photoURL);
             setState(prevState => ({ ...prevState, activedChatBtn: !activedChatBtn }));
             if(router.asPath.indexOf('/chat/') === -1) {
                 router.push('/');

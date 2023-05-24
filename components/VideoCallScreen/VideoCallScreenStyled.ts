@@ -12,11 +12,11 @@ export const VideoGrid = styled.div`
 `;
 
 export const Video = styled.video`
-    margin: 20px;
-    width: 1650px;
-    height: 700px;
+    margin: 20px 20px 0 20px;
+    width: 54%;
+    /* height: 83.8vh; */
     object-fit: cover;
-    border-radius: 5px;
+    border-radius: 10px;
 `;
 
 export const UserAvatar = styled(Avatar)`

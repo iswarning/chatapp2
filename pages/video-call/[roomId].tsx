@@ -4,12 +4,14 @@ import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import styled from "styled-components";
 import VideoCameraFrontIcon from '@mui/icons-material/VideoCameraFront';
+import CallEndIcon from '@mui/icons-material/CallEnd';
 import MicIcon from '@mui/icons-material/Mic';
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@/firebase";
 import OneToOneScreen from "@/components/OneToOneScreen/OneToOneScreen";
+import { Button } from "@mui/material";
 
-export default function VideoCall({callVideoStatus}: any) {
+export default function VideoCall() {
     
     const [user] = useAuthState(auth);
     
@@ -20,7 +22,7 @@ export default function VideoCall({callVideoStatus}: any) {
     const [minute, setMinute] = useState(0);
 
     useEffect(() => {
-        console.log(showCam);
+        
     },[])
 
     useInterval(() => {
@@ -56,7 +58,6 @@ export default function VideoCall({callVideoStatus}: any) {
 
     const handleShowCam = () => {
         setShowCam(!showCam);
-        console.log(showCam);
     }
 
     const handleShowMic = () => {
@@ -64,10 +65,9 @@ export default function VideoCall({callVideoStatus}: any) {
     }
 
     return (
-        <>
-            { !showCam && !showMic ?  null : <OneToOneScreen cam={showCam} mic={showMic} /> }
-            <div className="d-flex mt-2">
-                { formatNumber(minute) + ":" + formatNumber(second) }
+        <Container>
+            <OneToOneScreen />
+            <ActionContainer className="d-flex mt-2">
                 {
                     showCam ? <ActionBtnActive onClick={() => setShowCam(true)}>
                         <VideoCameraFrontIcon fontSize="large" />
@@ -75,6 +75,15 @@ export default function VideoCall({callVideoStatus}: any) {
                         <VideoCameraFrontIcon fontSize="large" />
                     </ActionBtn>
                 }
+                <CenterContainer>
+                    <TimeContainer>
+                        { formatNumber(minute) + ":" + formatNumber(second) }
+                    </TimeContainer>
+                    
+                    <RejectBtn variant="contained" color='error'>
+                        <CallEndIcon/>
+                    </RejectBtn>
+                </CenterContainer>
                 {
                     showMic ? <ActionBtnActive onClick={handleShowMic}>
                         <MicIcon fontSize="large" />
@@ -82,13 +91,33 @@ export default function VideoCall({callVideoStatus}: any) {
                         <MicIcon fontSize="large" />
                     </ActionBtn>
                 }
-            </div>
+            </ActionContainer>
             
-        </>
+        </Container>
     )
-    
 }
 
+const ActionContainer = styled.div``
+
+const RejectBtn = styled(Button)`
+    width: max-content;
+`
+const Container = styled.div`
+    background-color: hsl(0, 0%, 13.6%);
+    /* width: 100%; */
+    height: 100vh;
+`
+const CenterContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    padding: 10px 0;
+`
+
+const TimeContainer = styled.div`
+    text-align: center;
+    color: white;
+    margin-bottom: 20px;
+`
 const ShowCamBtn = styled.button`
     border-radius: 50%;
     border: none;
