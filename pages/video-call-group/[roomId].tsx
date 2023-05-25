@@ -46,7 +46,8 @@ export default function VideoCall({callVideoStatus}: any) {
             socket.on('user-connected', userId => {
                 connectToNewUser(userId, stream);
             })
-        })
+            
+        }).catch((err) => console.log(err))
 
         socket.on('user-disconnected', userId => {
             if(peers[userId]) peers[userId].close()
@@ -82,7 +83,7 @@ export default function VideoCall({callVideoStatus}: any) {
         return () => {
             socketRef.current.disconnect();
         }
-    });
+    }).catch((err) => console.log(err));
 
     const handleShowCam = () => {
 

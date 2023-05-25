@@ -50,7 +50,7 @@ export default function VideoCallScreen({ statusCall, photoURL, sender, recipien
                     isGroup: isGroup
                 }
                 socketRef.current.emit("reject-call", JSON.stringify(data))
-            })
+            }).catch((err) => console.log(err))
         }
 
         if (statusCall === "Incoming Call") {
@@ -66,7 +66,7 @@ export default function VideoCallScreen({ statusCall, photoURL, sender, recipien
                     isGroup: isGroup
                 }
                 socketRef.current.emit("reject-call", JSON.stringify(data))
-            })
+            }).catch((err) => console.log(err))
         }
 
         return () => {

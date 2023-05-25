@@ -10,6 +10,7 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@/firebase";
 import OneToOneScreen from "@/components/OneToOneScreen/OneToOneScreen";
 import { Button } from "@mui/material";
+import { toast } from "react-toastify";
 
 export default function VideoCall() {
     
@@ -21,8 +22,18 @@ export default function VideoCall() {
     const [second, setSecond] = useState(0);
     const [minute, setMinute] = useState(0);
 
+    const socketRef: any = useRef();
+// 
+    socketRef.current = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!)
+
     useEffect(() => {
-        
+        // socketRef.current.on("response-disconnect-call", (data: any) => {
+        //     let response = JSON.parse(data);
+        //     toast(`${response.name} disconnected the call`, { hideProgressBar: true, autoClose: 5000, type: 'info' })
+        // })
+        // return () => {
+        //     socketRef.current.disconnect();
+        // }
     },[])
 
     useInterval(() => {

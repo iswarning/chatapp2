@@ -32,7 +32,7 @@ export default function App({ Component, pageProps }: AppProps) {
   useEffect(() => {
 
     if(user) {
-      createNewUser(user);
+      createNewUser(user).catch((err) => console.log(err));
       getNotificationMessage(user, socketRef.current);
       
       socketRef.current.on("response-call-video", (res: string) => {
@@ -58,7 +58,7 @@ export default function App({ Component, pageProps }: AppProps) {
               if(d.length === 1) {
                 setIsOpen(false);
               }
-            })
+            }).catch((err) => console.log(err))
           }
           toast(`${data.name} rejected the call !`, { hideProgressBar: true, autoClose: 5000, type: 'info' })
         }

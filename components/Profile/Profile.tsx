@@ -21,9 +21,6 @@ import ReactModal from 'react-modal';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth, db } from '@/firebase';
 import getUserById from '@/services/users/getUserById';
-import createNewUser from '@/services/users/createNewUser';
-import firebase from 'firebase';
-import UpdateUser from '@/services/users/updateUser';
 
 
 export default function Profile() {
@@ -35,8 +32,8 @@ export default function Profile() {
     const [user] = useAuthState(auth);
 
     useEffect(() => {
-        getListFriend();
-        getUserInfo();
+        getListFriend().catch((err) => console.log(err));
+        getUserInfo().catch((err) => console.log(err));
     },[userInfo])
 
     const getUserInfo = async() => {
@@ -55,7 +52,7 @@ export default function Profile() {
 
     const updateInfo = async(e: any) => {
         e.preventDefault();
-        db.collection("users").doc(user?.uid).update({ phoneNumber: phoneNumber });
+        db.collection("users").doc(user?.uid).update({ phoneNumber: phoneNumber }).catch((err) => console.log(err));
         setIsOpenModal(!isOpenModal);
     }
 

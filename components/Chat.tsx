@@ -13,10 +13,14 @@ export default function Chat({ id, data, active, onShowMessage }: any) {
     const [lastMessage, setLastMessage] = useState('This is Messagesssssssssssssssssssssssssssssssssssssssssssssssssssssssss')
 
     useEffect(() => {
-        getUserByEmail(getRecipientEmail(data.users, user)).then((u) => setRecipientUser(u.data()));         
+        getUserInfo().catch((err) => console.log(err));
         handleMessageTooLong();
     },[])
 
+    const getUserInfo = async() => {
+        const info = await getUserByEmail(getRecipientEmail(data.users, user));
+        setRecipientUser(info.data());
+    }
 
     const handleMessageTooLong = () => {
         if(lastMessage.length > 25) {
@@ -31,7 +35,7 @@ export default function Chat({ id, data, active, onShowMessage }: any) {
                 <UserContainer onClick={() => onShowMessage()} style={{backgroundColor: active ? '#e9eaeb' : ''}}>
                     <UserAvatar src={data.photoURL}/>
                     <ContainerText>
-                        <TextEmail>{data.name}</TextEmail>
+                        <TextEmail>Team: {data.name}</TextEmail>
                         <TextMess>{lastMessage}</TextMess>
                     </ContainerText>
                     <Dot>&#x2022;</Dot>

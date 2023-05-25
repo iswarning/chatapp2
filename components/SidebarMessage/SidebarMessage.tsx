@@ -44,21 +44,20 @@ export default function SidebarMessage() {
         }
     }
     
-
     const getListChat = async() => {
         getChatByEmail(user?.email!).then((chats: any) => {
             setChatData(chats);
-        });
+        }).catch((err) => console.log(err))
     }
 
     const onClose = () => {
         setIsOpen(false);
-        getListChat();
+        getListChat().catch((err) => console.log(err));
     }
 
     const showMessages = (chat: any) => {
         setChatInfo(chat);
-        getMessageData(chat.id);
+        getMessageData(chat.id).catch((err) => console.log(err));
     }
 
     const getMessageData = async(chatId: string) => {
@@ -68,6 +67,13 @@ export default function SidebarMessage() {
         } else {
             setMessData([])
         }
+    }
+
+    const pushNewMessage = (msg: any) => {
+        let res = messData;
+        res.push(msg);
+        console.log(res)
+        setMessData(res);
     }
 
     return (
