@@ -81,7 +81,7 @@ export default function VideoCall({callVideoStatus}: any) {
         }
 
         return () => {
-            socketRef.current.disconnect();
+            socket.disconnect();
         }
     }).catch((err) => console.log(err));
 

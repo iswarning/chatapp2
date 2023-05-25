@@ -11,6 +11,6 @@ export default function getNotificationMessage(userLoggedIn: any, socket: any) {
         }
     });
     return () => {
-      socket.current.disconnect()
+      socket.disconnect()
     }
 }

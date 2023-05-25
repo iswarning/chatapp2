@@ -35,7 +35,7 @@ export default function Chat({ id, data, active, onShowMessage }: any) {
                 <UserContainer onClick={() => onShowMessage()} style={{backgroundColor: active ? '#e9eaeb' : ''}}>
                     <UserAvatar src={data.photoURL}/>
                     <ContainerText>
-                        <TextEmail>Team: {data.name}</TextEmail>
+                        <TextEmail>Group: {data.name}</TextEmail>
                         <TextMess>{lastMessage}</TextMess>
                     </ContainerText>
                     <Dot>&#x2022;</Dot>

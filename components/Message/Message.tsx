@@ -2,7 +2,7 @@ import { auth } from "@/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useEffect, useState } from "react";
 import getUserByEmail from "@/services/users/getUserByEmail";
-import { Container, ContainerReciever, ContainerSender, MessageContent, Reciever, Sender, Timestamp, UserAvatarReciever, UserAvatarSender } from "./MessageStyled";
+import { Container, ContainerReciever, ContainerSender, MessageContent, Reciever, Sender, Timestamp, UserAvatarReciever } from "./MessageStyled";
 
 export default function Message({user, message, showAvatar}: any) {
 
@@ -27,10 +27,9 @@ export default function Message({user, message, showAvatar}: any) {
         <Container>
             {
                 user === userLoggedIn?.email ? <ContainerSender>
-                    <Sender style={{marginRight: showAvatar ? '65px' : ''}} title={'Sent at ' +  formatDate(message.timestamp)}>
+                    <Sender title={'Sent at ' +  formatDate(message.timestamp)}>
                         <MessageContent dangerouslySetInnerHTML={{__html: message.message}}></MessageContent>
                     </Sender>
-                    { !showAvatar ? <UserAvatarSender src={userLoggedIn?.photoURL ?? ''} /> : null }
                 </ContainerSender> 
                 : 
                 <ContainerReciever>

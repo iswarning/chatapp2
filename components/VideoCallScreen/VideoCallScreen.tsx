@@ -15,7 +15,7 @@ export default function VideoCallScreen({ statusCall, photoURL, sender, recipien
     
     const router = useRouter();
     const socketRef: any = useRef();
-    socketRef.current = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
+    const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
 
     const getUserInfo = async(email: string) => {
         const data = await getUserByEmail(email);
@@ -33,7 +33,7 @@ export default function VideoCallScreen({ statusCall, photoURL, sender, recipien
             recipient: sender,
             chatId: chatId
         }
-        socketRef.current.emit("accept-call", JSON.stringify(data))
+        socket.emit("accept-call", JSON.stringify(data))
     }
 
     const handleRejectCall = () => {
@@ -49,7 +49,7 @@ export default function VideoCallScreen({ statusCall, photoURL, sender, recipien
                     chatId: chatId,
                     isGroup: isGroup
                 }
-                socketRef.current.emit("reject-call", JSON.stringify(data))
+                socket.emit("reject-call", JSON.stringify(data))
             }).catch((err) => console.log(err))
         }
 
@@ -65,12 +65,12 @@ export default function VideoCallScreen({ statusCall, photoURL, sender, recipien
                     chatId: chatId,
                     isGroup: isGroup
                 }
-                socketRef.current.emit("reject-call", JSON.stringify(data))
+                socket.emit("reject-call", JSON.stringify(data))
             }).catch((err) => console.log(err))
         }
 
         return () => {
-            socketRef.current.disconnect();
+            socket.disconnect();
         }
         
     }

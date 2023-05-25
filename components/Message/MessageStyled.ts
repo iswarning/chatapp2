@@ -16,10 +16,10 @@ export const ContainerReciever = styled(Container)`
     
 `;
 
-export const UserAvatarSender = styled(Avatar)`
-    width: 50px;
-    height: 50px;
-`;
+// export const UserAvatarSender = styled(Avatar)`
+//     width: 50px;
+//     height: 50px;
+// `;
 
 export const UserAvatarReciever = styled(Avatar)`
     width: 50px;

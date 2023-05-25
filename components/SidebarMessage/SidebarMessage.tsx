@@ -69,13 +69,6 @@ export default function SidebarMessage() {
         }
     }
 
-    const pushNewMessage = (msg: any) => {
-        let res = messData;
-        res.push(msg);
-        console.log(res)
-        setMessData(res);
-    }
-
     return (
         <Container>
             <MenuContainer>
@@ -107,7 +100,7 @@ export default function SidebarMessage() {
             {
                 messData ? 
                     <ChatContainer>
-                        <ChatScreen chatId={chatInfo.id} chat={chatInfo.data()} messages={messData} onReloadMessages={() => getMessageData(chatInfo.id)}/>
+                        <ChatScreen chatId={chatInfo.id} chat={chatInfo.data()} messages={messData}/>
                     </ChatContainer>
                 : null
             }

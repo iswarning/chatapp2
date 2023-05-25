@@ -16,23 +16,23 @@ export default function OneToOneScreen() {
 
     const [user] = useAuthState(auth);
 
-    socketRef.current = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!)
+    const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!)
 
     useEffect(() => {
         getVideoStream();
-        // socketRef.current.on("response-disconnect-call", (data: any) => {
+        // socket.on("response-disconnect-call", (data: any) => {
         //     let response = JSON.parse(data);
         //     toast(`${response.name} disconnected the call`, { hideProgressBar: true, autoClose: 5000, type: 'info' })
         // })
         // return () => {
-        //     socketRef.current.disconnect();
+        //     socket.disconnect();
         // }
     },[])
 
     const getVideoStream = () => {
         import('peerjs').then(({ default: Peer }) => {
             
-            socketRef.current = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
+            const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
             
             const peers: any = {};
             const myPeer = new Peer();
@@ -51,14 +51,14 @@ export default function OneToOneScreen() {
                     })
                 })
     
-                socketRef.current.on('user-connected', (response: any) => {
+                socket.on('user-connected', (response: any) => {
                     let data = JSON.parse(response);
                     connectToNewUser(data.clientId, stream);
                 })
 
             }).catch((err) => console.log(err))
     
-            socketRef.current.on('user-disconnected', (response: any) => {
+            socket.on('user-disconnected', (response: any) => {
                 let dataRes: any = JSON.parse(response);
                 if(peers[dataRes.clientId]) { 
                     // getChatById(dataRes.chatRoomId).then((chat) => {
@@ -69,7 +69,7 @@ export default function OneToOneScreen() {
                     //         recipient: chat?.data()?.users.filter((user: any) => user === user?.email),
                     //         isGroup: false
                     //     }
-                    //     socketRef.current.emit("disconnect-call", JSON.stringify(dataSend))
+                    //     socket.emit("disconnect-call", JSON.stringify(dataSend))
                     //     peers[dataRes.clientId].close();
                     // }).catch((err) => console.log(err));
                     peers[dataRes.clientId].close();
@@ -83,7 +83,7 @@ export default function OneToOneScreen() {
                     sender: user?.email,
                     name: user?.displayName
                 }
-                socketRef.current.emit('join-room', JSON.stringify(data));
+                socket.emit('join-room', JSON.stringify(data));
             })
     
             const connectToNewUser = (userId: any, stream: any) => {
@@ -95,7 +95,7 @@ export default function OneToOneScreen() {
             }
 
             return () => {
-                socketRef.current.disconnect();
+                socket.disconnect();
             }
 
         }).catch((err) => console.log(err));

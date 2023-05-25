@@ -1,5 +1,5 @@
 export default function getResponseCall(socketRef: any, user: any, isOpen : boolean, onOpen: any) {
-    socketRef.current.on("response-call-video", (res: string) => {
+    socket.on("response-call-video", (res: string) => {
         let data = JSON.parse(res);
         if(data.recipient.includes(user?.email)) {
             if(!isOpen) {

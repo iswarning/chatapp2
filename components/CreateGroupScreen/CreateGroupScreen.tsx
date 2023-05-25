@@ -51,7 +51,7 @@ export default function CreateGroupScreen({onClose}: any) {
         if(value.length === 10) {
             const d = friendData?.find((f) => f.phoneNumber === value)
             if(d !== undefined && listMember.length > 0 && listMember.filter((mem: any) => mem.email === d.email).length === 0) { 
-                setSearchData(d)
+                setSearchData(d);
             } else {
                 setSearchData({});
             }
@@ -67,6 +67,8 @@ export default function CreateGroupScreen({onClose}: any) {
             },
             ...oldListMember
         ]);
+        setSearchInput('');
+        setSearchData({});
     }
 
     const handleRemoveUser = (mem: any) => {

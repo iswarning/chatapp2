@@ -26,16 +26,22 @@ export default function App({ Component, pageProps }: AppProps) {
   const [isGroup, setIsGroup] = useState(false);
   const router = useRouter();
 
-  const socketRef: any = useRef();
-  socketRef.current = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
+  // const socketRef: any = useRef();
+  // const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
+
+
 
   useEffect(() => {
 
     if(user) {
       createNewUser(user).catch((err) => console.log(err));
-      getNotificationMessage(user, socketRef.current);
+      const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!)
+
+      socket.emit("online", user?.email);
+
+      getNotificationMessage(user, socket);
       
-      socketRef.current.on("response-call-video", (res: string) => {
+      socket.on("response-call-video", (res: string) => {
         let data = JSON.parse(res);
         if(data.recipient.includes(user?.email)) {
             setChatRoomId(data.chatId);
@@ -48,7 +54,7 @@ export default function App({ Component, pageProps }: AppProps) {
         }
       });
 
-      socketRef.current.on('response-reject-call', (res: string) => {
+      socket.on('response-reject-call', (res: string) => {
         let data = JSON.parse(res);
         if(data.recipient.includes(user?.email)) {
           if (!data.isGroup) {
@@ -64,15 +70,15 @@ export default function App({ Component, pageProps }: AppProps) {
         }
       });
 
-      // socketRef.current.on("response-accept-call", (res: string) => {
-      //   let data = JSON.parse(res);
-      //   if(data.recipient.includes(user?.email)) {
-      //     window.open(router.basePath + "/video-call/" + data.chatId);
-      //   }
-      // })
+      socket.on("response-accept-call", (res: string) => {
+        let data = JSON.parse(res);
+        if(data.recipient.includes(user?.email)) {
+          window.open(router.basePath + "/video-call/" + data.chatId);
+        }
+      })
 
       return () => {
-        socketRef.current.disconnect()
+        socket.disconnect()
       }
 
     }
