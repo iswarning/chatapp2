@@ -33,7 +33,7 @@ export default function VideoCallScreen({ statusCall, photoURL, sender, recipien
             recipient: sender,
             chatId: chatId
         }
-        socket.emit("accept-call", JSON.stringify(data))
+        socket.emit("accept-call-one-to-one", JSON.stringify(data))
     }
 
     const handleRejectCall = () => {
@@ -42,6 +42,7 @@ export default function VideoCallScreen({ statusCall, photoURL, sender, recipien
 
         if (statusCall === "Calling") {
             getUserInfo(sender).then((d) => {
+                console.log(sender, recipient)
                 let data: any = {
                     sender: sender,
                     recipient: recipient,
@@ -49,23 +50,35 @@ export default function VideoCallScreen({ statusCall, photoURL, sender, recipien
                     chatId: chatId,
                     isGroup: isGroup
                 }
-                socket.emit("reject-call", JSON.stringify(data))
+                socket.emit("reject-call-one-to-one", JSON.stringify(data))
             }).catch((err) => console.log(err))
         }
 
         if (statusCall === "Incoming Call") {
+            // getUserInfo(user?.email!).then((d) => {
+            //     let recipientData = [];
+            //     recipientData.push(getRecipientEmail(recipient, user));
+            //     recipientData.push(sender);
+            //     console.log(recipientData)
+            //     alert(recipientData)
+            //     let data: any = {
+            //         sender: user?.email,
+            //         recipient: recipientData,
+            //         name: d?.fullName,
+            //         chatId: chatId,
+            //         isGroup: isGroup
+            //     }
+            //     socket.emit("reject-call", JSON.stringify(data))
+            // }).catch((err) => console.log(err))
             getUserInfo(user?.email!).then((d) => {
-                let recipientData = [];
-                recipientData.push(getRecipientEmail(recipient, user));
-                recipientData.push(sender);
                 let data: any = {
                     sender: user?.email,
-                    recipient: recipientData,
+                    recipient: recipient,
                     name: d?.fullName,
                     chatId: chatId,
                     isGroup: isGroup
                 }
-                socket.emit("reject-call", JSON.stringify(data))
+                socket.emit("reject-call-one-to-one", JSON.stringify(data))
             }).catch((err) => console.log(err))
         }
 

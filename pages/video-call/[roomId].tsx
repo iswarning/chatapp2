@@ -11,6 +11,7 @@ import { auth } from "@/firebase";
 import OneToOneScreen from "@/components/OneToOneScreen/OneToOneScreen";
 import { Button } from "@mui/material";
 import { toast } from "react-toastify";
+import getAllChat from "@/services/chats/getAllChat";
 
 export default function VideoCall() {
     
@@ -107,6 +108,24 @@ export default function VideoCall() {
         </Container>
     )
 }
+
+// export async function getStaticProps({ params: { post } }) {
+//     const [pageContent] = await Promise.all([getBlogPostContent(post)]);
+//     return { props: { pageContent } };
+//   }
+  
+// export async function getStaticPaths() {
+//     const [chats] = await Promise.all([getAllChat()]);
+  
+//     const paths = chats.map((c) => {
+//       return { params: { chat: c.id } }; // Route is something like "this-is-my-post"
+//     });
+  
+//     return {
+//       paths,
+//       fallback: false,
+//     };
+// }
 
 const ActionContainer = styled.div``
 

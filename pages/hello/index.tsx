@@ -2,26 +2,15 @@ import Head from "next/head";
 import { toast } from "react-toastify";
 import styled from "styled-components";
 import { useState } from "react";
+import React from "react";
 
-export default function Hello() {
+export default class Hello extends React.Component {
 
-    const [show, setShow] = useState(false);
-
-    const handleClick = () => {
-        setShow(!show);
-        if(show) {
-            document.getElementById("snackbar")?.classList.add("show")
-        } else {
-            document.getElementById("snackbar")?.classList.remove("show")
-        }
+    render() {
+        return (
+            <div>Hello world</div>
+        )
     }
-
-    return (
-        <>
-            <button onClick={handleClick}>Show Snackbar</button><div id="snackbar">Some text some message..</div>
-        </>
-        
-    )
 }
 
 

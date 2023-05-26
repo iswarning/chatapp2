@@ -20,19 +20,18 @@ import { IconButton } from '@mui/material';
 import CreateGroupScreen from '../CreateGroupScreen/CreateGroupScreen';
 import getMessagesByChatId from '@/services/messages/getMessagesByChatId';
 import ChatScreen from '../ChatScreen/ChatScreen';
-import Loading from '../Loading';
 
 export default function SidebarMessage() {
 
     const [user] = useAuthState(auth);
     const [searchInput, setSearchInput] = useState('');
-    const [chatData, setChatData] = useState([]);
+    const [chatData, setChatData]: any = useState([]);
     const [isOpen, setIsOpen] = useState(false);
     const [messData, setMessData]: any = useState(null);
     const [chatInfo, setChatInfo]: any = useState({});
 
     useEffect(() => {
-        getListChat();
+        getListChat().catch((err) => console.log(err))
     },[])
 
     const handleSearch = (e: any) => {
@@ -45,19 +44,18 @@ export default function SidebarMessage() {
     }
     
     const getListChat = async() => {
-        getChatByEmail(user?.email!).then((chats: any) => {
-            setChatData(chats);
-        }).catch((err) => console.log(err))
+        const chatByEmail = await getChatByEmail(user?.email!);
+        setChatData(chatByEmail);
     }
 
-    const onClose = () => {
+    const onClose = async() => {
         setIsOpen(false);
-        getListChat().catch((err) => console.log(err));
+        await getListChat();
     }
 
-    const showMessages = (chat: any) => {
+    const showMessages = async(chat: any) => {
         setChatInfo(chat);
-        getMessageData(chat.id).catch((err) => console.log(err));
+        await getMessageData(chatInfo.id);
     }
 
     const getMessageData = async(chatId: string) => {
@@ -93,14 +91,14 @@ export default function SidebarMessage() {
                             id={chat.id} 
                             data={chat.data()} 
                             onShowMessage={() => showMessages(chat)} 
-                            active={chat.id === chatInfo.id} />
+                            />
                     ) : null
                 }
             </SidebarContainer>
             {
                 messData ? 
                     <ChatContainer>
-                        <ChatScreen chatId={chatInfo.id} chat={chatInfo.data()} messages={messData}/>
+                        <ChatScreen chatId={chatInfo.id} chat={chatInfo.data()} messages={messData} onReloadMessage={() => getMessageData(chatInfo.id)}/>
                     </ChatContainer>
                 : null
             }

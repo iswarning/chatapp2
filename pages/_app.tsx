@@ -26,56 +26,56 @@ export default function App({ Component, pageProps }: AppProps) {
   const [isGroup, setIsGroup] = useState(false);
   const router = useRouter();
 
-  // const socketRef: any = useRef();
-  // const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
-
-
+  const socketRef: any = useRef();
+  const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
+  socketRef.current = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!)
 
   useEffect(() => {
 
     if(user) {
       createNewUser(user).catch((err) => console.log(err));
-      const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!)
-
-      socket.emit("online", user?.email);
 
       getNotificationMessage(user, socket);
       
-      socket.on("response-call-video", (res: string) => {
+      socket.on("response-call-video-one-to-one", (res: string) => {
         let data = JSON.parse(res);
-        if(data.recipient.includes(user?.email)) {
+        if(data.recipient === user?.email) {
             setChatRoomId(data.chatId);
             setSender(data.sender);
             setRecipient(data.recipient);
             setIsGroup(data.isGroup);
-            if(!isOpen) {
-              setIsOpen(true);
-            }
+            setIsOpen(true);
         }
       });
 
-      socket.on('response-reject-call', (res: string) => {
+
+      // socket.on("response-call-video", (res: string) => {
+      //   let data = JSON.parse(res);
+      //   if(data.recipient.includes(user?.email)) {
+      //       setChatRoomId(data.chatId);
+      //       setSender(data.sender);
+      //       setRecipient(data.recipient);
+      //       setIsGroup(data.isGroup);
+      //       if(!isOpen) {
+      //         setIsOpen(true);
+      //       }
+      //   }
+      // });
+
+      socket.on('response-reject-call-one-to-one', (res: string) => {
         let data = JSON.parse(res);
-        if(data.recipient.includes(user?.email)) {
-          if (!data.isGroup) {
-            setIsOpen(false);
-          } else {
-            getUserBusy().then((d) => {
-              if(d.length === 1) {
-                setIsOpen(false);
-              }
-            }).catch((err) => console.log(err))
-          }
+        if(data.recipient === user?.email) {
+          setIsOpen(false);
           toast(`${data.name} rejected the call !`, { hideProgressBar: true, autoClose: 5000, type: 'info' })
         }
       });
 
-      socket.on("response-accept-call", (res: string) => {
-        let data = JSON.parse(res);
-        if(data.recipient.includes(user?.email)) {
-          window.open(router.basePath + "/video-call/" + data.chatId);
-        }
-      })
+      // socket.on("response-accept-call-one-to-one", (res: string) => {
+      //   let data = JSON.parse(res);
+      //   if(data.recipient === user?.email) {
+      //     // window.open(router.basePath + "/video-call/" + data.chatId);
+      //   }
+      // })
 
       return () => {
         socket.disconnect()
@@ -92,7 +92,7 @@ export default function App({ Component, pageProps }: AppProps) {
     <Component {...pageProps} />
     <ToastContainer />
     <VideoCallContainer isOpen={isOpen} ariaHideApp={false}>
-        <VideoCallScreen statusCall='Incoming Call' photoURL={user?.photoURL} sender={sender} recipient={recipient}  chatId={chatRoomId}  onClose={() => setIsOpen(false)} isGroup={isGroup} />
+        <VideoCallScreen statusCall='Incoming Call' photoURL={user?.photoURL} sender={recipient} recipient={sender}  chatId={chatRoomId}  onClose={() => setIsOpen(false)} isGroup={isGroup} />
     </VideoCallContainer>
   </> 
   
