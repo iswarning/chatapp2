@@ -1,49 +1,52 @@
-import { CardContentCustom, Container, SendMessageBtn, UnfriendBtn } from "../Friend/FriendStyled";
-import { useEffect, useState } from "react";
-import { Card, CardMedia, Typography } from "@mui/material";
-import getUserByEmail from "@/services/users/getUserByEmail";
-import createFriend from "@/services/friends/createFriend";
-import deleteFriendRequest from "@/services/friend-requests/deleteFriendRequest";
-import getFriendRequestsByEmail from "@/services/friend-requests/getFriendRequestsByEmail";
+import { useCollection } from "react-firebase-hooks/firestore";
+import { db } from "@/firebase";
 
-export default function FriendRequest({senderEmail, recipientEmail, onGetFriendRequest}: any) {
+export default function FriendRequest({ id, senderEmail, recipientEmail}: any) {
 
-    const [userInfo, setUserInfo]: any = useState({});
+    const [recipientUserInfo] = useCollection(
+        db
+        .collection("users")
+        .where("email",'==',senderEmail)
+    )
 
-    useEffect(() => {
-        getUserByEmail(String(senderEmail)).then((userData) => setUserInfo(userData.data()));
-    },[]);
-
-    const onAccept = () => {
-        createFriend(senderEmail, recipientEmail)
-        onCancel();
-        onGetFriendRequest();
+    const onAccept = async() => {
+        await db
+        .collection("friend_requests")
+        .doc(id)
+        .set({
+            senderEmail: senderEmail,
+            recipientEmail: recipientEmail,
+            isAccepted: true
+        })
     }
 
-    const onCancel = () => {
-        getFriendRequestsByEmail(senderEmail, recipientEmail).then((friendRequest: any) => {
-            deleteFriendRequest(friendRequest.id);
-            onGetFriendRequest();
-        });
+    const onCancel = async() => {
+        await db
+        .collection("friend_requests")
+        .doc(id)
+        .set({
+            senderEmail: senderEmail,
+            recipientEmail: recipientEmail,
+            isAccepted: false
+        })
     }
 
     return (
-        <Container>
-            <Card sx={{ maxWidth: 345 }}>
-                <CardMedia
-                    sx={{ height: 220 }}
-                    image={userInfo?.photoURL ?? ''}
-                    title="Avatar"
-                >
-                </CardMedia>
-                <CardContentCustom>
-                    <Typography gutterBottom variant="h5" component="div">
-                    {userInfo?.fullName ?? 'Albert Einstein'}
-                    </Typography>
-                    <SendMessageBtn onClick={onAccept}>Accept</SendMessageBtn>
-                    <UnfriendBtn onClick={onCancel}>Cancel</UnfriendBtn>
-                </CardContentCustom>
-            </Card>
-        </Container>
+        <div className="col-xl-3 sm:mx-3 md:mx-3 lg:mx-2 xl:mx-2 mt-16 bg-white shadow-xl rounded-lg text-gray-900" style={{padding: 0}}>
+            <div className="rounded-t-lg h-32 overflow-hidden">
+                <img className="w-full" src='/images/cover-image.jpg' alt='Mountain'/>
+            </div>
+            <div className="mx-auto w-32 h-32 relative -mt-16 border-4 border-white rounded-full overflow-hidden">
+                <img className="object-cover object-center h-32" src={recipientUserInfo?.docs?.[0].data().photoURL} alt='Woman looking front'/>
+            </div>
+            <div className="text-center mt-2">
+                <h2 className="font-semibold">{recipientUserInfo?.docs?.[0].data().fullName}</h2>
+                <p className="text-gray-500">Software Engineer</p>
+            </div>
+            <div className="p-4 border-t mt-2 mx-auto d-flex">
+                <button className="w-1/2 block mx-2 rounded-full bg-gray-900 hover:shadow-lg font-semibold text-white px-6 py-2" onClick={onAccept}>Accept</button>
+                <button className="w-1/2 block mx-2 rounded-full hover:shadow-lg font-semibold text-black px-6 py-2" onClick={onCancel} style={{border: '1px solid'}}>Cancel</button>
+            </div>
+        </div>
     )
 }

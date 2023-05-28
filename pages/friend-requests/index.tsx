@@ -3,8 +3,10 @@ import { Inter } from 'next/font/google'
 import SidebarMessage from '@/components/SidebarMessage/SidebarMessage'
 import Layout from '@/components/Layout'
 import { ReactElement } from 'react'
-import type { NextPageWithLayout } from './_app';
+import type { NextPageWithLayout } from '../_app';
 import ChatScreen from '@/components/ChatScreen/ChatScreen'
+import FriendRequestsListScreen from '@/components/FriendRequestsListScreen/FriendRequestsListScreen'
+import styled from 'styled-components'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -18,19 +20,16 @@ const Page: NextPageWithLayout = () => {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      {/* <SidebarMessage /> */}
 
         <div className="main flex-1 flex flex-col">
             <div className="hidden lg:block heading flex-2">
-                <h1 className="text-3xl text-gray-700 mb-4">Chat</h1>
+                <h1 className="text-3xl text-gray-700 mb-4">Friend Requests</h1>
             </div>
 
-            <div className="flex-1 flex h-full">
-                <SidebarMessage />
-                {/* <ChatScreen /> */}
-
-            </div>
+            {/* <div className="flex-1 flex"> */}
+            <FriendRequestsListScreen />
         </div>
+        {/* </div> */}
 
     </>
   )
@@ -45,3 +44,17 @@ Page.getLayout = function getLayout(page: ReactElement) {
 };
 
 export default Page;
+
+const MainContent = styled.div`
+    padding: 20px 0 0 0;
+    width: 100%;
+    flex: 1;
+    overflow: scroll;
+    height: 100vh;
+
+    ::-webkit-scrollbar {
+        display: none;
+    }
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+`

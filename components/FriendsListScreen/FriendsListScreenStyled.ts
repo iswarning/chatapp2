@@ -7,7 +7,7 @@ const Row = styled.div.attrs(() => ({
 `;
 
 const Col = styled.div.attrs(() => ({
-    className: 'col-xl-2 col-md-3 col-sm-3'
+    className: 'col-xl-3 col-md-4 col-sm-4'
 }))`
     
 `;

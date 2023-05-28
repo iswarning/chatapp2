@@ -2,7 +2,7 @@ import '@/styles/globals.css'
 import type { AppProps } from 'next/app'
 import { useAuthState } from 'react-firebase-hooks/auth'
 import Login from './login';
-import { useEffect, useRef, useState } from 'react';
+import { ReactElement, ReactNode, useEffect, useRef, useState } from 'react';
 import createNewUser from '@/services/users/createNewUser';
 import 'bootstrap/dist/css/bootstrap.css';
 import getNotificationMessage from '@/utils/getNotificationMessage';
@@ -16,8 +16,21 @@ import VideoCallScreen from '@/components/VideoCallScreen/VideoCallScreen';
 import getUserBusy from '@/utils/getUserBusy';
 import popupCenter from '@/utils/popupCenter';
 import { useRouter } from 'next/router';
+import Layout from '@/components/Layout';
+import { NextPage } from 'next';
+import { config } from '@fortawesome/fontawesome-svg-core'
+import '../node_modules/@fortawesome/fontawesome-svg-core/styles.css'
+config.autoAddCss = false
 
-export default function App({ Component, pageProps }: AppProps) {
+export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
+  getLayout?: (page: ReactElement) => ReactNode;
+};
+ 
+type AppPropsWithLayout = AppProps & {
+  Component: NextPageWithLayout;
+};
+
+export default function App({ Component, pageProps }: AppPropsWithLayout) {
   const [user, loading] = useAuthState(auth);
   const [isOpen, setIsOpen] = useState(false);
   const [chatRoomId, setChatRoomId] = useState('')
@@ -88,12 +101,19 @@ export default function App({ Component, pageProps }: AppProps) {
 
   if(loading) return <Loading />
   
-  return <>
-    <Component {...pageProps} />
-    <ToastContainer />
-    <VideoCallContainer isOpen={isOpen} ariaHideApp={false}>
-        <VideoCallScreen statusCall='Incoming Call' photoURL={user?.photoURL} sender={recipient} recipient={sender}  chatId={chatRoomId}  onClose={() => setIsOpen(false)} isGroup={isGroup} />
-    </VideoCallContainer>
-  </> 
+  // return <>
+  //   <Layout>
+  //     <Component {...pageProps} />
+  //   </Layout>
+    
+  //   <ToastContainer />
+  //   <VideoCallContainer isOpen={isOpen} ariaHideApp={false}>
+  //       <VideoCallScreen statusCall='Incoming Call' photoURL={user?.photoURL} sender={recipient} recipient={sender}  chatId={chatRoomId}  onClose={() => setIsOpen(false)} isGroup={isGroup} />
+  //   </VideoCallContainer>
+  // </> 
+
+  const getLayout = Component.getLayout ?? ((page) => page);
+ 
+  return getLayout(<Component {...pageProps} />);
   
 }

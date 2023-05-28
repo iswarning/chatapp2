@@ -1,96 +1,121 @@
-import { auth } from "@/firebase";
-import getUserByEmail from "@/services/users/getUserByEmail";
+import { auth, db } from "@/firebase";
 import getRecipientEmail from "@/utils/getRecipientEmail";
-import { Avatar } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
 import { useAuthState } from "react-firebase-hooks/auth";
+import { useCollection } from "react-firebase-hooks/firestore";
 import styled from "styled-components";
+import Image from 'next/image';
+import TimeAgo from "timeago-react";
 
-export default function Chat({ id, data, active, onShowMessage }: any) {
+export default function Chat({ chat }: any) {
 
     const [user] = useAuthState(auth);
-    const [recipientUser, setRecipientUser]: any = useState({});
-    const [lastMessage, setLastMessage] = useState('This is Messagesssssssssssssssssssssssssssssssssssssssssssssssssssssssss')
+    const router = useRouter();
 
-    useEffect(() => {
-        getUserInfo().catch((err) => console.log(err));
-        handleMessageTooLong();
-    },[])
+    const [recipientSnapshot] = useCollection(
+        db
+        .collection("users")
+        .where("email",'==', getRecipientEmail(chat.users, user))
+    )
 
-    const getUserInfo = async() => {
-        const info = await getUserByEmail(getRecipientEmail(data.users, user));
-        setRecipientUser(info.data());
+    const [lastMessageSnapshot] = useCollection(
+        db
+        .collection("chats")
+        .doc(chat.id)
+        .collection("messages")
+        .orderBy("timestamp")
+        .limitToLast(1)
+    );
+
+    const lastMessage = lastMessageSnapshot?.docs?.[0]?.data();
+
+    const [userInfoOfLastMessageSnapshot] = useCollection(
+        db
+        .collection("users")
+        .where("email",'==', String(lastMessage?.user))
+    )
+
+    const [messageSnapshot] = useCollection(
+        db
+        .collection("chats")
+        .doc(chat.id)
+        .collection("messages")
+        .where("user",'!=',user?.email)
+    );
+
+    const amountUnSeenMsg = messageSnapshot?.docs?.filter((mess) => !mess?.data()?.seen?.includes(user?.email));
+
+    const handleShowChatScreen = () => {
+        router.push(`/chat/${chat.id}`)
     }
 
-    const handleMessageTooLong = () => {
-        if(lastMessage.length > 25) {
-            setLastMessage(lastMessage.substring(0, 25) + "...");
+    const getRecipientAvatar = () => {
+        if(chat?.isGroup) {
+            if(chat?.photoURL.length > 0)
+                return chat?.photoURL
+            else
+                return "/images/group-default.jpg"
+        } else {
+            let photoUrl = recipientSnapshot?.docs?.[0].data().photoURL
+            if(photoUrl?.length > 0)
+                return photoUrl
+            else return "/images/avatar-default.png"
+        }
+    }
+
+    const handleShowLastMessage = () => {
+        if (chat.isGroup) {
+            return userInfoOfLastMessageSnapshot?.docs?.[0]?.data()?.fullName + ': ' + lastMessage?.message
+        } else {
+            if (lastMessage?.user === user?.email) {
+                return 'You: ' + lastMessage?.message
+            } else return lastMessage?.message
         }
     }
 
     return (
-        <>
-            {
-                data.isGroup ? 
-                <UserContainer onClick={() => onShowMessage()} style={{backgroundColor: active ? '#e9eaeb' : ''}}>
-                    <UserAvatar src={data.photoURL}/>
-                    <ContainerText>
-                        <TextEmail>Group: {data.name}</TextEmail>
-                        <TextMess>{lastMessage}</TextMess>
-                    </ContainerText>
-                    <Dot>&#x2022;</Dot>
-                </UserContainer>
-                : 
-                <UserContainer onClick={() => onShowMessage()} style={{backgroundColor: active ? '#e9eaeb' : ''}}>
-                    <UserAvatar src={recipientUser.photoURL}/>
-                    <ContainerText>
-                        <TextEmail>{recipientUser.fullName}</TextEmail>
-                        <TextMess>{lastMessage}</TextMess>
-                    </ContainerText>
-                    <Dot>&#x2022;</Dot>
-                </UserContainer>
-            }
-        </>
+        <div className={"entry cursor-pointer transform hover:scale-105 duration-300 transition-transform bg-white mb-4 rounded p-4 flex shadow-md" + (chat.id === router.query.id ? " border-l-4 border-red-500" : "") } onClick={handleShowChatScreen}>
+            <div className="flex-2">
+                <div className="w-12 h-12 relative">
+                    <CustomAvatar
+                        src={getRecipientAvatar()}
+                        width={50}
+                        height={50}
+                        alt="User Avatar"
+                    />
+                    <span className="absolute w-4 h-4 bg-green-400 rounded-full right-0 bottom-0 border-2 border-white"></span>
+                </div>
+            </div>
+            <div className="flex-1 px-2">
+                <div className="truncate w-40"><span className="text-gray-800">{chat.isGroup ? 'Group: ' + chat.name : recipientSnapshot?.docs?.[0].data().fullName}</span></div>
+                <div className="truncate w-40"><small className="text-gray-600 ">{lastMessageSnapshot?.docs.length! > 0 ? handleShowLastMessage() : null}</small></div>
+            </div>
+            <div className="flex-2 text-right">
+                <div>
+                    <small className="text-gray-500">
+                        <p>
+                            {lastMessageSnapshot?.docs.length! > 0 ? lastMessage?.timestamp?.toDate() ? (
+                                <TimeAgo datetime={lastMessage?.timestamp?.toDate()} />
+                            ) : (
+                                "Unavailable"
+                            ) : null}
+                        </p>
+                    </small>
+                </div>
+                <div>
+                    {
+                        amountUnSeenMsg?.length! > 0 ?
+                       <small className="text-xs bg-red-500 text-white rounded-full h-6 w-6 leading-6 text-center inline-block">
+                            { amountUnSeenMsg?.length! }
+                        </small> : null
+                    }
+                </div>
+            </div>
+        </div>
     )
 
 }
 
-const Dot = styled.span`
-    font-size: 30px;
-    color: #0DA3BA;
-    margin-left: auto;
+export const CustomAvatar = styled(Image)`
+    border-radius: 50%;
 `
-
-const ContainerText = styled.div`
-    display: flex;
-    flex-direction: column;
-`
-
-const TextMess = styled.span`
-    font-size: 14px;
-    color: black;
-    font-weight: 500;
-    text-overflow: ellipsis
-`
-
-const TextEmail = styled.span`
-`;
-
-const UserAvatar = styled(Avatar)`
-    margin: 5px;
-    margin-right: 10px;
-    width: 50px;
-    height: 50px;
-`;
-
-const UserContainer = styled.div`
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    padding: 15px;
-    word-break: break-word;
-    height: 80px;
-    :hover {
-        background-color: #e9eaeb;
-    }
-`;

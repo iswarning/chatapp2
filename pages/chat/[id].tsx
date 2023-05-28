@@ -1,15 +1,13 @@
 import Head from 'next/head'
-import { Inter } from 'next/font/google'
 import SidebarMessage from '@/components/SidebarMessage/SidebarMessage'
 import Layout from '@/components/Layout'
 import { ReactElement } from 'react'
-import type { NextPageWithLayout } from './_app';
+import type { NextPageWithLayout } from '../_app';
 import ChatScreen from '@/components/ChatScreen/ChatScreen'
-
-const inter = Inter({ subsets: ['latin'] })
+import { db } from '@/firebase'
 
 // import '@/styles/tailwind.min.css'
-const Page: NextPageWithLayout = () => {
+const Page: NextPageWithLayout = ({chat, messages}: any) => {
   return (
     <>
       <Head>
@@ -18,7 +16,7 @@ const Page: NextPageWithLayout = () => {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      {/* <SidebarMessage /> */}
+      {/* ChatScreen */}
 
         <div className="main flex-1 flex flex-col">
             <div className="hidden lg:block heading flex-2">
@@ -27,8 +25,7 @@ const Page: NextPageWithLayout = () => {
 
             <div className="flex-1 flex h-full">
                 <SidebarMessage />
-                {/* <ChatScreen /> */}
-
+                <ChatScreen chat={chat} messages={messages}/>
             </div>
         </div>
 
@@ -45,3 +42,29 @@ Page.getLayout = function getLayout(page: ReactElement) {
 };
 
 export default Page;
+
+export async function getServerSideProps(context: any) {
+    const ref = db.collection('chats').doc(context.query.id);
+    const messagesRes = await ref.collection('messages').orderBy('timestamp', 'asc').get();
+    const messages = messagesRes.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+    }))
+    .map((messages: any) => ({
+        ...messages,
+        timestamp: messages.timestamp.toDate().getTime(),
+    }));
+
+    const chatRes = await ref.get();
+    const chat = {
+        id: chatRes.id,
+        ...chatRes.data()
+    };
+
+    return {
+        props: {
+            messages: JSON.stringify(messages),
+            chat: chat
+        }
+    }
+}
