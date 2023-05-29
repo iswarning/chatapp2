@@ -7,6 +7,7 @@ import type { NextPageWithLayout } from '../_app';
 import ChatScreen from '@/components/ChatScreen/ChatScreen'
 import FriendRequestsListScreen from '@/components/FriendRequestsListScreen/FriendRequestsListScreen'
 import styled from 'styled-components'
+import FriendsListScreen from '@/components/FriendsListScreen/FriendsListScreen'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -25,7 +26,7 @@ const Page: NextPageWithLayout = () => {
             <div className="hidden lg:block heading flex-2">
                 <h1 className="text-3xl text-gray-700 mb-4">Friend Requests</h1>
             </div>
-            <FriendRequestsListScreen />
+            <FriendsListScreen />
         </div>
     </>
   )
@@ -40,4 +41,3 @@ Page.getLayout = function getLayout(page: ReactElement) {
 };
 
 export default Page;
-

@@ -1,33 +1,29 @@
-import { useEffect, useState } from "react";
-import Friend from "../Friend/Friend";
-import { Col, Row } from "./FriendsListScreenStyled";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { auth } from "@/firebase";
-import getAllFriendOfUser from "@/services/friends/getAllFriendOfUser";
+import { auth, db } from "@/firebase";
+import { useCollection } from "react-firebase-hooks/firestore";
+import Friend from "../Friend/Friend";
 
-export default function FriendsListScreen() {
+function FriendsListScreen() {
 
     const [user] = useAuthState(auth);
-    const [friendList, setFriendList]: any = useState([]);
-
-    useEffect(() => {
-        getListFriend();
-    },[]);
-
-    const getListFriend = async() => {
-        const lf = await getAllFriendOfUser(user?.email!);
-        if(lf) {
-            setFriendList(lf);
-        }
-    }
+    
+    const [friendListSnapshot] = useCollection(
+        db
+        .collection("friends")
+        .where("users",'array-contains',user?.email)
+    )
 
     return (
-        <Row>
-            { friendList.length > 0 ? friendList.map((friend: any) => 
-                <Col key={friend.id}>
-                    <Friend users={friend.data().users} onGetListFriend={() => getListFriend()} />
-                </Col>
-            ) : null}
-        </Row>
+        <div className="container">
+            <div className='row'>
+                {
+                    friendListSnapshot ? friendListSnapshot?.docs?.map((friend) => 
+                        <Friend key={friend.id} data={{ id: friend.id, ...friend.data() }} />
+                    ) : null
+                }
+            </div>
+        </div>
     )
 }
+
+export default FriendsListScreen;

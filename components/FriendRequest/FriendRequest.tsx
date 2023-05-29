@@ -3,11 +3,13 @@ import { db } from "@/firebase";
 
 export default function FriendRequest({ id, senderEmail, recipientEmail}: any) {
 
-    const [recipientUserInfo] = useCollection(
+    const [recipientUserSnapshot] = useCollection(
         db
         .collection("users")
         .where("email",'==',senderEmail)
     )
+
+    const recipientUser = recipientUserSnapshot?.docs?.[0]?.data();
 
     const onAccept = async() => {
         await db
@@ -37,15 +39,15 @@ export default function FriendRequest({ id, senderEmail, recipientEmail}: any) {
                 <img className="w-full" src='/images/cover-image.jpg' alt='Mountain'/>
             </div>
             <div className="mx-auto w-32 h-32 relative -mt-16 border-4 border-white rounded-full overflow-hidden">
-                <img className="object-cover object-center h-32" src={recipientUserInfo?.docs?.[0].data().photoURL} alt='Woman looking front'/>
+                <img className="object-cover object-center h-32" src={recipientUser?.photoURL} alt='Woman looking front'/>
             </div>
             <div className="text-center mt-2">
-                <h2 className="font-semibold">{recipientUserInfo?.docs?.[0].data().fullName}</h2>
+                <h2 className="font-semibold">{recipientUser?.fullName}</h2>
                 <p className="text-gray-500">Software Engineer</p>
             </div>
             <div className="p-4 border-t mt-2 mx-auto d-flex">
-                <button className="w-1/2 block mx-2 rounded-full bg-gray-900 hover:shadow-lg font-semibold text-white px-6 py-2" onClick={onAccept}>Accept</button>
-                <button className="w-1/2 block mx-2 rounded-full hover:shadow-lg font-semibold text-black px-6 py-2" onClick={onCancel} style={{border: '1px solid'}}>Cancel</button>
+                <button className="w-1/2 block mx-2 rounded-full bg-gray-900 hover:shadow-lg font-semibold text-white px-6 py-2" onClick={() => onAccept}>Accept</button>
+                <button className="w-1/2 block mx-2 rounded-full hover:shadow-lg font-semibold text-black px-6 py-2" onClick={() => onCancel} style={{border: '1px solid'}}>Cancel</button>
             </div>
         </div>
     )

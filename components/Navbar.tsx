@@ -6,6 +6,7 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { CustomAvatar } from "./Chat";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import Link from "next/link";
 
 export default function Navbar() {
 
@@ -35,43 +36,43 @@ export default function Navbar() {
                 </div>
             </div>
             <div className="menu mt-8">
-                <a className={router.pathname === "/" || router.pathname.indexOf("chat") !== -1 ? CLASS_ACTIVE : CLASS_NOT_ACTIVE} onClick={() => router.push("/")}>
+                <Link className={router.pathname === "/" || router.pathname.indexOf("chat") !== -1 ? CLASS_ACTIVE : CLASS_NOT_ACTIVE} href={'/'}>
                     <span className="inline-block align-text-bottom mr-2">
                         <FontAwesomeIcon icon={faComment} fontSize={12} />
                     </span>
                     Chat
-                </a>
-                <a className={router.pathname === "/friend-requests" ? CLASS_ACTIVE : CLASS_NOT_ACTIVE} onClick={() => router.push("/friend-requests")}>
+                </Link>
+                <Link className={router.pathname === "/friend-requests" ? CLASS_ACTIVE : CLASS_NOT_ACTIVE} href={'/friend-requests'}>
                     <span className="inline-block align-text-bottom mr-2">
                         <FontAwesomeIcon icon={faUserPlus} fontSize={12} />
                     </span>
                     Friend Requests
-                </a>
+                </Link>
 
-                <a className={router.pathname === "/all-friends" ? CLASS_ACTIVE : CLASS_NOT_ACTIVE} onClick={() => router.push("/all-friends")}>
+                <Link className={router.pathname === "/all-friends" ? CLASS_ACTIVE : CLASS_NOT_ACTIVE} href={'/all-friends'}>
                     <span className="inline-block align-text-bottom mr-2">
                         <FontAwesomeIcon icon={faUserCheck} fontSize={12} />
                     </span>
                     All friends
-                </a>
-                <a className={router.pathname === "/suggestions" ? CLASS_ACTIVE : CLASS_NOT_ACTIVE} onClick={() => router.push("/suggestions")}>
+                </Link>
+                <Link className={router.pathname === "/suggestions" ? CLASS_ACTIVE : CLASS_NOT_ACTIVE} href={'/suggestions'}>
                     <span className="inline-block align-text-bottom mr-2">
                         <FontAwesomeIcon icon={faUserGroup} fontSize={12} />
                     </span>
                     Suggestions
-                </a>
-                <a className={router.pathname === "/files" ? CLASS_ACTIVE : CLASS_NOT_ACTIVE} onClick={() => router.push("/files")}>
+                </Link>
+                <Link className={router.pathname === "/files" ? CLASS_ACTIVE : CLASS_NOT_ACTIVE} href={'/files'}>
                     <span className="inline-block align-text-bottom mr-2">
                         <FontAwesomeIcon icon={faFileAlt} fontSize={12} />
                     </span>&nbsp;
                     Files
-                </a>
-                <a className={router.pathname === "/profile" ? CLASS_ACTIVE : CLASS_NOT_ACTIVE} onClick={() => router.push("/profile")}>
+                </Link>
+                <Link className={router.pathname === "/profile" ? CLASS_ACTIVE : CLASS_NOT_ACTIVE} href={'/profile'}>
                     <span className="inline-block align-text-bottom mr-2">
                         <FontAwesomeIcon icon={faAddressCard} fontSize={12} />
                     </span>
                     Profile
-                </a>                
+                </Link>                
                 
             </div>
         </div>

@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* :root {
+:root {
     --max-width: 1100px;
     --border-radius: 12px;
     --font-mono: ui-monospace, Menlo, Monaco, 'Cascadia Mono', 'Segoe UI Mono', 'Roboto Mono', 'Oxygen Mono', 'Ubuntu Monospace', 'Source Code Pro', 'Fira Mono', 'Droid Sans Mono', 'Courier New', monospace;
@@ -35,7 +35,7 @@
         --card-rgb: 100, 100, 100;
         --card-border-rgb: 200, 200, 200;
     }
-} */
+}
 
 * {
     box-sizing: border-box;
@@ -72,4 +72,77 @@ a {
     /* IE and Edge */
     scrollbar-width: none;
     /* Firefox */
+}
+
+#hover-animation {
+    overflow: hidden;
+    position: relative;
+    display: inline-block;
+  }
+  
+  #hover-animation::before,
+  #hover-animation::after {
+   content: '';
+    position: absolute;
+    width: 100%;
+    left: 0;
+  }
+  #hover-animation::before {
+    background-color: #54b3d6;
+    height: 2px;
+    bottom: 0;
+    transform-origin: 100% 50%;
+    transform: scaleX(0);
+    transition: transform .3s cubic-bezier(0.76, 0, 0.24, 1);
+  }
+  #hover-animation::after {
+    content: attr(data-replace);
+    height: 100%;
+    top: 0;
+    transform-origin: 100% 50%;
+    transform: translate3d(200%, 0, 0);
+    transition: transform .3s cubic-bezier(0.76, 0, 0.24, 1);
+    color: #54b3d6;
+  }
+  
+  #hover-animation:hover::before {
+    transform-origin: 0% 50%;
+    transform: scaleX(1);
+  }
+  #hover-animation:hover::after {
+    transform: translate3d(0, 0, 0);
+  }
+  
+  #hover-animation span {
+    display: inline-block;
+    transition: transform .3s cubic-bezier(0.76, 0, 0.24, 1);
+  }
+  
+  #hover-animation:hover span {
+    transform: translate3d(-200%, 0, 0);
+  }
+  
+  #hover-animation {
+      text-decoration: none;
+      color: #18272F;
+      font-weight: 700;
+      vertical-align: top;
+  }
+
+@media only screen and (min-width: 1600px) and (max-width: 1799px) {
+    .messages {
+        max-height: 450px;
+    }
+}
+
+@media only screen and (min-width: 1800px) and (max-width: 1999px) {
+    .messages {
+        max-height: 550px;
+    }
+}
+
+@media only screen and (min-width: 2000px) and (max-width: 2200px) {
+    .messages {
+        max-height: 700px;
+    }
 }

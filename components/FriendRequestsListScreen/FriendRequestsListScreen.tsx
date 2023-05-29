@@ -19,7 +19,7 @@ function FriendRequestsListScreen() {
             <div className='row'>
                 {
                     friendRequestSnapshot ? friendRequestSnapshot?.docs?.map((fR) => 
-                        <FriendRequest id={fR.id} senderEmail={fR.data().senderEmail} recipientEmail={fR.data().recipientEmail} />
+                        <FriendRequest key={fR.id} id={fR.id} senderEmail={fR.data().senderEmail} recipientEmail={fR.data().recipientEmail} />
                     ) : null
                 }
             </div>

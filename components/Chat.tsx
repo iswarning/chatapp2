@@ -35,7 +35,7 @@ export default function Chat({ chat }: any) {
         .where("email",'==', String(lastMessage?.user))
     )
 
-    const [messageSnapshot] = useCollection(
+    const [messageRecipientSnapshot] = useCollection(
         db
         .collection("chats")
         .doc(chat.id)
@@ -43,10 +43,11 @@ export default function Chat({ chat }: any) {
         .where("user",'!=',user?.email)
     );
 
-    const amountUnSeenMsg = messageSnapshot?.docs?.filter((mess) => !mess?.data()?.seen?.includes(user?.email));
+    const amountUnSeenMsg = messageRecipientSnapshot?.docs?.filter((mess) => !mess?.data()?.seen?.includes(user?.email));
 
     const handleShowChatScreen = () => {
         router.push(`/chat/${chat.id}`)
+        setSeenMessage();
     }
 
     const getRecipientAvatar = () => {
@@ -70,6 +71,28 @@ export default function Chat({ chat }: any) {
             if (lastMessage?.user === user?.email) {
                 return 'You: ' + lastMessage?.message
             } else return lastMessage?.message
+        }
+    }
+
+    const setSeenMessage = async() => {
+        const messageSnap = await db
+                .collection("chats")
+                .doc(chat.id)
+                .collection("messages").get();
+        if (messageSnap) {
+            messageSnap?.docs?.forEach(async(m) => {
+                const msgRef = db
+                    .collection("chats")
+                    .doc(chat.id)
+                    .collection("messages")
+                    .doc(m.id);
+                const res = await msgRef.get();
+                if(res?.data()?.user === user?.email) return;
+                if(res?.data()?.seen?.includes(user?.email)) return;
+                let result = res?.data()?.seen;
+                result.push(user?.email)
+                await msgRef.set({ ...res.data(), seen: result })
+            });
         }
     }
 

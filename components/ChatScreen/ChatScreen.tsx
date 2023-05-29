@@ -7,10 +7,11 @@ import getRecipientEmail from "@/utils/getRecipientEmail";
 import { io } from "socket.io-client";
 import { useRouter } from "next/router";
 import firebase from "firebase";
-import { CustomAvatar } from "../Chat";
 import styled from "styled-components";
+import CallIcon from '@mui/icons-material/Call';
+import Link from "next/link";
 
-let emojiData: any = [
+export const emojiData: any = [
     0x1F600,
     0x1F604,
     0x1F605,
@@ -141,23 +142,23 @@ export default function ChatScreen({ chat, messages}: any) {
             seen: []
         }).catch((err) => console.log(err))
         
-        // sendNotification();
+        sendNotification();
         
         setInput('');
 
         scrollToBottom();
     }
 
-    // const sendNotification = () => {
-    //     let listRecipient = chat.users.filter((email: any) => email !== user?.email)
-    //     let dataNofity = {
-    //         message: input,
-    //         recipient: chat.isGroup ? listRecipient : getRecipientEmail(chat.users, user),
-    //         name: chat.isGroup ? chat.name : user?.displayName,
-    //         isGroup: chat.isGroup,
-    //     }
-    //     socket.emit('send-message', JSON.stringify(dataNofity));
-    // }
+    const sendNotification = () => {
+        let listRecipient = chat.users.filter((email: any) => email !== user?.email)
+        let dataNofity = {
+            message: input,
+            recipient: chat.isGroup ? listRecipient : getRecipientEmail(chat.users, user),
+            name: chat.isGroup ? chat.name : user?.displayName,
+            isGroup: chat.isGroup,
+        }
+        socket.emit('send-message', JSON.stringify(dataNofity));
+    }
 
     // const handleVideoCall = async() => {
     //     let userBusy = await getUserBusy();
@@ -186,12 +187,13 @@ export default function ChatScreen({ chat, messages}: any) {
     //     return null;
     // }
 
-    // const addEmoji = (e: any) => {
-    //     setInput(input + String.fromCodePoint(e));
-    //     setShowEmoji(false);
-    // };
+    const addEmoji = (e: any) => {
+        setInput(input + String.fromCodePoint(e));
+        setShowEmoji(false);
+    };
 
     const setSeenMessage = async() => {
+        console.log(11111111)
         if (messageSnapShot) {
             messageSnapShot?.docs?.forEach(async(m) => {
                 const msgRef = db
@@ -280,36 +282,17 @@ export default function ChatScreen({ chat, messages}: any) {
         <div className="chat-area flex-1 flex flex-col">
             
             <div className="flex-3">
-                <h2 className="text-xl py-1 mb-8 border-b-2 border-gray-200"><b>{chat.isGroup ? 'Chatting in group ' + chat.name : 'Chatting with ' + recipientSnapshot?.docs?.[0].data().fullName}</b></h2>
+                <h2 className="text-xl pb-3 mb-8 border-b-2 border-gray-200 d-flex">
+                    {chat.isGroup ? 'Chatting in group ' : 'Chatting with '}&nbsp;
+                    <Link href={`/profile/${recipientSnapshot?.docs?.[0].id}`} className="text-gray-400 cursor-pointer" id="hover-animation" data-replace="Profile">
+                        <span>{chat.isGroup ? chat.name : recipientSnapshot?.docs?.[0].data().fullName}</span>
+                    </Link>
+                    <CallIcon className="ml-auto cursor-pointer" />
+                </h2>
             </div>
-            <div className="messages flex-1 overflow-auto h-screen px-4" style={{maxHeight: '600px'}}>
+            <div className="messages flex-1 overflow-auto h-screen px-4">
                 {showMessage()}
                 <EndOfMessage ref={(el) => { endOfMessageRef.current = el; }} />
-                <div className="flex -space-x-4">
-                    <CustomAvatar
-                        src={"/images/avatar-default.png"}
-                        width={25}
-                        height={25}
-                        alt="User Avatar"
-                        className="w-10 h-10"
-                        style={{border: '2px solid #F3F4F6'}}
-                    />
-                    <CustomAvatar
-                        src={"/images/avatar-default.png"}
-                        width={20}
-                        height={20}
-                        alt="User Avatar"
-                        className="w-10 h-10"
-                    />
-                    <CustomAvatar
-                        src={"/images/avatar-default.png"}
-                        width={20}
-                        height={20}
-                        alt="User Avatar"
-                        className="w-10 h-10"
-                    />
-                    <a className="flex items-center justify-center w-10 h-10 text-xs font-medium text-white bg-gray-700 rounded-full hover:bg-gray-600 dark:border-gray-800" href="#">+99</a>
-                </div>
             </div>
             
             <div className="flex-2 pt-4 pb-10">
@@ -320,7 +303,6 @@ export default function ChatScreen({ chat, messages}: any) {
                         </span>
                     </div>
                     <div className="flex-1">
-
                         <textarea name="message" className="w-full block outline-none py-4 px-4 bg-transparent" rows={1} placeholder="Type a message..." autoFocus onChange={(e) => setInput(e.target.value)} value={input} style={{maxHeight: '80px'}} onClick={() => setSeenMessage()}></textarea>
                     </div>
                     <div className="flex-2 w-32 p-2 flex content-center items-center">
@@ -332,7 +314,7 @@ export default function ChatScreen({ chat, messages}: any) {
                             </span>
                         </div>
                         <div className="flex-1">
-                            <button className="bg-blue-400 w-10 h-10 rounded-full inline-block" onClick={sendMessage}>
+                            <button disabled={!input} className="bg-blue-400 w-10 h-10 rounded-full inline-block" onClick={sendMessage}>
                                 <span className="inline-block align-text-bottom">
                                     <svg fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" className="w-4 h-4 text-white"><path d="M5 13l4 4L19 7"></path></svg>
                                 </span>
@@ -343,7 +325,7 @@ export default function ChatScreen({ chat, messages}: any) {
             </div>
             {
                 showEmoji ? <EmojiContainer>
-                    {emojiData.map((e: any) => <EmojiElement key={e}>
+                    {emojiData.map((e: any) => <EmojiElement onClick={() => addEmoji(e)} key={e}>
                         {String.fromCodePoint(e)}
                     </EmojiElement>)}
                 </EmojiContainer> : null
@@ -361,7 +343,7 @@ const EmojiContainer = styled.div.attrs(() => ({
     background-color: white;
     border-radius: 10px;
     padding: 10px;
-    margin-top: 370px;
+    margin-top: 15%;
     overflow: scroll;
     ::-webkit-scrollbar {
         display: none;
