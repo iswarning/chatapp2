@@ -284,7 +284,7 @@ export default function ChatScreen({ chat, messages}: any) {
             <div className="flex-3">
                 <h2 className="text-xl pb-3 mb-8 border-b-2 border-gray-200 d-flex">
                     {chat.isGroup ? 'Chatting in group ' : 'Chatting with '}&nbsp;
-                    <Link href={`/profile/${recipientSnapshot?.docs?.[0].id}`} className="text-gray-400 cursor-pointer" id="hover-animation" data-replace="Profile">
+                    <Link href={`/profile/${recipientSnapshot?.docs?.[0].id}`} className="cursor-pointer font-semibold" id="hover-animation" data-replace="Profile">
                         <span>{chat.isGroup ? chat.name : recipientSnapshot?.docs?.[0].data().fullName}</span>
                     </Link>
                     <CallIcon className="ml-auto cursor-pointer" />

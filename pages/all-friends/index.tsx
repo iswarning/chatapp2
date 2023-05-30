@@ -24,7 +24,7 @@ const Page: NextPageWithLayout = () => {
 
         <div className="main flex-1 flex flex-col">
             <div className="hidden lg:block heading flex-2">
-                <h1 className="text-3xl text-gray-700 mb-4">Friend Requests</h1>
+                <h1 className="text-3xl text-gray-700 mb-4">All friends</h1>
             </div>
             <FriendsListScreen />
         </div>

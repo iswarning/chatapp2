@@ -11,7 +11,6 @@ function FriendRequestsListScreen() {
         db
         .collection("friend_requests")
         .where("recipientEmail",'==',user?.email)
-        .where("isAccepted",'==',false)
     )
 
     return (

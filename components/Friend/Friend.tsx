@@ -1,14 +1,11 @@
 import { auth, db } from "@/firebase";
-import { CardContentCustom, Container, SendMessageBtn, UnfriendBtn } from "./FriendStyled";
-import { useEffect, useState } from "react";
-import { Card, CardMedia, Typography } from "@mui/material";
-import getUserByEmail from "@/services/users/getUserByEmail";
 import { useAuthState } from "react-firebase-hooks/auth";
 import getRecipientEmail from "@/utils/getRecipientEmail";
-import getFriendByEmails from "@/services/friends/getFriendByEmails";
-import deleteFriend from "@/services/friends/deleteFriend";
 import { useCollection, useCollectionOnce } from "react-firebase-hooks/firestore";
 import { useRouter } from "next/router";
+import ContactMailIcon from '@mui/icons-material/ContactMail';
+import MailOutlineIcon from '@mui/icons-material/MailOutline';
+import PhoneIcon from '@mui/icons-material/Phone';
 
 export default function Friend({data}: any) {
 

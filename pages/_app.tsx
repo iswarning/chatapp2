@@ -1,4 +1,5 @@
 import '@/styles/globals.css'
+import '@/pages/profile/profile.css'
 import type { AppProps } from 'next/app'
 import { useAuthState } from 'react-firebase-hooks/auth'
 import Login from './login';
@@ -11,12 +12,7 @@ import Loading from '@/components/Loading';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer, toast } from 'react-toastify';
 import { io } from 'socket.io-client';
-import { VideoCallContainer } from '@/components/ChatScreen/ChatScreenStyled';
-import VideoCallScreen from '@/components/VideoCallScreen/VideoCallScreen';
-import getUserBusy from '@/utils/getUserBusy';
-import popupCenter from '@/utils/popupCenter';
 import { useRouter } from 'next/router';
-import Layout from '@/components/Layout';
 import { NextPage } from 'next';
 import { config } from '@fortawesome/fontawesome-svg-core'
 import '../node_modules/@fortawesome/fontawesome-svg-core/styles.css'

@@ -1,7 +1,11 @@
 import { useCollection } from "react-firebase-hooks/firestore";
-import { db } from "@/firebase";
+import { auth, db } from "@/firebase";
+import { useAuthState } from "react-firebase-hooks/auth";
+import firebase from "firebase";
 
 export default function FriendRequest({ id, senderEmail, recipientEmail}: any) {
+
+    const [user] = useAuthState(auth);
 
     const [recipientUserSnapshot] = useCollection(
         db
@@ -13,24 +17,24 @@ export default function FriendRequest({ id, senderEmail, recipientEmail}: any) {
 
     const onAccept = async() => {
         await db
-        .collection("friend_requests")
-        .doc(id)
-        .set({
-            senderEmail: senderEmail,
-            recipientEmail: recipientEmail,
-            isAccepted: true
+        .collection("friends")
+        .add({
+            users: [user?.email, recipientUser?.email],
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
         })
     }
 
     const onCancel = async() => {
-        await db
-        .collection("friend_requests")
-        .doc(id)
-        .set({
-            senderEmail: senderEmail,
-            recipientEmail: recipientEmail,
-            isAccepted: false
-        })
+        const friend = await db
+            .collection('friend_requests')
+            .doc(id)
+            .get();
+
+        const batch = db.batch();
+
+        batch.delete(friend.ref);
+
+        await batch.commit();
     }
 
     return (

@@ -1,178 +1,108 @@
-import EditIcon from '@mui/icons-material/Edit';
-import { InformationContainer,
-    UserContainer,
-    Container,
-    UpperImage,
-    UserProfile,
-    UserAvatar,
-    UserInfo,
-    TextName,
-    TextFriend,
-    TextGroupRow,
-    TextGroupCol,
-    TextGroup,
-    Label,
-    ValueContainer,
-    Value} from '../UserDetailScreen/UserDetailScreenStyled';
+
 import { useEffect, useState } from 'react';
-import getAllFriendOfUser from '@/services/friends/getAllFriendOfUser';
-import styled from 'styled-components';
-import ReactModal from 'react-modal';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth, db } from '@/firebase';
-import getUserById from '@/services/users/getUserById';
+import { CustomAvatar } from '../Chat';
+import { toast } from 'react-toastify';
 
 
 export default function Profile() {
 
-    const [amountFriends, setAmountFriends] = useState(0);
-    const [isOpenModal, setIsOpenModal] = useState(false);
     const [phoneNumber, setPhoneNumber] = useState('');
     const [userInfo, setUserInfo]: any = useState({});
     const [user] = useAuthState(auth);
 
     useEffect(() => {
-        getListFriend().catch((err) => console.log(err));
+        const getUserInfo = async() => {
+            const data = await db.collection("users").doc(user?.uid).get();
+            if(data) {
+                setUserInfo(data.data());
+            }
+        }
         getUserInfo().catch((err) => console.log(err));
-    },[userInfo])
-
-    const getUserInfo = async() => {
-        const data = await getUserById(user?.uid!);
-        if(data) {
-            setUserInfo(data);
-        }
-    }
-
-    const getListFriend = async() => {
-        const f = await getAllFriendOfUser(user?.email!);
-        if(f.length > 0) {
-            setAmountFriends(f.length);
-        }
-    }
+    },[])
 
     const updateInfo = async(e: any) => {
         e.preventDefault();
         db.collection("users").doc(user?.uid).update({ phoneNumber: phoneNumber }).catch((err) => console.log(err));
-        setIsOpenModal(!isOpenModal);
-    }
-
-    const handleOpenModal = () => {
-        setIsOpenModal(!isOpenModal);
-        setPhoneNumber(userInfo.phoneNumber)
+        toast('Update info successfully', { hideProgressBar: true, type: 'success' })
     }
 
     return (
-        <Container>
-            <UserContainer>
-                <UpperImage src={userInfo?.upperImage ?? '/images/upper-image-default.png'} />
-                <UserProfile>
-                    <UserAvatar src={userInfo?.photoURL ?? '/images/avatar-default.jpg'} />
-                    <UserInfo>
-                        <TextName>{ userInfo?.displayName ?? 'Albert Einstein'}</TextName>
-                        <TextFriend>{amountFriends} Friends</TextFriend>
-                    </UserInfo>
-                </UserProfile>
-            </UserContainer>
-            <InformationContainer>           
-                <TextGroupRow>
-                    <TextGroupCol>
-                        <TextGroup>
-                            <Label>Email:</Label>
-                            <ValueContainer>
-                                <Value>{ userInfo?.email ?? 'mail@gmail.com'}</Value>
-                            </ValueContainer>
-                        </TextGroup>
-                    </TextGroupCol>
-                </TextGroupRow>
-                <TextGroupRow>
-                    <TextGroupCol>
-                        <TextGroup>
-                            <Label>Birthday:</Label>
-                            <ValueContainer>
-                                <Value>{ userInfo?.birthday ?? '21-12-2012'}</Value>
-                            </ValueContainer>
-                        </TextGroup>
-                    </TextGroupCol>
-                </TextGroupRow>
-                <TextGroupRow>
-                    <TextGroupCol>
-                        <TextGroup>
-                            <Label>Address:</Label>
-                            <ValueContainer>
-                                <Value>{ userInfo?.address ?? 'Los Angeles California San Fransisco'}</Value>
-                            </ValueContainer>
-                        </TextGroup>
-                    </TextGroupCol>
-                </TextGroupRow>
-                <TextGroupRow>
-                    <TextGroupCol>
-                        <TextGroup>
-                            <Label>Gender:</Label>
-                            <ValueContainer>
-                                <Value>{ userInfo?.gender ?? 'Male'}</Value>
-                            </ValueContainer>
-                        </TextGroup>
-                    </TextGroupCol>
-                </TextGroupRow>
-                <TextGroupRow>
-                    <TextGroupCol>
-                        <TextGroup>
-                            <Label>Phone:</Label>
-                            <ValueContainer>
-                                <Value>{ userInfo?.phoneNumber ?? '0909999000'}</Value>
-                            </ValueContainer>
-                        </TextGroup>
-                    </TextGroupCol>
-                </TextGroupRow>
-                <UpdateButton onClick={handleOpenModal}><EditIcon fontSize='small'/> Edit Information</UpdateButton>
-            </InformationContainer>
-            <ModalUpdateInfo isOpen={isOpenModal} onRequestClose={() => setIsOpenModal(false)}>
-                <h3>Update Information</h3>
-                {/* <form role="form" method="POST" action=""> */}
-                    {/* <input type="hidden" name="_token" value=""/> */}
-                    <div className="form-group my-3">
-                        <label className="control-label">Phone Number</label>
-                        <div>
-                            <input type="number" className="form-control input-lg" name="email" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)}/>
+        <div className="container-xl">
+
+    <hr className="mt-0 mb-4"/>
+    <div className="row">
+        <div className="col-xl-4">
+            <div className="card mb-4 mb-xl-0">
+                <div className="card-header">Profile Picture</div>
+                <div className="card-body text-center mx-auto">
+                    <CustomAvatar 
+                        src={user?.photoURL!}
+                        height={200} 
+                        width={200}
+                        alt='Profile Avatar'
+                        className='my-4'
+                    />
+                    <div className="small font-italic text-muted mb-4">JPG or PNG no larger than 5 MB</div>
+                    <button className="btn btn-primary mb-4" type="button">Upload new image</button>
+                </div>
+            </div>
+        </div>
+        <div className="col-xl-8">
+            <div className="card mb-4">
+                <div className="card-header">Account Details</div>
+                <div className="card-body">
+                    <form>
+                        <div className="mb-3">
+                            <label className="small mb-1" htmlFor="inputUsername">Full Name (how your name will appear to other users on the site)</label>
+                            <input className="form-control" id="inputUsername" type="text" placeholder="Enter your username" value={user?.displayName!}/>
                         </div>
-                    </div>
-                    <div className="form-group my-3">
-                        <div>
-                            <button type="button" className="btn" style={{background: '#0DA3BA', color: 'white'}} onClick={(e) => updateInfo(e)}>Update</button>
+                        <div className="row gx-3 mb-3">
+                            <div className="col-md-6">
+                                <label className="small mb-2" htmlFor="Gender">Gender</label><br/>
+                                <div className="form-check">
+                                    <input className="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1"/>
+                                    <label className="form-check-label" htmlFor="flexRadioDefault1">
+                                        Male
+                                    </label>
+                                    </div>
+                                    <div className="form-check">
+                                    <input className="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2"/>
+                                    <label className="form-check-label" htmlFor="flexRadioDefault2">
+                                        Female
+                                    </label>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                {/* </form> */}
-            </ModalUpdateInfo>
-        </Container>
+                        <div className="mb-3">
+                            <label className="small mb-1" htmlFor="inputLocation">Address</label>
+                            <input className="form-control" id="inputLocation" type="text" placeholder="Enter your location" value="San Francisco, CA"/>
+                        </div>
+                        <div className="mb-3">
+                            <label className="small mb-1" htmlFor="inputEmailAddress">Email</label>
+                            <input className="form-control" id="inputEmailAddress" type="email" required placeholder="Enter your email address" value={user?.email!}/>
+                        </div>
+                        <div className="row gx-3 mb-3">
+                            <div className="col-md-6">
+                                <label className="small mb-1" htmlFor="inputPhone">Phone number</label>
+                                <input className="form-control" id="inputPhone" type="number" required placeholder="Enter your phone number" value={userInfo?.phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)}/>
+                            </div>
+                            <div className="col-md-6">
+                                <label className="small mb-1" htmlFor="inputBirthday">Birthday</label>
+                                <input className="form-control" id="inputBirthday" type="date" name="birthday" placeholder="Enter your birthday" value="06/10/1988"/>
+                            </div>
+                        </div>
+                        <button className="btn btn-primary" type="button" onClick={updateInfo}>Save changes</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
     )
 }
 
-const ModalUpdateInfo = styled(ReactModal)`
-    border-radius: 10px;
-    border: 1px solid whitesmoke;
-    width: 400px;
-    height: 600px;
-    margin-left: auto;
-    margin-right: auto;
-    margin-top: 100px;
-    background-color: white;
-    padding: 30px;
-`
-
-const UpdateButton = styled.button`
-    color: white;
-    background-color: #0DA3BA;
-    padding: 5px 7px 5px 7px;
-    border-radius: 5px;
-    border: none;
-    cursor: pointer;
-    width: max-content;
-    height: 40px;
-    
-    :hover {
-        opacity: 0.7;
-    }
-`;
 
 
 
