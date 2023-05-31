@@ -5,7 +5,7 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import MailIcon from '@mui/icons-material/Mail';
 import LocalPhoneIcon from '@mui/icons-material/LocalPhone';
 import { CustomAvatar } from "../../ChatPage/Chat";
-import ShowStatusFriend from "../../ShowStatusFriend/ShowStatusFriend";
+import ShowStatusFriend from "../ShowStatusFriend/ShowStatusFriend";
 import { useCollection } from "react-firebase-hooks/firestore";
 import getStatusFriend from "@/utils/getStatusFriend";
 
