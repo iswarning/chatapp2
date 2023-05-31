@@ -1,25 +1,25 @@
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth, db } from "@/firebase";
-import FriendRequest from "../FriendRequest/FriendRequest";
 import { useCollection } from "react-firebase-hooks/firestore";
+import Friend from "../Friend/Friend";
 import styled from "styled-components";
 
-function FriendRequestsListScreen() {
+function FriendsListScreen() {
 
     const [user] = useAuthState(auth);
     
-    const [friendRequestSnapshot] = useCollection(
+    const [friendListSnapshot] = useCollection(
         db
-        .collection("friend_requests")
-        .where("recipientEmail",'==',user?.email)
+        .collection("friends")
+        .where("users",'array-contains',user?.email)
     )
 
     return (
         <Container>
             <div className='row'>
                 {
-                    friendRequestSnapshot ? friendRequestSnapshot?.docs?.map((fR) => 
-                        <FriendRequest key={fR.id} id={fR.id} senderEmail={fR.data().senderEmail} recipientEmail={fR.data().recipientEmail} />
+                    friendListSnapshot ? friendListSnapshot?.docs?.map((friend) => 
+                        <Friend key={friend.id} data={{ id: friend.id, ...friend.data() }} />
                     ) : null
                 }
             </div>
@@ -42,4 +42,4 @@ const Container = styled.div.attrs(() => ({
     scrollbar-width: none;
 `
 
-export default FriendRequestsListScreen;
+export default FriendsListScreen;

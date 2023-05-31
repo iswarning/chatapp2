@@ -3,7 +3,7 @@ import { faAddressCard, faComment, faFileAlt, faUserCheck, faUserGroup, faUserPl
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import ChatIcon from '@mui/icons-material/Chat';
 import { useAuthState } from "react-firebase-hooks/auth";
-import { CustomAvatar } from "./Chat";
+import { CustomAvatar } from "./ChatPage/Chat";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import Link from "next/link";
@@ -67,7 +67,7 @@ export default function Navbar() {
                     </span>&nbsp;
                     Files
                 </Link>
-                <Link className={router.pathname === "/profile" ? CLASS_ACTIVE : CLASS_NOT_ACTIVE} href={'/profile'}>
+                <Link className={router.pathname === "/profile" || router.pathname.indexOf("profile") !== -1 ? CLASS_ACTIVE : CLASS_NOT_ACTIVE} href={'/profile'}>
                     <span className="inline-block align-text-bottom mr-2">
                         <FontAwesomeIcon icon={faAddressCard} fontSize={12} />
                     </span>

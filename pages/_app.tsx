@@ -16,6 +16,8 @@ import { useRouter } from 'next/router';
 import { NextPage } from 'next';
 import { config } from '@fortawesome/fontawesome-svg-core'
 import '../node_modules/@fortawesome/fontawesome-svg-core/styles.css'
+import getNotificationAddFriend from '@/utils/getNotificationAddFriend';
+import getNotificationAcceptFriend from '@/utils/getNotificationAcceptFriend';
 config.autoAddCss = false
 
 export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
@@ -35,27 +37,29 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
   const [isGroup, setIsGroup] = useState(false);
   const router = useRouter();
 
-  const socketRef: any = useRef();
   const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
-  socketRef.current = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!)
 
   useEffect(() => {
 
     if(user) {
       createNewUser(user).catch((err) => console.log(err));
 
-      getNotificationMessage(user, socket);
+      getNotificationMessage(user?.email, socket);
+
+      getNotificationAddFriend(user?.email, socket);
+
+      getNotificationAcceptFriend(user?.email, socket);
       
-      socket.on("response-call-video-one-to-one", (res: string) => {
-        let data = JSON.parse(res);
-        if(data.recipient === user?.email) {
-            setChatRoomId(data.chatId);
-            setSender(data.sender);
-            setRecipient(data.recipient);
-            setIsGroup(data.isGroup);
-            setIsOpen(true);
-        }
-      });
+      // socket.on("response-call-video-one-to-one", (res: string) => {
+      //   let data = JSON.parse(res);
+      //   if(data.recipient === user?.email) {
+      //       setChatRoomId(data.chatId);
+      //       setSender(data.sender);
+      //       setRecipient(data.recipient);
+      //       setIsGroup(data.isGroup);
+      //       setIsOpen(true);
+      //   }
+      // });
 
 
       // socket.on("response-call-video", (res: string) => {
@@ -71,13 +75,13 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
       //   }
       // });
 
-      socket.on('response-reject-call-one-to-one', (res: string) => {
-        let data = JSON.parse(res);
-        if(data.recipient === user?.email) {
-          setIsOpen(false);
-          toast(`${data.name} rejected the call !`, { hideProgressBar: true, autoClose: 5000, type: 'info' })
-        }
-      });
+      // socket.on('response-reject-call-one-to-one', (res: string) => {
+      //   let data = JSON.parse(res);
+      //   if(data.recipient === user?.email) {
+      //     setIsOpen(false);
+      //     toast(`${data.name} rejected the call !`, { hideProgressBar: true, autoClose: 5000, type: 'info' })
+      //   }
+      // });
 
       // socket.on("response-accept-call-one-to-one", (res: string) => {
       //   let data = JSON.parse(res);

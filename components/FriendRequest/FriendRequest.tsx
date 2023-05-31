@@ -2,10 +2,12 @@ import { useCollection } from "react-firebase-hooks/firestore";
 import { auth, db } from "@/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
 import firebase from "firebase";
+import { io } from "socket.io-client";
 
 export default function FriendRequest({ id, senderEmail, recipientEmail}: any) {
 
     const [user] = useAuthState(auth);
+    const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!)
 
     const [recipientUserSnapshot] = useCollection(
         db
@@ -16,12 +18,32 @@ export default function FriendRequest({ id, senderEmail, recipientEmail}: any) {
     const recipientUser = recipientUserSnapshot?.docs?.[0]?.data();
 
     const onAccept = async() => {
+
         await db
         .collection("friends")
         .add({
-            users: [user?.email, recipientUser?.email],
+            users: [senderEmail, recipientEmail],
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         })
+
+        const friend = await db
+            .collection('friend_requests')
+            .doc(id)
+            .get()
+
+        if (friend?.exists) {
+            const batch = db.batch();
+
+            batch.delete(friend.ref);
+
+            await batch.commit();
+        }
+
+        socket.emit("send-notify", JSON.stringify({
+            type: 'accept-friend',
+            recipient: senderEmail,
+            name: recipientUser?.fullName
+        }))
     }
 
     const onCancel = async() => {
@@ -47,11 +69,11 @@ export default function FriendRequest({ id, senderEmail, recipientEmail}: any) {
             </div>
             <div className="text-center mt-2">
                 <h2 className="font-semibold">{recipientUser?.fullName}</h2>
-                <p className="text-gray-500">Software Engineer</p>
+                <div className="text-gray-500 pb-2">Software Engineer</div>
             </div>
             <div className="p-4 border-t mt-2 mx-auto d-flex">
-                <button className="w-1/2 block mx-2 rounded-full bg-gray-900 hover:shadow-lg font-semibold text-white px-6 py-2" onClick={() => onAccept}>Accept</button>
-                <button className="w-1/2 block mx-2 rounded-full hover:shadow-lg font-semibold text-black px-6 py-2" onClick={() => onCancel} style={{border: '1px solid'}}>Cancel</button>
+                <button className="w-1/2 block mx-2 rounded-full bg-gray-900 hover:shadow-lg font-semibold text-white px-6 py-2" onClick={onAccept}>Accept</button>
+                <button className="w-1/2 block mx-2 rounded-full hover:shadow-lg font-semibold text-black px-6 py-2" onClick={onCancel} style={{border: '1px solid'}}>Cancel</button>
             </div>
         </div>
     )

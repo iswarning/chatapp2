@@ -1,9 +1,9 @@
 import { toast } from "react-toastify";
 
-export default function getNotificationMessage(userLoggedIn: any, socket: any) {
-    socket.on("response-message", (msg: any) => {
+export default function getNotificationMessage(emailLoggedIn: any, socket: any) {
+    socket.on("response-notify", (msg: any) => {
       const data = JSON.parse(msg);
-      if(data.recipient.includes(userLoggedIn?.email)) {
+      if(data.type === 'send-message' && data.recipient.includes(emailLoggedIn)) {
           const options: any = {
             body: data.name + ": " + data.message,
           };

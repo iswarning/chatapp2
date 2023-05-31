@@ -1,20 +1,17 @@
 import Head from 'next/head'
 import { Inter } from 'next/font/google'
 import Layout from '@/components/Layout'
-import { ReactElement, use } from 'react'
+import { ReactElement } from 'react'
 import type { NextPageWithLayout } from '../_app';
-import { useAuthState } from 'react-firebase-hooks/auth'
-import { auth, db } from '@/firebase'
-import UserDetailScreen from '@/components/UserDetailScreen/UserDetailScreen';
-import { useRouter } from 'next/router';
-import getStatusFriend from '@/utils/getStatusFriend';
+import UserDetailScreen from '@/components/ProfilePage/UserDetailScreen/UserDetailScreen';
+import { db } from '@/firebase';
 
 const inter = Inter({ subsets: ['latin'] })
 
 // import '@/styles/tailwind.min.css'
 const Page: NextPageWithLayout = ({userInfo}: any) => {
 
-const [user] = useAuthState(auth);
+const data = JSON.parse(userInfo);
 
   return (
     <>
@@ -25,7 +22,7 @@ const [user] = useAuthState(auth);
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-        <UserDetailScreen userInfo={userInfo} statusFriend={getStatusFriend(user?.email!, userInfo?.id)} />
+        <UserDetailScreen userInfo={data} />
     </>
   )
 }

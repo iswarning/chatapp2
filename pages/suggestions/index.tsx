@@ -1,13 +1,9 @@
 import Head from 'next/head'
 import { Inter } from 'next/font/google'
-import SidebarMessage from '@/components/ChatPage/SidebarMessage/SidebarMessage'
 import Layout from '@/components/Layout'
 import { ReactElement } from 'react'
 import type { NextPageWithLayout } from '../_app';
-import ChatScreen from '@/components/ChatPage/ChatScreen/ChatScreen'
-import FriendRequestsListScreen from '@/components/FriendRequestsListScreen/FriendRequestsListScreen'
-import styled from 'styled-components'
-import FriendsListScreen from '@/components/AllFriendPage/FriendsListScreen/FriendsListScreen'
+import SuggestionScreen from '@/components/SuggestionPage/SuggestionScreen/SuggestionScreen'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -21,13 +17,18 @@ const Page: NextPageWithLayout = () => {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
+      {/* <SidebarMessage /> */}
 
         <div className="main flex-1 flex flex-col">
             <div className="hidden lg:block heading flex-2">
-                <h1 className="text-3xl text-gray-700 mb-4">All friends</h1>
+                <h1 className="text-3xl text-gray-700 mb-4">Suggestions</h1>
             </div>
-            <FriendsListScreen />
+
+            <div className="flex-1 flex h-full">
+                <SuggestionScreen  />
+            </div>
         </div>
+
     </>
   )
 }

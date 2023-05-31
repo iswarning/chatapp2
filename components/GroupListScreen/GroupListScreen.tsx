@@ -1,4 +1,4 @@
-import Profile from "../Profile/Profile";
+import Profile from "../ProfilePage/Profile/Profile";
 import { Container } from "./GroupListScreenStyled";
 
 export default function GroupListScreen() {

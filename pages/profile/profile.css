@@ -496,3 +496,37 @@ p {
     }
   }
 }
+
+@media only screen and (min-width: 2000px) and (max-width: 2200px) {
+  @-webkit-keyframes materia {
+    0% {
+      background: #E0E0E0;
+    }
+    50% {
+      -webkit-border-radius: 10px;
+    }
+    100% {
+      width: 1400px;
+      height: max-content;
+      background: #FFFFFF;
+      -webkit-border-radius: 10px;
+    }
+  }
+  @keyframes materia {
+    0% {
+      background: #E0E0E0;
+    }
+    50% {
+      border-radius: 10px;
+    }
+    100% {
+      width: 1400px;
+      height: max-content;
+      background: #FFFFFF;
+      border-radius: 10px;
+    }
+  }
+  .profile-card {
+    left: 29%;
+  }
+}

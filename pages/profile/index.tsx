@@ -1,11 +1,9 @@
 import Head from 'next/head'
 import { Inter } from 'next/font/google'
-import SidebarMessage from '@/components/SidebarMessage/SidebarMessage'
 import Layout from '@/components/Layout'
 import { ReactElement } from 'react'
 import type { NextPageWithLayout } from '../_app';
-import ChatScreen from '@/components/ChatScreen/ChatScreen'
-import Profile from '@/components/Profile/Profile'
+import Profile from '@/components/ProfilePage/Profile/Profile'
 
 const inter = Inter({ subsets: ['latin'] })
 

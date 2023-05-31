@@ -1,9 +1,9 @@
 import Head from 'next/head'
-import SidebarMessage from '@/components/SidebarMessage/SidebarMessage'
+import SidebarMessage from '@/components/ChatPage/SidebarMessage/SidebarMessage'
 import Layout from '@/components/Layout'
 import { ReactElement } from 'react'
 import type { NextPageWithLayout } from '../_app';
-import ChatScreen from '@/components/ChatScreen/ChatScreen'
+import ChatScreen from '@/components/ChatPage/ChatScreen/ChatScreen'
 import { db } from '@/firebase'
 
 // import '@/styles/tailwind.min.css'

@@ -1,36 +1,33 @@
 import { db } from "@/firebase";
+import getFriendRequestsByEmail from "@/services/friend-requests/getFriendRequestsByEmail";
+import getFriendRequestsRecipientByEmail from "@/services/friend-requests/getFriendRequestsRecipientByEmail";
+import getFriendByEmails from "@/services/friends/getFriendByEmails";
 
 export default async function getStatusFriend(emailLoggedIn: string, emailIsFriend: string) {
 
     let status = 'isStranger';
 
-    const friendRequestsByEmail = await db
-            .collection("friend_requests")
-            .where("senderEmail",'==',emailLoggedIn)
-            .where("recipientEmail",'==',emailIsFriend)
-            .get();
+    const friendRequestsByEmail = await getFriendRequestsByEmail(emailLoggedIn, emailIsFriend);
 
-    if(friendRequestsByEmail) {
+    if(friendRequestsByEmail?.exists
+        && friendRequestsByEmail?.data().senderEmail === emailLoggedIn) { 
         status = 'isFriendRequest';
     }
 
-    const friendRequestsRecipientByEmail = await db
-            .collection("friend_requests")
-            .where("recipientEmail",'==',emailLoggedIn)
-            .where("senderEmail",'==',emailIsFriend)
-            .get();
+    const friendRequestsRecipientByEmail = await getFriendRequestsRecipientByEmail(emailLoggedIn);
 
-    if(friendRequestsRecipientByEmail) {
-        status = 'isPendingAccept';
+    if(friendRequestsRecipientByEmail.length > 0) {
+        const findFriend = friendRequestsRecipientByEmail.find((item) => 
+            item.data().senderEmail === emailIsFriend);
+
+        if(findFriend?.exists) {
+            status = 'isPendingAccept';
+        }
     }
 
-    const friendByEmails = await db
-            .collection("friends")
-            .where("users",'array-contains',emailLoggedIn)
-            .get();
-
-    if(friendByEmails) {
-        friendByEmails?.docs?.find((fr) => fr.data().user.includes(emailIsFriend))
+    const friendByEmails = await getFriendByEmails(emailLoggedIn, String(emailIsFriend));
+            
+    if(friendByEmails?.exists) { 
         status = 'isFriend';
     }
 
