@@ -52,7 +52,7 @@ export default function Header() {
 }
 
 const ModalContainer = styled.article`
-    width: 500px;
+    width: 400px;
     height: 700px;
     background: white;
     margin-left: auto;

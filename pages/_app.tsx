@@ -54,13 +54,13 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
     if(user) {
       createNewUser(user).catch((err) => console.log(err));
 
-      getNotificationMessage(user?.email, socket);
+      // getNotificationMessage(user?.email, socket);
 
-      getNotificationAddFriend(user?.email, socket);
+      // getNotificationAddFriend(user?.email, socket);
 
-      getNotificationAcceptFriend(user?.email, socket);
+      // getNotificationAcceptFriend(user?.email, socket);
 
-      requestPermission()
+      // requestPermission()
 
       // const channel = new BroadcastChannel("notifications");
       // channel.addEventListener("message", (event) => {

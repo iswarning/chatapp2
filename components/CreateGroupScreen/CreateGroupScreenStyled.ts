@@ -106,8 +106,8 @@ export const UserContainer = styled.div`
     height: 60px;
 `;
 
-export const TextEmail = styled.p`
-    margin-top: 15px;
+export const TextEmail = styled.label`
+    /* margin-top: 15px; */
 `;
 
 export const UserAvatar = styled(Avatar)`

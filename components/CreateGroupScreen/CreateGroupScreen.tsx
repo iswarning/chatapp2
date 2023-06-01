@@ -11,68 +11,103 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import { Button, IconButton, Modal } from "@mui/material";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useCollection } from "react-firebase-hooks/firestore";
+import Member from "./Member";
 
 export default function CreateGroupScreen({onClose}: any) {
 
     const [searchInput, setSearchInput] = useState('');
     const [groupName, setGroupName] = useState('');
     const [listMember, setListMember]: any = useState([]);
-    const [statusView, setStatusView] = useState('viewFriend');
-    const [friendData, setFriendData] = useState<Array<any>>();
     const [searchData, setSearchData]: any = useState([]);
+    const [loading, setLoading] = useState(false);
     const [user] = useAuthState(auth);
 
     useEffect(() => {
-        const getFriendAndUserInfo = async() => {
-            let result: Array<any> = [];
-            const allFriend = await getAllFriendOfUser(user?.email!);
-            if(allFriend.length > 0) { 
-                allFriend.forEach(async(f) => {
-                    const userByEmail = await getUserByEmail(getRecipientEmail(f.data().users, user));
-                    result.push({
-                        id: userByEmail.id,
-                        email: userByEmail.data().email,
-                        phoneNumber: userByEmail.data().phoneNumber,
-                        photoURL: userByEmail.data().photoURL,
-                    })
-                })
-            }
-            setFriendData(result);
-        }
-        getFriendAndUserInfo();
-        addAdminUserToGroup();
+        // const getFriendAndUserInfo = async() => {
+        //     let result: Array<any> = [];
+        //     const allFriend = await getAllFriendOfUser(user?.email!);
+        //     if(allFriend.length > 0) { 
+        //         allFriend.forEach(async(f) => {
+        //             const userByEmail = await getUserByEmail(getRecipientEmail(f.data().users, user));
+        //             result.push({
+        //                 id: userByEmail.id,
+        //                 email: userByEmail.data().email,
+        //                 phoneNumber: userByEmail.data().phoneNumber,
+        //                 photoURL: userByEmail.data().photoURL,
+        //             })
+        //         })
+        //     }
+        //     setFriendData(result);
+        // }
+        // getFriendAndUserInfo();
+        // addAdminUserToGroup();
+        Promise.all([friendList]).then(() => setLoading(true))
     },[])
 
-    const addAdminUserToGroup = () => setListMember([
-        { id: user?.uid, email: user?.email, photoURL: user?.photoURL, phoneNumber: user?.phoneNumber}]);
+    const [friendSnapshot] = useCollection(
+        db
+        .collection("friends")
+        .where("users",'array-contains',user?.email)
+    )
+
+    const friendList = friendSnapshot?.docs?.map(async(friend) => {
+        const userSnapshot = await db.collection("users").where("email",'==',getRecipientEmail(friend.data().users, user)).get()
+        const userInfo = userSnapshot?.docs?.[0];
+        return {
+            friendId: friend.id,
+            ...friend.data(),
+            userId: userInfo.id,
+            ...userInfo.data()
+        }
+    })
 
     const handleSearch = (value: any) => {
         setSearchInput(value);
-        if(value.length === 10) {
-            const d = friendData?.map((fri) => fri.phoneNumber.indexOf(value) !== -1)
-            if(d !== undefined && d.length > 0) { 
-                setSearchData(d);
-            } else {
-                setSearchData([]);
-            }
+        // let isPhone = Number.isNaN(value);
+        // if(isPhone && value.length === 10) {
+        //     let result = friendSnapshot?.docs?.map((fri) => {
+                
+        //     })
+        //     if(result !== undefined && result.length > 0) { 
+        //         setSearchData(result);
+        //     } else {
+        //         setSearchData([]);
+        //     }
+        // } else if (!isPhone && value.length > 0) {
+        //     let result = friendSnapshot?.docs?.map((fri) => {
+        //         return (getRecipientEmail(fri.data().users, user)).indexOf(value) !== -1
+        //     })
+        //     if(result !== undefined && result.length > 0) { 
+        //         setSearchData(result);
+        //     } else {
+        //         setSearchData([]);
+        //     }
+        // }
+    }
+
+    const removeMember = (userInfo: any) => {
+        let array = [...listMember]; // make a separate copy of the array
+        let itemExist = listMember.find((mem: any) => mem.id === userInfo.id)
+        if (itemExist) {
+            array.splice(itemExist, 1);
+            setListMember(array)
         }
     }
 
-    const handleAddUser = (userInfo: any) => {
-        setListMember((oldListMember: any) => [
-            {
-                id: userInfo?.id, 
-                email: userInfo?.email, 
-                photoURL: userInfo?.photoURL, 
-            },
-            ...oldListMember
-        ]);
-        setSearchInput('');
-        setFriendData(friendData?.filter((fr) => fr.id === userInfo?.id))
-    }
-
-    const handleRemoveUser = (mem: any) => {
-        setListMember(listMember.filter((m: any) => m.email !== mem.email));
+    const handleCheckBox = (userInfo: any, checked: boolean) => {
+        if (!checked) {
+            removeMember(userInfo);
+        } else {
+            setListMember((oldListMember: any) => [
+                {
+                    id: userInfo?.id, 
+                    email: userInfo?.email, 
+                    photoURL: userInfo?.photoURL, 
+                },
+                ...oldListMember
+            ]);
+        }
+        // setSearchInput('');
     }
 
     const handleCreateNewGroupChat = (e: any) => {
@@ -83,69 +118,45 @@ export default function CreateGroupScreen({onClose}: any) {
     }
 
     return (
-
-        <Container>
-            <SidebarContainer>
-                <Search>
+        <>
+            {
+                loading ? <Container>
+            <SidebarContainer >
+                <Search className="py-2">
                     <SearchIcon />
-                    <SearchInput placeholder='Enter phone number to search' value={searchInput} onChange={(e) => handleSearch(e.currentTarget.value)}/>
+                    <SearchInput placeholder='Enter phone number or email to search' value={searchInput} onChange={(e) => handleSearch(e.currentTarget.value)}/>
                 </Search>
-                <GroupNameContainer>
+                <CountMemberContainer className={"mt-4 " + (listMember.length < 2 ? "bg-red-100 text-red-800" : "bg-green-100 text-green-800") + "  font-medium mr-2 px-3 py-0.5 rounded-full dark:bg-red-900 dark:text-red-300"}>
+                    <Label className="">Total members:</Label>
+                    <CountMemberValue>&nbsp; {listMember?.length!}</CountMemberValue>
+                </CountMemberContainer>
+                <ListMemberScreen style={{overflowY: 'auto'}} className="py-2">
+                {
+                    friendList && searchInput.length === 0 ? friendList?.map((data: any) => 
+                        <Member key={data.friendId} userInfo={data} onCheckBox={(userInfo: any, checked: boolean) => handleCheckBox(userInfo, checked)} />
+                    ) : null
+                }
+                {
+                    searchInput.length > 0 && searchData.length > 0 ? searchData?.map((data: any) => 
+                        <Member key={data.friendId} userInfo={data} onCheckBox={(userInfo: any, checked: boolean) => handleCheckBox(userInfo, checked)} />
+                    ) : null
+                }
+                </ListMemberScreen>
+                <GroupNameContainer className="py-2">
                     <GroupNameInput title="Group Name" placeholder=" Enter group name" value={groupName} hidden={listMember?.length! < 3} onChange={(e) => setGroupName(e.target.value)}/>
                 </GroupNameContainer>
-                <CountMemberContainer>
-                    <Label>Total members:</Label>
-                    <CountMemberValue>&nbsp; {listMember?.length!}</CountMemberValue>
-                    { statusView === 'viewFriend' ? <IconButton style={{marginLeft: 'auto'}} onClick={() => setStatusView('viewListMember')}><VisibilityIcon/></IconButton> : null}
-                    { statusView === 'viewListMember' ? <IconButton style={{marginLeft: 'auto'}} onClick={() => setStatusView('viewFriend')}><ArrowBackIcon /></IconButton> : null}
-                </CountMemberContainer>
-                <ListMemberScreen style={{overflowY: listMember?.length! > 7 && statusView === 'viewListMember' ? 'scroll' : 'unset'}}>
-                {/* {   
-                    statusView === 'viewFriend' && searchInput.length === 10  && Object.keys(searchData).length > 0 ? 
-                        <UserContainer key={searchData?.id}>
-                            <UserAvatar src={searchData?.photoURL} />
-                            <TextEmail>{searchData?.phoneNumber}</TextEmail>
-                            <BtnAdd titleAccess="Add" onClick={() => handleAddUser(searchData)}/>
-                        </UserContainer>
-                    : null
-                }   */}
-                {
-                    statusView === 'viewFriend' && friendData && searchInput.length === 0 ? friendData.map(data => 
-                        <UserContainer key={data?.id}>
-                            <UserAvatar src={data?.photoURL} />
-                            <TextEmail>{data?.phoneNumber}</TextEmail>&nbsp;
-                            <input type="checkbox" onChange={() => handleAddUser(data)} />
-                        </UserContainer>
-                    ) : null
-                }
-                {
-                    statusView === 'viewFriend' && searchInput.length > 0 ? searchData?.map((data: any) => 
-                        <UserContainer key={data?.id}>
-                            <UserAvatar src={data?.photoURL} />
-                            <TextEmail>{data?.phoneNumber}</TextEmail>&nbsp;
-                            <BtnAdd titleAccess="Add" onClick={() => handleAddUser(data)}/>
-                        </UserContainer>
-                    ) : null
-                }
-                {   
-                    statusView === 'viewListMember' && listMember?.length! > 0 ? listMember?.map((mem: any) =>
-                        <UserContainer key={mem?.id}>
-                            <UserAvatar src={mem?.photoURL} />
-                            <TextEmail>{mem?.email}</TextEmail>
-                            <BtnRemove titleAccess="Remove" onClick={() => handleRemoveUser(mem)} style={{display: mem.id === user?.uid ? 'none': 'block'}}/>
-                        </UserContainer>
-                    ) : null
-                }    
-                </ListMemberScreen>
-                <BtnContainer>
+                <BtnContainer className="py-2 text-center">
                     <Button
-                        variant="contained"
+                        variant="outlined"
                         color="info" 
-                        style={{display: listMember?.length! < 3 || groupName.length < 3 ? 'none' : 'block'}} 
+                        style={{display: listMember?.length! >= 2 && groupName.length >= 3 ? 'block' : 'none'}} 
                         onClick={handleCreateNewGroupChat}>Create Group
                     </Button>
                 </BtnContainer>
             </SidebarContainer>
-        </Container>
+        </Container> : null
+            }
+        </>
+        
     )
 }
