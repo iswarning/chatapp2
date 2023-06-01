@@ -3,6 +3,8 @@ import { useAuthState } from 'react-firebase-hooks/auth';
 import Chat from '../Chat';
 import { useEffect, useState } from 'react';
 import { useCollection } from 'react-firebase-hooks/firestore';
+import { IconButton } from '@mui/material';
+
 
 export default function SidebarMessage() {
 
@@ -93,6 +95,7 @@ export default function SidebarMessage() {
         //         <CreateGroupScreen onClose={onClose}/>
         //     </ModalContainer>
         // </Container>
+    <>
         <div className="sidebar hidden lg:flex w-1/3 flex-2 flex-col pr-6" >
             <div className="search flex-2 pb-6 px-2">
                 <input type="text" className="outline-none py-2 block w-full bg-transparent border-b-2 border-gray-200" placeholder="Search"/>
@@ -111,6 +114,8 @@ export default function SidebarMessage() {
                 }
             </div>
         </div>
+    </>
+        
     );
 }
 

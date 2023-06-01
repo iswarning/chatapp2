@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react";
 import { BtnAdd, BtnBack, BtnContainer, BtnRemove, BtnViewListMember, Container, CountMemberContainer, CountMemberValue, GroupNameContainer, GroupNameInput, Label, ListMemberScreen, Search, SearchInput, SidebarContainer, TextEmail, UserAvatar, UserContainer } from "./CreateGroupScreenStyled";
 import SearchIcon from '@mui/icons-material/Search';
-import { AcceptBtn } from "../FriendRequest/FriendRequestStyled";
 import getAllFriendOfUser from "@/services/friends/getAllFriendOfUser";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { auth } from "@/firebase";
+import { auth, db } from "@/firebase";
 import getRecipientEmail from "@/utils/getRecipientEmail";
 import getUserByEmail from "@/services/users/getUserByEmail";
 import createNewGroupChat from "@/services/chat-groups/createNewGroupChat";
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import { IconButton } from "@mui/material";
+import { Button, IconButton, Modal } from "@mui/material";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { useCollection } from "react-firebase-hooks/firestore";
 
 export default function CreateGroupScreen({onClose}: any) {
 
@@ -19,7 +19,7 @@ export default function CreateGroupScreen({onClose}: any) {
     const [listMember, setListMember]: any = useState([]);
     const [statusView, setStatusView] = useState('viewFriend');
     const [friendData, setFriendData] = useState<Array<any>>();
-    const [searchData, setSearchData]: any = useState({});
+    const [searchData, setSearchData]: any = useState([]);
     const [user] = useAuthState(auth);
 
     useEffect(() => {
@@ -49,11 +49,11 @@ export default function CreateGroupScreen({onClose}: any) {
     const handleSearch = (value: any) => {
         setSearchInput(value);
         if(value.length === 10) {
-            const d = friendData?.find((f) => f.phoneNumber === value)
-            if(d !== undefined && listMember.length > 0 && listMember.filter((mem: any) => mem.email === d.email).length === 0) { 
+            const d = friendData?.map((fri) => fri.phoneNumber.indexOf(value) !== -1)
+            if(d !== undefined && d.length > 0) { 
                 setSearchData(d);
             } else {
-                setSearchData({});
+                setSearchData([]);
             }
         }
     }
@@ -68,7 +68,7 @@ export default function CreateGroupScreen({onClose}: any) {
             ...oldListMember
         ]);
         setSearchInput('');
-        setSearchData({});
+        setFriendData(friendData?.filter((fr) => fr.id === userInfo?.id))
     }
 
     const handleRemoveUser = (mem: any) => {
@@ -83,6 +83,7 @@ export default function CreateGroupScreen({onClose}: any) {
     }
 
     return (
+
         <Container>
             <SidebarContainer>
                 <Search>
@@ -99,7 +100,7 @@ export default function CreateGroupScreen({onClose}: any) {
                     { statusView === 'viewListMember' ? <IconButton style={{marginLeft: 'auto'}} onClick={() => setStatusView('viewFriend')}><ArrowBackIcon /></IconButton> : null}
                 </CountMemberContainer>
                 <ListMemberScreen style={{overflowY: listMember?.length! > 7 && statusView === 'viewListMember' ? 'scroll' : 'unset'}}>
-                {   
+                {/* {   
                     statusView === 'viewFriend' && searchInput.length === 10  && Object.keys(searchData).length > 0 ? 
                         <UserContainer key={searchData?.id}>
                             <UserAvatar src={searchData?.photoURL} />
@@ -107,7 +108,25 @@ export default function CreateGroupScreen({onClose}: any) {
                             <BtnAdd titleAccess="Add" onClick={() => handleAddUser(searchData)}/>
                         </UserContainer>
                     : null
-                }  
+                }   */}
+                {
+                    statusView === 'viewFriend' && friendData && searchInput.length === 0 ? friendData.map(data => 
+                        <UserContainer key={data?.id}>
+                            <UserAvatar src={data?.photoURL} />
+                            <TextEmail>{data?.phoneNumber}</TextEmail>&nbsp;
+                            <input type="checkbox" onChange={() => handleAddUser(data)} />
+                        </UserContainer>
+                    ) : null
+                }
+                {
+                    statusView === 'viewFriend' && searchInput.length > 0 ? searchData?.map((data: any) => 
+                        <UserContainer key={data?.id}>
+                            <UserAvatar src={data?.photoURL} />
+                            <TextEmail>{data?.phoneNumber}</TextEmail>&nbsp;
+                            <BtnAdd titleAccess="Add" onClick={() => handleAddUser(data)}/>
+                        </UserContainer>
+                    ) : null
+                }
                 {   
                     statusView === 'viewListMember' && listMember?.length! > 0 ? listMember?.map((mem: any) =>
                         <UserContainer key={mem?.id}>
@@ -119,10 +138,12 @@ export default function CreateGroupScreen({onClose}: any) {
                 }    
                 </ListMemberScreen>
                 <BtnContainer>
-                    <AcceptBtn 
+                    <Button
+                        variant="contained"
+                        color="info" 
                         style={{display: listMember?.length! < 3 || groupName.length < 3 ? 'none' : 'block'}} 
                         onClick={handleCreateNewGroupChat}>Create Group
-                    </AcceptBtn>
+                    </Button>
                 </BtnContainer>
             </SidebarContainer>
         </Container>

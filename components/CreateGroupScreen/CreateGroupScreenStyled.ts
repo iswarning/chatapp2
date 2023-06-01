@@ -1,13 +1,12 @@
 import { Avatar } from "@mui/material";
 import styled from "styled-components";
-import { AcceptBtn, CancelBtn } from "../FriendRequest/FriendRequestStyled";
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 
 export const Container = styled.div.attrs(() => ({
     className: 'container'
 }))`
-    border: 1px solid whitesmoke;
+    /* border: 1px solid whitesmoke; */
 `
 
 export const SidebarContainer = styled.div`
@@ -18,7 +17,7 @@ export const SidebarContainer = styled.div`
     max-width: 350px;
     max-height: 600px;
     overflow-y: scroll;
-
+    text-align: center;
     ::-webkit-scrollbar {
         display: none;
     }

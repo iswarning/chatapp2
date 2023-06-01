@@ -10,6 +10,8 @@ import firebase from "firebase";
 import styled from "styled-components";
 import CallIcon from '@mui/icons-material/Call';
 import Link from "next/link";
+import VideocamIcon from '@mui/icons-material/Videocam';
+import { IconButton } from "@mui/material";
 
 export const emojiData: any = [
     0x1F600,
@@ -283,12 +285,20 @@ export default function ChatScreen({ chat, messages}: any) {
         <div className="chat-area flex-1 flex flex-col">
             
             <div className="flex-3">
-                <h2 className="text-xl pb-3 mb-8 border-b-2 border-gray-200 d-flex">
+                <h2 className="text-xl pb-1 mb-4 border-b-2 border-gray-200 d-flex">
                     {chat.isGroup ? 'Chatting in group ' : 'Chatting with '}&nbsp;
                     <Link href={`/profile/${recipientSnapshot?.docs?.[0].id}`} className="cursor-pointer font-semibold" id="hover-animation" data-replace="Profile">
                         <span>{chat.isGroup ? chat.name : recipientSnapshot?.docs?.[0].data().fullName}</span>
                     </Link>
-                    <CallIcon className="ml-auto cursor-pointer" />
+                    <div className="ml-auto">
+                        <IconButton>
+                            <VideocamIcon  fontSize="small" />
+                        </IconButton>
+                        <IconButton>
+                            <CallIcon fontSize="small" />
+                        </IconButton>
+                    </div>
+                    
                 </h2>
             </div>
             <div className="messages flex-1 overflow-auto h-screen px-4">

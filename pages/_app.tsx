@@ -7,7 +7,8 @@ import { ReactElement, ReactNode, useEffect, useRef, useState } from 'react';
 import createNewUser from '@/services/users/createNewUser';
 import 'bootstrap/dist/css/bootstrap.css';
 import getNotificationMessage from '@/utils/getNotificationMessage';
-import { auth, getMessagingToken, onMessageListener } from '@/firebase';
+import { auth } from '@/firebase';
+// import { auth, getMessagingToken, onMessageListener } from '@/firebase';
 import Loading from '@/components/Loading';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer, toast } from 'react-toastify';
@@ -53,18 +54,18 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
     if(user) {
       createNewUser(user).catch((err) => console.log(err));
 
-      // getNotificationMessage(user?.email, socket);
+      getNotificationMessage(user?.email, socket);
 
-      // getNotificationAddFriend(user?.email, socket);
+      getNotificationAddFriend(user?.email, socket);
 
-      // getNotificationAcceptFriend(user?.email, socket);
+      getNotificationAcceptFriend(user?.email, socket);
 
       requestPermission()
 
-      const channel = new BroadcastChannel("notifications");
-      channel.addEventListener("message", (event) => {
-          console.log("Receive background: ", event.data);
-      });
+      // const channel = new BroadcastChannel("notifications");
+      // channel.addEventListener("message", (event) => {
+      //     console.log("Receive background: ", event.data);
+      // });
       
       // socket.on("response-call-video-one-to-one", (res: string) => {
       //   let data = JSON.parse(res);
@@ -113,14 +114,14 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
     }
   },[user]);
 
-  useEffect(() => {
-    getMessagingToken();
-  },[])
-  useEffect(() => {
-    onMessageListener().then(data => {
-        console.log("Receive foreground: ",data)
-    })
-  })
+  // useEffect(() => {
+  //   getMessagingToken();
+  // },[])
+  // useEffect(() => {
+  //   onMessageListener().then(data => {
+  //       console.log("Receive foreground: ",data)
+  //   })
+  // })
 
   if(!user) return <Login/>
 

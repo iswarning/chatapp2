@@ -17,33 +17,33 @@ const auth = app.auth();
 
 const provider = new firebase.auth.GoogleAuthProvider();
 
-let messaging: firebase.messaging.Messaging;
+// let messaging: firebase.messaging.Messaging;
 
-if (typeof window !== "undefined") {
-  if (firebase.messaging.isSupported()) {
-    messaging = firebase.messaging();
-  }
-}
+// if (typeof window !== "undefined") {
+//   if (firebase.messaging.isSupported()) {
+//     messaging = firebase.messaging();
+//   }
+// }
 
-export const getMessagingToken = async () => {
-  let currentToken = "";
-  if (!messaging) return;
-  try {
-    currentToken = await messaging.getToken({
-      vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
-    });
-    console.log(currentToken)
-  } catch (error) {
-    console.log("An error occurred while retrieving token. ", error);
-  }
-  return currentToken;
-};
+// export const getMessagingToken = async () => {
+//   let currentToken = "";
+//   if (!messaging) return;
+//   try {
+//     currentToken = await messaging.getToken({
+//       vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
+//     });
+//     console.log(currentToken)
+//   } catch (error) {
+//     console.log("An error occurred while retrieving token. ", error);
+//   }
+//   return currentToken;
+// };
 
-export const onMessageListener = () =>
-  new Promise((resolve) => {
-    messaging.onMessage((payload) => {
-      resolve(payload);
-    });
-});
+// export const onMessageListener = () =>
+//   new Promise((resolve) => {
+//     messaging.onMessage((payload) => {
+//       resolve(payload);
+//     });
+// });
 
 export { db, auth, provider };

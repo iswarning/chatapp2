@@ -1,4 +1,13 @@
+import { IconButton, Modal } from "@mui/material";
+import GroupAddIcon from '@mui/icons-material/GroupAdd';
+import { useState } from "react";
+import CreateGroupScreen from "./CreateGroupScreen/CreateGroupScreen";
+import styled from "styled-components";
+
 export default function Header() {
+    
+    const [isOpen, setIsOpen] = useState(false);
+    
     return (
         <div className="py-4 flex-2 flex flex-row">
             <div className="flex-1">
@@ -15,6 +24,11 @@ export default function Header() {
             </div>
             <div className="flex-1 text-right">
                 <span className="inline-block text-gray-700">
+                    <IconButton onClick={() => setIsOpen(true)}>
+                        <GroupAddIcon titleAccess='Create Group Chat'/>
+                    </IconButton>
+                </span>
+                <span className="inline-block ml-2 text-gray-700">
                     Status: <span className="inline-block align-text-bottom w-4 h-4 bg-green-400 rounded-full border-2 border-white"></span> <b>Online</b>
                 <span className="inline-block align-text-bottom">
                         <svg fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" className="w-4 h-4"><path d="M19 9l-7 7-7-7"></path></svg>
@@ -27,6 +41,23 @@ export default function Header() {
                     </span>
                 </span>
             </div>
+            <Modal open={isOpen} onClose={() => setIsOpen(false)} >
+                <ModalContainer>
+                    <h3 className="text-center">Create New Group Chat</h3>
+                    <CreateGroupScreen onClose={() => setIsOpen(false)} />
+                </ModalContainer>
+            </Modal>
         </div>
     );
-  }
+}
+
+const ModalContainer = styled.article`
+    width: 500px;
+    height: 700px;
+    background: white;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 60px;
+    border-radius: 10px;
+    padding: 30px;
+`

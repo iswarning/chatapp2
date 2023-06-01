@@ -6,6 +6,8 @@ import { ReactElement, useEffect } from 'react'
 import type { NextPageWithLayout } from './_app';
 import ChatScreen from '@/components/ChatPage/ChatScreen/ChatScreen'
 import sendNotificationFCM from '@/utils/sendNotificationFCM'
+import { IconButton } from '@mui/material'
+
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -19,14 +21,14 @@ const Page: NextPageWithLayout = () => {
     
   },[])
 
-  const handleTestMessage = () => {
-    sendNotificationFCM(
-      "Hello world", 
-      "First message", 
-      "c51PFxRwFhvtErtWzn61Ca:APA91bFQAaPkzpBTEo9nCqwa-lZD4nNWvtQB1hLar9mtqPFiTB2ZCQD8kFHKX8Uqy8L5lGnMkbVqHjRlKfRQ3NNSyX6eoo1pC8fqEDZ4WJNPTsCd8x__jr4coimRCcAVJmy32XkC4zJ1",
-      "ya29.a0AWY7Ckkl4Oq33t6H4JhuvFBDbIRe1B5Hl7Bbg8EmiO06Iy8XVI3etXj8b2_rpmxQ6hlYPwyjjoUNGlCnPjIv8Y7uCfSvZuqMVeOQB3mC8Fi50V584gWPXq1b4EXh9w8094Cov2_NQtgzYEooriyxcVg9w8qiaCgYKASASARMSFQG1tDrp2SdkcMQgtoEF1rhcQMYRBw0163"
-    ).then((data) => console.log(data))
-  }
+  // const handleTestMessage = () => {
+  //   sendNotificationFCM(
+  //     "Hello world", 
+  //     "First message", 
+  //     "c51PFxRwFhvtErtWzn61Ca:APA91bFQAaPkzpBTEo9nCqwa-lZD4nNWvtQB1hLar9mtqPFiTB2ZCQD8kFHKX8Uqy8L5lGnMkbVqHjRlKfRQ3NNSyX6eoo1pC8fqEDZ4WJNPTsCd8x__jr4coimRCcAVJmy32XkC4zJ1",
+  //     "ya29.a0AWY7Ckn_e5uzJyoY4sLoQV5Ws1uBKAdE3gMIR5su95Ic-yJjzm5UhlO2CZaAP0wMHh1jPcZYVblyfWCkv2V81HJM5pstPelma_arWpiI_T9aM33wS8FuwUYAIKEHgkqBNUtPtDTMy_E58tRSOl82-THuSalRaCgYKARMSARMSFQG1tDrpH19IGuUu33NXOqAcHy-xeA0163"
+  //   ).then((data) => console.log(data))
+  // }
 
   return (
     <>
@@ -37,12 +39,12 @@ const Page: NextPageWithLayout = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       {/* <SidebarMessage /> */}
-      <button onClick={handleTestMessage}>Test message</button>
+      {/* <button onClick={handleTestMessage}>Test message</button> */}
         <div className="main flex-1 flex flex-col">
             <div className="hidden lg:block heading flex-2">
                 <h1 className="text-3xl text-gray-700 mb-4">Chat</h1>
             </div>
-
+            
             <div className="flex-1 flex h-full">
               
                 <SidebarMessage />
