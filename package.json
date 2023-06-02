@@ -21,6 +21,7 @@
         "@mui/icons-material": "^5.11.11",
         "@mui/material": "^5.11.14",
         "@mui/styled-engine-sc": "^5.11.11",
+        "@netlify/plugin-nextjs": "^4.37.4",
         "@types/emoji-mart": "^3.0.9",
         "@types/node": "18.15.5",
         "@types/react": "18.0.28",
