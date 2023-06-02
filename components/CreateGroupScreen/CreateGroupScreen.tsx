@@ -12,82 +12,118 @@ import { Button, IconButton, Modal } from "@mui/material";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useCollection } from "react-firebase-hooks/firestore";
 import Member from "./Member";
+import ItemFilter from "./ItemFilter";
+import { userInfo } from "os";
 
-export default function CreateGroupScreen({onClose}: any) {
+export default function CreateGroupScreen({onClose, friendData}: any) {
 
     const [searchInput, setSearchInput] = useState('');
     const [groupName, setGroupName] = useState('');
     const [listMember, setListMember]: any = useState([]);
+    const [friendList, setFriendList]: any = useState([]);
     const [searchData, setSearchData]: any = useState([]);
-    const [loading, setLoading] = useState(false);
+    // const [loading, setLoading] = useState(false);
     const [user] = useAuthState(auth);
 
     useEffect(() => {
-        // const getFriendAndUserInfo = async() => {
-        //     let result: Array<any> = [];
-        //     const allFriend = await getAllFriendOfUser(user?.email!);
-        //     if(allFriend.length > 0) { 
-        //         allFriend.forEach(async(f) => {
-        //             const userByEmail = await getUserByEmail(getRecipientEmail(f.data().users, user));
-        //             result.push({
-        //                 id: userByEmail.id,
-        //                 email: userByEmail.data().email,
-        //                 phoneNumber: userByEmail.data().phoneNumber,
-        //                 photoURL: userByEmail.data().photoURL,
-        //             })
-        //         })
-        //     }
-        //     setFriendData(result);
-        // }
-        // getFriendAndUserInfo();
-        // addAdminUserToGroup();
-        Promise.all([friendList]).then(() => setLoading(true))
-    },[])
-
+        if(searchInput.length === 1) {
+            getFriendList().then((data) => setFriendList(data)).catch(err => console.log(err))
+        }
+    },[searchInput])
+    
     const [friendSnapshot] = useCollection(
         db
         .collection("friends")
         .where("users",'array-contains',user?.email)
     )
 
-    const friendList = friendSnapshot?.docs?.map(async(friend) => {
-        const userSnapshot = await db.collection("users").where("email",'==',getRecipientEmail(friend.data().users, user)).get()
-        const userInfo = userSnapshot?.docs?.[0];
-        return {
-            friendId: friend.id,
-            ...friend.data(),
-            userId: userInfo.id,
-            ...userInfo.data()
-        }
-    })
+    async function getFriendList() {
+        let result: any[] = [];
 
-    const handleSearch = (value: any) => {
+        friendSnapshot?.docs?.forEach((friend) => {
+            (async() => {
+                const userSnapshot = await db.collection("users").where("email",'==',getRecipientEmail(friend.data().users, user)).get()
+                const userInfo = userSnapshot?.docs?.[0];
+                result.push({
+                    friendId: friend.id,
+                    ...friend.data(),
+                    userId: userInfo.id,
+                    ...userInfo.data()
+                })
+            })();
+        })
+
+        return result;
+    }
+
+    const showFriendList = () => {
+        if (friendList.length > 0) {
+            if(searchInput.length === 0) {
+                return friendList  ? friendList?.map((data: any) => 
+                            <ItemFilter key={data.id} userInfo={data} onCheckBox={(userInfo: any, checked: boolean) => handleCheckBox(userInfo, checked)} checked={listMember?.find((mem: any) => mem.id === data.userId)} />
+                        ) : null
+            } else {
+                return searchData ? searchData?.map((data: any) => 
+                            <ItemFilter key={data.id} userInfo={data} onCheckBox={(userInfo: any, checked: boolean) => handleCheckBox(userInfo, checked)} checked={listMember?.find((mem: any) => mem.id === data.userId)} />
+                        ) : null
+            }
+        } else {
+            if(searchInput.length === 0) { 
+                return friendSnapshot ? friendSnapshot?.docs?.map((data: any) => 
+                            <Member key={data.id} email={getRecipientEmail(data.data().users, user)} onCheckBox={(userInfo: any, checked: boolean) => handleCheckBox(userInfo, checked)} listMember={listMember} />
+                        ) : null
+            } else {
+                return searchData ? searchData?.map((data: any) => 
+                            <ItemFilter key={data.id} userInfo={data} onCheckBox={(userInfo: any, checked: boolean) => handleCheckBox(userInfo, checked)} checked={listMember?.find((mem: any) => mem.id === data.userId)} />
+                        ) : null
+                }
+            
+        }
+    }
+
+    const isPhoneNumber = (str: string) => {
+        for (let i = 0; i < str.length; i++) {
+            if(Number.isNaN(Number(str.charAt(i)))) {
+                return false;
+            } 
+        }
+        return true
+    }
+
+    const handleSearch = (value: string) => {
         setSearchInput(value);
-        // let isPhone = Number.isNaN(value);
-        // if(isPhone && value.length === 10) {
-        //     let result = friendSnapshot?.docs?.map((fri) => {
-                
-        //     })
-        //     if(result !== undefined && result.length > 0) { 
-        //         setSearchData(result);
-        //     } else {
-        //         setSearchData([]);
-        //     }
-        // } else if (!isPhone && value.length > 0) {
-        //     let result = friendSnapshot?.docs?.map((fri) => {
-        //         return (getRecipientEmail(fri.data().users, user)).indexOf(value) !== -1
-        //     })
-        //     if(result !== undefined && result.length > 0) { 
-        //         setSearchData(result);
-        //     } else {
-        //         setSearchData([]);
-        //     }
-        // }
+        if(value.length > 0) {
+            if(isPhoneNumber(value)) {
+                let result = friendList?.filter((u: any) => {
+                    return u?.phoneNumber?.indexOf(value) !== -1
+                });
+                if(result !== undefined && result.length > 0) { 
+                    setSearchData(result);
+                } else {
+                    setSearchData([]);
+                }
+            } else {
+                let result = friendList?.filter((u: any) => {
+                    return u?.email?.indexOf(value) !== -1
+                });
+                if(result !== undefined && result.length > 0) { 
+                    setSearchData(result);
+                } else {
+                    setSearchData([]);
+                }
+            }
+        } else {
+            // getFriendList().then((data) => setFriendList(data)).catch(err => console.log(err))
+        }
     }
 
     const removeMember = (userInfo: any) => {
+        console.log(listMember.length)
         let array = [...listMember]; // make a separate copy of the array
         let itemExist = listMember.find((mem: any) => mem.id === userInfo.id)
+        if(listMember.length === 1) {
+            setListMember([]); return;
+        }
         if (itemExist) {
             array.splice(itemExist, 1);
             setListMember(array)
@@ -95,6 +131,7 @@ export default function CreateGroupScreen({onClose}: any) {
     }
 
     const handleCheckBox = (userInfo: any, checked: boolean) => {
+        console.log(userInfo, checked);
         if (!checked) {
             removeMember(userInfo);
         } else {
@@ -119,27 +156,19 @@ export default function CreateGroupScreen({onClose}: any) {
 
     return (
         <>
-            {
-                loading ? <Container>
+         <Container>
             <SidebarContainer >
                 <Search className="py-2">
                     <SearchIcon />
-                    <SearchInput placeholder='Enter phone number or email to search' value={searchInput} onChange={(e) => handleSearch(e.currentTarget.value)}/>
+                    <SearchInput placeholder='Enter phone number or email to search' value={searchInput} onChange={(e) => handleSearch(e.target.value)}/>
                 </Search>
-                <CountMemberContainer className={"mt-4 " + (listMember.length < 2 ? "bg-red-100 text-red-800" : "bg-green-100 text-green-800") + "  font-medium mr-2 px-3 py-0.5 rounded-full dark:bg-red-900 dark:text-red-300"}>
+                <CountMemberContainer className="mt-4 font-medium mr-2 px-3 py-0.5">
                     <Label className="">Total members:</Label>
                     <CountMemberValue>&nbsp; {listMember?.length!}</CountMemberValue>
                 </CountMemberContainer>
                 <ListMemberScreen style={{overflowY: 'auto'}} className="py-2">
                 {
-                    friendList && searchInput.length === 0 ? friendList?.map((data: any) => 
-                        <Member key={data.friendId} userInfo={data} onCheckBox={(userInfo: any, checked: boolean) => handleCheckBox(userInfo, checked)} />
-                    ) : null
-                }
-                {
-                    searchInput.length > 0 && searchData.length > 0 ? searchData?.map((data: any) => 
-                        <Member key={data.friendId} userInfo={data} onCheckBox={(userInfo: any, checked: boolean) => handleCheckBox(userInfo, checked)} />
-                    ) : null
+                    showFriendList()
                 }
                 </ListMemberScreen>
                 <GroupNameContainer className="py-2">
@@ -154,8 +183,7 @@ export default function CreateGroupScreen({onClose}: any) {
                     </Button>
                 </BtnContainer>
             </SidebarContainer>
-        </Container> : null
-            }
+        </Container>
         </>
         
     )

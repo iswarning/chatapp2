@@ -3,6 +3,7 @@ import Footer from './Footer';
 import Header from './Header';
  
 export default function Layout({ children }: any) {
+
   return (
     <div className="w-full h-screen">
         <div className="flex h-full">
@@ -10,6 +11,7 @@ export default function Layout({ children }: any) {
           <Navbar />
           <div className="flex-1 bg-gray-100 w-full h-full">
               <div className="main-body container m-auto w-11/12 h-full flex flex-col">
+                {/* <h1>{data[0]?.userId}</h1> */}
                 {/* Header */}
                 <Header />
                 {/* Body */}

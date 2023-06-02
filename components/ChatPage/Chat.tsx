@@ -66,7 +66,10 @@ export default function Chat({ chat }: any) {
 
     const handleShowLastMessage = () => {
         if (chat.isGroup) {
-            return userInfoOfLastMessageSnapshot?.docs?.[0]?.data()?.fullName + ': ' + lastMessage?.message
+            if (lastMessage?.user === user?.email) {
+                return 'You: ' + lastMessage?.message
+            }
+            else return userInfoOfLastMessageSnapshot?.docs?.[0]?.data()?.fullName + ': ' + lastMessage?.message
         } else {
             if (lastMessage?.user === user?.email) {
                 return 'You: ' + lastMessage?.message
@@ -80,18 +83,20 @@ export default function Chat({ chat }: any) {
                 .doc(chat.id)
                 .collection("messages").get();
         if (messageSnap) {
-            messageSnap?.docs?.forEach(async(m) => {
-                const msgRef = db
-                    .collection("chats")
-                    .doc(chat.id)
-                    .collection("messages")
-                    .doc(m.id);
-                const res = await msgRef.get();
-                if(res?.data()?.user === user?.email) return;
-                if(res?.data()?.seen?.includes(user?.email)) return;
-                let result = res?.data()?.seen;
-                result.push(user?.email)
-                await msgRef.set({ ...res.data(), seen: result })
+            messageSnap?.docs?.forEach((m) => {
+                (async() => {
+                    const msgRef = db
+                        .collection("chats")
+                        .doc(chat.id)
+                        .collection("messages")
+                        .doc(m.id);
+                    const res = await msgRef.get();
+                    if(res?.data()?.user === user?.email) return;
+                    if(res?.data()?.seen?.includes(user?.email)) return;
+                    let result = res?.data()?.seen;
+                    result.push(user?.email)
+                    await msgRef.set({ ...res.data(), seen: result })
+                })()
             });
         }
     }

@@ -2,21 +2,22 @@ import { useCollection, useCollectionOnce } from "react-firebase-hooks/firestore
 import { TextEmail, UserAvatar, UserContainer } from "./CreateGroupScreenStyled";
 import { db } from "@/firebase";
 
-export default function Member({userInfo, onCheckBox}: any) {
+export default function Member({email, onCheckBox, listMember}: any) {
 
-    
+    const [userSnapshot] = useCollection(db.collection("users").where("email", '==', email));
+    const userInfo = userSnapshot?.docs?.[0];
 
     return (
         <UserContainer>
-            {userInfo?.userId + 11111}
-            <UserAvatar src={userInfo?.photoURL} />
-            <TextEmail htmlFor={userInfo?.userId}>{userInfo?.fullName}</TextEmail>&nbsp;
+            <UserAvatar src={userInfo?.data().photoURL} />
+            <TextEmail htmlFor={userInfo?.id}>{userInfo?.data().fullName}</TextEmail>&nbsp;
             <input
-                id={userInfo?.userId} 
+                id={userInfo?.id} 
                 type="checkbox" 
-                name={userInfo?.email} 
+                name={userInfo?.data().email} 
                 className="ml-auto" 
-                onChange={(e) => onCheckBox({ id: userInfo?.userId, ...userInfo }, e.target.checked)}  />
+                onChange={(e) => onCheckBox({ id: userInfo?.id, ...userInfo?.data() }, e.target.checked)} 
+                checked={listMember.find((mem: any) => mem.id === userInfo?.id)} />
         </UserContainer>
     )
 }

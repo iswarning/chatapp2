@@ -1,12 +1,46 @@
 import { IconButton, Modal } from "@mui/material";
 import GroupAddIcon from '@mui/icons-material/GroupAdd';
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CreateGroupScreen from "./CreateGroupScreen/CreateGroupScreen";
 import styled from "styled-components";
+import { useCollection } from "react-firebase-hooks/firestore";
+import { auth, db } from "@/firebase";
+import { useAuthState } from "react-firebase-hooks/auth";
+import getRecipientEmail from "@/utils/getRecipientEmail";
 
 export default function Header() {
     
     const [isOpen, setIsOpen] = useState(false);
+    const [user] = useAuthState(auth);
+    const [friendList, setFriendList]: any = useState([]);
+
+    useEffect(() => {
+        
+    },[])
+
+    // const [friendSnapshot] = useCollection(
+    //     db
+    //     .collection("friends")
+    //     .where("users",'array-contains',user?.email)
+    // )
+
+    // async function getFriendList() {
+    //     let result: any[] = [];
+
+    //     friendSnapshot?.docs?.forEach(async(friend) => {
+    //         const userSnapshot = await db.collection("users").where("email",'==',getRecipientEmail(friend.data().users, user)).get()
+    //         const userInfo = userSnapshot?.docs?.[0];
+    //         result.push({
+    //             friendId: friend.id,
+    //             ...friend.data(),
+    //             userId: userInfo.id,
+    //             ...userInfo.data()
+    //         })
+             
+    //     })
+        
+    //     return result;
+    // }
     
     return (
         <div className="py-4 flex-2 flex flex-row">
