@@ -5,6 +5,7 @@ import { ReactElement } from 'react'
 import type { NextPageWithLayout } from '../_app';
 import UserDetailScreen from '@/components/ProfilePage/UserDetailScreen/UserDetailScreen';
 import { db } from '@/firebase';
+import { GetStaticPaths } from 'next';
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -37,9 +38,9 @@ Page.getLayout = function getLayout(page: ReactElement) {
 
 export default Page;
 
-export async function getServerSideProps(context: any) {
+export async function getStaticProps({ params }: any) {
 
-    const userDoc = await db.collection("users").doc(context.query.id).get();
+    const userDoc = await db.collection("users").doc(params.id).get();
 
     const userInfo: any = {
         id: userDoc?.id,
@@ -51,5 +52,19 @@ export async function getServerSideProps(context: any) {
             userInfo: JSON.stringify(userInfo)
         }
     }
+}
+
+export async function getStaticPaths(){
+
+  const userDoc = await db.collection("users").get();
+
+  const paths = userDoc?.docs?.map((user) => ({
+    params: { id: user.id.toString() },
+  }))
+
+  return {
+      paths,
+      fallback: false //indicates the type of fallback
+  }
 }
 

@@ -25,20 +25,14 @@
     "friends": [
         {
             "users": ["chivinh1998@gmail.com", "hacker20001235@gmail.com"],
-            "isBlock": false,
-            "isDelete": false,
             "createdAt": ""
         },
         {
             "users": ["hacker20001235@gmail.com", "chivinh1998@gmail.com"],
-            "isBlock": false,
-            "isDelete": false,
             "createdAt": ""
         },
         {
             "users": ["chivinh1998@gmail.com", "hacker20001236@gmail.com"],
-            "isBlock": false,
-            "isDelete": false,
             "createdAt": ""
         }
     ],
@@ -46,7 +40,13 @@
     "friend_requests": {
         "senderEmail": "chivinh1998@gmail.com",
         "recipientEmail": "hacker20001235@gmail.com",
-        "isDelete": false,
+        "createdAt": ""
+    },
+
+    "notifications": {
+        "recipient": ["chivinh1998@gmail.com","hacker20001235@gmail.com"],
+        "content": "wkeoqkeokqwoekqw",
+        "type": "",
         "createdAt": ""
     }
 }

@@ -43,8 +43,8 @@ Page.getLayout = function getLayout(page: ReactElement) {
 
 export default Page;
 
-export async function getServerSideProps(context: any) {
-    const ref = db.collection('chats').doc(context.query.id);
+export async function getStaticProps({ params }: any) {
+    const ref = db.collection('chats').doc(params.id);
     const messagesRes = await ref.collection('messages').orderBy('timestamp', 'asc').get();
     const messages = messagesRes.docs.map((doc) => ({
         id: doc.id,
@@ -67,4 +67,18 @@ export async function getServerSideProps(context: any) {
             chat: chat
         }
     }
+}
+
+export async function getStaticPaths(){
+
+  const chatDoc = await db.collection("chats").get();
+
+  const paths = chatDoc?.docs?.map((chat) => ({
+    params: { id: chat.id.toString() },
+  }))
+
+  return {
+      paths,
+      fallback: false //indicates the type of fallback
+  }
 }
