@@ -98,7 +98,7 @@ export default function Message({message, photoURL, chatId}: any) {
                                         isShownReaction ? <div className="flex flex-row absolute px-4">
                                             {
                                                 getEmojiData.map((emoji: number, index: number) => 
-                                                    index < 6 ? <span className="cursor-pointer" onClick={(event) => handleReaction(event, emoji)}>{String.fromCodePoint(emoji)}</span> : null
+                                                    index < 6 ? <span key={emoji} className="cursor-pointer" onClick={(event) => handleReaction(event, emoji)}>{String.fromCodePoint(emoji)}</span> : null
                                                 )
                                             }
                                         </div> : null
