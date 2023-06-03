@@ -12,28 +12,11 @@ import CallIcon from '@mui/icons-material/Call';
 import Link from "next/link";
 import VideocamIcon from '@mui/icons-material/Videocam';
 import { IconButton } from "@mui/material";
+import getEmojiData from "@/utils/getEmojiData";
 
-export const emojiData: any = [
-    0x1F600,
-    0x1F604,
-    0x1F605,
-    0x1F606,
-    0x1F923,
-    0x1F602,
-    0x1F642,
-    0x1F970,
-    0x1F618,
-    0x1F60D,
-    0x1F60B,
-    0x1F917,
-    0x1F644,
-    0x1F611,
-    0x1F60C,
-    0x1F634,
-    0x1F62A,
-]
 
-export default function ChatScreen({ chat, messages}: any) {
+
+export default function ChatScreen({ chat, messages, onShowUserDetail}: any) {
     const [user] = useAuthState(auth);
     const [input, setInput] = useState('');
     const endOfMessageRef: any = useRef(null);
@@ -88,9 +71,6 @@ export default function ChatScreen({ chat, messages}: any) {
         endOfMessageRef.current.scrollIntoView({ behavior: "smooth" });
     }
 
-    const checkShowAvatar = (data: any, index: number) => 
-         data[index]?.user === data[index+1]?.user
-
     const getRecipientAvatar = () => {
         if(chat?.isGroup) {
             if(chat?.photoURL.length > 0)
@@ -107,30 +87,33 @@ export default function ChatScreen({ chat, messages}: any) {
 
     const showMessage = () => {
         if(messageSnapShot) {
-            const data = messageSnapShot?.docs?.map((message) => ({ id: message.id, ...message.data() }))
-            return data?.map((message: any, index) => 
+            return messageSnapShot?.docs?.map((message: any) => 
                 <Message 
                     key={message.id}  
                     message={{
-                        ...message, 
-                        timestamp: message.timestamp?.toDate().getTime()
+                        id: message.id,
+                        ...message.data(), 
+                        timestamp: message?.timestamp?.toDate().getTime()
                     }}
                     photoURL={getRecipientAvatar()}
-                    showAvatar={checkShowAvatar(data, index)}
+                    chatId={chat.id}
                 />)
         } else {
-            // const data = JSON.parse(messages);
-            return messages?.map((message: any, index: number) => 
+            return messages?.docs?.map((message: any) => 
                 <Message 
                     key={message.id} 
-                    message={message}
+                    message={{
+                        id: message.id,
+                        ...message.data(), 
+                        timestamp: message?.timestamp?.toDate().getTime()
+                    }}
                     photoURL={getRecipientAvatar()}
-                    showAvatar={checkShowAvatar(messages, index)}
+                    chatId={chat.id}
                 />)
         }
     }
 
-    const sendMessage = async(e: any) => {
+    const sendMessage = async(e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
         setSeenMessage();
@@ -228,6 +211,10 @@ export default function ChatScreen({ chat, messages}: any) {
         }
     }
 
+    const handleShowUserDetail = () => {
+
+    }
+
     return (
         // <Container>
         //     <Header>
@@ -282,15 +269,15 @@ export default function ChatScreen({ chat, messages}: any) {
         //     </VideoCallContainer>
         // </Container>
         
-        <div className="chat-area flex-1 flex flex-col">
+        <div className="chat-area flex-1 flex flex-col relative">
             
             <div className="flex-3">
                 <h2 className="text-xl pb-1 mb-4 border-b-2 border-gray-200 d-flex">
                     {chat.isGroup ? 'Chatting in group ' : 'Chatting with '}&nbsp;
                     {
-                        !chat.isGroup ? <Link href={`/profile/${recipientSnapshot?.docs?.[0].id}`} className="cursor-pointer font-semibold" id="hover-animation" data-replace="Profile">
+                        !chat.isGroup ? <div onClick={() => router.push(`/profile?id=${recipientSnapshot?.docs?.[0].id}`)} className="cursor-pointer font-semibold" id="hover-animation" data-replace="Profile">
                             <span>{recipientSnapshot?.docs?.[0].data().fullName}</span>
-                        </Link> : <span>{chat.name}</span>
+                        </div> : <span>{chat.name}</span>
                     }
                     <div className="ml-auto">
                         <IconButton>
@@ -316,7 +303,10 @@ export default function ChatScreen({ chat, messages}: any) {
                         </span>
                     </div>
                     <div className="flex-1">
-                        <textarea name="message" className="w-full block outline-none py-4 px-4 bg-transparent" rows={1} placeholder="Type a message..." autoFocus onChange={(e) => setInput(e.target.value)} value={input} style={{maxHeight: '80px'}} onClick={() => setSeenMessage()}></textarea>
+                        <form onSubmit={sendMessage}>
+                            <input  name="message" className="w-full block outline-none py-4 px-4 bg-transparent" placeholder="Type a message..." autoFocus onChange={(e) => setInput(e.target.value)} value={input} style={{maxHeight: '80px'}} onClick={() => setSeenMessage()} />
+                            <input type="submit" style={{position: 'absolute',left: '-9999px'}}/>
+                        </form>
                     </div>
                     <div className="flex-2 w-32 p-2 flex content-center items-center">
                         <div className="flex-1 text-center">
@@ -326,24 +316,18 @@ export default function ChatScreen({ chat, messages}: any) {
                                 </span>
                             </span>
                         </div>
-                        <div className="flex-1">
-                            <button disabled={!input} className="bg-blue-400 w-10 h-10 rounded-full inline-block" onClick={sendMessage}>
-                                <span className="inline-block align-text-bottom">
-                                    <svg fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" className="w-4 h-4 text-white"><path d="M5 13l4 4L19 7"></path></svg>
-                                </span>
-                            </button>
-                        </div>
                     </div>
                 </div>
             </div>
             {
                 showEmoji ? <EmojiContainer>
-                    {emojiData.map((e: any) => <EmojiElement onClick={() => addEmoji(e)} key={e}>
+                    {getEmojiData.map((e: any) => <EmojiElement onClick={() => addEmoji(e)} key={e}>
                         {String.fromCodePoint(e)}
                     </EmojiElement>)}
                 </EmojiContainer> : null
             }
         </div>
+        
     )
 }
 
@@ -356,7 +340,7 @@ const EmojiContainer = styled.div.attrs(() => ({
     background-color: white;
     border-radius: 10px;
     padding: 10px;
-    margin-top: 15%;
+    margin-top: 35%;
     overflow: scroll;
     ::-webkit-scrollbar {
         display: none;

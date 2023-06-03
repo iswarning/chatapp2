@@ -6,11 +6,29 @@ import { useCollection } from "react-firebase-hooks/firestore";
 import styled from "styled-components";
 import Image from 'next/image';
 import TimeAgo from "timeago-react";
+import { io } from "socket.io-client";
+import { useEffect, useRef, useState } from "react";
 
-export default function Chat({ chat }: any) {
+export default function Chat({ chat, onShowMessage, active }: any) {
 
     const [user] = useAuthState(auth);
     const router = useRouter();
+    const [userOnline, setUserOnline] = useState<Array<string>>()
+
+    const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!)
+    const socketRef: any = useRef();
+    socketRef.current = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
+
+    useEffect(() => {
+        socketRef.current.on("get-user-online", (userOn: any) => {
+            console.log(Object.values(userOn))
+            setUserOnline(Object.values(userOn))
+        })
+
+        return () => {
+            socketRef.current.disconnect();
+        }
+    },[])
 
     const [recipientSnapshot] = useCollection(
         db
@@ -35,18 +53,15 @@ export default function Chat({ chat }: any) {
         .where("email",'==', String(lastMessage?.user))
     )
 
-    const [messageRecipientSnapshot] = useCollection(
-        db
-        .collection("chats")
-        .doc(chat.id)
-        .collection("messages")
-        .where("user",'!=',user?.email)
-    );
-
-    const amountUnSeenMsg = messageRecipientSnapshot?.docs?.filter((mess) => !mess?.data()?.seen?.includes(user?.email));
+    // const [messageRecipientSnapshot] = useCollection(
+    //     db
+    //     .collection("chats")
+    //     .doc(chat.id)
+    //     .collection("messages")
+    // );
 
     const handleShowChatScreen = () => {
-        router.push(`/chat/${chat.id}`)
+        onShowMessage();
         setSeenMessage();
     }
 
@@ -102,7 +117,7 @@ export default function Chat({ chat }: any) {
     }
 
     return (
-        <div className={"entry cursor-pointer transform hover:scale-105 duration-300 transition-transform bg-white mb-4 rounded p-4 flex shadow-md" + (chat.id === router.query.id ? " border-l-4 border-red-500" : "") } onClick={handleShowChatScreen}>
+        <div className={"entry cursor-pointer transform hover:scale-105 duration-300 transition-transform bg-white mb-4 rounded p-4 flex shadow-md" + (active ? " border-l-4 border-red-500" : "") } onClick={handleShowChatScreen}>
             <div className="flex-2">
                 <div className="w-12 h-12 relative">
                     <CustomAvatar
@@ -111,12 +126,17 @@ export default function Chat({ chat }: any) {
                         height={50}
                         alt="User Avatar"
                     />
-                    <span className="absolute w-4 h-4 bg-green-400 rounded-full right-0 bottom-0 border-2 border-white"></span>
+                    {
+                        !chat.isGroup ? userOnline && userOnline?.find((userOn: string) => userOn === getRecipientEmail(chat.users, user)) ? 
+                            <span className="absolute w-4 h-4 bg-green-400 rounded-full right-0 bottom-0 border-2 border-white"></span> :
+                           <span className="absolute w-4 h-4 bg-gray-400 rounded-full right-0 bottom-0 border-2 border-white"></span> 
+                    
+                     : null   }
                 </div>
             </div>
             <div className="flex-1 px-2">
                 <div className="truncate w-40"><span className="text-gray-800">{chat.isGroup ? 'Group: ' + chat.name : recipientSnapshot?.docs?.[0].data().fullName}</span></div>
-                <div className="truncate w-40"><small className="text-gray-600 ">{lastMessageSnapshot?.docs.length! > 0 ? handleShowLastMessage() : null}</small></div>
+                <div className="truncate w-40"><small className="text-gray-600 ">{lastMessageSnapshot?.docs.length! > 0 ? handleShowLastMessage() : ""}</small></div>
             </div>
             <div className="flex-2 text-right">
                 <div>
@@ -132,10 +152,7 @@ export default function Chat({ chat }: any) {
                 </div>
                 <div>
                     {
-                        amountUnSeenMsg?.length! > 0 ?
-                       <small className="text-xs bg-red-500 text-white rounded-full h-6 w-6 leading-6 text-center inline-block">
-                            { amountUnSeenMsg?.length! }
-                        </small> : null
+                        (lastMessage?.message?.length > 0 && lastMessage?.user !== user?.email) ? lastMessage?.seen.find((userSeen: string) => userSeen === user?.email) ? null :  <small className="text-sm bg-blue-500 mb-1 rounded-full h-3 w-3 leading-4 text-center inline-block"></small> : null
                     }
                 </div>
             </div>

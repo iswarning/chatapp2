@@ -10,6 +10,11 @@
             "type": "text",
             "photoURL": "",
             "user": "chivinh1998@gmail.com",
+            "seen": [],
+            "reaction": {
+                "senderEmail": "",
+                "emoji": ""
+            },
             "timestamp": ""
         }
     },
@@ -20,10 +25,9 @@
         "fullName": "",
         "phoneNumber": "",
         "lastSeen": ""
-    }, 
+    },
 
-    "friends": [
-        {
+    "friends": [{
             "users": ["chivinh1998@gmail.com", "hacker20001235@gmail.com"],
             "createdAt": ""
         },
@@ -44,10 +48,9 @@
     },
 
     "notifications": {
-        "recipient": ["chivinh1998@gmail.com","hacker20001235@gmail.com"],
+        "recipient": ["chivinh1998@gmail.com", "hacker20001235@gmail.com"],
         "content": "wkeoqkeokqwoekqw",
         "type": "",
         "createdAt": ""
     }
 }
-

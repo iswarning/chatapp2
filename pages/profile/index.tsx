@@ -1,14 +1,37 @@
 import Head from 'next/head'
 import { Inter } from 'next/font/google'
 import Layout from '@/components/Layout'
-import { ReactElement } from 'react'
+import { ReactElement, useEffect, useState } from 'react'
 import type { NextPageWithLayout } from '../_app';
 import Profile from '@/components/ProfilePage/Profile/Profile'
+import { db } from '@/firebase';
+import { useRouter } from 'next/router';
+import UserDetailScreen from '@/components/ProfilePage/UserDetailScreen/UserDetailScreen';
 
 const inter = Inter({ subsets: ['latin'] })
 
 // import '@/styles/tailwind.min.css'
 const Page: NextPageWithLayout = () => {
+
+  const [userInfo, setUserInfo]: any = useState({});
+  const router = useRouter();
+
+  useEffect(() => {
+    if (router?.query?.id !== undefined) {
+        const getUserInfo = async() => {
+          const data = await db.collection("users").doc(String(router?.query?.id)).get();
+          if(data) {
+              console.log(data.data())
+              setUserInfo(data.data());
+          }
+        }
+        getUserInfo().catch((err) => console.log(err));
+    }
+    
+  },[])
+
+
+
   return (
     <>
       <Head>
@@ -25,7 +48,9 @@ const Page: NextPageWithLayout = () => {
             </div>
 
             <div className="flex-1 flex h-full">
-                <Profile />
+              {
+                router.query.id !== undefined ? <UserDetailScreen userInfo={userInfo} /> : <Profile />
+              }
             </div>
         </div>
 

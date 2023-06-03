@@ -3,10 +3,9 @@ import { Inter } from 'next/font/google'
 import SidebarMessage from '@/components/ChatPage/SidebarMessage/SidebarMessage'
 import Layout from '@/components/Layout'
 import { ReactElement, useEffect } from 'react'
-import type { NextPageWithLayout } from './_app';
-import ChatScreen from '@/components/ChatPage/ChatScreen/ChatScreen'
-import sendNotificationFCM from '@/utils/sendNotificationFCM'
-import { IconButton } from '@mui/material'
+import { GetStaticProps } from 'next'
+import { getDataHooksProps } from 'next-data-hooks'
+import { NextPageWithLayout } from './_app'
 
 
 const inter = Inter({ subsets: ['latin'] })
@@ -30,6 +29,10 @@ const Page: NextPageWithLayout = () => {
   //   ).then((data) => console.log(data))
   // }
 
+  // const handleShowUserDetail = async() => {
+
+  // }
+
   return (
     <>
       <Head>
@@ -38,8 +41,6 @@ const Page: NextPageWithLayout = () => {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      {/* <SidebarMessage /> */}
-      {/* <button onClick={handleTestMessage}>Test message</button> */}
         <div className="main flex-1 flex flex-col">
             <div className="hidden lg:block heading flex-2">
                 <h1 className="text-3xl text-gray-700 mb-4">Chat</h1>
@@ -47,7 +48,7 @@ const Page: NextPageWithLayout = () => {
             
             <div className="flex-1 flex h-full">
               
-                <SidebarMessage />
+                <SidebarMessage/>
 
             </div>
         </div>

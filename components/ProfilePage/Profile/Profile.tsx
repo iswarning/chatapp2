@@ -5,19 +5,19 @@ import { auth, db } from '@/firebase';
 import { CustomAvatar } from '../../ChatPage/Chat';
 import { toast } from 'react-toastify';
 import styled from 'styled-components';
+import { useRouter } from 'next/router';
 
 export default function Profile() {
 
     const [phoneNumber, setPhoneNumber] = useState('');
-    const [userInfo, setUserInfo]: any = useState({});
     const [user] = useAuthState(auth);
     const [image, setImage]: any = useState(null)
+    
 
     useEffect(() => {
         const getUserInfo = async() => {
             const data = await db.collection("users").doc(user?.uid).get();
             if(data) {
-                setUserInfo(data.data());
                 setPhoneNumber(data?.data()?.phoneNumber);
             }
         }

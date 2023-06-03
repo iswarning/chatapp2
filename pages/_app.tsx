@@ -1,13 +1,11 @@
 import '@/styles/globals.css'
-import '@/pages/profile/profile.css'
 import type { AppProps } from 'next/app'
 import { useAuthState } from 'react-firebase-hooks/auth'
 import Login from './login';
 import { ReactElement, ReactNode, useEffect, useRef, useState } from 'react';
 import createNewUser from '@/services/users/createNewUser';
 import 'bootstrap/dist/css/bootstrap.css';
-import getNotificationMessage from '@/utils/getNotificationMessage';
-import { auth } from '@/firebase';
+import { auth, db } from '@/firebase';
 // import { auth, getMessagingToken, onMessageListener } from '@/firebase';
 import Loading from '@/components/Loading';
 import 'react-toastify/dist/ReactToastify.css';
@@ -17,9 +15,8 @@ import { useRouter } from 'next/router';
 import { NextPage } from 'next';
 import { config } from '@fortawesome/fontawesome-svg-core'
 import '../node_modules/@fortawesome/fontawesome-svg-core/styles.css'
-import getNotificationAddFriend from '@/utils/getNotificationAddFriend';
-import getNotificationAcceptFriend from '@/utils/getNotificationAcceptFriend';
 import { NextDataHooksProvider } from 'next-data-hooks';
+import getNotification from '@/utils/getNotifications';
 config.autoAddCss = false
 
 export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
@@ -41,6 +38,8 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
   const router = useRouter();
 
   const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
+  const socketRef: any = useRef();
+  socketRef.current = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
 
   function requestPermission() {
     console.log('Requesting permission...');
@@ -55,6 +54,14 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
 
     if(user) {
       createNewUser(user).catch((err) => console.log(err));
+      requestPermission()
+      getNotification(user?.email)
+      // socketRef.current.emit('login',{userId: user?.email});
+
+      // return () => {
+      //   socketRef.current.disconnect()
+      // }
+      
 
       // getNotificationMessage(user?.email, socket);
 
@@ -62,7 +69,7 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
 
       // getNotificationAcceptFriend(user?.email, socket);
 
-      // requestPermission()
+      
 
       // const channel = new BroadcastChannel("notifications");
       // channel.addEventListener("message", (event) => {
@@ -108,11 +115,12 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
       //     // window.open(router.basePath + "/video-call/" + data.chatId);
       //   }
       // })
-
+      // socketRef.current.on("disconnect", () => {
+      //   console.log(socketRef.current.disconnected); // true
+      // });
       // return () => {
       //   socket.disconnect()
       // }
-
     }
   },[user]);
 
