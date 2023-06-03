@@ -119,13 +119,13 @@ export default function ChatScreen({ chat, messages}: any) {
                     showAvatar={checkShowAvatar(data, index)}
                 />)
         } else {
-            const data = JSON.parse(messages);
-            return data?.map((message: any, index: number) => 
+            // const data = JSON.parse(messages);
+            return messages?.map((message: any, index: number) => 
                 <Message 
                     key={message.id} 
                     message={message}
                     photoURL={getRecipientAvatar()}
-                    showAvatar={checkShowAvatar(data, index)}
+                    showAvatar={checkShowAvatar(messages, index)}
                 />)
         }
     }

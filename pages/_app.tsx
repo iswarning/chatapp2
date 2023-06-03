@@ -19,6 +19,7 @@ import { config } from '@fortawesome/fontawesome-svg-core'
 import '../node_modules/@fortawesome/fontawesome-svg-core/styles.css'
 import getNotificationAddFriend from '@/utils/getNotificationAddFriend';
 import getNotificationAcceptFriend from '@/utils/getNotificationAcceptFriend';
+import { NextDataHooksProvider } from 'next-data-hooks';
 config.autoAddCss = false
 
 export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
@@ -30,6 +31,7 @@ type AppPropsWithLayout = AppProps & {
 };
 
 export default function App({ Component, pageProps }: AppPropsWithLayout) {
+  const { children, ...rest } = pageProps;
   const [user, loading] = useAuthState(auth);
   const [isOpen, setIsOpen] = useState(false);
   const [chatRoomId, setChatRoomId] = useState('')
@@ -140,10 +142,10 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
 
   const getLayout = Component.getLayout ?? ((page) => page);
  
-  return getLayout(<>
+  return getLayout(<NextDataHooksProvider {...rest}>
               <Component {...pageProps} />
     <ToastContainer />
     
-  </>);
+  </NextDataHooksProvider>);
   
 }

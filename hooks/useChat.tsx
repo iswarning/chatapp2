@@ -3,7 +3,7 @@ import { createDataHook } from 'next-data-hooks';
 
 // this context is the GetStaticPropsContext from 'next'
 //                                                      👇
-const useBlogPost = createDataHook('ChatMessage', async (context) => {
+const useChatMessage = createDataHook('ChatMessage', async (context) => {
   const chatId = context.params?.id as string;
 
   const ref = db.collection('chats').doc(chatId);
@@ -23,7 +23,7 @@ const useBlogPost = createDataHook('ChatMessage', async (context) => {
         ...chatRes.data()
     };
 
-    return blogPost;
-    });
+    return { chat, messages };
+});
 
-export default useBlogPost;
+export default useChatMessage;

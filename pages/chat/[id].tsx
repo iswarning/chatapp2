@@ -5,9 +5,15 @@ import { ReactElement } from 'react'
 import type { NextPageWithLayout } from '../_app';
 import ChatScreen from '@/components/ChatPage/ChatScreen/ChatScreen'
 import { db } from '@/firebase'
+import useChatMessage from '@/hooks/useChat';
+import { GetStaticProps } from 'next';
+import { getDataHooksProps } from 'next-data-hooks';
 
 // import '@/styles/tailwind.min.css'
-const Page: NextPageWithLayout = ({chat, messages}: any) => {
+const Page: any = () => {
+
+  const { chat, messages } = useChatMessage();
+
   return (
     <>
       <Head>
@@ -41,33 +47,55 @@ Page.getLayout = function getLayout(page: ReactElement) {
   );
 };
 
+Page.dataHooks = [
+  useChatMessage
+]
+
 export default Page;
 
-export async function getStaticProps({ params }: any) {
-    const ref = db.collection('chats').doc(params.id);
-    const messagesRes = await ref.collection('messages').orderBy('timestamp', 'asc').get();
-    const messages = messagesRes.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-    }))
-    .map((messages: any) => ({
-        ...messages,
-        timestamp: messages.timestamp.toDate().getTime(),
-    }));
+// export async function getStaticProps({ params }: any) {
+//     const ref = db.collection('chats').doc(params.id);
+//     const messagesRes = await ref.collection('messages').orderBy('timestamp', 'asc').get();
+//     const messages = messagesRes.docs.map((doc) => ({
+//         id: doc.id,
+//         ...doc.data(),
+//     }))
+//     .map((messages: any) => ({
+//         ...messages,
+//         timestamp: messages.timestamp.toDate().getTime(),
+//     }));
 
-    const chatRes = await ref.get();
-    const chat = {
-        id: chatRes.id,
-        ...chatRes.data()
-    };
+//     const chatRes = await ref.get();
+//     const chat = {
+//         id: chatRes.id,
+//         ...chatRes.data()
+//     };
 
-    return {
-        props: {
-            messages: JSON.stringify(messages),
-            chat: chat
-        }
-    }
-}
+//     return {
+//         props: {
+//             messages: JSON.stringify(messages),
+//             chat: chat
+//         }
+//     }
+// }
+
+export const getStaticProps: GetStaticProps = async (context) => {
+  const dataHooksProps = await getDataHooksProps({
+    context,
+    // this is an array of all data hooks from the `dataHooks` static prop.
+    //                             👇👇👇
+    dataHooks: Page.dataHooks,
+  });
+
+  return {
+    props: {
+      // spread the props required by next-data-hooks
+      ...dataHooksProps,
+
+      // add additional props to Next.js here
+    },
+  };
+};
 
 export async function getStaticPaths(){
 
