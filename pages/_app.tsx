@@ -2,10 +2,10 @@ import '@/styles/globals.css'
 import type { AppProps } from 'next/app'
 import { useAuthState } from 'react-firebase-hooks/auth'
 import Login from './login';
-import { ReactElement, ReactNode, useEffect, useRef, useState } from 'react';
+import { ReactElement, ReactNode, createContext, useEffect, useRef, useState } from 'react';
 import createNewUser from '@/services/users/createNewUser';
 import 'bootstrap/dist/css/bootstrap.css';
-import { auth, db } from '@/firebase';
+import { auth, db, getMessagingToken, onMessageListener } from '@/firebase';
 // import { auth, getMessagingToken, onMessageListener } from '@/firebase';
 import Loading from '@/components/Loading';
 import 'react-toastify/dist/ReactToastify.css';
@@ -15,8 +15,14 @@ import { useRouter } from 'next/router';
 import { NextPage } from 'next';
 import { config } from '@fortawesome/fontawesome-svg-core'
 import '../node_modules/@fortawesome/fontawesome-svg-core/styles.css'
-import { NextDataHooksProvider } from 'next-data-hooks';
 import getNotification from '@/utils/getNotifications';
+import requestPermission from '@/utils/requestPermission';
+import { AppWrapper, useAppContext } from '@/context/AppContext';
+import {
+  QueryClient,
+  QueryClientProvider,
+  useQuery,
+} from '@tanstack/react-query'
 config.autoAddCss = false
 
 export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
@@ -36,26 +42,17 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
   const [recipient, setRecipient] = useState([])
   const [isGroup, setIsGroup] = useState(false);
   const router = useRouter();
-
   const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
   const socketRef: any = useRef();
   socketRef.current = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
-
-  function requestPermission() {
-    console.log('Requesting permission...');
-    Notification.requestPermission().then((permission) => {
-      if (permission === 'granted') {
-        console.log('Notification permission granted.');
-      }
-    })
-  }
-
+const context: any = useAppContext();
+const queryClient = new QueryClient()
   useEffect(() => {
-
     if(user) {
       createNewUser(user).catch((err) => console.log(err));
       requestPermission()
       getNotification(user?.email)
+
       // socketRef.current.emit('login',{userId: user?.email});
 
       // return () => {
@@ -71,10 +68,11 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
 
       
 
-      // const channel = new BroadcastChannel("notifications");
-      // channel.addEventListener("message", (event) => {
-      //     console.log("Receive background: ", event.data);
-      // });
+      const channel = new BroadcastChannel("notifications");
+      channel.addEventListener("message", (event) => {
+        console.log(event.data);
+          new Notification("New nofitication", { body: event.data.notification.body })
+      });
       
       // socket.on("response-call-video-one-to-one", (res: string) => {
       //   let data = JSON.parse(res);
@@ -121,17 +119,30 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
       // return () => {
       //   socket.disconnect()
       // }
+      window.addEventListener("beforeunload", () => setUserOffline());
+      return () => {
+        window.addEventListener("beforeunload", () => setUserOffline());
+      }
     }
   },[user]);
 
+  const setUserOffline = () => {
+    try {
+        db.collection("users").doc(user?.uid).update({ isOnline: false })
+    } catch(err) {
+      console.log(err)
+    }
+  }
+
+  useEffect(() => {
+    onMessageListener().then((data: any) => {
+      toast(`${data.notification.body}`, { hideProgressBar: true, autoClose: 5000, type: 'info' })
+    })
+  })
+
   // useEffect(() => {
-  //   getMessagingToken();
+  //   getMessagingToken()
   // },[])
-  // useEffect(() => {
-  //   onMessageListener().then(data => {
-  //       console.log("Receive foreground: ",data)
-  //   })
-  // })
 
   if(!user) return <Login/>
 
@@ -150,10 +161,15 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
 
   const getLayout = Component.getLayout ?? ((page) => page);
  
-  return getLayout(<NextDataHooksProvider {...rest}>
-              <Component {...pageProps} />
-    <ToastContainer />
+  return getLayout(
+    <QueryClientProvider client={queryClient}>
+      <AppWrapper>
+        {context?.getToken()}
+        <Component {...pageProps} />
+        <ToastContainer />
+      </AppWrapper>
+    </QueryClientProvider>
     
-  </NextDataHooksProvider>);
+  );
   
 }

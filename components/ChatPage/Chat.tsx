@@ -127,10 +127,9 @@ export default function Chat({ chat, onShowMessage, active }: any) {
                         alt="User Avatar"
                     />
                     {
-                        !chat.isGroup ? userOnline && userOnline?.find((userOn: string) => userOn === getRecipientEmail(chat.users, user)) ? 
+                        !chat.isGroup ? recipientSnapshot?.docs?.[0]?.data()?.isOnline ? 
                             <span className="absolute w-4 h-4 bg-green-400 rounded-full right-0 bottom-0 border-2 border-white"></span> :
                            <span className="absolute w-4 h-4 bg-gray-400 rounded-full right-0 bottom-0 border-2 border-white"></span> 
-                    
                      : null   }
                 </div>
             </div>

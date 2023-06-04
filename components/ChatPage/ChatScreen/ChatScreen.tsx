@@ -9,7 +9,6 @@ import { useRouter } from "next/router";
 import firebase from "firebase";
 import styled from "styled-components";
 import CallIcon from '@mui/icons-material/Call';
-import Link from "next/link";
 import VideocamIcon from '@mui/icons-material/Videocam';
 import { IconButton } from "@mui/material";
 import getEmojiData from "@/utils/getEmojiData";

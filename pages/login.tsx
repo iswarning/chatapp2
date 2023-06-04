@@ -2,9 +2,11 @@ import styled from "styled-components";
 import Head from 'next/head'
 import { Button } from "@mui/material";
 import { auth, provider } from "../firebase";
+import firebase from "firebase";
 
-const signIn = () => {
-    auth.signInWithPopup(provider).catch(alert);
+const signIn = async() => {
+    const { credential } = await firebase.auth().signInWithPopup(provider);
+    console.log(credential?.toJSON());
 }
 
 function Login() {

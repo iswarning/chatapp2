@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth, db } from '@/firebase';
 import { CustomAvatar } from '../../ChatPage/Chat';
@@ -13,6 +13,7 @@ export default function Profile() {
     const [user] = useAuthState(auth);
     const [image, setImage]: any = useState(null)
     
+    // const AppContext: any = useAppContext();
 
     useEffect(() => {
         const getUserInfo = async() => {
@@ -22,6 +23,7 @@ export default function Profile() {
             }
         }
         getUserInfo().catch((err) => console.log(err));
+        // console.log(AppContext)
     },[])
 
     const updateInfo = async(e: any) => {
@@ -120,7 +122,7 @@ export default function Profile() {
                                 <div className="row gx-3 mb-3">
                                     <div className="col-md-6">
                                         <label className="small mb-1" htmlFor="inputPhone">Phone number</label>
-                                        <input className="form-control" type="number" required placeholder="Enter your phone number" value={phoneNumber} onChange={handlePhoneNumber}/>
+                                        <input className="form-control" type="number" required placeholder="Enter your phone number" value={11111} onChange={handlePhoneNumber}/>
                                     </div>
                                     <div className="col-md-6">
                                         <label className="small mb-1" htmlFor="inputBirthday">Birthday</label>

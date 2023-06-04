@@ -1,24 +1,17 @@
 import Axios from 'axios'
 
-export default async function sendNotificationFCM(title: string, body: string, fcm_token: string, bearer_token: string) {
+export default async function sendNotificationFCM(title: string, body: string, fcm_token: string) {
     const data = {
-        "message": {
-            "token": fcm_token,
-            "notification": {
-              "title": title,
-              "body": body
-            },
-            "webpush": {
-              "fcm_options": {
-                "link": "google.com"
-              }
-            }
-          }
+      "to": fcm_token,
+      "notification" : {
+          "body" : body,
+          "title": title
+      }
     }
-    const response = await Axios.post(`https://fcm.googleapis.com//v1/projects/${process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID}/messages:send`, data, {
+    const response = await Axios.post(`https://fcm.googleapis.com/fcm/send`, data, {
         headers: {
             "Content-Type": "application/json",
-            "Authorization": "Bearer " + bearer_token,
+            "Authorization": "key=" + process.env.NEXT_PUBLIC_FIREBASE_SERVER_KEY,
         }
     })
 

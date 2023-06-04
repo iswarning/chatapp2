@@ -3,7 +3,7 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { CustomAvatar } from "../Chat";
 import styled from "styled-components";
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
-import { useState } from "react";
+import { lazy, useState } from "react";
 import getEmojiData from "@/utils/getEmojiData";
 import { useCollection } from "react-firebase-hooks/firestore";
 import firebase from "firebase";

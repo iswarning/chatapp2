@@ -45,12 +45,5 @@
         "senderEmail": "chivinh1998@gmail.com",
         "recipientEmail": "hacker20001235@gmail.com",
         "createdAt": ""
-    },
-
-    "notifications": {
-        "recipient": ["chivinh1998@gmail.com", "hacker20001235@gmail.com"],
-        "content": "wkeoqkeokqwoekqw",
-        "type": "",
-        "createdAt": ""
     }
 }

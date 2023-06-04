@@ -2,10 +2,13 @@ import Head from 'next/head'
 import { Inter } from 'next/font/google'
 import SidebarMessage from '@/components/ChatPage/SidebarMessage/SidebarMessage'
 import Layout from '@/components/Layout'
-import { ReactElement, useEffect } from 'react'
+import { ReactElement, useContext, useEffect } from 'react'
 import { GetStaticProps } from 'next'
 import { getDataHooksProps } from 'next-data-hooks'
 import { NextPageWithLayout } from './_app'
+import sendNotificationFCM from '@/utils/sendNotificationFCM'
+import { auth } from '@/firebase'
+import { useAppContext } from '@/context/AppContext'
 
 
 const inter = Inter({ subsets: ['latin'] })
@@ -14,20 +17,16 @@ const inter = Inter({ subsets: ['latin'] })
 // import '@/styles/tailwind.min.css'
 const Page: NextPageWithLayout = () => {
 
+  const value: any = useAppContext()
 
-
-  useEffect(() => {
-    
-  },[])
-
-  // const handleTestMessage = () => {
-  //   sendNotificationFCM(
-  //     "Hello world", 
-  //     "First message", 
-  //     "c51PFxRwFhvtErtWzn61Ca:APA91bFQAaPkzpBTEo9nCqwa-lZD4nNWvtQB1hLar9mtqPFiTB2ZCQD8kFHKX8Uqy8L5lGnMkbVqHjRlKfRQ3NNSyX6eoo1pC8fqEDZ4WJNPTsCd8x__jr4coimRCcAVJmy32XkC4zJ1",
-  //     "ya29.a0AWY7Ckn_e5uzJyoY4sLoQV5Ws1uBKAdE3gMIR5su95Ic-yJjzm5UhlO2CZaAP0wMHh1jPcZYVblyfWCkv2V81HJM5pstPelma_arWpiI_T9aM33wS8FuwUYAIKEHgkqBNUtPtDTMy_E58tRSOl82-THuSalRaCgYKARMSARMSFQG1tDrpH19IGuUu33NXOqAcHy-xeA0163"
-  //   ).then((data) => console.log(data))
-  // }
+  const handleTestMessage = () => {
+    // auth.signOut()
+    sendNotificationFCM(
+      "Hello world", 
+      "First message", 
+      value.fcm_token
+    ).then((data) => console.log(data))
+  }
 
   // const handleShowUserDetail = async() => {
 
@@ -47,9 +46,8 @@ const Page: NextPageWithLayout = () => {
             </div>
             
             <div className="flex-1 flex h-full">
-              
-                <SidebarMessage/>
-
+                <button onClick={handleTestMessage}>adada</button>
+                {/* <SidebarMessage/> */}
             </div>
         </div>
 
