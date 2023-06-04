@@ -42,37 +42,13 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
   const [recipient, setRecipient] = useState([])
   const [isGroup, setIsGroup] = useState(false);
   const router = useRouter();
-  const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
-  const socketRef: any = useRef();
-  socketRef.current = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
-const context: any = useAppContext();
-const queryClient = new QueryClient()
+
+  const queryClient = new QueryClient()
   useEffect(() => {
     if(user) {
       createNewUser(user).catch((err) => console.log(err));
       requestPermission()
       getNotification(user?.email)
-
-      // socketRef.current.emit('login',{userId: user?.email});
-
-      // return () => {
-      //   socketRef.current.disconnect()
-      // }
-      
-
-      // getNotificationMessage(user?.email, socket);
-
-      // getNotificationAddFriend(user?.email, socket);
-
-      // getNotificationAcceptFriend(user?.email, socket);
-
-      
-
-      // const channel = new BroadcastChannel("notifications");
-      // channel.addEventListener("message", (event) => {
-      //   console.log(event.data);
-      //     new Notification("New nofitication", { body: event.data.notification.body })
-      // });
       
       // socket.on("response-call-video-one-to-one", (res: string) => {
       //   let data = JSON.parse(res);

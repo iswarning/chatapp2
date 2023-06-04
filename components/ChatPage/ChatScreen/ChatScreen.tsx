@@ -137,6 +137,7 @@ export default function ChatScreen({ chat, messages, onShowUserDetail}: any) {
         let listRecipient = chat.users.filter((email: any) => email !== user?.email)
         let dataNofity = {
             message: input,
+            chatRoomId: chat.id,
             recipient: chat.isGroup ? listRecipient : getRecipientEmail(chat.users, user),
             name: chat.isGroup ? chat.name : user?.displayName,
             isGroup: chat.isGroup,
