@@ -17,16 +17,16 @@ const inter = Inter({ subsets: ['latin'] })
 // import '@/styles/tailwind.min.css'
 const Page: NextPageWithLayout = () => {
 
-  const value: any = useAppContext()
+  // const value: any = useAppContext()
 
-  const handleTestMessage = () => {
-    // auth.signOut()
-    sendNotificationFCM(
-      "Hello world", 
-      "First message", 
-      value.fcm_token
-    ).then((data) => console.log(data))
-  }
+  // const handleTestMessage = () => {
+  //   // auth.signOut()
+  //   sendNotificationFCM(
+  //     "Hello world", 
+  //     "First message", 
+  //     value.fcm_token
+  //   ).then((data) => console.log(data))
+  // }
 
   // const handleShowUserDetail = async() => {
 
@@ -46,8 +46,8 @@ const Page: NextPageWithLayout = () => {
             </div>
             
             <div className="flex-1 flex h-full">
-                <button onClick={handleTestMessage}>adada</button>
-                {/* <SidebarMessage/> */}
+                {/* <button onClick={handleTestMessage}>adada</button> */}
+                <SidebarMessage/>
             </div>
         </div>
 

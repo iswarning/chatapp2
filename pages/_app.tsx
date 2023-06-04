@@ -68,11 +68,11 @@ const queryClient = new QueryClient()
 
       
 
-      const channel = new BroadcastChannel("notifications");
-      channel.addEventListener("message", (event) => {
-        console.log(event.data);
-          new Notification("New nofitication", { body: event.data.notification.body })
-      });
+      // const channel = new BroadcastChannel("notifications");
+      // channel.addEventListener("message", (event) => {
+      //   console.log(event.data);
+      //     new Notification("New nofitication", { body: event.data.notification.body })
+      // });
       
       // socket.on("response-call-video-one-to-one", (res: string) => {
       //   let data = JSON.parse(res);
@@ -134,11 +134,11 @@ const queryClient = new QueryClient()
     }
   }
 
-  useEffect(() => {
-    onMessageListener().then((data: any) => {
-      toast(`${data.notification.body}`, { hideProgressBar: true, autoClose: 5000, type: 'info' })
-    })
-  })
+  // useEffect(() => {
+  //   onMessageListener().then((data: any) => {
+  //     toast(`${data.notification.body}`, { hideProgressBar: true, autoClose: 5000, type: 'info' })
+  //   })
+  // })
 
   // useEffect(() => {
   //   getMessagingToken()
@@ -164,7 +164,6 @@ const queryClient = new QueryClient()
   return getLayout(
     <QueryClientProvider client={queryClient}>
       <AppWrapper>
-        {context?.getToken()}
         <Component {...pageProps} />
         <ToastContainer />
       </AppWrapper>
