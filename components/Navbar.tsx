@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import ChatIcon from '@mui/icons-material/Chat';
 import { useAuthState } from "react-firebase-hooks/auth";
 import { CustomAvatar } from "./ChatPage/Chat";
-import { useRouter } from "next/router";
+import { Router, useRouter } from "next/router";
 import { useState } from "react";
 import Link from "next/link";
 
@@ -73,7 +73,12 @@ export default function Navbar() {
                     </span>
                     Profile
                 </Link>                
-                
+                <div className={CLASS_NOT_ACTIVE} onClick={() => auth.signOut()}>
+                    <span className="inline-block align-text-bottom mr-2">
+                        <FontAwesomeIcon icon={faAddressCard} fontSize={12} />
+                    </span>
+                    Profile
+                </div>   
             </div>
         </div>
     )
