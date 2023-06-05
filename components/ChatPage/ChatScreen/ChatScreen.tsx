@@ -1,4 +1,4 @@
-import { auth, db } from "@/firebase";
+import { auth, db, storage } from "@/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useCollection } from "react-firebase-hooks/firestore";
 import Message from "../Message/Message";
@@ -12,8 +12,8 @@ import CallIcon from '@mui/icons-material/Call';
 import VideocamIcon from '@mui/icons-material/Videocam';
 import { IconButton } from "@mui/material";
 import getEmojiData from "@/utils/getEmojiData";
-
-
+import sendNotificationFCM from "@/utils/sendNotificationFCM";
+import SendIcon from '@mui/icons-material/Send';
 
 export default function ChatScreen({ chat, messages, onShowUserDetail}: any) {
     const [user] = useAuthState(auth);
@@ -114,12 +114,13 @@ export default function ChatScreen({ chat, messages, onShowUserDetail}: any) {
 
     const sendMessage = async(e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        let message = document.getElementById("input-message")?.innerHTML
 
         setSeenMessage();
 
         db.collection('chats').doc(chat.id).collection('messages').add({
             timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-            message: input,
+            message: message,
             user: user?.email,
             type: 'text',
             photoURL: '',
@@ -128,22 +129,17 @@ export default function ChatScreen({ chat, messages, onShowUserDetail}: any) {
         
         sendNotification();
         
-        setInput('');
+        document.getElementById("input-message")?.innerHTML = '';
 
         scrollToBottom();
     }
 
     const sendNotification = () => {
-        let listRecipient = chat.users.filter((email: any) => email !== user?.email)
-        let dataNofity = {
-            message: input,
-            chatRoomId: chat.id,
-            recipient: chat.isGroup ? listRecipient : getRecipientEmail(chat.users, user),
-            name: chat.isGroup ? chat.name : user?.displayName,
-            isGroup: chat.isGroup,
-            type: 'send-message'
-        }
-        socket.emit('send-notify', JSON.stringify(dataNofity));
+        sendNotificationFCM(
+            "New message !",
+            chat.isGroup ?  chat.name : user?.displayName + " : " + document.getElementById("input-message")?.innerHTML,
+            recipientSnapshot?.docs?.[0]?.data().fcm_token
+        ).catch(err => console.log(err))
     }
 
     // const handleVideoCall = async() => {
@@ -179,9 +175,8 @@ export default function ChatScreen({ chat, messages, onShowUserDetail}: any) {
     };
 
     const setSeenMessage = async() => {
-        console.log(11111111)
         if (messageSnapShot) {
-            messageSnapShot?.docs?.forEach(async(m) => {
+            messageSnapShot?.docs?.forEach((m) => (async() => {
                 const msgRef = db
                     .collection("chats")
                     .doc(chat.id)
@@ -193,7 +188,7 @@ export default function ChatScreen({ chat, messages, onShowUserDetail}: any) {
                 let result = res?.data()?.seen;
                 result.push(user?.email)
                 await msgRef.set({ ...res.data(), seen: result })
-            });
+            }));
         } else {
             messages?.forEach(async(m: any) => {
                 const msgRef = db
@@ -211,8 +206,26 @@ export default function ChatScreen({ chat, messages, onShowUserDetail}: any) {
         }
     }
 
-    const handleShowUserDetail = () => {
+    const handlePaste = (event: React.ClipboardEvent<HTMLDivElement>) => {
+        event.preventDefault();
+        let data = event.clipboardData.items[0];
+        console.log(data.type)
+        if (data.type === "image/png")
+        {
+            let blob: any = data.getAsFile();
+    
+            let reader = new FileReader();
+            reader.onload = function(event) {
+                
+            };
+    
+            reader.readAsDataURL(blob);
+        }
+    }
 
+    const uploadToBucket = () => {
+        const base64String = "";
+        storage.ref("public/images/message/")
     }
 
     return (
@@ -287,7 +300,6 @@ export default function ChatScreen({ chat, messages, onShowUserDetail}: any) {
                             <CallIcon fontSize="small" />
                         </IconButton>
                     </div>
-                    
                 </h2>
             </div>
             <div className="messages flex-1 overflow-auto h-screen px-4">
@@ -303,16 +315,25 @@ export default function ChatScreen({ chat, messages, onShowUserDetail}: any) {
                         </span>
                     </div>
                     <div className="flex-1">
-                        <form onSubmit={sendMessage}>
-                            <input  name="message" className="w-full block outline-none py-4 px-4 bg-transparent" placeholder="Type a message..." autoFocus onChange={(e) => setInput(e.target.value)} value={input} style={{maxHeight: '80px'}} onClick={() => setSeenMessage()} />
-                            <input type="submit" style={{position: 'absolute',left: '-9999px'}}/>
-                        </form>
+                            <InputMessage
+                            contentEditable="true"
+                            className="w-full block outline-none py-4 px-4 bg-transparent"
+                            style={{maxHeight: '80px'}} 
+                            onClick={() => setSeenMessage()} id="input-message" placeholder="Type message..."/>
                     </div>
+                    
                     <div className="flex-2 w-32 p-2 flex content-center items-center">
-                        <div className="flex-1 text-center">
+                        <div className="flex-1 text-center" onClick={() => sendMessage}>
                             <span className="text-gray-400 hover:text-gray-800">
-                                <span className="inline-block align-text-bottom">
+                                <span className="inline-block align-text-bottom" >
                                     <svg fill="none" strokeLinecap="round" strokeWidth="2" stroke="currentColor" viewBox="0 0 24 24" className="w-6 h-6"><path d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>
+                                </span>
+                            </span>
+                        </div>
+                        <div className="flex-1 text-center cursor-pointer" >
+                            <span className="text-gray-400 hover:text-gray-800" onClick={(e) => sendMessage(e)}>
+                                <span className="inline-block align-text-bottom">
+                                    <SendIcon />
                                 </span>
                             </span>
                         </div>
@@ -330,6 +351,22 @@ export default function ChatScreen({ chat, messages, onShowUserDetail}: any) {
         
     )
 }
+
+
+
+const InputMessage = styled.div`
+    background-color: white;
+    outline: #ccc;
+    border-radius: 10px;
+    padding: 20px;
+    overflow: hidden;
+    max-height: 200px;
+    /* overflow-y: scroll; */
+    border: none;
+    background-position: center;
+    object-fit: cover;
+    background-repeat: no-repeat;
+`
 
 const EmojiContainer = styled.div.attrs(() => ({
     className: ''

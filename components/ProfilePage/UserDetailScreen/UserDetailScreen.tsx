@@ -8,15 +8,21 @@ import { CustomAvatar } from "../../ChatPage/Chat";
 import ShowStatusFriend from "../ShowStatusFriend/ShowStatusFriend";
 import { useCollection } from "react-firebase-hooks/firestore";
 import getStatusFriend from "@/utils/getStatusFriend";
+import Loading from "@/components/Loading";
 
 function UserDetailScreen({userInfo}: any) {
 
     const [status, setStatus] = useState('');
 
     const [user] = useAuthState(auth);
+    const [isShow, setShow] = useState(false);
 
     useEffect(() => {
-        getStatusFriend(user?.email!, userInfo?.email).then((s) => setStatus(s)).catch(err => console.log(err))
+        setShow(true)
+        getStatusFriend(user?.email!, userInfo?.email).then((s) => {
+            setStatus(s)
+            setShow(false)
+        }).catch(err => console.log(err))
     },[status])
 
     // const [friendRequestSnapshot] = useCollection(
@@ -117,6 +123,7 @@ function UserDetailScreen({userInfo}: any) {
         //         </div>
         // </div>
         <div>
+            <Loading isShow={isShow} />
             <div className="p-8 bg-white shadow mt-10 rounded">
                 <div className="grid grid-cols-1 md:grid-cols-3">
                     <div className="grid grid-cols-3 text-center order-last md:order-first mt-20 md:mt-0">

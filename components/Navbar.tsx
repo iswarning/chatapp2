@@ -1,12 +1,14 @@
 import { auth } from "@/firebase";
-import { faAddressCard, faComment, faFileAlt, faUserCheck, faUserGroup, faUserPlus } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import ChatIcon from '@mui/icons-material/Chat';
 import { useAuthState } from "react-firebase-hooks/auth";
 import { CustomAvatar } from "./ChatPage/Chat";
-import { Router, useRouter } from "next/router";
-import { useState } from "react";
+import { useRouter } from "next/router";
 import Link from "next/link";
+import LogoutIcon from '@mui/icons-material/Logout';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import PeopleIcon from '@mui/icons-material/People';
+import ReorderIcon from '@mui/icons-material/Reorder';
+import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
 
 export default function Navbar() {
 
@@ -17,7 +19,7 @@ export default function Navbar() {
     const CLASS_NOT_ACTIVE = "block py-4 px-12 border-l-4 text-gray-600 hover:bg-gray-300 hover:text-black cursor-pointer"
 
     return (
-        <div className="hidden xl:block sm:flex-2 w-64 bg-gray-200">
+        <div className="hidden xl:block sm:flex-2 w-64 bg-gray-200 h-screen position-fixed">
             <div className="user-profile text-center">
                 <div className="w-32 h-32 rounded-full  border-2 border-white bg-white shadow-lg" style={{ margin: '4rem auto 2rem auto' }}>
                     <CustomAvatar
@@ -38,46 +40,39 @@ export default function Navbar() {
             <div className="menu mt-8">
                 <Link className={router.pathname === "/" || router.pathname.indexOf("chat") !== -1 ? CLASS_ACTIVE : CLASS_NOT_ACTIVE} href={'/'}>
                     <span className="inline-block align-text-bottom mr-2">
-                        <FontAwesomeIcon icon={faComment} fontSize={12} />
+                        <QuestionAnswerIcon fontSize="small" />
                     </span>
                     Chat
                 </Link>
                 <Link className={router.pathname === "/friend-requests" ? CLASS_ACTIVE : CLASS_NOT_ACTIVE} href={'/friend-requests'}>
                     <span className="inline-block align-text-bottom mr-2">
-                        <FontAwesomeIcon icon={faUserPlus} fontSize={12} />
+                        <PersonAddIcon fontSize="small" />
                     </span>
                     Friend Requests
                 </Link>
-
                 <Link className={router.pathname === "/all-friends" ? CLASS_ACTIVE : CLASS_NOT_ACTIVE} href={'/all-friends'}>
                     <span className="inline-block align-text-bottom mr-2">
-                        <FontAwesomeIcon icon={faUserCheck} fontSize={12} />
+                        <ReorderIcon fontSize="small"  />
                     </span>
                     All friends
                 </Link>
                 <Link className={router.pathname === "/suggestions" ? CLASS_ACTIVE : CLASS_NOT_ACTIVE} href={'/suggestions'}>
                     <span className="inline-block align-text-bottom mr-2">
-                        <FontAwesomeIcon icon={faUserGroup} fontSize={12} />
+                        <PeopleIcon fontSize="small" />
                     </span>
                     Suggestions
                 </Link>
-                <Link className={router.pathname === "/files" ? CLASS_ACTIVE : CLASS_NOT_ACTIVE} href={'/files'}>
-                    <span className="inline-block align-text-bottom mr-2">
-                        <FontAwesomeIcon icon={faFileAlt} fontSize={12} />
-                    </span>&nbsp;
-                    Files
-                </Link>
                 <Link className={router.pathname === "/profile" || router.pathname.indexOf("profile") !== -1 ? CLASS_ACTIVE : CLASS_NOT_ACTIVE} href={'/profile'}>
                     <span className="inline-block align-text-bottom mr-2">
-                        <FontAwesomeIcon icon={faAddressCard} fontSize={12} />
+                        <AccountCircleIcon fontSize="small" />
                     </span>
                     Profile
                 </Link>                
                 <div className={CLASS_NOT_ACTIVE} onClick={() => auth.signOut()}>
                     <span className="inline-block align-text-bottom mr-2">
-                        <FontAwesomeIcon icon={faAddressCard} fontSize={12} />
+                        <LogoutIcon fontSize="small" />
                     </span>
-                    Profile
+                    Logout
                 </div>   
             </div>
         </div>

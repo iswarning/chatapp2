@@ -9,8 +9,8 @@ export default function Layout({ children }: any) {
         <div className="flex h-full">
           {/* Menu Left */}
           <Navbar />
-          <div className="flex-1 bg-gray-100 w-full h-full">
-              <div className="main-body container m-auto w-11/12 h-full flex flex-col">
+          <div className="flex-1 w-full h-full">
+              <div className="main-body container w-11/12 h-full flex flex-col" style={{marginLeft: '20%'}}>
                 {/* <h1>{data[0]?.userId}</h1> */}
                 {/* Header */}
                 <Header />

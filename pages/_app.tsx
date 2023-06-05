@@ -23,6 +23,7 @@ import {
   QueryClientProvider,
   useQuery,
 } from '@tanstack/react-query'
+import { setUserOffline } from '@/utils/setUserOffline';
 config.autoAddCss = false
 
 export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
@@ -43,13 +44,26 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
   const [isGroup, setIsGroup] = useState(false);
   const router = useRouter();
 
+  // const context: any = useAppContext();
+
   const queryClient = new QueryClient()
+
   useEffect(() => {
     if(user) {
-      createNewUser(user).catch((err) => console.log(err));
-      requestPermission()
-      getNotification(user?.email)
+
+      requestPermission();
+
+      getMessagingToken().then(token => {
+        createNewUser(user, token).catch((err) => console.log(err));
+      }).catch((err) => console.log(err));
+
       
+      // getNotification(user?.email)
+      // const channel = new BroadcastChannel("notifications");
+      // channel.addEventListener("message", (event) => {
+      //   console.log(event.data);
+      //     new Notification("New nofitication", { body: event.data.notification.body })
+      // });
       // socket.on("response-call-video-one-to-one", (res: string) => {
       //   let data = JSON.parse(res);
       //   if(data.recipient === user?.email) {
@@ -95,26 +109,28 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
       // return () => {
       //   socket.disconnect()
       // }
-      window.addEventListener("beforeunload", () => setUserOffline());
+      window.addEventListener("beforeunload", () => {
+        setUserOffline(user?.uid).catch(err => console.log(err))
+      });
       return () => {
-        window.addEventListener("beforeunload", () => setUserOffline());
+        window.addEventListener("beforeunload", () => {
+          setUserOffline(user?.uid).catch(err => console.log(err))
+        });
       }
     }
   },[user]);
 
-  const setUserOffline = () => {
-    try {
-        db.collection("users").doc(user?.uid).update({ isOnline: false })
-    } catch(err) {
-      console.log(err)
-    }
-  }
 
-  // useEffect(() => {
-  //   onMessageListener().then((data: any) => {
-  //     toast(`${data.notification.body}`, { hideProgressBar: true, autoClose: 5000, type: 'info' })
-  //   })
-  // })
+
+  useEffect(() => {
+    onMessageListener().then((data: any) => {
+      toast(`${data.notification.body}`, { hideProgressBar: true, autoClose: 5000, type: 'info' })
+    }).catch(err => console.log(err))
+  })
+
+  useEffect(() => {
+    
+  },[])
 
   // useEffect(() => {
   //   getMessagingToken()

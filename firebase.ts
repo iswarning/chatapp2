@@ -17,6 +17,8 @@ const auth = app.auth();
 
 const provider = new firebase.auth.GoogleAuthProvider();
 
+const storage = firebase.storage(app);
+
 let messaging: firebase.messaging.Messaging;
 
 if (typeof window !== "undefined") {
@@ -30,7 +32,7 @@ export const getMessagingToken = async () => {
   if (!messaging) return;
   try {
     currentToken = await messaging.getToken({
-      vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
+      vapidKey: process.env.NEXT_PUBLIC_FIREBASE_FCM_VAPID_KEY,
     });
   } catch (error) {
     console.log("An error occurred while retrieving token. ", error);
@@ -45,4 +47,4 @@ export const onMessageListener = () =>
     });
 });
 
-export { db, auth, provider };
+export { db, auth, provider, storage };

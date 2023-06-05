@@ -15,6 +15,10 @@
                 "senderEmail": "",
                 "emoji": ""
             },
+            "imagesInMessage": {
+                "position": "<img1>",
+                "base64Code": "data:<wwepk1q0239u203u2>"
+            },
             "timestamp": ""
         }
     },
@@ -24,7 +28,8 @@
         "photoURL": "",
         "fullName": "",
         "phoneNumber": "",
-        "lastSeen": ""
+        "isOnline": false,
+        "fcm_token": ""
     },
 
     "friends": [{

@@ -24,7 +24,7 @@ const Page: NextPageWithLayout = () => {
   //   sendNotificationFCM(
   //     "Hello world", 
   //     "First message", 
-  //     value.fcm_token
+      
   //   ).then((data) => console.log(data))
   // }
 

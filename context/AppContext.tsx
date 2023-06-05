@@ -3,8 +3,10 @@ import { getMessagingToken } from '@/firebase';
 import { useQuery } from '@tanstack/react-query';
 import { createContext, useContext } from 'react';
 import CircularProgress from '@mui/material/CircularProgress';
+import {ClipLoader} from 'react-spinners'
+import Loading from '@/components/Loading';
 
-const AppContext = createContext(null);
+const AppContext = createContext({});
 
 export function AppWrapper({ children }: any) {
 
@@ -16,14 +18,14 @@ export function AppWrapper({ children }: any) {
       ),
   })
 
-  const initialState: any = {
-    fcm_token: data
-  } 
+  let fcm_token = data;
 
-  if(isLoading) return <CircularProgress />
+  if(isLoading) return <Loading isShow={true} />
 
   return (
-    <AppContext.Provider value={initialState}>
+    <AppContext.Provider value={{
+      fcm_token
+    }}>
       {children}
     </AppContext.Provider>
   );

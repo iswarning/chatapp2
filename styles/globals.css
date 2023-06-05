@@ -135,10 +135,16 @@ a {
     .messages {
         max-height: 600px;
     }
+    #scroll-style-3 {
+        max-height: 600px;
+    }
 }
 
 @media only screen and (min-width: 800px) and (max-width: 999px) {
     .messages {
+        max-height: 600px;
+    }
+    #scroll-style-3 {
         max-height: 600px;
     }
 }
@@ -147,10 +153,16 @@ a {
     .messages {
         max-height: 600px;
     }
+    #scroll-style-3 {
+        max-height: 600px;
+    }
 }
 
 @media only screen and (min-width: 1200px) and (max-width: 1399px) {
     .messages {
+        max-height: 600px;
+    }
+    #scroll-style-3 {
         max-height: 600px;
     }
 }
@@ -159,11 +171,17 @@ a {
     .messages {
         max-height: 600px;
     }
+    #scroll-style-3 {
+        max-height: 600px;
+    }
 }
 
 @media only screen and (min-width: 1600px) and (max-width: 1799px) {
     .messages {
-        max-height: 600px;
+        max-height: 450px;
+    }
+    #scroll-style-3 {
+        max-height: 580px;
     }
 }
 
@@ -171,10 +189,16 @@ a {
     .messages {
         max-height: 600px;
     }
+    #scroll-style-3 {
+        max-height: 600px;
+    }
 }
 
 @media only screen and (min-width: 2000px) and (max-width: 2200px) {
     .messages {
+        max-height: 700px;
+    }
+    #scroll-style-3 {
         max-height: 700px;
     }
 }

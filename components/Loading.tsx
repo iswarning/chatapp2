@@ -1,12 +1,34 @@
-import { CircularProgress } from "@mui/material";
+import ReactLoading from "react-loading";
+import styled from "styled-components";
 
-export default function Login() {
+export default function Loading({isShow}: any) {
     return (
-        <center style={{ display: 'grid', placeItems: 'center', height: '100vh'}}>
-            <div>
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/WhatsApp.svg/768px-WhatsApp.svg.png" alt="" style={{ marginBottom: 10 }} height={200} />
-            </div>
-            <CircularProgress size={60}/>
-        </center>
+        <>
+            { isShow ? <LoadingOverlay>
+                    <LoadingContainer>
+                        <ReactLoading type='spinningBubbles' color="#02FFFF" />
+                    </LoadingContainer>
+                </LoadingOverlay> : <div></div>}
+        </>
+        
     )
 }
+
+const LoadingOverlay = styled.div`
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: black;
+    opacity: 0.8;
+    z-index: 1000;
+`
+
+const LoadingContainer = styled.div`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    min-height: 100vh;
+`
