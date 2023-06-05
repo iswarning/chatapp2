@@ -22,6 +22,7 @@ export default function ChatScreen({ chat, messages, onShowUserDetail}: any) {
     const [showEmoji, setShowEmoji] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
     const [isOnline, setIsOnline] = useState(false);
+    const [listImage, setListImage] = useState<any>(null)
     const router = useRouter();
     const [messageSnapShot] = useCollection(
         db
@@ -114,22 +115,45 @@ export default function ChatScreen({ chat, messages, onShowUserDetail}: any) {
 
     const sendMessage = async(e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        let message = document.getElementById("input-message")?.innerHTML
+        const inputMsgElement = document.getElementById("input-message");
+        const listImage = inputMsgElement?.getElementsByTagName("img") || [];
+// console.log(inputMsgElement?.);return;
+        let message;
+        for(let i = 0; i < listImage?.length - 1; i++)
+        {
 
+            // listImage[i].replaceWith()
+        }
         setSeenMessage();
 
-        db.collection('chats').doc(chat.id).collection('messages').add({
+        const messageDoc = await db.collection('chats').doc(chat.id).collection('messages').add({
             timestamp: firebase.firestore.FieldValue.serverTimestamp(),
             message: message,
             user: user?.email,
             type: 'text',
             photoURL: '',
             seen: []
-        }).catch((err) => console.log(err))
+        });
+
+        if(messageDoc) {
+            const snap = await messageDoc.get();
+            if (listImage?.length > 0) {
+                
+                    await db
+                        .collection('chats')
+                        .doc(chat.id)
+                        .collection('messages')
+                        .doc(snap.id)
+                        .collection("imagesInMessage")
+                        .add({
+                            position: "<img"
+                        })
+            }
+        }
         
         sendNotification();
-        
-        document.getElementById("input-message")?.innerHTML = '';
+        const element = document.getElementById("input-message");
+        // if(element) element.innerHTML = "";
 
         scrollToBottom();
     }
@@ -206,26 +230,20 @@ export default function ChatScreen({ chat, messages, onShowUserDetail}: any) {
         }
     }
 
-    const handlePaste = (event: React.ClipboardEvent<HTMLDivElement>) => {
-        event.preventDefault();
-        let data = event.clipboardData.items[0];
-        console.log(data.type)
-        if (data.type === "image/png")
-        {
-            let blob: any = data.getAsFile();
+    // const handlePaste = (event: React.ClipboardEvent<HTMLDivElement>) => {
+    //     // event.preventDefault();
+    //     // let data = event.clipboardData.items[0];
+    //     // if (data.type === "image/png")
+    //     // {
+    //     //     let blob: any = data.getAsFile();
     
-            let reader = new FileReader();
-            reader.onload = function(event) {
-                
-            };
-    
-            reader.readAsDataURL(blob);
-        }
-    }
+    //     //     setListImage((old: any) => [...old, blob])
+    //     // }
+    //     // return true;
+    // }
 
-    const uploadToBucket = () => {
-        const base64String = "";
-        storage.ref("public/images/message/")
+    const uploadToBucket = (file: any, messageId: string) => {
+        storage.ref(`public/images/message/${messageId}`).put(file)
     }
 
     return (
@@ -319,7 +337,9 @@ export default function ChatScreen({ chat, messages, onShowUserDetail}: any) {
                             contentEditable="true"
                             className="w-full block outline-none py-4 px-4 bg-transparent"
                             style={{maxHeight: '80px'}} 
-                            onClick={() => setSeenMessage()} id="input-message" placeholder="Type message..."/>
+                            onClick={setSeenMessage} 
+                            id="input-message" 
+                            placeholder="Type message..." />
                     </div>
                     
                     <div className="flex-2 w-32 p-2 flex content-center items-center">
@@ -361,7 +381,7 @@ const InputMessage = styled.div`
     padding: 20px;
     overflow: hidden;
     max-height: 200px;
-    /* overflow-y: scroll; */
+    overflow-y: scroll;
     border: none;
     background-position: center;
     object-fit: cover;

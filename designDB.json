@@ -17,7 +17,7 @@
             },
             "imagesInMessage": {
                 "position": "<img1>",
-                "base64Code": "data:<wwepk1q0239u203u2>"
+                "pathToBucket": "public/images/message/"
             },
             "timestamp": ""
         }

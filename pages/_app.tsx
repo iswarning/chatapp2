@@ -110,11 +110,11 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
       //   socket.disconnect()
       // }
       window.addEventListener("beforeunload", () => {
-        setUserOffline(user?.uid).catch(err => console.log(err))
+        return setUserOffline(user?.uid).catch(err => console.log(err))
       });
       return () => {
         window.addEventListener("beforeunload", () => {
-          setUserOffline(user?.uid).catch(err => console.log(err))
+          return setUserOffline(user?.uid).catch(err => console.log(err))
         });
       }
     }
