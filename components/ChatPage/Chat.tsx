@@ -6,7 +6,6 @@ import { useCollection } from "react-firebase-hooks/firestore";
 import styled from "styled-components";
 import Image from 'next/image';
 import TimeAgo from "timeago-react";
-import { io } from "socket.io-client";
 import { useEffect, useRef, useState } from "react";
 
 export default function Chat({ chat, onShowMessage, active }: any) {
@@ -15,19 +14,7 @@ export default function Chat({ chat, onShowMessage, active }: any) {
     const router = useRouter();
     const [userOnline, setUserOnline] = useState<Array<string>>()
 
-    const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!)
-    const socketRef: any = useRef();
-    socketRef.current = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
-
     useEffect(() => {
-        socketRef.current.on("get-user-online", (userOn: any) => {
-            console.log(Object.values(userOn))
-            setUserOnline(Object.values(userOn))
-        })
-
-        return () => {
-            socketRef.current.disconnect();
-        }
     },[])
 
     const [recipientSnapshot] = useCollection(
@@ -62,7 +49,7 @@ export default function Chat({ chat, onShowMessage, active }: any) {
 
     const handleShowChatScreen = () => {
         onShowMessage();
-        setSeenMessage();
+        // setSeenMessage();
     }
 
     const getRecipientAvatar = () => {

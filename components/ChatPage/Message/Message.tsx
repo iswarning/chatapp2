@@ -1,4 +1,4 @@
-import { auth, db } from "@/firebase";
+import { auth, db, storage } from "@/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { CustomAvatar } from "../Chat";
 import styled from "styled-components";
@@ -7,6 +7,7 @@ import { lazy, useState } from "react";
 import getEmojiData from "@/utils/getEmojiData";
 import { useCollection } from "react-firebase-hooks/firestore";
 import firebase from "firebase";
+import HtmlElementWrapper from "@/modules/HTMLElementWrapper";
 
 export default function Message({message, photoURL, chatId}: any) {
 
@@ -30,10 +31,10 @@ export default function Message({message, photoURL, chatId}: any) {
         .limitToLast(1)
     )
 
-    const handleReaction = (event: any, emoji: number) => {
+    const handleReaction = async(event: any, emoji: number) => {
         event.preventDefault();
         try {
-            db
+            await db
             .collection("chats")
             .doc(chatId)
             .collection("messages")
@@ -50,6 +51,25 @@ export default function Message({message, photoURL, chatId}: any) {
         setIsShown(false);
     }
 
+    const getUrlFromBucket = async(path: string) => {
+        return await storage.ref(path).getDownloadURL()
+    }
+
+    const handleMessage = (msg: string) => {
+        let listImgInMsg = msg.match(/#img/g) ?? [];
+        const messageElement: HTMLDivElement = document.createElement("div");
+        let messageExport = msg;
+        if (listImgInMsg.length > 0) {
+            for(let j = 0; j < listImgInMsg.length; j++) {
+                getUrlFromBucket(`public/images/message/${message?.id}/#img`+ j.toString()).then((url) => {
+                    messageExport = messageExport.replace("#img" + j.toString(), `<img alt="User Avatar" loading="lazy" width="130" height="130" decoding="async" data-nimg="1" class="sc-eDDNvR iaAXyW block" src="${url}" style="color: transparent;"/>`) 
+                }).catch(err => console.log(err))
+            }
+        }
+        messageElement.innerHTML = messageExport;
+        return messageElement;
+    }
+
     return (
         <>
             {
@@ -57,7 +77,7 @@ export default function Message({message, photoURL, chatId}: any) {
                 message.user === userLoggedIn?.email ? <div className="message me mb-4 flex text-right">
                     <div className="flex-1 px-2">
                         <div className="inline-block bg-blue-600 rounded-full p-2 px-4 text-white relative" style={{backgroundColor: '#3182ce'}}>
-                            <span dangerouslySetInnerHTML={{__html: message.message}}></span>
+                            <HtmlElementWrapper element={handleMessage(message.message)} />
                         </div>
                         {/* <div className="pr-4"><small className="text-gray-500">{formatDate(message.timestamp)}</small></div> */}
                     </div>

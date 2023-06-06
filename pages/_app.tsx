@@ -10,7 +10,6 @@ import { auth, db, getMessagingToken, onMessageListener } from '@/firebase';
 import Loading from '@/components/Loading';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer, toast } from 'react-toastify';
-import { io } from 'socket.io-client';
 import { useRouter } from 'next/router';
 import { NextPage } from 'next';
 import { config } from '@fortawesome/fontawesome-svg-core'

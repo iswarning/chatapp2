@@ -2,12 +2,10 @@ import { useCollection } from "react-firebase-hooks/firestore";
 import { auth, db } from "@/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
 import firebase from "firebase";
-import { io } from "socket.io-client";
 
 export default function FriendRequest({ id, senderEmail, recipientEmail}: any) {
 
     const [user] = useAuthState(auth);
-    const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!)
 
     const [recipientUserSnapshot] = useCollection(
         db
@@ -39,11 +37,11 @@ export default function FriendRequest({ id, senderEmail, recipientEmail}: any) {
             await batch.commit();
         }
 
-        socket.emit("send-notify", JSON.stringify({
-            type: 'accept-friend',
-            recipient: senderEmail,
-            name: recipientUser?.fullName
-        }))
+        // socket.emit("send-notify", JSON.stringify({
+        //     type: 'accept-friend',
+        //     recipient: senderEmail,
+        //     name: recipientUser?.fullName
+        // }))
     }
 
     const onCancel = async() => {

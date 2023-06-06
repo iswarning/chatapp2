@@ -14,6 +14,7 @@ import { IconButton } from "@mui/material";
 import getEmojiData from "@/utils/getEmojiData";
 import sendNotificationFCM from "@/utils/sendNotificationFCM";
 import SendIcon from '@mui/icons-material/Send';
+import Loading from "@/components/Loading";
 
 export default function ChatScreen({ chat, messages, onShowUserDetail}: any) {
     const [user] = useAuthState(auth);
@@ -23,6 +24,7 @@ export default function ChatScreen({ chat, messages, onShowUserDetail}: any) {
     const [isOpen, setIsOpen] = useState(false);
     const [isOnline, setIsOnline] = useState(false);
     const [listImage, setListImage] = useState<any>(null)
+    const [isLoading, setLoading] = useState(false);
     const router = useRouter();
     const [messageSnapShot] = useCollection(
         db
@@ -38,7 +40,6 @@ export default function ChatScreen({ chat, messages, onShowUserDetail}: any) {
         .where("email",'==', getRecipientEmail(chat.users, user))
     )
 
-    const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
 
     useEffect(() => {
         // getRecipientUser().catch((err) => console.log(err))
@@ -114,16 +115,62 @@ export default function ChatScreen({ chat, messages, onShowUserDetail}: any) {
     }
 
     const sendMessage = async(e: React.FormEvent<HTMLFormElement>) => {
+        setLoading(true)
         e.preventDefault();
         const inputMsgElement = document.getElementById("input-message");
-        const listImage = inputMsgElement?.getElementsByTagName("img") || [];
-// console.log(inputMsgElement?.);return;
-        let message;
-        for(let i = 0; i < listImage?.length - 1; i++)
-        {
+        const listImage = inputMsgElement?.getElementsByTagName("img") ?? [];
+        let sizeInput = inputMsgElement?.childNodes?.length ?? 0;
 
-            // listImage[i].replaceWith()
+        let message = "";
+        let imgString = [];
+        let countImg = 0;
+        for(let i = 0; i < sizeInput; i++)
+        {
+            switch(inputMsgElement?.childNodes[i].nodeName){
+                case '#text':
+                    message += inputMsgElement?.childNodes[i].nodeValue
+                    break;
+                case 'IMG':
+                    message += `<br>#img${countImg}<br>`
+                    imgString.push(`#img${countImg}`)
+                    countImg++;
+                    break;
+                case 'BR':
+                    message += '<br><br>';
+                    break;
+                case 'DIV':
+                    let childNodeDiv: any = inputMsgElement?.childNodes[i].childNodes;
+                    for(const element of childNodeDiv) {
+                        switch(element.nodeName) {
+                            case '#text':
+                                message += element.nodeValue + '<br>';
+                                break;
+                            case 'IMG':
+                                message += `<br>#img${countImg}<br>`;
+                                imgString.push(`#img${countImg}`);
+                                countImg++;
+                                break;
+                            case 'BR':
+                                message += '<br><br>';
+                                break;
+                        }
+                    }
+                    break;
+            }
         }
+
+           
+
+        // const newMsg: HTMLDivElement = document.createElement("div")
+        // newMsg.style.border = '1px solid blue';
+        // if (listImage?.length > 0) {
+        //     for(let j = 0; j < imgString.length; j++) {
+        //         message = message.replace("#img" + j.toString(), '<img alt="User Avatar" loading="lazy" width="130" height="130" decoding="async" data-nimg="1" class="sc-eDDNvR iaAXyW block" src="https://lh3.googleusercontent.com/a/AGNmyxaHFgmXNFi08fg5vNTjfMDxACtUTNeHL8_FwwOV3A=s96-c" style="color: transparent;"/>')
+        //     }
+        // }
+        // newMsg.innerHTML = message;
+        // document.getElementsByClassName("messages")[0].append(newMsg)
+
         setSeenMessage();
 
         const messageDoc = await db.collection('chats').doc(chat.id).collection('messages').add({
@@ -137,25 +184,24 @@ export default function ChatScreen({ chat, messages, onShowUserDetail}: any) {
 
         if(messageDoc) {
             const snap = await messageDoc.get();
-            if (listImage?.length > 0) {
-                
-                    await db
-                        .collection('chats')
-                        .doc(chat.id)
-                        .collection('messages')
-                        .doc(snap.id)
-                        .collection("imagesInMessage")
-                        .add({
-                            position: "<img"
-                        })
-            }
+            for(let o = 0; o < listImage.length; o++) {
+                fetch(listImage[o].src)
+                    .then(function(response) {
+                        return response.blob()
+                    })
+                    .then(function(blob) {
+                        storage.ref(`public/images/message/${snap.id}/#img${o}`).put(blob).catch(err => console.log(err))
+                    }).catch(err => console.log(err));
+            } 
         }
         
         sendNotification();
         const element = document.getElementById("input-message");
-        // if(element) element.innerHTML = "";
+        if(element) element.innerHTML = "";
 
         scrollToBottom();
+
+        setLoading(false)
     }
 
     const sendNotification = () => {
@@ -199,6 +245,7 @@ export default function ChatScreen({ chat, messages, onShowUserDetail}: any) {
     };
 
     const setSeenMessage = async() => {
+
         if (messageSnapShot) {
             messageSnapShot?.docs?.forEach((m) => (async() => {
                 const msgRef = db
@@ -299,7 +346,8 @@ export default function ChatScreen({ chat, messages, onShowUserDetail}: any) {
         //         <VideoCallScreen statusCall='Calling' photoURL={chat.isGroup ? chat.photoURL : recipientUser.photoURL} sender={user?.email} recipient={getRecipientEmail(chat.users, user)} chatId={chatId} onClose={() => setIsOpen(false)} isGroup={chat.isGroup} />
         //     </VideoCallContainer>
         // </Container>
-        
+        <>
+        <Loading isLoading={isLoading} />
         <div className="chat-area flex-1 flex flex-col relative">
             
             <div className="flex-3">
@@ -368,7 +416,7 @@ export default function ChatScreen({ chat, messages, onShowUserDetail}: any) {
                 </EmojiContainer> : null
             }
         </div>
-        
+        </>
     )
 }
 
