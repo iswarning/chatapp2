@@ -161,15 +161,15 @@ export default function ChatScreen({ chat, messages, onShowUserDetail}: any) {
 
            
 
-        // const newMsg: HTMLDivElement = document.createElement("div")
-        // newMsg.style.border = '1px solid blue';
-        // if (listImage?.length > 0) {
-        //     for(let j = 0; j < imgString.length; j++) {
-        //         message = message.replace("#img" + j.toString(), '<img alt="User Avatar" loading="lazy" width="130" height="130" decoding="async" data-nimg="1" class="sc-eDDNvR iaAXyW block" src="https://lh3.googleusercontent.com/a/AGNmyxaHFgmXNFi08fg5vNTjfMDxACtUTNeHL8_FwwOV3A=s96-c" style="color: transparent;"/>')
-        //     }
-        // }
-        // newMsg.innerHTML = message;
-        // document.getElementsByClassName("messages")[0].append(newMsg)
+        const newMsg: HTMLDivElement = document.createElement("div")
+        newMsg.style.border = '1px solid blue';
+        if (listImage?.length > 0) {
+            for(let j = 0; j < imgString.length; j++) {
+                message = message.replace("#img" + j.toString(), '<img alt="User Avatar" loading="lazy" width="130" height="130" decoding="async" data-nimg="1" class="sc-eDDNvR iaAXyW block" src="https://lh3.googleusercontent.com/a/AGNmyxaHFgmXNFi08fg5vNTjfMDxACtUTNeHL8_FwwOV3A=s96-c" style="color: transparent;"/>')
+            }
+        }
+        newMsg.innerHTML = message;
+        document.getElementsByClassName("messages")[0].append(newMsg)
 
         setSeenMessage();
 
