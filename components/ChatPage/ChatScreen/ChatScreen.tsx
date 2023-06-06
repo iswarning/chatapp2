@@ -15,6 +15,7 @@ import getEmojiData from "@/utils/getEmojiData";
 import sendNotificationFCM from "@/utils/sendNotificationFCM";
 import SendIcon from '@mui/icons-material/Send';
 import Loading from "@/components/Loading";
+import { useQuery } from "@tanstack/react-query";
 
 export default function ChatScreen({ chat, messages, onShowUserDetail}: any) {
     const [user] = useAuthState(auth);
@@ -84,12 +85,20 @@ export default function ChatScreen({ chat, messages, onShowUserDetail}: any) {
                 return photoUrl
             else return "/images/avatar-default.png"
         }
-    }     
+    }
+    
 
     const showMessage = () => {
         if(messageSnapShot) {
-            return messageSnapShot?.docs?.map((message: any) => 
-                <Message 
+            return messageSnapShot?.docs?.map((message: any) => {
+                let arrayImage: any = {};
+                let listImgInMsg = message.data().message.match(/#img/g) ?? [];
+                if(listImgInMsg.length > 0) {
+                    listImgInMsg.forEach(async(msg: any, i: number) => {
+                        arrayImage['#img' + i.toString()] = await storage.ref(`public/images/message/${message?.id}/#img`+ i.toString()).getDownloadURL().catch(() => arrayImage['#img' + i.toString()] = null);
+                    })
+                }
+                return <Message 
                     key={message.id}  
                     message={{
                         id: message.id,
@@ -98,10 +107,19 @@ export default function ChatScreen({ chat, messages, onShowUserDetail}: any) {
                     }}
                     photoURL={getRecipientAvatar()}
                     chatId={chat.id}
-                />)
+                    arrayImage={arrayImage}
+                />
+            })
         } else {
-            return messages?.docs?.map((message: any) => 
-                <Message 
+            return messages?.docs?.map((message: any) => {
+                let arrayImage: any = {};
+                let listImgInMsg = message.data().message.match(/#img/g) ?? [];
+                if(listImgInMsg.length > 0) {
+                    listImgInMsg.forEach(async(msg: any, i: number) => {
+                        arrayImage['#img' + i.toString()] = await storage.ref(`public/images/message/${message?.id}/#img`+ i.toString()).getDownloadURL();
+                    })
+                }
+                return <Message 
                     key={message.id} 
                     message={{
                         id: message.id,
@@ -110,7 +128,8 @@ export default function ChatScreen({ chat, messages, onShowUserDetail}: any) {
                     }}
                     photoURL={getRecipientAvatar()}
                     chatId={chat.id}
-                />)
+                />
+            })
         }
     }
 
@@ -177,7 +196,7 @@ export default function ChatScreen({ chat, messages, onShowUserDetail}: any) {
             timestamp: firebase.firestore.FieldValue.serverTimestamp(),
             message: message,
             user: user?.email,
-            type: 'text',
+            type: listImage.length > 0 ? 'text-image' :'text',
             photoURL: '',
             seen: []
         });

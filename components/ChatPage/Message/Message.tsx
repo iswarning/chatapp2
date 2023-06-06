@@ -8,8 +8,9 @@ import getEmojiData from "@/utils/getEmojiData";
 import { useCollection } from "react-firebase-hooks/firestore";
 import firebase from "firebase";
 import HtmlElementWrapper from "@/modules/HTMLElementWrapper";
+import { useQuery } from "@tanstack/react-query";
 
-export default function Message({message, photoURL, chatId}: any) {
+export default function Message({message, photoURL, chatId, arrayImage}: any) {
 
     const [userLoggedIn] = useAuthState(auth);
     const [isShown,setIsShown] = useState(false)
@@ -51,23 +52,18 @@ export default function Message({message, photoURL, chatId}: any) {
         setIsShown(false);
     }
 
-    const getUrlFromBucket = async(path: string) => {
-        return await storage.ref(path).getDownloadURL()
-    }
-
     const handleMessage = (msg: string) => {
-        let listImgInMsg = msg.match(/#img/g) ?? [];
-        const messageElement: HTMLDivElement = document.createElement("div");
+        console.log(arrayImage)
         let messageExport = msg;
-        if (listImgInMsg.length > 0) {
-            for(let j = 0; j < listImgInMsg.length; j++) {
-                getUrlFromBucket(`public/images/message/${message?.id}/#img`+ j.toString()).then((url) => {
-                    messageExport = messageExport.replace("#img" + j.toString(), `<img alt="User Avatar" loading="lazy" width="130" height="130" decoding="async" data-nimg="1" class="sc-eDDNvR iaAXyW block" src="${url}" style="color: transparent;"/>`) 
-                }).catch(err => console.log(err))
+        if (arrayImage !== null && arrayImage !== undefined) {
+            if (Object.keys(arrayImage) === null) {
+
             }
+            Object.keys(arrayImage).forEach((key, index) => {
+                messageExport = messageExport.replace("#img" + index.toString(), `<img loading="lazy" decoding="async" src="${arrayImage[key]}" style="color: transparent;"/>`)
+            })
         }
-        messageElement.innerHTML = messageExport;
-        return messageElement;
+        return <div dangerouslySetInnerHTML={{__html: messageExport}} ></div>;
     }
 
     return (
@@ -76,8 +72,9 @@ export default function Message({message, photoURL, chatId}: any) {
                 // Sender
                 message.user === userLoggedIn?.email ? <div className="message me mb-4 flex text-right">
                     <div className="flex-1 px-2">
-                        <div className="inline-block bg-blue-600 rounded-full p-2 px-4 text-white relative" style={{backgroundColor: '#3182ce'}}>
-                            <HtmlElementWrapper element={handleMessage(message.message)} />
+                        <div className="inline-block p-2 px-4 text-white relative" style={{backgroundColor: '#3182ce', borderRadius: '10px'}}>
+                            {/* <HtmlElementWrapper element={handleMessage(message.message)} /> */}
+                            {handleMessage(message.message)}
                         </div>
                         {/* <div className="pr-4"><small className="text-gray-500">{formatDate(message.timestamp)}</small></div> */}
                     </div>
@@ -97,7 +94,7 @@ export default function Message({message, photoURL, chatId}: any) {
                         </div>
                     </div>
                     <div className="flex-1 px-2" onMouseEnter={() => setIsShown(true)} onMouseLeave={() => setIsShown(false)}>
-                        <div className="inline-block bg-gray-300 rounded-full p-2 px-4 text-gray-700 relative"  style={{backgroundColor: 'rgba(226,232,240,1)'}}>
+                        <div className="inline-block bg-gray-300 p-2 px-4 text-gray-700 relative"  style={{backgroundColor: 'rgba(226,232,240,1)', borderRadius: '10px'}}>
                             <span>{message.message}</span>
                             {
                                 reactionSnapshot?.docs?.length! > 0 ? <ReactionContainerReciever>
