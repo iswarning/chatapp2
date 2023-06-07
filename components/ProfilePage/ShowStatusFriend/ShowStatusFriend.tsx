@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import firebase from "firebase";
 import { io } from "socket.io-client";
+import sendNotificationFCM from "@/utils/sendNotificationFCM";
 
 export default function ShowStatusFriend({userInfo, statusFriend}: any) {
     
@@ -30,14 +31,19 @@ export default function ShowStatusFriend({userInfo, statusFriend}: any) {
             recipientEmail: userInfo?.email!,
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         })
-        socket.emit("send-notify", JSON.stringify({
-            sender: user?.email,
-            recipient: userInfo?.email,
-            name: user?.displayName,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            type: 'send-add-friend'
-        }))
+        // socket.emit("send-notify", JSON.stringify({
+        //     sender: user?.email,
+        //     recipient: userInfo?.email,
+        //     name: user?.displayName,
+        //     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        //     type: 'send-add-friend'
+        // }))
         setStatus('isFriendRequest');
+        sendNotificationFCM(
+            'Notification',
+            user?.displayName + 'sent a friend request',
+            userInfo?.fcm_token
+        ).catch(err => console.log(err))
     }
 
     const onCancelFriendRequest = async() => {

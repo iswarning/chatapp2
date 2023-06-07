@@ -10,11 +10,12 @@ import firebase from "firebase";
 import HtmlElementWrapper from "@/modules/HTMLElementWrapper";
 import { useQuery } from "@tanstack/react-query";
 
-export default function Message({message, photoURL, chatId, arrayImage}: any) {
+export default function Message({message, photoURL, chatId}: any) {
 
     const [userLoggedIn] = useAuthState(auth);
     const [isShown,setIsShown] = useState(false)
     const [isShownReaction,setIsShownReaction] = useState(false)
+    const [load, setLoad] = useState(0)
 
     const formatDate = (dt: any) => {
         let d = new Date(dt);
@@ -52,15 +53,26 @@ export default function Message({message, photoURL, chatId, arrayImage}: any) {
         setIsShown(false);
     }
 
-    const handleMessage = (msg: string) => {
-        console.log(arrayImage)
-        let messageExport = msg;
-        if (arrayImage !== null && arrayImage !== undefined) {
-            if (Object.keys(arrayImage) === null) {
+    const [imageInMessageSnap] = useCollection(
+        db
+        .collection("chats")
+        .doc(chatId)
+        .collection("messages")
+        .doc(message.id)
+        .collection("imageInMessage")
+    )
 
-            }
-            Object.keys(arrayImage).forEach((key, index) => {
-                messageExport = messageExport.replace("#img" + index.toString(), `<img loading="lazy" decoding="async" src="${arrayImage[key]}" style="color: transparent;"/>`)
+    const handleMessage = () => {
+        let messageExport = message.message;
+        if (message.type === 'text-image') {
+            imageInMessageSnap?.docs?.forEach((img, index) => {
+                messageExport = messageExport.replace(
+                    img.data().key, 
+                    `<img 
+                    loading="lazy"
+                    decoding="async" 
+                    src="${img.data().url}" 
+                    style="color: transparent;"/>`)
             })
         }
         return <div dangerouslySetInnerHTML={{__html: messageExport}} ></div>;
@@ -74,7 +86,7 @@ export default function Message({message, photoURL, chatId, arrayImage}: any) {
                     <div className="flex-1 px-2">
                         <div className="inline-block p-2 px-4 text-white relative" style={{backgroundColor: '#3182ce', borderRadius: '10px'}}>
                             {/* <HtmlElementWrapper element={handleMessage(message.message)} /> */}
-                            {handleMessage(message.message)}
+                            {handleMessage()}
                         </div>
                         {/* <div className="pr-4"><small className="text-gray-500">{formatDate(message.timestamp)}</small></div> */}
                     </div>
@@ -95,7 +107,7 @@ export default function Message({message, photoURL, chatId, arrayImage}: any) {
                     </div>
                     <div className="flex-1 px-2" onMouseEnter={() => setIsShown(true)} onMouseLeave={() => setIsShown(false)}>
                         <div className="inline-block bg-gray-300 p-2 px-4 text-gray-700 relative"  style={{backgroundColor: 'rgba(226,232,240,1)', borderRadius: '10px'}}>
-                            <span>{message.message}</span>
+                            {handleMessage()}
                             {
                                 reactionSnapshot?.docs?.length! > 0 ? <ReactionContainerReciever>
                                     <div>
@@ -132,6 +144,7 @@ export default function Message({message, photoURL, chatId, arrayImage}: any) {
         </>
     )
 }
+
 
 const ReactionContainer = styled.div`
     border-radius: 50%;

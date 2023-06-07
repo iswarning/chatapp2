@@ -16,16 +16,16 @@ import sendNotificationFCM from "@/utils/sendNotificationFCM";
 import SendIcon from '@mui/icons-material/Send';
 import Loading from "@/components/Loading";
 import { useQuery } from "@tanstack/react-query";
+import DoneAllIcon from '@mui/icons-material/DoneAll';
 
 export default function ChatScreen({ chat, messages, onShowUserDetail}: any) {
     const [user] = useAuthState(auth);
     const [input, setInput] = useState('');
     const endOfMessageRef: any = useRef(null);
     const [showEmoji, setShowEmoji] = useState(false);
-    const [isOpen, setIsOpen] = useState(false);
-    const [isOnline, setIsOnline] = useState(false);
-    const [listImage, setListImage] = useState<any>(null)
+    const [progress, setProgress] = useState(0);
     const [isLoading, setLoading] = useState(false);
+    const [statusSend, setStatusSend] = useState('')
     const router = useRouter();
     const [messageSnapShot] = useCollection(
         db
@@ -33,6 +33,7 @@ export default function ChatScreen({ chat, messages, onShowUserDetail}: any) {
         .doc(chat.id)
         .collection('messages')
         .orderBy('timestamp')
+        .limitToLast(10)
     )
 
     const [recipientSnapshot] = useCollection(
@@ -40,7 +41,6 @@ export default function ChatScreen({ chat, messages, onShowUserDetail}: any) {
         .collection("users")
         .where("email",'==', getRecipientEmail(chat.users, user))
     )
-
 
     useEffect(() => {
         // getRecipientUser().catch((err) => console.log(err))
@@ -67,6 +67,7 @@ export default function ChatScreen({ chat, messages, onShowUserDetail}: any) {
         // return () => {
         //     socket.disconnect()
         // }
+        
     },[messageSnapShot])
 
     const scrollToBottom = () => {
@@ -86,19 +87,11 @@ export default function ChatScreen({ chat, messages, onShowUserDetail}: any) {
             else return "/images/avatar-default.png"
         }
     }
-    
 
     const showMessage = () => {
         if(messageSnapShot) {
-            return messageSnapShot?.docs?.map((message: any) => {
-                let arrayImage: any = {};
-                let listImgInMsg = message.data().message.match(/#img/g) ?? [];
-                if(listImgInMsg.length > 0) {
-                    listImgInMsg.forEach(async(msg: any, i: number) => {
-                        arrayImage['#img' + i.toString()] = await storage.ref(`public/images/message/${message?.id}/#img`+ i.toString()).getDownloadURL().catch(() => arrayImage['#img' + i.toString()] = null);
-                    })
-                }
-                return <Message 
+            return messageSnapShot?.docs?.map((message: any) => 
+                <Message 
                     key={message.id}  
                     message={{
                         id: message.id,
@@ -107,19 +100,11 @@ export default function ChatScreen({ chat, messages, onShowUserDetail}: any) {
                     }}
                     photoURL={getRecipientAvatar()}
                     chatId={chat.id}
-                    arrayImage={arrayImage}
                 />
-            })
+            )
         } else {
-            return messages?.docs?.map((message: any) => {
-                let arrayImage: any = {};
-                let listImgInMsg = message.data().message.match(/#img/g) ?? [];
-                if(listImgInMsg.length > 0) {
-                    listImgInMsg.forEach(async(msg: any, i: number) => {
-                        arrayImage['#img' + i.toString()] = await storage.ref(`public/images/message/${message?.id}/#img`+ i.toString()).getDownloadURL();
-                    })
-                }
-                return <Message 
+            return messages?.docs?.map((message: any) => 
+                <Message 
                     key={message.id} 
                     message={{
                         id: message.id,
@@ -129,13 +114,11 @@ export default function ChatScreen({ chat, messages, onShowUserDetail}: any) {
                     photoURL={getRecipientAvatar()}
                     chatId={chat.id}
                 />
-            })
+            )
         }
     }
 
-    const sendMessage = async(e: React.FormEvent<HTMLFormElement>) => {
-        setLoading(true)
-        e.preventDefault();
+    const handleImageInMessage = () => {
         const inputMsgElement = document.getElementById("input-message");
         const listImage = inputMsgElement?.getElementsByTagName("img") ?? [];
         let sizeInput = inputMsgElement?.childNodes?.length ?? 0;
@@ -178,17 +161,14 @@ export default function ChatScreen({ chat, messages, onShowUserDetail}: any) {
             }
         }
 
-           
+        return { listImage, message };
+    }
 
-        const newMsg: HTMLDivElement = document.createElement("div")
-        newMsg.style.border = '1px solid blue';
-        if (listImage?.length > 0) {
-            for(let j = 0; j < imgString.length; j++) {
-                message = message.replace("#img" + j.toString(), '<img alt="User Avatar" loading="lazy" width="130" height="130" decoding="async" data-nimg="1" class="sc-eDDNvR iaAXyW block" src="https://lh3.googleusercontent.com/a/AGNmyxaHFgmXNFi08fg5vNTjfMDxACtUTNeHL8_FwwOV3A=s96-c" style="color: transparent;"/>')
-            }
-        }
-        newMsg.innerHTML = message;
-        document.getElementsByClassName("messages")[0].append(newMsg)
+    const sendMessage = async(e: React.FormEvent<HTMLFormElement>) => {
+        setStatusSend("Sending...")
+        e.preventDefault();
+        
+        let { listImage, message } = handleImageInMessage();
 
         setSeenMessage();
 
@@ -209,24 +189,67 @@ export default function ChatScreen({ chat, messages, onShowUserDetail}: any) {
                         return response.blob()
                     })
                     .then(function(blob) {
-                        storage.ref(`public/images/message/${snap.id}/#img${o}`).put(blob).catch(err => console.log(err))
+                        storage
+                        .ref(`public/images/message/${snap.id}/#img${o}`)
+                        .put(blob)
+                        .on(
+                            "state_changed",
+                            (snapshot) => {
+                                const prog = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+                                setProgress(prog);
+                            },
+                            (err) => console.log(err),
+                            () => {
+                                pushUrlImageToFirestore(snap, o)
+                            }
+                        )
                     }).catch(err => console.log(err));
             } 
+            sendNotification(snap);
         }
         
-        sendNotification();
         const element = document.getElementById("input-message");
         if(element) element.innerHTML = "";
 
         scrollToBottom();
-
-        setLoading(false)
+        setStatusSend("Sent")
     }
 
-    const sendNotification = () => {
+    const pushUrlImageToFirestore = (snap: any, o: number) => {
+        storage
+        .ref(`public/images/message/${snap.id}/#img${o}`)
+        .getDownloadURL()
+        .then(async(url) => {
+            await db
+            .collection("chats")
+            .doc(chat.id)
+            .collection("messages")
+            .doc(snap.id)
+            .collection("imageInMessage")
+            .add({
+                url: url,
+                key: `#img${o}`
+            });
+            scrollToBottom();
+        }).catch(err => console.log(err))
+    }
+
+    const sendNotification = (snap: any) => {
+        let bodyNotify: any;
+        if (chat.isGroup) {
+            if(snap.data().type === 'text-image') {
+                bodyNotify = chat.name + " sent you a message ";
+            }
+            bodyNotify = chat.name + " : " + snap.data().message;
+        } else {
+            if(snap.data().type === 'text-image') {
+                bodyNotify = user?.displayName + " sent a message ";
+            }
+            bodyNotify = user?.displayName + " : " + snap.data().message;
+        }         
         sendNotificationFCM(
             "New message !",
-            chat.isGroup ?  chat.name : user?.displayName + " : " + document.getElementById("input-message")?.innerHTML,
+            bodyNotify,
             recipientSnapshot?.docs?.[0]?.data().fcm_token
         ).catch(err => console.log(err))
     }
@@ -296,75 +319,10 @@ export default function ChatScreen({ chat, messages, onShowUserDetail}: any) {
         }
     }
 
-    // const handlePaste = (event: React.ClipboardEvent<HTMLDivElement>) => {
-    //     // event.preventDefault();
-    //     // let data = event.clipboardData.items[0];
-    //     // if (data.type === "image/png")
-    //     // {
-    //     //     let blob: any = data.getAsFile();
-    
-    //     //     setListImage((old: any) => [...old, blob])
-    //     // }
-    //     // return true;
-    // }
-
-    const uploadToBucket = (file: any, messageId: string) => {
-        storage.ref(`public/images/message/${messageId}`).put(file)
-    }
-
     return (
-        // <Container>
-        //     <Header>
-        //         <UserAvatar src={chat?.isGroup ? chat?.photoURL : recipientUser.photoURL} />
-        //         <HeaderInformation>
-        //             <TextEmail>{chat?.isGroup ? 'Group: ' + chat.name : recipientUser.fullName}</TextEmail>
-        //             <p>Active {''}
-        //             {recipientUser?.lastSeen?.toDate() ? (
-        //                 <TimeAgo datetime={recipientUser?.lastSeen?.toDate()} />
-        //             ) : (
-        //                 "Unavailable"
-        //             )}
-        //             </p>
-        //         </HeaderInformation>
-        //         <HeaderIcons>
-        //             <IconButton onClick={handleVideoCall}>
-        //                 <CallIcon titleAccess="Call video"/>
-        //             </IconButton>
-        //             <IconButton>
-        //                 <MoreVertIcon />
-        //             </IconButton>
-        //         </HeaderIcons>
-        //     </Header>
-            
-        //     <MessageContainer>
-        //         {showMessage()}
-        //         <EndOfMessage ref={(el) => { endOfMessageRef.current = el; }} />
-        //     </MessageContainer>
-        //     <InputContainer>
-        //         {
-        //             showEmoji ? <EmojiContainer>
-        //                 {emojiData.map((e: any) => <EmojiElement onClick={() => addEmoji(e)} key={e}>
-        //                     {String.fromCodePoint(e)}
-        //                 </EmojiElement>)}
-        //             </EmojiContainer> : null
-        //         }
-        //         <IconButton onClick={() => setShowEmoji(!showEmoji)} >
-        //             <InsertEmoticonIcon style={{color: showEmoji ? '#0DA3BA' : ''}}/>
-        //         </IconButton>
-        //         <IconButton>
-        //             <AttachFileIcon />
-        //         </IconButton>
-        //         <IconButton>
-        //             <MicIcon />
-        //         </IconButton>
-        //         <Input value={input} onChange={(e) => setInput(e.target.value)}/>
-        //         <BtnSend hidden disabled={!input} type="submit" onClick={sendMessage}>Send Message</BtnSend>
-        //     </InputContainer>
-
         //     <VideoCallContainer isOpen={isOpen} >
         //         <VideoCallScreen statusCall='Calling' photoURL={chat.isGroup ? chat.photoURL : recipientUser.photoURL} sender={user?.email} recipient={getRecipientEmail(chat.users, user)} chatId={chatId} onClose={() => setIsOpen(false)} isGroup={chat.isGroup} />
         //     </VideoCallContainer>
-        // </Container>
         <>
         <Loading isLoading={isLoading} />
         <div className="chat-area flex-1 flex flex-col relative">
@@ -389,9 +347,17 @@ export default function ChatScreen({ chat, messages, onShowUserDetail}: any) {
             </div>
             <div className="messages flex-1 overflow-auto h-screen px-4">
                 {showMessage()}
+                {
+                    statusSend.length > 0 ? 
+                    <span className="float-right pr-2">
+                        {statusSend}
+                        &nbsp;
+                        {statusSend === 'Sending...' ? null : 
+                        <DoneAllIcon fontSize="small" />}</span> 
+                        : null
+                }
                 <EndOfMessage ref={(el) => { endOfMessageRef.current = el; }} />
             </div>
-            
             <div className="flex-2 pt-4 pb-10">
                 <div className="write bg-white shadow flex rounded-lg">
                     <div className="flex-3 flex content-center items-center text-center p-4 pr-0">

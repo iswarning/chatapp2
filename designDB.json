@@ -8,16 +8,15 @@
         "messages": {
             "message": "Hello world",
             "type": "text",
-            "photoURL": "",
             "user": "chivinh1998@gmail.com",
             "seen": [],
             "reaction": {
                 "senderEmail": "",
                 "emoji": ""
             },
-            "imagesInMessage": {
-                "position": "<img1>",
-                "pathToBucket": "public/images/message/"
+            "imageInMessage": {
+                "url": "",
+                "key": ""
             },
             "timestamp": ""
         }
