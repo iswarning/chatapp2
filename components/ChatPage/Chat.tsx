@@ -68,14 +68,29 @@ export default function Chat({ chat, onShowMessage, active }: any) {
 
     const handleShowLastMessage = () => {
         if (chat.isGroup) {
-            if (lastMessage?.user === user?.email) {
-                return 'You: ' + lastMessage?.message
+            if (lastMessage?.type === 'text-image') {
+                if (lastMessage?.user === user?.email) {
+                    return 'You sent a message'
+                }
+                else return userInfoOfLastMessageSnapshot?.docs?.[0]?.data()?.fullName + ' sent a message'
+            } else {
+                if (lastMessage?.user === user?.email) {
+                    return 'You: ' + lastMessage?.message
+                }
+                else return userInfoOfLastMessageSnapshot?.docs?.[0]?.data()?.fullName + ': ' + lastMessage?.message
             }
-            else return userInfoOfLastMessageSnapshot?.docs?.[0]?.data()?.fullName + ': ' + lastMessage?.message
+            
         } else {
-            if (lastMessage?.user === user?.email) {
-                return 'You: ' + lastMessage?.message
-            } else return lastMessage?.message
+            if (lastMessage?.type === 'text-image') { 
+                if (lastMessage?.user === user?.email) {
+                    return 'You sent a message'
+                } else return  recipientSnapshot?.docs?.[0].data().fullName +  ' sent a message'
+            } else {
+                if (lastMessage?.user === user?.email) {
+                    return 'You: ' + lastMessage?.message
+                } else return lastMessage?.message
+            }
+            
         }
     }
 

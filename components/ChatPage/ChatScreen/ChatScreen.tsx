@@ -10,13 +10,14 @@ import firebase from "firebase";
 import styled from "styled-components";
 import CallIcon from '@mui/icons-material/Call';
 import VideocamIcon from '@mui/icons-material/Videocam';
-import { IconButton } from "@mui/material";
+import { IconButton, Modal } from "@mui/material";
 import getEmojiData from "@/utils/getEmojiData";
 import sendNotificationFCM from "@/utils/sendNotificationFCM";
 import SendIcon from '@mui/icons-material/Send';
 import Loading from "@/components/Loading";
-import { useQuery } from "@tanstack/react-query";
 import DoneAllIcon from '@mui/icons-material/DoneAll';
+import UserDetailScreen from "@/components/ProfilePage/UserDetailScreen/UserDetailScreen";
+import { ModalContainer } from "./ChatScreenStyled";
 
 export default function ChatScreen({ chat, messages, onShowUserDetail}: any) {
     const [user] = useAuthState(auth);
@@ -25,7 +26,8 @@ export default function ChatScreen({ chat, messages, onShowUserDetail}: any) {
     const [showEmoji, setShowEmoji] = useState(false);
     const [progress, setProgress] = useState(0);
     const [isLoading, setLoading] = useState(false);
-    const [statusSend, setStatusSend] = useState('')
+    const [statusSend, setStatusSend] = useState('');
+    const [isOpen, setIsOpen] = useState(false);
     const router = useRouter();
     const [messageSnapShot] = useCollection(
         db
@@ -183,28 +185,26 @@ export default function ChatScreen({ chat, messages, onShowUserDetail}: any) {
 
         if(messageDoc) {
             const snap = await messageDoc.get();
-            for(let o = 0; o < listImage.length; o++) {
-                fetch(listImage[o].src)
-                    .then(function(response) {
-                        return response.blob()
-                    })
-                    .then(function(blob) {
-                        storage
-                        .ref(`public/images/message/${snap.id}/#img${o}`)
-                        .put(blob)
-                        .on(
-                            "state_changed",
-                            (snapshot) => {
-                                const prog = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
-                                setProgress(prog);
-                            },
-                            (err) => console.log(err),
-                            () => {
-                                pushUrlImageToFirestore(snap, o)
-                            }
-                        )
-                    }).catch(err => console.log(err));
-            } 
+            await Promise.all(
+                Array.prototype.map.call(listImage, async(item: HTMLImageElement, index) => {
+                    const response = await fetch(item?.src);
+                    const blob = await response.blob();
+                    storage
+                    .ref(`public/images/message/${snap.id}/#img${index}`)
+                    .put(blob)
+                    .on(
+                        "state_changed",
+                        (snapshot) => {
+                            const prog = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+                            setProgress(prog);
+                        },
+                        (err) => console.log(err),
+                        () => {
+                            pushUrlImageToFirestore(snap, index)
+                        }
+                    )
+                })
+            )
             sendNotification(snap);
         }
         
@@ -242,7 +242,7 @@ export default function ChatScreen({ chat, messages, onShowUserDetail}: any) {
             }
             bodyNotify = chat.name + " : " + snap.data().message;
         } else {
-            if(snap.data().type === 'text-image') {
+            if(snap?.data().type === 'text-image') {
                 bodyNotify = user?.displayName + " sent a message ";
             }
             bodyNotify = user?.displayName + " : " + snap.data().message;
@@ -281,7 +281,7 @@ export default function ChatScreen({ chat, messages, onShowUserDetail}: any) {
     //     return null;
     // }
 
-    const addEmoji = (e: any) => {
+    const addEmoji = (e: number) => {
         setInput(input + String.fromCodePoint(e));
         setShowEmoji(false);
     };
@@ -331,7 +331,7 @@ export default function ChatScreen({ chat, messages, onShowUserDetail}: any) {
                 <h2 className="text-xl pb-1 mb-4 border-b-2 border-gray-200 d-flex">
                     {chat.isGroup ? 'Chatting in group ' : 'Chatting with '}&nbsp;
                     {
-                        !chat.isGroup ? <div onClick={() => router.push(`/profile?id=${recipientSnapshot?.docs?.[0].id}`)} className="cursor-pointer font-semibold" id="hover-animation" data-replace="Profile">
+                        !chat.isGroup ? <div onClick={() => setIsOpen(true)} className="cursor-pointer font-semibold" id="hover-animation" data-replace="Profile">
                             <span>{recipientSnapshot?.docs?.[0].data().fullName}</span>
                         </div> : <span>{chat.name}</span>
                     }
@@ -401,6 +401,11 @@ export default function ChatScreen({ chat, messages, onShowUserDetail}: any) {
                 </EmojiContainer> : null
             }
         </div>
+        <Modal open={isOpen} onClose={() => setIsOpen(false)} >
+            <ModalContainer>
+                <UserDetailScreen userInfo={recipientSnapshot?.docs?.[0].data()} />
+            </ModalContainer>
+        </Modal>
         </>
     )
 }

@@ -33,7 +33,7 @@ export default function Message({message, photoURL, chatId}: any) {
         .limitToLast(1)
     )
 
-    const handleReaction = async(event: any, emoji: number) => {
+    const handleReaction = async(event: Event, emoji: number) => {
         event.preventDefault();
         try {
             await db
@@ -63,9 +63,9 @@ export default function Message({message, photoURL, chatId}: any) {
     )
 
     const handleMessage = () => {
-        let messageExport = message.message;
+        let messageExport: string = message.message;
         if (message.type === 'text-image') {
-            imageInMessageSnap?.docs?.forEach((img, index) => {
+            imageInMessageSnap?.docs?.forEach((img) => {
                 messageExport = messageExport.replace(
                     img.data().key, 
                     `<img 
