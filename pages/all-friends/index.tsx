@@ -4,6 +4,7 @@ import Layout from "@/components/Layout";
 import { ReactElement } from "react";
 import type { NextPageWithLayout } from "../_app";
 import FriendsListScreen from "@/components/AllFriendPage/FriendsListScreen/FriendsListScreen";
+import SidebarAllFriend from "@/components/AllFriendPage/SidebarAllFriends";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -22,7 +23,10 @@ const Page: NextPageWithLayout = () => {
         <div className="hidden lg:block heading flex-2">
           <h1 className="text-3xl text-gray-700 mb-4">All friends</h1>
         </div>
-        <FriendsListScreen />
+        <div className="flex-1 flex h-full">
+          <SidebarAllFriend />
+        </div>
+        
       </div>
     </>
   );

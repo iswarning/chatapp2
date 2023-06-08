@@ -9,6 +9,7 @@ import ShowStatusFriend from "../ShowStatusFriend/ShowStatusFriend";
 import { useCollection } from "react-firebase-hooks/firestore";
 import getStatusFriend from "@/utils/getStatusFriend";
 import Loading from "@/components/Loading";
+import styled from "styled-components";
 
 function UserDetailScreen({userInfo}: any) {
 
@@ -26,53 +27,59 @@ function UserDetailScreen({userInfo}: any) {
     },[status])
 
     return (
-        <div>
+        <ModalContainer>
             <Loading isShow={isShow} />
-            <div className="p-16 bg-white shadow rounded">
-                <div className="grid grid-cols-1 md:grid-cols-3 flex">
-                    <div className="grid grid-cols-3 text-center order-last md:order-first mt-20 md:mt-0">
-                        <div>
-                            <p className="font-bold text-gray-700 text-xl">22</p>
-                            <p className="text-gray-400">Friends</p>
-                        </div>
-                        <div>
-                            <p className="font-bold text-gray-700 text-xl">10</p>
-                            <p className="text-gray-400">Photos</p>
-                        </div>
-                        <div>
-                            <p className="font-bold text-gray-700 text-xl">89</p>
-                            <p className="text-gray-400">Comments</p>
-                        </div>
-                    </div>
-                    
-                    <div className="md:justify-center">
-                        <ShowStatusFriend userInfo={userInfo} statusFriend={status} />
-                    </div>  <div className="w-48 h-48 bg-indigo-100 mx-auto rounded-full shadow-2xl inset-x-0 flex items-center justify-center text-indigo-500">
-                        <CustomAvatar src={userInfo?.photoURL!} height={200} width={200} alt='' />
-                    </div>
-                </div>
-                
-
-                <div className="mt-20 text-center border-b pb-6">
-                    <h1 className="text-4xl font-medium text-gray-700">Jessica Jones, <span className="font-light text-gray-500">27</span></h1>
+    <div className="max-w-sm bg-white rounded-lg overflow-hidden shadow-lg">
+        <div className="border-b px-4 pb-6">
+            <div className="text-center my-6">
+                <CustomAvatar src={userInfo?.photoURL!} height={200} width={200} alt='' className="h-32 w-32 rounded-full border-4 border-white mx-auto my-2" />
+                <div className="py-2">
+                    <h3 className="text-3xl font-medium text-gray-700">{userInfo?.fullName}</h3>
                     <p className="font-light text-gray-600 mt-3"><LocationOnIcon fontSize='small' />&nbsp;Los Angeles, California</p>
 
-                    <p className="mt-8 text-gray-500"><MailIcon fontSize='small' />&nbsp;{userInfo?.email}</p>
-                    <p className="mt-2 text-gray-500"><LocalPhoneIcon fontSize='small' />&nbsp;{parsePhoneNumber(String(userInfo?.phoneNumber))}</p>
+                    <p className="mt-2 text-gray-500"><MailIcon fontSize='small' />&nbsp;{userInfo?.email}</p>
+                    <p className="mt-2 text-gray-500"><LocalPhoneIcon fontSize='small' />&nbsp;{parsePhoneNumber(String(userInfo?.phoneNumber ?? '0909999000'))}</p>
                 </div>
-
-                <div className="mt-12 flex flex-col justify-center">
-                    <p className="text-gray-600 text-center font-light lg:px-16">By the time Nikola Tesla was six years old, he had already started experimenting and inventing. His keen interest in nature and the way things work, combined with intelligence and curiosity, led to childhood inventions such as a motor powered by June bugs, air piston gun, and frog catching device.</p>
-                    <button className="text-indigo-500 py-2 px-4  font-medium mt-4">
-                        Show more
-                    </button>
-                </div>
-
+            </div>
+            <div className="flex gap-2 px-2">
+            <ShowStatusFriend userInfo={userInfo} statusFriend={status} />
             </div>
         </div>
+        <div className="px-4 py-4">
+            <div className="flex gap-2 items-center text-gray-800r mb-4">
+                <svg className="h-6 w-6 text-gray-600" fill="currentColor" xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24" width="24" height="24">
+                    <path className=""
+                        d="M12 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm9 11a1 1 0 0 1-2 0v-2a3 3 0 0 0-3-3H8a3 3 0 0 0-3 3v2a1 1 0 0 1-2 0v-2a5 5 0 0 1 5-5h8a5 5 0 0 1 5 5v2z" />
+                </svg>
+                <span><strong className="text-black">12</strong> Mutual Friends</span>
+            </div>
+            <div className="flex">
+                <div className="flex justify-end mr-2">
+                    <img className="border-2 border-white rounded-full h-10 w-10 -mr-2" src="https://randomuser.me/api/portraits/men/32.jpg" alt=""/>
+                    <img className="border-2 border-white rounded-full h-10 w-10 -mr-2" src="https://randomuser.me/api/portraits/women/31.jpg" alt=""/>
+                    <img className="border-2 border-white rounded-full h-10 w-10 -mr-2" src="https://randomuser.me/api/portraits/men/33.jpg" alt=""/>
+                    <img className="border-2 border-white rounded-full h-10 w-10 -mr-2" src="https://randomuser.me/api/portraits/women/32.jpg" alt=""/>
+                    <img className="border-2 border-white rounded-full h-10 w-10 -mr-2" src="https://randomuser.me/api/portraits/men/44.jpg" alt=""/>
+                    <img className="border-2 border-white rounded-full h-10 w-10 -mr-2" src="https://randomuser.me/api/portraits/women/42.jpg" alt=""/>
+                    <span className="flex items-center justify-center bg-white text-sm text-gray-800 font-semibold border-2 border-gray-200 rounded-full h-10 w-10">+999</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        </ModalContainer>
     )
 
 }
+
+const ModalContainer = styled.div`
+    margin-top: 10%;
+    width: 400px;
+    height: 500px;
+    margin-left: auto;
+    margin-right: auto;
+`
 
 const parsePhoneNumber = (phone: string) => {
     if (phone.length === 10) {

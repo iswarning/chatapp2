@@ -4,9 +4,13 @@ import { useCollection } from "react-firebase-hooks/firestore";
 import styled from "styled-components";
 import Image from "next/image";
 import firebase from "firebase";
-import { IconButton } from "@mui/material";
+import { IconButton, Modal } from "@mui/material";
 import AddTaskIcon from "@mui/icons-material/AddTask";
 import CancelIcon from "@mui/icons-material/Cancel";
+import { useEffect, useState } from "react";
+import { io } from "socket.io-client";
+import UserDetailScreen from "../ProfilePage/UserDetailScreen/UserDetailScreen";
+import { useAppContext } from "@/context/AppContext";
 
 export default function FriendRequest({
   id,
@@ -14,6 +18,7 @@ export default function FriendRequest({
   recipientEmail,
 }: any) {
   const [user] = useAuthState(auth);
+  const [isOpen, setIsOpen] = useState(false);
 
   const [chatSnapshot] = useCollection(
     db.collection("chats").where("users", "array-contains", user?.email)
@@ -63,10 +68,10 @@ export default function FriendRequest({
   };
 
   return (
+    <>
     <div
       className={
         "entry transform duration-300 transition-transform bg-white mb-4 rounded p-4 flex shadow-md"
-        // (active ? " border-l-4 border-red-500" : "")
       }
     >
       <div className="flex-2">
@@ -77,11 +82,10 @@ export default function FriendRequest({
             height={50}
             alt="User Avatar"
           />
-          {/* <span className="absolute w-4 h-4 bg-gray-400 rounded-full right-0 bottom-0 border-2 border-white"></span> */}
         </div>
       </div>
       <div className="flex-1 px-2 ml-2">
-        <div className="truncate w-40">
+        <div className="truncate w-40 cursor-pointer" id="hover-animation" data-replace="Profile" onClick={() => setIsOpen(true)}>
           <span className="text-gray-800">
             {chat?.data().isGroup
               ? "Group: " + chat?.data().name
@@ -107,6 +111,10 @@ export default function FriendRequest({
         </div>
       </div>
     </div>
+    <Modal open={isOpen} onClose={() => setIsOpen(false)}>
+          <UserDetailScreen userInfo={recipientSnapshot?.docs?.[0].data()} />
+      </Modal>
+    </>
   );
 }
 

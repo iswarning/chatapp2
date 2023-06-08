@@ -17,7 +17,6 @@ import SendIcon from "@mui/icons-material/Send";
 import Loading from "@/components/Loading";
 import DoneAllIcon from "@mui/icons-material/DoneAll";
 import UserDetailScreen from "@/components/ProfilePage/UserDetailScreen/UserDetailScreen";
-import { ModalContainer } from "./ChatScreenStyled";
 
 export default function ChatScreen({ chat, messages, onShowUserDetail }: any) {
   const [user] = useAuthState(auth);
@@ -446,9 +445,7 @@ export default function ChatScreen({ chat, messages, onShowUserDetail }: any) {
         ) : null}
       </div>
       <Modal open={isOpen} onClose={() => setIsOpen(false)}>
-        <ModalContainer>
           <UserDetailScreen userInfo={recipientSnapshot?.docs?.[0].data()} />
-        </ModalContainer>
       </Modal>
     </>
   );

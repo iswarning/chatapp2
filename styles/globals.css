@@ -104,6 +104,7 @@ a {
     transform: translate3d(200%, 0, 0);
     transition: transform .3s cubic-bezier(0.76, 0, 0.24, 1);
     color: #54b3d6;
+    font-weight: 500;
 }
 
 #hover-animation:hover::before {
@@ -127,7 +128,6 @@ a {
 #hover-animation {
     text-decoration: none;
     color: #18272F;
-    font-weight: 700;
     vertical-align: top;
 }
 

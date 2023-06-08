@@ -131,11 +131,3 @@ export const MessageContainer = styled.div`
     min-height: 90vh;
     
 `;
-export const ModalContainer = styled.article`
-    max-width: 1600px;
-    margin-left: auto;
-    margin-right: auto;
-    margin-top: 60px;
-    border-radius: 10px;
-    padding: 30px;
-`

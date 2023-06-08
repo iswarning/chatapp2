@@ -6,7 +6,7 @@ import ChatScreen from "../ChatPage/ChatScreen/ChatScreen";
 import { useQuery } from "@tanstack/react-query";
 import Friend from "./Friend/Friend";
 
-export default function SidebarMessage() {
+export default function SidebarAllFriend() {
   const [user] = useAuthState(auth);
   const [chatInfo, setChatInfo] = useState<any>(null);
   const [messData, setMessData] = useState<any>(null);
@@ -48,7 +48,7 @@ export default function SidebarMessage() {
                 <Friend
                   key={friend.id}
                   data={{ id: friend.id, ...friend.data() }}
-                  onSendMessage={(chat: any) => showMessage(chat)}
+                  onShowMessage={(chat: any) => showMessage(chat)}
                 />
               ))
             : null}

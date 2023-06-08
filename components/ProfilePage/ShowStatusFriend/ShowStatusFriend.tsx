@@ -67,45 +67,41 @@ export default function ShowStatusFriend({userInfo, statusFriend}: any) {
     const showStatusFriend = () => {
         switch(status.length > 0 ? status : statusFriend) {
             case 'isStranger':
-                return <div className="flex justify-center py-4 lg:pt-4 pt-8">
+                return <>
                             <button 
-                                className="block mx-2 rounded-full bg-gray-900 hover:shadow-lg font-semibold text-white px-6 py-2" 
+                                className="bg-gray-900 hover:shadow-lg font-semibold text-white flex-1 rounded-full text-white antialiased px-4 py-2" 
                                 onClick={onAddFriend}>Add friend</button>
                             <button 
-                                className="block mx-2 rounded-full hover:shadow-lg font-semibold text-black px-6 py-2" 
-                                style={{border: '1px solid'}}
-                                >Send Message</button>
-                        </div>
+                                className="flex-1 rounded-full border-2 border-gray-400 font-semibold text-black px-4 py-2" 
+                                >Chat</button>
+                        </>
             case 'isFriendRequest':
-                return <div className="flex justify-center py-4 lg:pt-4 pt-8">
+                return <>
                             <button 
-                                className="block mx-2 rounded-full bg-gray-900 hover:shadow-lg font-semibold text-white px-6 py-2" 
+                                className="bg-gray-900 hover:shadow-lg font-semibold text-white flex-1 rounded-full text-white antialiased px-4 py-2" 
                                 onClick={onCancelFriendRequest}>Cancel Request</button>
                             <button 
-                                className="block mx-2 rounded-full hover:shadow-lg font-semibold text-black px-6 py-2" 
-                                style={{border: '1px solid'}}
-                                onClick={onCancelFriendRequest}>Send Message</button>
-                        </div>
+                                className="flex-1 rounded-full border-2 border-gray-400 font-semibold text-black px-4 py-2"
+                                onClick={onCancelFriendRequest}>Chat</button>
+                        </>
             case 'isFriend':
-                return <div className="flex justify-center py-4 lg:pt-4 pt-8">
+                return <>
                             <button 
-                                className="block mx-2 rounded-full bg-gray-900 hover:shadow-lg font-semibold text-white px-6 py-2" 
+                                className="bg-gray-900 hover:shadow-lg font-semibold text-white flex-1 rounded-full text-white antialiased px-4 py-2" 
                                 onClick={onUnFriend}>Unfriend</button>
                             <button 
-                                className="block mx-2 rounded-full hover:shadow-lg font-semibold text-black px-6 py-2" 
-                                style={{border: '1px solid'}}
-                                onClick={onUnFriend}>Send Message</button>
-                        </div>
+                                className="flex-1 rounded-full border-2 border-gray-400 font-semibold text-black px-4 py-2"
+                                onClick={onUnFriend}>Chat</button>
+                        </>
             case 'isPendingAccept':
-                return <div className="flex justify-center py-4 lg:pt-4 pt-8">
+                return <>
                             <button 
-                                className="block mx-2 rounded-full bg-gray-900 hover:shadow-lg font-semibold text-white px-6 py-2" 
+                                className="bg-gray-900 hover:shadow-lg font-semibold text-white flex-1 rounded-full text-white antialiased px-4 py-2" 
                                 disabled>Pending Accept</button>
                             <button 
-                                className="block mx-2 rounded-full hover:shadow-lg font-semibold text-black px-6 py-2" 
-                                style={{border: '1px solid'}}
-                                onClick={onCancelFriendRequest}>Send Message</button>
-                        </div>
+                                className="flex-1 rounded-full border-2 border-gray-400 font-semibold text-black px-4 py-2"
+                                onClick={onCancelFriendRequest}>Chat</button>
+                        </>
                 
         }
     }
