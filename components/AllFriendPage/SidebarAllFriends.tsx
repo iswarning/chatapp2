@@ -1,18 +1,18 @@
-import { auth, db } from "../../../firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useCollection } from "react-firebase-hooks/firestore";
-import ChatScreen from "../ChatScreen/ChatScreen";
-import Chat from "../Chat";
-import { MessageType } from "@/types/Message";
+import { auth, db } from "@/firebase";
+import ChatScreen from "../ChatPage/ChatScreen/ChatScreen";
+import { useQuery } from "@tanstack/react-query";
+import Friend from "./Friend/Friend";
 
 export default function SidebarMessage() {
   const [user] = useAuthState(auth);
   const [chatInfo, setChatInfo] = useState<any>(null);
   const [messData, setMessData] = useState<any>(null);
 
-  const [chatSnapshot] = useCollection(
-    db.collection("chats").where("users", "array-contains", user?.email)
+  const [friendListSnapshot] = useCollection(
+    db.collection("friends").where("users", "array-contains", user?.email)
   );
 
   const showMessage = (chat: any) => {
@@ -43,16 +43,12 @@ export default function SidebarMessage() {
           className="flex-1 overflow-y-scroll h-screen p-2"
           id="scroll-style-3"
         >
-          {chatSnapshot?.docs?.length! > 0
-            ? chatSnapshot?.docs?.map((chat) => (
-                <Chat
-                  key={chat.id}
-                  chat={{
-                    id: chat.id,
-                    ...chat.data(),
-                  }}
-                  onShowMessage={() => showMessage(chat)}
-                  active={chatInfo?.id === chat.id}
+          {friendListSnapshot
+            ? friendListSnapshot?.docs?.map((friend) => (
+                <Friend
+                  key={friend.id}
+                  data={{ id: friend.id, ...friend.data() }}
+                  onSendMessage={(chat: any) => showMessage(chat)}
                 />
               ))
             : null}

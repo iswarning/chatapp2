@@ -1,15 +1,11 @@
-import Head from 'next/head'
-import { Inter } from 'next/font/google'
-import SidebarMessage from '@/components/ChatPage/SidebarMessage/SidebarMessage'
-import Layout from '@/components/Layout'
-import { ReactElement } from 'react'
-import type { NextPageWithLayout } from '../_app';
-import ChatScreen from '@/components/ChatPage/ChatScreen/ChatScreen'
-import FriendRequestsListScreen from '@/components/FriendRequestsListScreen/FriendRequestsListScreen'
-import styled from 'styled-components'
-import FriendsListScreen from '@/components/AllFriendPage/FriendsListScreen/FriendsListScreen'
+import Head from "next/head";
+import { Inter } from "next/font/google";
+import Layout from "@/components/Layout";
+import { ReactElement } from "react";
+import type { NextPageWithLayout } from "../_app";
+import FriendsListScreen from "@/components/AllFriendPage/FriendsListScreen/FriendsListScreen";
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ["latin"] });
 
 // import '@/styles/tailwind.min.css'
 const Page: NextPageWithLayout = () => {
@@ -22,22 +18,18 @@ const Page: NextPageWithLayout = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-        <div className="main flex-1 flex flex-col">
-            <div className="hidden lg:block heading flex-2">
-                <h1 className="text-3xl text-gray-700 mb-4">All friends</h1>
-            </div>
-            <FriendsListScreen />
+      <div className="main flex-1 flex flex-col">
+        <div className="hidden lg:block heading flex-2">
+          <h1 className="text-3xl text-gray-700 mb-4">All friends</h1>
         </div>
+        <FriendsListScreen />
+      </div>
     </>
-  )
-}
- 
-Page.getLayout = function getLayout(page: ReactElement) {
-  return (
-    <Layout>
-      {page}
-    </Layout>
   );
+};
+
+Page.getLayout = function getLayout(page: ReactElement) {
+  return <Layout>{page}</Layout>;
 };
 
 export default Page;

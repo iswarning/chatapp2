@@ -74,7 +74,7 @@ export default function ShowStatusFriend({userInfo, statusFriend}: any) {
                             <button 
                                 className="block mx-2 rounded-full hover:shadow-lg font-semibold text-black px-6 py-2" 
                                 style={{border: '1px solid'}}
-                                onClick={() => router.push(`/chat?id=${}`)}>Send Message</button>
+                                >Send Message</button>
                         </div>
             case 'isFriendRequest':
                 return <div className="flex justify-center py-4 lg:pt-4 pt-8">

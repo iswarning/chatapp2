@@ -1,14 +1,11 @@
-import Head from 'next/head'
-import { Inter } from 'next/font/google'
-import SidebarMessage from '@/components/ChatPage/SidebarMessage/SidebarMessage'
-import Layout from '@/components/Layout'
-import { ReactElement } from 'react'
-import type { NextPageWithLayout } from '../_app';
-import ChatScreen from '@/components/ChatPage/ChatScreen/ChatScreen'
-import FriendRequestsListScreen from '@/components/FriendRequestsListScreen/FriendRequestsListScreen'
-import styled from 'styled-components'
+import Head from "next/head";
+import { Inter } from "next/font/google";
+import Layout from "@/components/Layout";
+import { ReactElement } from "react";
+import type { NextPageWithLayout } from "../_app";
+import SidebarFriendRequest from "@/components/FriendRequest/SidebarFriendRequest";
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ["latin"] });
 
 // import '@/styles/tailwind.min.css'
 const Page: NextPageWithLayout = () => {
@@ -21,23 +18,18 @@ const Page: NextPageWithLayout = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-        <div className="main flex-1 flex flex-col">
-            <div className="hidden lg:block heading flex-2">
-                <h1 className="text-3xl text-gray-700 mb-4">Friend Requests</h1>
-            </div>
-            <FriendRequestsListScreen />
+      <div className="main flex-1 flex flex-col">
+        <div className="hidden lg:block heading flex-2">
+          <h1 className="text-3xl text-gray-700 mb-4">Friend Requests</h1>
         </div>
+        <SidebarFriendRequest />
+      </div>
     </>
-  )
-}
- 
-Page.getLayout = function getLayout(page: ReactElement) {
-  return (
-    <Layout>
-      {page}
-    </Layout>
   );
 };
 
-export default Page;
+Page.getLayout = function getLayout(page: ReactElement) {
+  return <Layout>{page}</Layout>;
+};
 
+export default Page;

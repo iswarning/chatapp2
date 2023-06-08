@@ -1,78 +1,115 @@
-import { useCollection } from "react-firebase-hooks/firestore";
 import { auth, db } from "@/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
+import { useCollection } from "react-firebase-hooks/firestore";
+import styled from "styled-components";
+import Image from "next/image";
 import firebase from "firebase";
+import { IconButton } from "@mui/material";
+import AddTaskIcon from "@mui/icons-material/AddTask";
+import CancelIcon from "@mui/icons-material/Cancel";
 
-export default function FriendRequest({ id, senderEmail, recipientEmail}: any) {
+export default function FriendRequest({
+  id,
+  senderEmail,
+  recipientEmail,
+}: any) {
+  const [user] = useAuthState(auth);
 
-    const [user] = useAuthState(auth);
+  const [chatSnapshot] = useCollection(
+    db.collection("chats").where("users", "array-contains", user?.email)
+  );
 
-    const [recipientUserSnapshot] = useCollection(
-        db
-        .collection("users")
-        .where("email",'==',senderEmail)
-    )
+  const chat = chatSnapshot?.docs?.find((chatSnap) =>
+    chatSnap?.data().users.includes(recipientEmail)
+  );
 
-    const recipientUser = recipientUserSnapshot?.docs?.[0]?.data();
+  const [recipientSnapshot] = useCollection(
+    db.collection("users").where("email", "==", senderEmail)
+  );
 
-    const onAccept = async() => {
+  const onAccept = async () => {
+    await db.collection("friends").add({
+      users: [senderEmail, recipientEmail],
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
 
-        await db
-        .collection("friends")
-        .add({
-            users: [senderEmail, recipientEmail],
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        })
+    const friend = await db.collection("friend_requests").doc(id).get();
 
-        const friend = await db
-            .collection('friend_requests')
-            .doc(id)
-            .get()
+    if (friend?.exists) {
+      const batch = db.batch();
 
-        if (friend?.exists) {
-            const batch = db.batch();
+      batch.delete(friend.ref);
 
-            batch.delete(friend.ref);
-
-            await batch.commit();
-        }
-
-        // socket.emit("send-notify", JSON.stringify({
-        //     type: 'accept-friend',
-        //     recipient: senderEmail,
-        //     name: recipientUser?.fullName
-        // }))
+      await batch.commit();
     }
 
-    const onCancel = async() => {
-        const friend = await db
-            .collection('friend_requests')
-            .doc(id)
-            .get();
+    await db.collection("chats").add({
+      users: [senderEmail, recipientEmail],
+      photoURL: "",
+      isGroup: false,
+      name: "",
+      admin: "",
+    });
+  };
 
-        const batch = db.batch();
+  const onCancel = async () => {
+    const friend = await db.collection("friend_requests").doc(id).get();
 
-        batch.delete(friend.ref);
+    const batch = db.batch();
 
-        await batch.commit();
-    }
+    batch.delete(friend.ref);
 
-    return (
-        <div className="col-xl-3 sm:mx-3 md:mx-3 lg:mx-2 xl:mx-2 mt-16 bg-white shadow-xl rounded-lg text-gray-900" style={{padding: 0}}>
-            <div className="rounded-t-lg h-32 overflow-hidden">
-                <img className="w-full" src='/images/cover-image.jpg' alt='Mountain'/>
-            </div>
-            <div className="mx-auto w-32 h-32 relative -mt-16 border-4 border-white rounded-full overflow-hidden">
-                <img className="object-cover object-center h-32" src={recipientUser?.photoURL} alt='Woman looking front'/>
-            </div>
-            <div className="text-center mt-2">
-                <h2 className="font-semibold">{recipientUser?.fullName}</h2>
-                <div className="text-gray-500 pb-2">Software Engineer</div>
-            </div>
-            <div className="p-4 border-t mt-2 mx-auto d-flex">
-                <button className="w-1/2 block mx-2 rounded-full bg-gray-900 hover:shadow-lg font-semibold text-white px-6 py-2" onClick={onAccept}>Accept</button>
-                <button className="w-1/2 block mx-2 rounded-full hover:shadow-lg font-semibold text-black px-6 py-2" onClick={onCancel} style={{border: '1px solid'}}>Cancel</button>
-            </div>
+    await batch.commit();
+  };
+
+  return (
+    <div
+      className={
+        "entry transform duration-300 transition-transform bg-white mb-4 rounded p-4 flex shadow-md"
+        // (active ? " border-l-4 border-red-500" : "")
+      }
+    >
+      <div className="flex-2">
+        <div className="w-12 h-12 relative">
+          <CustomAvatar
+            src={recipientSnapshot?.docs?.[0]?.data().photoURL}
+            width={50}
+            height={50}
+            alt="User Avatar"
+          />
+          {/* <span className="absolute w-4 h-4 bg-gray-400 rounded-full right-0 bottom-0 border-2 border-white"></span> */}
         </div>
-    )
+      </div>
+      <div className="flex-1 px-2 ml-2">
+        <div className="truncate w-40">
+          <span className="text-gray-800">
+            {chat?.data().isGroup
+              ? "Group: " + chat?.data().name
+              : recipientSnapshot?.docs?.[0].data().fullName}
+          </span>
+        </div>
+        <div className="truncate w-40">
+          <small className="text-gray-600 ">Have 2 mutual friend</small>
+        </div>
+      </div>
+      <div className="flex-2 text-right">
+        <div className="flex">
+          <div>
+            <IconButton title="Accept" onClick={() => onAccept}>
+              <AddTaskIcon fontSize="medium" />
+            </IconButton>
+          </div>
+          <div>
+            <IconButton title="Deny" onClick={() => onCancel}>
+              <CancelIcon fontSize="medium" />
+            </IconButton>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
+
+export const CustomAvatar = styled(Image)`
+  border-radius: 50%;
+`;

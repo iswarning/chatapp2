@@ -1,68 +1,110 @@
 import { auth, db } from "@/firebase";
-import { useAuthState } from "react-firebase-hooks/auth";
 import getRecipientEmail from "@/utils/getRecipientEmail";
-import { useCollection, useCollectionOnce } from "react-firebase-hooks/firestore";
 import { useRouter } from "next/router";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { useCollection } from "react-firebase-hooks/firestore";
+import styled from "styled-components";
+import Image from "next/image";
+import TimeAgo from "timeago-react";
+import { useEffect, useRef, useState } from "react";
 
-export default function Friend({data}: any) {
+export default function Friend({ data, onShowMessage }: any) {
+  const [user] = useAuthState(auth);
+  const router = useRouter();
 
-    const [user] = useAuthState(auth);
-    const router = useRouter();
+  const [chatSnapshot] = useCollection(
+    db.collection("chats").where("users", "array-contains", user?.email)
+  );
 
-    const [recipientUserSnapshot] = useCollection(
-        db
-        .collection("users")
-        .where("email",'==', getRecipientEmail(data.users, user))
-    )
+  const chat = chatSnapshot?.docs?.find((c) =>
+    c.data().users.includes(getRecipientEmail(data.users, user))
+  );
 
-    const recipientUser = recipientUserSnapshot?.docs?.[0]?.data();
+  const [recipientSnapshot] = useCollection(
+    db
+      .collection("users")
+      .where("email", "==", getRecipientEmail(data.users, user))
+  );
 
-    const onUnfriend = () => {
-        if(confirm('Do you want to unfriend?')){
-            deleteFriend().catch((err) => console.log(err));
-        }
+  const handleShowChatScreen = () => {
+    onShowMessage(chat);
+    setSeenMessage().catch((err) => console.log(err));
+  };
+
+  const setSeenMessage = async () => {
+    const messageSnap = await db
+      .collection("chats")
+      .doc(chat?.id)
+      .collection("messages")
+      .get();
+    if (messageSnap) {
+      messageSnap?.docs?.forEach((m) => {
+        (async () => {
+          const msgRef = db
+            .collection("chats")
+            .doc(chat?.id)
+            .collection("messages")
+            .doc(m.id);
+          const res = await msgRef.get();
+          if (res?.data()?.user === user?.email) return;
+          if (res?.data()?.seen?.includes(user?.email)) return;
+          let result = res?.data()?.seen;
+          result.push(user?.email);
+          await msgRef.set({ ...res.data(), seen: result });
+        })();
+      });
     }
+  };
 
-    const [chatSnapshot] = useCollectionOnce(
-        db
-        .collection("chats")
-        .where("users", 'array-contains', user?.email)
-    )
-
-    const onChat = () => {
-        const chat = chatSnapshot?.docs?.find(chat => chat.data().users.includes(getRecipientEmail(data.users, user)));
-        router.push(`/chat/${chat?.id}`).catch(err => console.log(err))
-    }
-
-    const deleteFriend = async() => {
-        const friend = await db
-            .collection('friends')
-            .doc(data.id)
-            .get();
-
-        const batch = db.batch();
-
-        batch.delete(friend.ref);
-
-        await batch.commit();
-    }
-
-    return (
-        <div className="col-xl-3 sm:mx-3 md:mx-3 lg:mx-2 xl:mx-2 mt-16 bg-white shadow-xl rounded-lg text-gray-900" style={{padding: 0}}>
-            <div className="rounded-t-lg h-32 overflow-hidden">
-                <img className="w-full" src='/images/cover-image.jpg' alt='Mountain'/>
-            </div>
-            <div className="mx-auto w-32 h-32 relative -mt-16 border-4 border-white rounded-full overflow-hidden">
-                <img className="object-cover object-center h-32" src={recipientUser?.photoURL} alt='Woman looking front'/>
-            </div>
-            <div className="text-center mt-2">
-                <h2 className="font-semibold">{recipientUser?.fullName}</h2>
-                <div className="text-gray-500 pb-2">Software Engineer</div>
-            </div>
-            <div className="p-4 border-t mt-2 mx-auto d-flex">
-                <button className="w-1/2 block mx-2 rounded-full bg-gray-900 hover:shadow-lg font-semibold text-white px-6 py-2" onClick={onChat}>Chat</button>
-                <button className="w-1/2 block mx-2 rounded-full hover:shadow-lg font-semibold text-black px-6 py-2" onClick={onUnfriend} style={{border: '1px solid'}}>Unfriend</button>
-            </div>
+  return (
+    <div
+      className={
+        "entry cursor-pointer transform hover:scale-105 duration-300 transition-transform bg-white mb-4 rounded p-4 flex shadow-md"
+        // (active ? " border-l-4 border-red-500" : "")
+      }
+      onClick={handleShowChatScreen}
+    >
+      <div className="flex-2">
+        <div className="w-12 h-12 relative">
+          <CustomAvatar
+            src={recipientSnapshot?.docs?.[0]?.data()?.photoURL}
+            width={50}
+            height={50}
+            alt="User Avatar"
+          />
+          {!chat?.data().isGroup ? (
+            recipientSnapshot?.docs?.[0]?.data()?.isOnline ? (
+              <span className="absolute w-4 h-4 bg-green-400 rounded-full right-0 bottom-0 border-2 border-white"></span>
+            ) : (
+              <span className="absolute w-4 h-4 bg-gray-400 rounded-full right-0 bottom-0 border-2 border-white"></span>
+            )
+          ) : null}
         </div>
-    )
+      </div>
+      <div className="flex-1 px-3">
+        <div className="truncate w-40">
+          <span className="text-gray-800">
+            {chat?.data().isGroup
+              ? "Group: " + chat.data().name
+              : recipientSnapshot?.docs?.[0].data().fullName}
+          </span>
+        </div>
+        <div className="truncate w-40">
+          <small className="text-gray-600 "></small>
+        </div>
+      </div>
+      <div className="flex-2 text-right">
+        <div>
+          <small className="text-gray-500">
+            <div className="pb-2"></div>
+          </small>
+        </div>
+        <div></div>
+      </div>
+    </div>
+  );
 }
+
+export const CustomAvatar = styled(Image)`
+  border-radius: 50%;
+`;
