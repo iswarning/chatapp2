@@ -7,18 +7,30 @@ import firebase from "firebase";
 import { IconButton, Modal } from "@mui/material";
 import AddTaskIcon from "@mui/icons-material/AddTask";
 import CancelIcon from "@mui/icons-material/Cancel";
-import { useEffect, useState } from "react";
-import { io } from "socket.io-client";
+import { useState } from "react";
 import UserDetailScreen from "../ProfilePage/UserDetailScreen/UserDetailScreen";
-import { useAppContext } from "@/context/AppContext";
+import sendNotificationFCM from "@/utils/sendNotificationFCM";
+import { UserType } from "@/types/UserType";
+import { useDispatch, useSelector } from "react-redux";
+import { selectAppState, setInitialState } from "@/modules/appSlice";
 
 export default function FriendRequest({
   id,
   senderEmail,
   recipientEmail,
-}: any) {
+  userInfo,
+  onDenyFR,
+}: {
+  id: string;
+  senderEmail: string;
+  recipientEmail: string;
+  userInfo: UserType | undefined;
+  onDenyFR: any;
+}) {
   const [user] = useAuthState(auth);
   const [isOpen, setIsOpen] = useState(false);
+  const dispatch = useDispatch();
+  const appState = useSelector(selectAppState);
 
   const [chatSnapshot] = useCollection(
     db.collection("chats").where("users", "array-contains", user?.email)
@@ -26,10 +38,6 @@ export default function FriendRequest({
 
   const chat = chatSnapshot?.docs?.find((chatSnap) =>
     chatSnap?.data().users.includes(recipientEmail)
-  );
-
-  const [recipientSnapshot] = useCollection(
-    db.collection("users").where("email", "==", senderEmail)
   );
 
   const onAccept = async () => {
@@ -55,6 +63,12 @@ export default function FriendRequest({
       name: "",
       admin: "",
     });
+
+    await sendNotificationFCM(
+      "Notification",
+      user?.displayName + "accepted a friend request",
+      userInfo?.fcm_token
+    );
   };
 
   const onCancel = async () => {
@@ -65,54 +79,71 @@ export default function FriendRequest({
     batch.delete(friend.ref);
 
     await batch.commit();
+
+    let newListFriendRequest = appState.listFriendRequest.filter(
+      (fR) => fR.id === id
+    );
+
+    dispatch(
+      setInitialState({
+        listFriendRequest: newListFriendRequest,
+      })
+    );
+
+    onDenyFR(newListFriendRequest);
   };
 
   return (
     <>
-    <div
-      className={
-        "entry transform duration-300 transition-transform bg-white mb-4 rounded p-4 flex shadow-md"
-      }
-    >
-      <div className="flex-2">
-        <div className="w-12 h-12 relative">
-          <CustomAvatar
-            src={recipientSnapshot?.docs?.[0]?.data().photoURL}
-            width={50}
-            height={50}
-            alt="User Avatar"
-          />
-        </div>
-      </div>
-      <div className="flex-1 px-2 ml-2">
-        <div className="truncate w-40 cursor-pointer" id="hover-animation" data-replace="Profile" onClick={() => setIsOpen(true)}>
-          <span className="text-gray-800">
-            {chat?.data().isGroup
-              ? "Group: " + chat?.data().name
-              : recipientSnapshot?.docs?.[0].data().fullName}
-          </span>
-        </div>
-        <div className="truncate w-40">
-          <small className="text-gray-600 ">Have 2 mutual friend</small>
-        </div>
-      </div>
-      <div className="flex-2 text-right">
-        <div className="flex">
-          <div>
-            <IconButton title="Accept" onClick={() => onAccept}>
-              <AddTaskIcon fontSize="medium" />
-            </IconButton>
-          </div>
-          <div>
-            <IconButton title="Deny" onClick={() => onCancel}>
-              <CancelIcon fontSize="medium" />
-            </IconButton>
+      <div
+        className={
+          "entry transform duration-300 transition-transform bg-white mb-4 rounded p-4 flex shadow-md"
+        }
+      >
+        <div className="flex-2">
+          <div className="w-12 h-12 relative">
+            <CustomAvatar
+              src={userInfo?.photoURL!}
+              width={50}
+              height={50}
+              alt="User Avatar"
+            />
           </div>
         </div>
+        <div className="flex-1 px-2 ml-2">
+          <div
+            className="truncate w-40 cursor-pointer"
+            id="hover-animation"
+            data-replace="Profile"
+            onClick={() => setIsOpen(true)}
+          >
+            <span className="text-gray-800">
+              {chat?.data().isGroup
+                ? "Group: " + chat?.data().name
+                : userInfo?.fullName}
+            </span>
+          </div>
+          <div className="truncate w-40">
+            <small className="text-gray-600 ">Have 2 mutual friend</small>
+          </div>
+        </div>
+        <div className="flex-2 text-right">
+          <div className="flex">
+            <div>
+              <IconButton title="Accept" onClick={() => onAccept()}>
+                <AddTaskIcon fontSize="medium" />
+              </IconButton>
+            </div>
+            <div>
+              <IconButton title="Deny" onClick={() => onCancel()}>
+                <CancelIcon fontSize="medium" />
+              </IconButton>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-    <Modal open={isOpen} onClose={() => setIsOpen(false)}>
-          <UserDetailScreen userInfo={recipientSnapshot?.docs?.[0].data()} />
+      <Modal open={isOpen} onClose={() => setIsOpen(false)}>
+        <UserDetailScreen userInfo={userInfo} />
       </Modal>
     </>
   );

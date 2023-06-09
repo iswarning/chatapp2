@@ -4,10 +4,8 @@ import { useCollection } from "react-firebase-hooks/firestore";
 import Message from "../Message/Message";
 import { useEffect, useRef, useState } from "react";
 import getRecipientEmail from "@/utils/getRecipientEmail";
-import { io } from "socket.io-client";
 import { useRouter } from "next/router";
 import firebase from "firebase";
-import styled from "styled-components";
 import CallIcon from "@mui/icons-material/Call";
 import VideocamIcon from "@mui/icons-material/Videocam";
 import { IconButton, Modal } from "@mui/material";
@@ -17,10 +15,18 @@ import SendIcon from "@mui/icons-material/Send";
 import Loading from "@/components/Loading";
 import DoneAllIcon from "@mui/icons-material/DoneAll";
 import UserDetailScreen from "@/components/ProfilePage/UserDetailScreen/UserDetailScreen";
+import TagFacesIcon from "@mui/icons-material/TagFaces";
+import InsertPhotoIcon from "@mui/icons-material/InsertPhoto";
+import AttachFileIcon from "@mui/icons-material/AttachFile";
+import {
+  EmojiContainer,
+  EmojiElement,
+  EndOfMessage,
+  InputMessage,
+} from "./ChatScreenStyled";
 
-export default function ChatScreen({ chat, messages, onShowUserDetail }: any) {
+export default function ChatScreen({ chat, messages }: any) {
   const [user] = useAuthState(auth);
-  const [input, setInput] = useState("");
   const endOfMessageRef: any = useRef(null);
   const [showEmoji, setShowEmoji] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -123,7 +129,6 @@ export default function ChatScreen({ chat, messages, onShowUserDetail }: any) {
     let sizeInput = inputMsgElement?.childNodes?.length ?? 0;
 
     let message = "";
-    let imgString = [];
     let countImg = 0;
     for (let i = 0; i < sizeInput; i++) {
       switch (inputMsgElement?.childNodes[i].nodeName) {
@@ -131,8 +136,7 @@ export default function ChatScreen({ chat, messages, onShowUserDetail }: any) {
           message += inputMsgElement?.childNodes[i].nodeValue;
           break;
         case "IMG":
-          message += `<br>#img${countImg}<br>`;
-          imgString.push(`#img${countImg}`);
+          message += `<br>#img-msg-${countImg}<br>`;
           countImg++;
           break;
         case "BR":
@@ -146,8 +150,7 @@ export default function ChatScreen({ chat, messages, onShowUserDetail }: any) {
                 message += element.nodeValue + "<br>";
                 break;
               case "IMG":
-                message += `<br>#img${countImg}<br>`;
-                imgString.push(`#img${countImg}`);
+                message += `<br>#img-msg-${countImg}<br>`;
                 countImg++;
                 break;
               case "BR":
@@ -162,7 +165,9 @@ export default function ChatScreen({ chat, messages, onShowUserDetail }: any) {
     return { listImage, message };
   };
 
-  const sendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
+  const sendMessage = async (
+    e: React.FormEvent<HTMLFormElement>
+  ): Promise<any> => {
     setStatusSend("Sending...");
     e.preventDefault();
 
@@ -192,7 +197,7 @@ export default function ChatScreen({ chat, messages, onShowUserDetail }: any) {
             const response = await fetch(item?.src);
             const blob = await response.blob();
             storage
-              .ref(`public/images/message/${snap.id}/#img${index}`)
+              .ref(`public/images/message/${snap.id}/#img-msg-${index}`)
               .put(blob)
               .on(
                 "state_changed",
@@ -204,7 +209,7 @@ export default function ChatScreen({ chat, messages, onShowUserDetail }: any) {
                 },
                 (err) => console.log(err),
                 () => {
-                  pushUrlImageToFirestore(snap, index);
+                  pushUrlImageToFirestore(snap.id, index);
                 }
               );
           }
@@ -220,20 +225,20 @@ export default function ChatScreen({ chat, messages, onShowUserDetail }: any) {
     setStatusSend("Sent");
   };
 
-  const pushUrlImageToFirestore = (snap: any, o: number) => {
+  const pushUrlImageToFirestore = (messId: any, index: number) => {
     storage
-      .ref(`public/images/message/${snap.id}/#img${o}`)
+      .ref(`public/images/message/${messId}/#img-msg-${index}`)
       .getDownloadURL()
       .then(async (url) => {
         await db
           .collection("chats")
           .doc(chatId)
           .collection("messages")
-          .doc(snap.id)
+          .doc(messId)
           .collection("imageInMessage")
           .add({
             url: url,
-            key: `#img${o}`,
+            key: `#img-msg-${index}`,
           });
         scrollToBottom();
       })
@@ -288,11 +293,13 @@ export default function ChatScreen({ chat, messages, onShowUserDetail }: any) {
   // }
 
   const addEmoji = (e: number) => {
-    setInput(input + String.fromCodePoint(e));
+    const inputMess = document.getElementById("input-message")?.innerHTML;
+    document.getElementById("input-message")!.innerHTML =
+      inputMess + String.fromCodePoint(e);
     setShowEmoji(false);
   };
 
-  const setSeenMessage = async () => {
+  const setSeenMessage = () => {
     if (messageSnapShot) {
       messageSnapShot?.docs?.forEach((m) => async () => {
         const msgRef = db
@@ -305,10 +312,10 @@ export default function ChatScreen({ chat, messages, onShowUserDetail }: any) {
         if (res?.data()?.seen?.includes(user?.email)) return;
         let result = res?.data()?.seen;
         result.push(user?.email);
-        await msgRef.set({ ...res.data(), seen: result });
+        await msgRef.update({ seen: result });
       });
     } else {
-      messages?.forEach(async (m: any) => {
+      messages?.forEach((m: any) => async () => {
         const msgRef = db
           .collection("chats")
           .doc(chatId)
@@ -319,7 +326,7 @@ export default function ChatScreen({ chat, messages, onShowUserDetail }: any) {
         if (res?.data()?.seen?.includes(user?.email)) return;
         let result = res?.data()?.seen;
         result.push(user?.email);
-        await msgRef.set({ ...res.data(), seen: result });
+        await msgRef.update({ seen: result });
       });
     }
   };
@@ -329,7 +336,7 @@ export default function ChatScreen({ chat, messages, onShowUserDetail }: any) {
     //         <VideoCallScreen statusCall='Calling' photoURL={chat.isGroup ? chat.photoURL : recipientUser.photoURL} sender={user?.email} recipient={getRecipientEmail(chat.users, user)} chatId={chatId} onClose={() => setIsOpen(false)} isGroup={chat.isGroup} />
     //     </VideoCallContainer>
     <>
-      <Loading isLoading={isLoading} />
+      <Loading isShow={isLoading} />
       <div className="chat-area flex-1 flex flex-col relative">
         <div className="flex-3">
           <h2 className="text-xl pb-1 mb-4 border-b-2 border-gray-200 d-flex">
@@ -375,24 +382,6 @@ export default function ChatScreen({ chat, messages, onShowUserDetail }: any) {
         </div>
         <div className="flex-2 pt-4 pb-10">
           <div className="write bg-white shadow flex rounded-lg">
-            <div className="flex-3 flex content-center items-center text-center p-4 pr-0">
-              <span
-                className="block text-center text-gray-400 hover:text-gray-800"
-                onClick={() => setShowEmoji(!showEmoji)}
-              >
-                <svg
-                  fill="none"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  className="h-6 w-6"
-                >
-                  <path d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-              </span>
-            </div>
             <div className="flex-1">
               <InputMessage
                 contentEditable="true"
@@ -404,29 +393,43 @@ export default function ChatScreen({ chat, messages, onShowUserDetail }: any) {
               />
             </div>
 
-            <div className="flex-2 w-32 p-2 flex content-center items-center">
-              <div className="flex-1 text-center" onClick={() => sendMessage}>
+            <div className="p-2 flex content-center items-center">
+              <div
+                className="text-center p-2 cursor-pointer"
+                onClick={() => setShowEmoji(!showEmoji)}
+              >
                 <span className="text-gray-400 hover:text-gray-800">
-                  <span className="inline-block align-text-bottom">
-                    <svg
-                      fill="none"
-                      strokeLinecap="round"
-                      strokeWidth="2"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      className="w-6 h-6"
-                    >
-                      <path d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
-                    </svg>
+                  <span className="align-text-bottom">
+                    <TagFacesIcon fontSize="small" />
                   </span>
                 </span>
               </div>
-              <div className="flex-1 text-center cursor-pointer">
+              <div
+                className="text-center p-2 cursor-pointer"
+                onClick={() => sendMessage}
+              >
+                <span className="text-gray-400 hover:text-gray-800">
+                  <span className="align-text-bottom">
+                    <InsertPhotoIcon fontSize="small" />
+                  </span>
+                </span>
+              </div>
+              <div
+                className="text-center p-2 cursor-pointer"
+                onClick={() => sendMessage}
+              >
+                <span className="text-gray-400 hover:text-gray-800">
+                  <span className="align-text-bottom">
+                    <AttachFileIcon fontSize="small" />
+                  </span>
+                </span>
+              </div>
+              <div className="text-center cursor-pointer p-2">
                 <span
-                  className="text-gray-400 hover:text-gray-800"
-                  onClick={(e) => sendMessage(e)}
+                  className="text-indigo-500 hover:text-gray-800"
+                  onClick={(event) => sendMessage(event)}
                 >
-                  <span className="inline-block align-text-bottom">
+                  <span className="align-text-bottom">
                     <SendIcon />
                   </span>
                 </span>
@@ -445,60 +448,8 @@ export default function ChatScreen({ chat, messages, onShowUserDetail }: any) {
         ) : null}
       </div>
       <Modal open={isOpen} onClose={() => setIsOpen(false)}>
-          <UserDetailScreen userInfo={recipientSnapshot?.docs?.[0].data()} />
+        <UserDetailScreen userInfo={recipientSnapshot?.docs?.[0].data()} />
       </Modal>
     </>
   );
 }
-
-const InputMessage = styled.div`
-  background-color: white;
-  outline: #ccc;
-  border-radius: 10px;
-  padding: 20px;
-  overflow: hidden;
-  max-height: 200px;
-  overflow-y: scroll;
-  border: none;
-  background-position: center;
-  object-fit: cover;
-  background-repeat: no-repeat;
-`;
-
-const EmojiContainer = styled.div.attrs(() => ({
-  className: "",
-}))`
-  position: absolute;
-  width: max-content;
-  max-width: 400px;
-  background-color: white;
-  border-radius: 10px;
-  padding: 10px;
-  margin-top: 35%;
-  overflow: scroll;
-  ::-webkit-scrollbar {
-    display: none;
-  }
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-  display: flex;
-  flex-wrap: wrap;
-  max-height: 300px;
-`;
-
-const EmojiElement = styled.div.attrs(() => ({
-  className: "",
-}))`
-  width: 25%;
-  cursor: pointer;
-  font-size: 50px;
-  padding-left: 10px;
-  :hover {
-    border-radius: 10px;
-    background-color: #ddebeb;
-  }
-`;
-
-const EndOfMessage = styled.div`
-  margin-bottom: 50px;
-`;

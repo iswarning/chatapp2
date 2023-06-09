@@ -27,7 +27,6 @@
         "photoURL": "",
         "fullName": "",
         "phoneNumber": "",
-        "isOnline": false,
         "fcm_token": ""
     },
 

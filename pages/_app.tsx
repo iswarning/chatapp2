@@ -2,7 +2,7 @@ import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import { useAuthState } from "react-firebase-hooks/auth";
 import Login from "./login";
-import { ReactElement, ReactNode, useEffect, useState } from "react";
+import { FC, ReactElement, ReactNode, useEffect, useState } from "react";
 import createNewUser from "@/services/users/createNewUser";
 import "bootstrap/dist/css/bootstrap.css";
 import { auth, getMessagingToken, onMessageListener } from "@/firebase";
@@ -14,10 +14,14 @@ import { NextPage } from "next";
 import { config } from "@fortawesome/fontawesome-svg-core";
 import "../node_modules/@fortawesome/fontawesome-svg-core/styles.css";
 import requestPermission from "@/utils/requestPermission";
-import { AppWrapper } from "@/context/AppContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { setUserOffline } from "@/utils/setUserOffline";
 import { io } from "socket.io-client";
+import { wrapper } from "../modules/store";
+import { Provider } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { setInitialState } from "@/modules/appSlice";
+import getInitialState from "@/utils/getInitialState";
+
 config.autoAddCss = false;
 
 export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
@@ -28,19 +32,19 @@ type AppPropsWithLayout = AppProps & {
   Component: NextPageWithLayout;
 };
 
-export default function App({ Component, pageProps }: AppPropsWithLayout) {
-  const { children, ...rest } = pageProps;
+export default function App({ Component, ...rest }: AppPropsWithLayout) {
+  const { store, props } = wrapper.useWrappedStore(rest);
   const [user, loading] = useAuthState(auth);
-  const [isOpen, setIsOpen] = useState(false);
-  const [chatRoomId, setChatRoomId] = useState("");
-  const [sender, setSender] = useState("");
-  const [recipient, setRecipient] = useState([]);
-  const [isGroup, setIsGroup] = useState(false);
-  const router = useRouter();
+  // const [isOpen, setIsOpen] = useState(false);
+  // const [chatRoomId, setChatRoomId] = useState("");
+  // const [sender, setSender] = useState("");
+  // const [recipient, setRecipient] = useState([]);
+  // const [isGroup, setIsGroup] = useState(false);
+  // const router = useRouter();
 
   const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
 
-  const [queryClient] = useState(() => new QueryClient());
+  // const [queryClient] = useState(() => new QueryClient());
 
   useEffect(() => {
     if (user) {
@@ -130,11 +134,9 @@ export default function App({ Component, pageProps }: AppPropsWithLayout) {
   const getLayout = Component.getLayout ?? ((page) => page);
 
   return getLayout(
-    <QueryClientProvider client={queryClient}>
-      <AppWrapper>
-        <Component {...pageProps} />
-        <ToastContainer />
-      </AppWrapper>
-    </QueryClientProvider>
+    <Provider store={store}>
+      <Component {...props.pageProps} />
+      <ToastContainer />
+    </Provider>
   );
 }

@@ -1,16 +1,14 @@
-import { useAuthState } from "react-firebase-hooks/auth";
-import { useState } from "react";
-import { useCollection } from "react-firebase-hooks/firestore";
-import { auth, db } from "@/firebase";
-import ChatScreen from "../ChatPage/ChatScreen/ChatScreen";
+import { selectAppState } from "@/modules/appSlice";
 import FriendRequest from "./FriendRequest";
+import { FriendRequestType } from "@/types/FriendRequestType";
+import { useSelector } from "react-redux";
+import { useState } from "react";
 
 export default function SidebarFriendRequest() {
-  const [user] = useAuthState(auth);
-
-  const [friendRequestSnapshot] = useCollection(
-    db.collection("friend_requests").where("recipientEmail", "==", user?.email)
-  );
+  const authState = useSelector(selectAppState);
+  const [listFriendRequest, setListFriendRequest] = useState<
+    Array<FriendRequestType>
+  >(authState.listFriendRequest);
 
   return (
     <>
@@ -26,13 +24,17 @@ export default function SidebarFriendRequest() {
           className="flex-1 overflow-y-scroll h-screen p-2"
           id="scroll-style-3"
         >
-          {friendRequestSnapshot
-            ? friendRequestSnapshot?.docs?.map((fR) => (
+          {listFriendRequest
+            ? listFriendRequest.map((fR) => (
                 <FriendRequest
                   key={fR.id}
                   id={fR.id}
-                  senderEmail={fR.data().senderEmail}
-                  recipientEmail={fR.data().recipientEmail}
+                  senderEmail={fR.senderEmail}
+                  recipientEmail={fR.recipientEmail}
+                  userInfo={fR.userInfo}
+                  onDenyFR={(newData: FriendRequestType[]) =>
+                    setListFriendRequest(newData)
+                  }
                 />
               ))
             : null}

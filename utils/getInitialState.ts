@@ -1,34 +1,83 @@
 import { db } from "@/firebase";
 import getRecipientEmail from "./getRecipientEmail";
+import { MapUserData, UserType } from "@/types/UserType";
+import { FriendType } from "@/types/FriendType";
+import { FriendRequestType } from "@/types/FriendRequestType";
 
-export default async function getInitialState(user: any) {
+export default async function getInitialState(userId: string | undefined) {
+  let data = {
+    userInfo: {} as UserType,
+    listFriend: new Array<FriendType>(),
+    listFriendRequest: new Array<FriendRequestType>(),
+  };
 
-    let initialData: any = {
-        userInfo: {},
-        listFriend: [],
-        listFriendRequest: [],
+  const userInfo = await db.collection("users").doc(userId).get();
+
+  data.userInfo = MapUserData(userInfo);
+
+  const listFriend = await db
+    .collection("friends")
+    .where("users", "array-contains", userInfo?.data()?.email)
+    .get();
+
+  for (const friend of listFriend?.docs || []) {
+    let info = await db
+      .collection("users")
+      .where(
+        "email",
+        "==",
+        getRecipientEmail(friend.data().users, userInfo?.data())
+      )
+      .get();
+
+    let itemToPush: FriendType = {
+      id: friend.data()?.id,
+      users: friend.data().users,
+      userInfo: MapUserData(info?.docs?.[0]),
     };
 
-    const userInfo = await db.collection("users").doc(user?.id).get();
+    data.listFriend.push(itemToPush);
+  }
+  // await Promise.all(
+  //   Array.prototype.map.call(listFriend?.docs, async (friend) => {
+  //     let info = await db
+  //       .collection("users")
+  //       .where(
+  //         "email",
+  //         "==",
+  //         getRecipientEmail(friend.data().users, userInfo?.data())
+  //       )
+  //       .get();
 
-    initialData.userInfo = {
-        id: userInfo.id,
-        ...userInfo.data()
-    }
+  //     let itemToPush: FriendType = {
+  //       id: info?.docs?.[0]?.id,
+  //       users: info?.docs?.[0]?.data().users,
+  //     };
+  //     data.listFriend.push(itemToPush);
+  //   })
+  // );
 
-    const listFriend = await db.collection("friends").where("users",'array-contains',user?.email).get();
+  const listFriendRequest = await db
+    .collection("friend_requests")
+    .where("recipientEmail", "==", userInfo?.data()?.email)
+    .get();
 
-    listFriend?.docs?.forEach((friend) => (async() => {
-        let info = await db.collection("users").where("email",'==',getRecipientEmail(friend.data().users, user)).get()
-        initialData.listFriend.push({ id: info?.docs?.[0]?.id, ...info?.docs?.[0]?.data() })
-    }));
+  for (const fR of listFriendRequest?.docs || []) {
+    let info = await db
+      .collection("users")
+      .where("email", "==", fR?.data().senderEmail)
+      .get();
 
-    const listFriendRequest = await db.collection("friend_requests").where("recipientEmail",'array-contains',user?.email).get();
+    let itemToPush: FriendRequestType = {
+      id: fR?.id,
+      senderEmail: fR?.data().senderEmail,
+      recipientEmail: fR?.data().recipientEmail,
+      createdAt: fR?.data().createdAt,
+      userInfo: MapUserData(info?.docs?.[0]),
+    };
 
-    listFriendRequest?.docs?.forEach((fR) => (async() => {
-        let info = await db.collection("users").where("email", '==', fR?.data().senderEmail).get()
-        initialData.listFriend.push({ id: info?.docs?.[0]?.id, ...info?.docs?.[0]?.data() })
-    }));
+    data.listFriendRequest.push(itemToPush);
+  }
 
-    return initialData;
+  return data;
 }
