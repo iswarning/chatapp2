@@ -166,7 +166,7 @@ export default function ChatScreen({ chat, messages }: any) {
   };
 
   const sendMessage = async (
-    e: React.FormEvent<HTMLFormElement>
+    e: any
   ): Promise<any> => {
     setStatusSend("Sending...");
     e.preventDefault();
@@ -380,8 +380,18 @@ export default function ChatScreen({ chat, messages }: any) {
             }}
           />
         </div>
-        <div className="flex-2 pt-4 pb-10">
-          <div className="write bg-white shadow flex rounded-lg">
+        <div className="pt-4 pb-10">
+          <div className="write bg-white shadow flex rounded-lg">              
+            <div
+                className="text-center pt-4 pl-4 cursor-pointer"
+                onClick={() => setShowEmoji(!showEmoji)}
+              >
+                <span className="text-gray-400 hover:text-gray-800">
+                  <span className="align-text-bottom">
+                    <TagFacesIcon fontSize="small" />
+                  </span>
+                </span>
+              </div>
             <div className="flex-1">
               <InputMessage
                 contentEditable="true"
@@ -394,16 +404,7 @@ export default function ChatScreen({ chat, messages }: any) {
             </div>
 
             <div className="p-2 flex content-center items-center">
-              <div
-                className="text-center p-2 cursor-pointer"
-                onClick={() => setShowEmoji(!showEmoji)}
-              >
-                <span className="text-gray-400 hover:text-gray-800">
-                  <span className="align-text-bottom">
-                    <TagFacesIcon fontSize="small" />
-                  </span>
-                </span>
-              </div>
+
               <div
                 className="text-center p-2 cursor-pointer"
                 onClick={() => sendMessage}

@@ -7,7 +7,6 @@ async function createNewUser(user: firebase.User, fcm_token: any) {
             email: user?.email,
             photoURL: user?.photoURL,
             fullName: user?.displayName,
-            isOnline: true,
             fcm_token: fcm_token
         }
     ).catch(err => console.log(err))

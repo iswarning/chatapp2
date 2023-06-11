@@ -5,14 +5,15 @@ import { auth, db } from "@/firebase";
 import ChatScreen from "../ChatPage/ChatScreen/ChatScreen";
 import { useQuery } from "@tanstack/react-query";
 import Friend from "./Friend/Friend";
+import Chat from "../ChatPage/Chat";
 
 export default function SidebarAllFriend() {
   const [user] = useAuthState(auth);
   const [chatInfo, setChatInfo] = useState<any>(null);
   const [messData, setMessData] = useState<any>(null);
 
-  const [friendListSnapshot] = useCollection(
-    db.collection("friends").where("users", "array-contains", user?.email)
+  const [chatSnapshot] = useCollection(
+    db.collection("chats").where("users", "array-contains", user?.email).where("isGroup",'==',false)
   );
 
   const showMessage = (chat: any) => {
@@ -43,12 +44,16 @@ export default function SidebarAllFriend() {
           className="flex-1 overflow-y-scroll h-screen p-2"
           id="scroll-style-3"
         >
-          {friendListSnapshot
-            ? friendListSnapshot?.docs?.map((friend) => (
-                <Friend
-                  key={friend.id}
-                  data={{ id: friend.id, ...friend.data() }}
-                  onShowMessage={(chat: any) => showMessage(chat)}
+          {chatSnapshot?.docs?.length! > 0
+            ? chatSnapshot?.docs?.map((chat) => (
+                <Chat
+                  key={chat.id}
+                  chat={{
+                    id: chat.id,
+                    ...chat.data(),
+                  }}
+                  onShowMessage={() => showMessage(chat)}
+                  active={chatInfo?.id === chat.id}
                 />
               ))
             : null}

@@ -5,8 +5,7 @@ import { auth, provider } from "../firebase";
 import firebase from "firebase";
 
 const signIn = async() => {
-    const { credential } = await firebase.auth().signInWithPopup(provider);
-    console.log(credential?.toJSON());
+    await firebase.auth().signInWithPopup(provider);
 }
 
 function Login() {

@@ -16,11 +16,12 @@ import "../node_modules/@fortawesome/fontawesome-svg-core/styles.css";
 import requestPermission from "@/utils/requestPermission";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { io } from "socket.io-client";
-import { wrapper } from "../modules/store";
+import { wrapper } from "../redux/store";
 import { Provider } from "react-redux";
 import { useDispatch, useSelector } from "react-redux";
-import { setInitialState } from "@/modules/appSlice";
+import { setInitialState } from "@/redux/appSlice";
 import getInitialState from "@/utils/getInitialState";
+import { IoProvider } from 'socket.io-react-hook';
 
 config.autoAddCss = false;
 
@@ -56,13 +57,12 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
         })
         .catch((err) => console.log(err));
 
-      socket.emit("login", { userId: user?.uid });
-
+      socket.emit("login", { userId: user?.email });
+      
       // getNotification(user?.email)
       // const channel = new BroadcastChannel("notifications");
       // channel.addEventListener("message", (event) => {
       //   console.log(event.data);
-      //     new Notification("New nofitication", { body: event.data.notification.body })
       // });
       // socket.on("response-call-video-one-to-one", (res: string) => {
       //   let data = JSON.parse(res);
@@ -135,8 +135,10 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
 
   return getLayout(
     <Provider store={store}>
-      <Component {...props.pageProps} />
-      <ToastContainer />
+      <IoProvider>
+        <Component {...props.pageProps} />
+        <ToastContainer />
+      </IoProvider>
     </Provider>
   );
 }

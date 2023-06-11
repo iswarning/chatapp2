@@ -54,6 +54,7 @@
         "reactstrap": "^9.1.10",
         "socket.io": "^4.6.1",
         "socket.io-client": "^4.6.2",
+        "socket.io-react-hook": "^2.4.1",
         "styled-components": "^5.3.9",
         "timeago-react": "^3.0.6",
         "typescript": "5.0.2",

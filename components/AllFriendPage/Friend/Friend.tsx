@@ -7,22 +7,16 @@ import styled from "styled-components";
 import Image from "next/image";
 import TimeAgo from "timeago-react";
 import { useEffect, useRef, useState } from "react";
-import { io } from "socket.io-client";
+import {useSelector} from 'react-redux'
+import { selectAppState } from "@/redux/appSlice";
 
 export default function Friend({ data, onShowMessage }: any) {
   const [user] = useAuthState(auth);
   const router = useRouter();
-  const [userOnline, setUserOnline] = useState<Array<string>>();
-
-  const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
+  const appState = useSelector(selectAppState)
 
   useEffect(() => {
-    socket.on("get-user-online", (data) => {
-      setUserOnline(data);
-    });
-    return () => {
-      socket.disconnect();
-    };
+
   }, []);
 
   const [chatSnapshot] = useCollection(
@@ -43,6 +37,17 @@ export default function Friend({ data, onShowMessage }: any) {
     onShowMessage(chat);
     setSeenMessage().catch((err) => console.log(err));
   };
+
+  const [lastMessageSnapshot] = useCollection(
+    db
+      .collection("chats")
+      .doc(chat?.id)
+      .collection("messages")
+      .orderBy("timestamp")
+      .limitToLast(1)
+  );
+
+  const lastMessage = lastMessageSnapshot?.docs?.[0]?.data();
 
   const setSeenMessage = async () => {
     const messageSnap = await db
@@ -85,13 +90,13 @@ export default function Friend({ data, onShowMessage }: any) {
             height={50}
             alt="User Avatar"
           />
-          {!chat?.data().isGroup ? (
-            userOnline?.find((u) => u === recipientSnapshot?.docs?.[0]?.id) ? (
+          {
+            appState.userOnline?.find((u: string) => u === recipientSnapshot?.docs?.[0]?.data().email) ? (
               <span className="absolute w-4 h-4 bg-green-400 rounded-full right-0 bottom-0 border-2 border-white"></span>
             ) : (
               <span className="absolute w-4 h-4 bg-gray-400 rounded-full right-0 bottom-0 border-2 border-white"></span>
             )
-          ) : null}
+          }
         </div>
       </div>
       <div className="flex-1 px-3">
@@ -109,10 +114,27 @@ export default function Friend({ data, onShowMessage }: any) {
       <div className="flex-2 text-right">
         <div>
           <small className="text-gray-500">
-            <div className="pb-2"></div>
+            <div className="pb-2">
+              {lastMessageSnapshot?.docs.length! > 0 ? (
+                lastMessage?.timestamp?.toDate() ? (
+                  <TimeAgo datetime={lastMessage?.timestamp?.toDate()} />
+                ) : (
+                  "Unavailable"
+                )
+              ) : null}
+            </div>
           </small>
         </div>
-        <div></div>
+        <div>
+          {lastMessage?.message?.length > 0 &&
+          lastMessage?.user !== user?.email ? (
+            lastMessage?.seen.find(
+              (userSeen: string) => userSeen === user?.email
+            ) ? null : (
+              <small className="text-sm bg-blue-500 mb-1 rounded-full h-3 w-3 leading-4 text-center inline-block"></small>
+            )
+          ) : null}
+        </div>
       </div>
     </div>
   );

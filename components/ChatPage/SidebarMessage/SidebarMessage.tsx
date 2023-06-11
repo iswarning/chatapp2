@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useCollection } from "react-firebase-hooks/firestore";
 import ChatScreen from "../ChatScreen/ChatScreen";
 import Chat from "../Chat";
-import { MessageType } from "@/types/Message";
 
 export default function SidebarMessage() {
   const [user] = useAuthState(auth);

@@ -1,14 +1,18 @@
-import { selectAppState } from "@/modules/appSlice";
+import { selectAppState } from "@/redux/appSlice";
 import FriendRequest from "./FriendRequest";
 import { FriendRequestType } from "@/types/FriendRequestType";
 import { useSelector } from "react-redux";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function SidebarFriendRequest() {
-  const authState = useSelector(selectAppState);
+  const appState = useSelector(selectAppState);
   const [listFriendRequest, setListFriendRequest] = useState<
     Array<FriendRequestType>
-  >(authState.listFriendRequest);
+  >(appState.listFriendRequest);
+
+  useEffect(() => {
+    console.log(appState)
+  },[])
 
   return (
     <>

@@ -3,8 +3,10 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { io } from "socket.io-client";
 import firebase from "firebase";
 import { useEffect, useState } from "react";
+import sendNotificationFCM from "@/utils/sendNotificationFCM";
+import { UserType } from "@/types/UserType";
 
-export default function User({ userInfo }: any) {
+export default function User({ userInfo }: { userInfo: UserType }) {
   const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
 
   const [user] = useAuthState(auth);
@@ -59,16 +61,11 @@ export default function User({ userInfo }: any) {
       recipientEmail: userInfo?.email!,
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
     });
-    socket.emit(
-      "send-notify",
-      JSON.stringify({
-        sender: user?.email,
-        recipient: userInfo?.email,
-        name: user?.displayName,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        type: "send-add-friend",
-      })
-    );
+    sendNotificationFCM(
+      "Notification",
+      user?.email + " sent you a friend request",
+      userInfo.fcm_token
+    )
   };
 
   return (

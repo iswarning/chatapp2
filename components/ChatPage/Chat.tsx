@@ -8,21 +8,18 @@ import Image from "next/image";
 import TimeAgo from "timeago-react";
 import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
+import {useSelector} from 'react-redux'
+import { selectAppState } from "@/redux/appSlice";
 
 export default function Chat({ chat, onShowMessage, active }: any) {
   const [user] = useAuthState(auth);
   const router = useRouter();
   const [userOnline, setUserOnline] = useState<Array<string>>();
-
-  const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
+  const appState = useSelector(selectAppState)
+  // const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
 
   useEffect(() => {
-    socket.on("get-user-online", (data) => {
-      setUserOnline(data);
-    });
-    return () => {
-      socket.disconnect();
-    };
+    
   }, []);
 
   const [recipientSnapshot] = useCollection(
@@ -123,6 +120,16 @@ export default function Chat({ chat, onShowMessage, active }: any) {
     }
   };
 
+  const handleGroupOnline = (): boolean => {
+    let amountUserOnline = 0;
+    chat.users.forEach((userChat: string) => {
+      if(appState.userOnline?.find((u: string) => u === userChat && u !== user?.email)?.length! > 0 && user !== user?.email) {
+        amountUserOnline++
+      }
+    })
+    return amountUserOnline > 0;
+  }
+
   return (
     <div
       className={
@@ -140,12 +147,16 @@ export default function Chat({ chat, onShowMessage, active }: any) {
             alt="User Avatar"
           />
           {!chat.isGroup ? (
-            userOnline?.find((u) => u === recipientSnapshot?.docs?.[0]?.id) ? (
+            appState.userOnline?.find((u: any) => u === recipientSnapshot?.docs?.[0]?.data().email) ? (
               <span className="absolute w-4 h-4 bg-green-400 rounded-full right-0 bottom-0 border-2 border-white"></span>
             ) : (
               <span className="absolute w-4 h-4 bg-gray-400 rounded-full right-0 bottom-0 border-2 border-white"></span>
             )
-          ) : null}
+          ) : handleGroupOnline() ? (
+            <span className="absolute w-4 h-4 bg-green-400 rounded-full right-0 bottom-0 border-2 border-white"></span>
+          ) : (
+            <span className="absolute w-4 h-4 bg-gray-400 rounded-full right-0 bottom-0 border-2 border-white"></span>
+          )}
         </div>
       </div>
       <div className="flex-1 px-2">

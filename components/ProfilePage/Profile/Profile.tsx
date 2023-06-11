@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth, db } from "@/firebase";
 import { CustomAvatar } from "../../ChatPage/Chat";
@@ -11,8 +11,6 @@ export default function Profile() {
   const [user] = useAuthState(auth);
   const [image, setImage]: any = useState(null);
 
-  // const AppContext: any = useAppContext();
-
   useEffect(() => {
     const getUserInfo = async () => {
       const data = await db.collection("users").doc(user?.uid).get();
@@ -21,7 +19,6 @@ export default function Profile() {
       }
     };
     getUserInfo().catch((err) => console.log(err));
-    // console.log(AppContext)
   }, []);
 
   const updateInfo = async (e: any) => {

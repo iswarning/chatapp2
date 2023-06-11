@@ -2,21 +2,23 @@ import { auth, db, storage } from "@/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { CustomAvatar } from "../Chat";
 import styled from "styled-components";
-import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import { lazy, useState } from "react";
 import getEmojiData from "@/utils/getEmojiData";
 import { useCollection } from "react-firebase-hooks/firestore";
 import firebase from "firebase";
-import HtmlElementWrapper from "@/modules/HTMLElementWrapper";
-import { useQuery } from "@tanstack/react-query";
+import sendNotificationFCM from "@/utils/sendNotificationFCM";
+import getRecipientEmail from "@/utils/getRecipientEmail";
+import { MessageType } from "@/types/MessageType";
+import {useSelector} from 'react-redux'
+import { selectAppState } from "@/redux/appSlice";
 
-export default function Message({message, photoURL, chatId}: any) {
+export default function Message({message, photoURL, chatId}: { message: MessageType, photoURL: string, chatId: string }) {
 
     const [userLoggedIn] = useAuthState(auth);
     const [isShown,setIsShown] = useState(false)
     const [isShownReaction,setIsShownReaction] = useState(false)
     const [load, setLoad] = useState(0)
-
+    const appState = useSelector(selectAppState)
     const formatDate = (dt: any) => {
         let d = new Date(dt);
         return d.getHours() + ":" + d.getMinutes();
@@ -33,7 +35,13 @@ export default function Message({message, photoURL, chatId}: any) {
         .limitToLast(1)
     )
 
-    const handleReaction = async(event: Event, emoji: number) => {
+    const [recipientSnapshot] = useCollection(
+        db
+        .collection("users")
+        .where("email",'==', message.user)
+    )
+
+    const handleReaction = async(event: any, emoji: number) => {
         event.preventDefault();
         try {
             await db
@@ -47,6 +55,11 @@ export default function Message({message, photoURL, chatId}: any) {
                 emoji: String.fromCodePoint(emoji),
                 timestamp: firebase.firestore.FieldValue.serverTimestamp(),
             })
+            await sendNotificationFCM(
+                "Notification",
+                userLoggedIn?.displayName + " dropped an emotion " + String.fromCodePoint(emoji) + " into your message",
+                recipientSnapshot?.docs?.[0]?.data().fcm_token
+            );
         } catch (error) {
             console.log(error)
         }
@@ -102,7 +115,13 @@ export default function Message({message, photoURL, chatId}: any) {
                                 height={50}
                                 alt="User Avatar"
                             />
-                            <span className="absolute w-4 h-4 bg-gray-400 rounded-full right-0 bottom-0 border-2 border-white"></span>
+                            {
+                                appState.userOnline?.find((u: any) => u === recipientSnapshot?.docs?.[0]?.data().email) ? (
+                                <span className="absolute w-4 h-4 bg-green-400 rounded-full right-0 bottom-0 border-2 border-white"></span>
+                                ) : (
+                                <span className="absolute w-4 h-4 bg-gray-400 rounded-full right-0 bottom-0 border-2 border-white"></span>
+                                )
+                            }
                         </div>
                     </div>
                     <div className="flex-1 px-2" onMouseEnter={() => setIsShown(true)} onMouseLeave={() => setIsShown(false)}>

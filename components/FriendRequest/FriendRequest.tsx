@@ -12,7 +12,6 @@ import UserDetailScreen from "../ProfilePage/UserDetailScreen/UserDetailScreen";
 import sendNotificationFCM from "@/utils/sendNotificationFCM";
 import { UserType } from "@/types/UserType";
 import { useDispatch, useSelector } from "react-redux";
-import { selectAppState, setInitialState } from "@/modules/appSlice";
 
 export default function FriendRequest({
   id,
@@ -29,8 +28,6 @@ export default function FriendRequest({
 }) {
   const [user] = useAuthState(auth);
   const [isOpen, setIsOpen] = useState(false);
-  const dispatch = useDispatch();
-  const appState = useSelector(selectAppState);
 
   const [chatSnapshot] = useCollection(
     db.collection("chats").where("users", "array-contains", user?.email)
@@ -66,7 +63,7 @@ export default function FriendRequest({
 
     await sendNotificationFCM(
       "Notification",
-      user?.displayName + "accepted a friend request",
+      user?.displayName + " accepted a friend request",
       userInfo?.fcm_token
     );
   };
@@ -80,17 +77,6 @@ export default function FriendRequest({
 
     await batch.commit();
 
-    let newListFriendRequest = appState.listFriendRequest.filter(
-      (fR) => fR.id === id
-    );
-
-    dispatch(
-      setInitialState({
-        listFriendRequest: newListFriendRequest,
-      })
-    );
-
-    onDenyFR(newListFriendRequest);
   };
 
   return (

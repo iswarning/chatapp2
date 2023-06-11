@@ -43,13 +43,7 @@ export default function VideoCall() {
             setSecond(0);
             setMinute((oldMinute) => oldMinute + 1)
         }
-    }, 1000);
-
-    function formatNumber(num: number){
-        if(num.toString().length === 1) 
-            return '0' + num;
-        return num;
-    }
+    }, 1000); 
 
     function useInterval(callback: any, delay: any) {
         const savedCallback: any = useRef();
@@ -66,6 +60,12 @@ export default function VideoCall() {
           }, delay);
           return () => clearInterval(id);
         }, [delay]);
+    }
+    
+    function formatNumber(num: number){
+        if(num.toString().length === 1) 
+            return '0' + num;
+        return num;
     }
 
     const handleShowCam = () => {

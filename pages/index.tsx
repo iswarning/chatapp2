@@ -6,27 +6,28 @@ import { ReactElement, useEffect, useState } from "react";
 import { NextPageWithLayout } from "./_app";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@/firebase";
-import getInitialState from "@/utils/getInitialState";
-import { useDispatch } from "react-redux";
-import { setInitialState } from "@/modules/appSlice";
 import Loading from "@/components/Loading";
+import {useSelector,useDispatch} from 'react-redux'
+import { selectAppState, setInitialState } from "@/redux/appSlice";
+import { io } from "socket.io-client";
 
 const inter = Inter({ subsets: ["latin"] });
 
 // import '@/styles/tailwind.min.css'
 const Page: NextPageWithLayout = () => {
   const [user] = useAuthState(auth);
-  const dispatch = useDispatch();
   const [isLoading, setLoading] = useState(false);
+  
+  const dispatch = useDispatch();
+  const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
 
   useEffect(() => {
-    setLoading(true);
-    getInitialState(user?.uid)
-      .then((initialData) => {
-        dispatch(setInitialState(initialData));
-        setLoading(false);
-      })
-      .catch((err) => console.log(err));
+    socket.on("get-user-online", (data) => {
+      dispatch(setInitialState({userOnline: data}))
+    });
+    return () => {
+      socket.disconnect();
+    };
   }, []);
 
   return (
