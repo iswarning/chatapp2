@@ -113,11 +113,18 @@ export default function Message({
 
   const handleFile = () => {
     const blobPart: Blob[] = [];
-    const urls = fileInMessageSnap?.docs?.map((file) => file.data().url);
-    urls?.forEach(async (url) => {
-      const response = await fetch(url);
-      const blob = await response.blob();
-      blobPart.push(blob);
+    fileInMessageSnap?.docs?.forEach((file) => {
+      // `url` is the download URL for 'images/stars.jpg'
+
+      // This can be downloaded directly:
+      const xhr = new XMLHttpRequest();
+      xhr.responseType = 'blob';
+      xhr.onload = (event) => {
+        const blob = xhr.response;
+        console.log(blob);
+      };
+      xhr.open('GET', file.data().url);
+      xhr.send();
     });
     const file = new Blob(blobPart);
     if (message.type === "file" && fileInMessageSnap?.docs?.length! > 0) {
