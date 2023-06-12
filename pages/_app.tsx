@@ -2,26 +2,20 @@ import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import { useAuthState } from "react-firebase-hooks/auth";
 import Login from "./login";
-import { FC, ReactElement, ReactNode, useEffect, useState } from "react";
+import { ReactElement, ReactNode, useEffect } from "react";
 import createNewUser from "@/services/users/createNewUser";
 import "bootstrap/dist/css/bootstrap.css";
 import { auth, getMessagingToken, onMessageListener } from "@/firebase";
 import Loading from "@/components/Loading";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer, toast } from "react-toastify";
-import { useRouter } from "next/router";
 import { NextPage } from "next";
 import { config } from "@fortawesome/fontawesome-svg-core";
 import "../node_modules/@fortawesome/fontawesome-svg-core/styles.css";
 import requestPermission from "@/utils/requestPermission";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { io } from "socket.io-client";
 import { wrapper } from "../redux/store";
 import { Provider } from "react-redux";
-import { useDispatch, useSelector } from "react-redux";
-import { setInitialState } from "@/redux/appSlice";
-import getInitialState from "@/utils/getInitialState";
-import { IoProvider } from 'socket.io-react-hook';
 
 config.autoAddCss = false;
 
@@ -58,7 +52,7 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
         .catch((err) => console.log(err));
 
       socket.emit("login", { userId: user?.email });
-      
+
       // getNotification(user?.email)
       // const channel = new BroadcastChannel("notifications");
       // channel.addEventListener("message", (event) => {
@@ -135,10 +129,8 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
 
   return getLayout(
     <Provider store={store}>
-      <IoProvider>
-        <Component {...props.pageProps} />
-        <ToastContainer />
-      </IoProvider>
+      <Component {...props.pageProps} />
+      <ToastContainer />
     </Provider>
   );
 }

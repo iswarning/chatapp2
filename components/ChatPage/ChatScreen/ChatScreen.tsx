@@ -24,6 +24,17 @@ import {
   EndOfMessage,
   InputMessage,
 } from "./ChatScreenStyled";
+import { toast } from "react-toastify";
+import {
+  handleImageInMessage,
+  onImageChange,
+  pushUrlFileToFirestore,
+  pushUrlImageToFirestore,
+  sendNotification,
+  setSeenMessage,
+} from "../Functions";
+import JSZip from "jszip";
+import { randomUUID } from "crypto";
 
 export default function ChatScreen({ chat, messages }: any) {
   const [user] = useAuthState(auth);
@@ -123,70 +134,18 @@ export default function ChatScreen({ chat, messages }: any) {
     }
   };
 
-  const handleImageInMessage = () => {
-    const inputMsgElement = document.getElementById("input-message");
-    const listImage = inputMsgElement?.getElementsByTagName("img") ?? [];
-    let sizeInput = inputMsgElement?.childNodes?.length ?? 0;
-
-    let message = "";
-    let countImg = 0;
-    for (let i = 0; i < sizeInput; i++) {
-      switch (inputMsgElement?.childNodes[i].nodeName) {
-        case "#text":
-          message += inputMsgElement?.childNodes[i].nodeValue;
-          break;
-        case "IMG":
-          message += `<br>#img-msg-${countImg}<br>`;
-          countImg++;
-          break;
-        case "BR":
-          message += "<br><br>";
-          break;
-        case "DIV":
-          let childNodeDiv: any = inputMsgElement?.childNodes[i].childNodes;
-          for (const element of childNodeDiv) {
-            switch (element.nodeName) {
-              case "#text":
-                message += element.nodeValue + "<br>";
-                break;
-              case "IMG":
-                message += `<br>#img-msg-${countImg}<br>`;
-                countImg++;
-                break;
-              case "BR":
-                message += "<br><br>";
-                break;
-            }
-          }
-          break;
-      }
-    }
-
-    return { listImage, message };
-  };
-
-  const sendMessage = async (
-    e: any
-  ): Promise<any> => {
+  const sendMessage = async (e: any): Promise<any> => {
     setStatusSend("Sending...");
     e.preventDefault();
 
     let { listImage, message } = handleImageInMessage();
 
-    setSeenMessage();
+    setSeenMessage(messageSnapShot, messages, user?.email, chatId);
 
-    const messageDoc = await db
-      .collection("chats")
-      .doc(chatId)
-      .collection("messages")
-      .add({
-        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-        message: message,
-        user: user?.email,
-        type: listImage.length > 0 ? "text-image" : "text",
-        photoURL: "",
-        seen: [],
-      });
+    const { messageDoc } = await addMessageToFirebase(
+      message,
+      listImage?.length! > 0 ? "text-image" : "text"
+    );
 
     if (messageDoc) {
       const snap = await messageDoc.get();
@@ -209,13 +168,23 @@ export default function ChatScreen({ chat, messages }: any) {
                 },
                 (err) => console.log(err),
                 () => {
-                  pushUrlImageToFirestore(snap.id, index);
+                  pushUrlImageToFirestore(
+                    snap.id,
+                    index,
+                    chatId,
+                    scrollToBottom
+                  );
                 }
               );
           }
         )
       );
-      sendNotification(snap);
+      sendNotification(
+        snap,
+        chat,
+        user?.displayName,
+        recipientSnapshot?.docs?.[0]?.data().fcm_token
+      );
     }
 
     const element = document.getElementById("input-message");
@@ -225,44 +194,20 @@ export default function ChatScreen({ chat, messages }: any) {
     setStatusSend("Sent");
   };
 
-  const pushUrlImageToFirestore = (messId: any, index: number) => {
-    storage
-      .ref(`public/images/message/${messId}/#img-msg-${index}`)
-      .getDownloadURL()
-      .then(async (url) => {
-        await db
-          .collection("chats")
-          .doc(chatId)
-          .collection("messages")
-          .doc(messId)
-          .collection("imageInMessage")
-          .add({
-            url: url,
-            key: `#img-msg-${index}`,
-          });
-        scrollToBottom();
-      })
-      .catch((err) => console.log(err));
-  };
-
-  const sendNotification = (snap: any) => {
-    let bodyNotify: any;
-    if (chat.isGroup) {
-      if (snap.data().type === "text-image") {
-        bodyNotify = chat.name + " sent you a message ";
-      }
-      bodyNotify = chat.name + " : " + snap.data().message;
-    } else {
-      if (snap?.data().type === "text-image") {
-        bodyNotify = user?.displayName + " sent a message ";
-      }
-      bodyNotify = user?.displayName + " : " + snap.data().message;
-    }
-    sendNotificationFCM(
-      "New message !",
-      bodyNotify,
-      recipientSnapshot?.docs?.[0]?.data().fcm_token
-    ).catch((err) => console.log(err));
+  const addMessageToFirebase = async (message: string, typeMessage: string) => {
+    const messageDoc = await db
+      .collection("chats")
+      .doc(chatId)
+      .collection("messages")
+      .add({
+        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+        message: message,
+        user: user?.email,
+        type: typeMessage,
+        photoURL: "",
+        seen: [],
+      });
+    return { messageDoc };
   };
 
   // const handleVideoCall = async() => {
@@ -299,35 +244,121 @@ export default function ChatScreen({ chat, messages }: any) {
     setShowEmoji(false);
   };
 
-  const setSeenMessage = () => {
-    if (messageSnapShot) {
-      messageSnapShot?.docs?.forEach((m) => async () => {
-        const msgRef = db
-          .collection("chats")
-          .doc(chatId)
-          .collection("messages")
-          .doc(m.id);
-        const res = await msgRef.get();
-        if (res?.data()?.user === user?.email) return;
-        if (res?.data()?.seen?.includes(user?.email)) return;
-        let result = res?.data()?.seen;
-        result.push(user?.email);
-        await msgRef.update({ seen: result });
-      });
-    } else {
-      messages?.forEach((m: any) => async () => {
-        const msgRef = db
-          .collection("chats")
-          .doc(chatId)
-          .collection("messages")
-          .doc(m.id);
-        const res = await msgRef.get();
-        if (res?.data()?.user === user?.email) return;
-        if (res?.data()?.seen?.includes(user?.email)) return;
-        let result = res?.data()?.seen;
-        result.push(user?.email);
-        await msgRef.update({ seen: result });
-      });
+  setSeenMessage(messageSnapShot, messages, user?.email, chatId);
+
+  const onAttachFile = async (event: any) => {
+    if (event.target.files && event.target.files[0]) {
+      let file: Blob = event.target.files[0];
+      let fileType = file.name.split(".").pop();
+      let validImageTypes = [
+        "jpg",
+        "png",
+        "dotx",
+        "pdf",
+        "mp3",
+        "mp4",
+        "csv",
+        "xlsx",
+        "txt",
+        "docx",
+        "dot",
+        "eml",
+        "html",
+        "css",
+        "js",
+        "rar",
+        "iso",
+        "xml",
+        "pptx",
+        "zip",
+        "exe",
+      ];
+      let fileSize = file.size / 1024 / 1024;
+      if (!validImageTypes.includes(fileType ?? "")) {
+        toast("File upload invalid !", {
+          hideProgressBar: true,
+          type: "error",
+          autoClose: 5000,
+        });
+        return;
+      }
+      if (fileSize > 100) {
+        toast("Size file no larger than 100 MB !", {
+          hideProgressBar: true,
+          type: "error",
+          autoClose: 5000,
+        });
+        return;
+      }
+      let chunkSize = 5 * 1024 * 1024; // 5 MB chunk size
+      let chunks = [];
+      let start = 0;
+      let end = chunkSize;
+      while (start < file.size) {
+        chunks.push(file.slice(start, end));
+        start = end;
+        end = start + chunkSize;
+      }
+      const { messageDoc } = await addMessageToFirebase("#file-msg-0", "file");
+      await db
+        .collection("chats")
+        .doc(chatId)
+        .collection("messages")
+        .doc(messageDoc.id)
+        .collection("fileInMessage")
+        .add({
+          key: "#file-msg-0",
+          size: fileSize,
+          name: file.name,
+        });
+      await Promise.all(
+        Array.prototype.map.call(chunks, async (chunk: Blob, index) => {
+          let key = `chunk-${index}`;
+          storage
+            .ref(`public/files/message/${messageDoc.id}/#file-msg-0/${key}`)
+            .put(chunk)
+            .on(
+              "state_changed",
+              (snapshot) => {
+                const prog = Math.round(
+                  (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+                );
+                setProgress(prog);
+              },
+              (err) => console.log(err),
+              () => {
+                // pushUrlFileToFirestore(
+                //   messageDoc.id,
+                //   chatId,
+                //   scrollToBottom,
+                //   key,
+                //   chunk.size,
+                //   chunk.name
+                // );
+                storage
+                  .ref(
+                    `public/files/message/${messageDoc.id}/#file-msg-0/${key}`
+                  )
+                  .getDownloadURL()
+                  .then(async (url) => {
+                    await db
+                      .collection("chats")
+                      .doc(chatId)
+                      .collection("messages")
+                      .doc(messageDoc.id)
+                      .collection("fileInMessage")
+                      .add({
+                        url: url,
+                        key: key,
+                        size: chunk.size,
+                      });
+                    scrollToBottom();
+                  })
+                  .catch((err) => console.log(err));
+              }
+            );
+        })
+      );
     }
   };
 
@@ -381,37 +412,48 @@ export default function ChatScreen({ chat, messages }: any) {
           />
         </div>
         <div className="pt-4 pb-10">
-          <div className="write bg-white shadow flex rounded-lg">              
+          <div className="write bg-white shadow flex rounded-lg">
             <div
-                className="text-center pt-4 pl-4 cursor-pointer"
-                onClick={() => setShowEmoji(!showEmoji)}
-              >
-                <span className="text-gray-400 hover:text-gray-800">
-                  <span className="align-text-bottom">
-                    <TagFacesIcon fontSize="small" />
-                  </span>
+              className="text-center pt-4 pl-4 cursor-pointer"
+              onClick={() => setShowEmoji(!showEmoji)}
+            >
+              <span className="text-gray-400 hover:text-gray-800">
+                <span className="align-text-bottom">
+                  <TagFacesIcon fontSize="small" />
                 </span>
-              </div>
+              </span>
+            </div>
             <div className="flex-1">
               <InputMessage
                 contentEditable="true"
                 className="w-full block outline-none py-4 px-4 bg-transparent"
-                style={{ maxHeight: "80px" }}
-                onClick={setSeenMessage}
+                style={{ maxHeight: "160px" }}
+                onClick={() => setSeenMessage}
                 id="input-message"
                 placeholder="Type message..."
               />
             </div>
 
             <div className="p-2 flex content-center items-center">
-
               <div
                 className="text-center p-2 cursor-pointer"
                 onClick={() => sendMessage}
               >
                 <span className="text-gray-400 hover:text-gray-800">
                   <span className="align-text-bottom">
-                    <InsertPhotoIcon fontSize="small" />
+                    <input
+                      type="file"
+                      hidden
+                      id="upload-image"
+                      onChange={onImageChange}
+                      multiple
+                    />
+                    <InsertPhotoIcon
+                      fontSize="small"
+                      onClick={() =>
+                        document.getElementById("upload-image")?.click()
+                      }
+                    />
                   </span>
                 </span>
               </div>
@@ -421,7 +463,18 @@ export default function ChatScreen({ chat, messages }: any) {
               >
                 <span className="text-gray-400 hover:text-gray-800">
                   <span className="align-text-bottom">
-                    <AttachFileIcon fontSize="small" />
+                    <input
+                      type="file"
+                      hidden
+                      id="upload-file"
+                      onChange={onAttachFile}
+                    />
+                    <AttachFileIcon
+                      fontSize="small"
+                      onClick={() =>
+                        document.getElementById("upload-file")?.click()
+                      }
+                    />
                   </span>
                 </span>
               </div>
