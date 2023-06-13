@@ -13,15 +13,19 @@ import { useSelector } from "react-redux";
 import { selectAppState } from "@/redux/appSlice";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
+import Image from "next/image";
+import TimeAgo from "timeago-react";
 
 export default function Message({
   message,
   photoURL,
   chatId,
+  showAvatar
 }: {
   message: MessageType;
   photoURL: string;
   chatId: string;
+  showAvatar: string | null
 }) {
   const [userLoggedIn] = useAuthState(auth);
   const [isShown, setIsShown] = useState(false);
@@ -197,10 +201,20 @@ export default function Message({
 </div> */}
 </div>
 <div className="clear-both mb-2"></div>
-<div className="text-gray-600 text-xs text-right">1 mins ago</div>
+{
+  showAvatar && showAvatar === message.id ? <div className="text-gray-600 text-xs text-right">{ <TimeAgo datetime={(message.timestamp as any).toDate()} /> }</div> : null
+}
 </div>
 <div className="chat-text-box__photo w-10 h-10 hidden sm:block flex-none image-fit relative ml-4">
-<img alt="Topson Messenger Tailwind HTML Admin Template" className="rounded-full" src="https://topson.left4code.com/dist/images/profile-1.jpg"/>
+{
+  showAvatar && showAvatar === message.id && userLoggedIn?.photoURL ? <Image
+    src={userLoggedIn?.photoURL!}
+    width={48}
+    height={48}
+    alt=""
+    className="rounded-full"
+  /> : null
+}
 </div>
 </div>
 <div className="clear-both"></div>
@@ -305,7 +319,15 @@ export default function Message({
             <div className="-intro-x chat-text-box flex items-end float-left mb-4">
               {/* avatar */}
 <div className="chat-text-box__photo w-10 h-10 hidden sm:block flex-none image-fit relative mr-4">
-<img alt="Topson Messenger Tailwind HTML Admin Template" className="rounded-full" src="https://topson.left4code.com/dist/images/profile-9.jpg"/>
+{
+  showAvatar && showAvatar === message.id && photoURL ? <Image
+    src={photoURL}
+    width={48}
+    height={48}
+    alt=""
+    className="rounded-full"
+  /> : null
+}
 </div>
 <div className="w-full">
 <div>
@@ -351,7 +373,9 @@ export default function Message({
 </div> */}
 </div>
 <div className="clear-both mb-2"></div>
-<div className="text-gray-600 text-xs">2 mins ago</div>
+{
+  showAvatar && showAvatar === message.id ? <div className="text-gray-600 text-xs">{ <TimeAgo datetime={(message.timestamp as any).toDate()} /> }</div> : null
+}
 </div>
 </div>
 <div className="clear-both"></div>

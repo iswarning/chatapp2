@@ -35,8 +35,11 @@ import {
 } from "../Functions";
 import { useSelector } from 'react-redux';
 import { selectAppState } from "@/redux/appSlice";
+import { ChatType } from "@/types/ChatType";
+import { MessageType } from "@/types/MessageType";
+import Image from "next/image";
 
-export default function ChatScreen({ chat }: any) {
+export default function ChatScreen({ chat, messages }: { chat: ChatType, messages: Array<MessageType> }) {
   const [user] = useAuthState(auth);
   const endOfMessageRef: any = useRef(null);
   const [showEmoji, setShowEmoji] = useState(false);
@@ -106,21 +109,19 @@ export default function ChatScreen({ chat }: any) {
     }
   };
 
+  const checkShowAvatar = (data: any, index: number) => 
+    data[index]?.user !== data[index+1]?.user
+
   const showMessage = () => {
-    if (messageSnapShot) {
-      return messageSnapShot?.docs?.map((message: any) => (
-        <Message
-          key={message.id}
-          message={{
-            id: message.id,
-            ...message.data(),
-            timestamp: message?.timestamp?.toDate().getTime(),
-          }}
-          photoURL={getRecipientAvatar()}
-          chatId={chatId}
-        />
-      ));
-    }
+    return messages?.map((message: MessageType, index) => (
+      <Message
+        key={message.id}
+        message={message}
+        photoURL={getRecipientAvatar()}
+        chatId={chatId}
+        showAvatar={checkShowAvatar(messages, index) ? message.id : null}
+      />
+    ));
   };
 
   const sendMessage = async (e: any): Promise<any> => {
@@ -351,6 +352,17 @@ export default function ChatScreen({ chat }: any) {
     }
   };
 
+  
+  const handleGroupOnline = (): boolean => {
+    let amountUserOnline = 0;
+    chat.users.forEach((userChat: string) => {
+      if(appState.userOnline?.find((u: string) => u === userChat && u !== user?.email)?.length! > 0 && user !== user?.email) {
+        amountUserOnline++
+      }
+    })
+    return amountUserOnline > 0;
+  }
+
   return (
     //     <VideoCallContainer isOpen={isOpen} >
     //         <VideoCallScreen statusCall='Calling' photoURL={chat.isGroup ? chat.photoURL : recipientUser.photoURL} sender={user?.email} recipient={getRecipientEmail(chat.users, user)} chatId={chatId} onClose={() => setIsOpen(false)} isGroup={chat.isGroup} />
@@ -497,13 +509,39 @@ export default function ChatScreen({ chat }: any) {
         <div className="intro-y box border border-theme-3 dark:bg-dark-2 dark:border-dark-2 flex items-center px-5 py-4">
           <div className="flex items-center mr-auto">
             <div className="w-12 h-12 flex-none image-fit mr-1">
-              <img alt="Topson Messenger Tailwind HTML Admin Template" className="rounded-full" src="https://topson.left4code.com/dist/images/profile-9.jpg"/>
-              <div className="bg-green-500 w-3 h-3 absolute right-0 top-0 rounded-full border-2 border-white"></div>
+              <Image 
+                src={getRecipientAvatar()}
+                width={48}
+                height={48}
+                alt=""
+                className="rounded-full"
+              />
+              {!chat.isGroup ? (
+                appState.userOnline?.find((u: any) => u === recipientSnapshot?.docs?.[0]?.data().email) ? (
+                  <div className="border-white w-3 h-3 absolute right-0 top-0 rounded-full border-2" style={{background: 'green'}}></div>
+                ) : (
+                  <span className="border-white w-3 h-3 absolute right-0 top-0 rounded-full border-2" style={{background: 'gray'}}></span>
+                )
+              ) : handleGroupOnline() ? (
+                <div className="border-white w-3 h-3 absolute right-0 top-0 rounded-full border-2" style={{background: 'green'}}></div>
+              ) : (
+                <span className="border-white w-3 h-3 absolute right-0 top-0 rounded-full border-2"style={{background: 'gray'}}></span>
+              )}
             </div>
             <div className="ml-2 overflow-hidden">
-              <a href="javascript:;" className="text-base font-medium">{recipientSnapshot?.docs?.[0].data().fullName}</a>
+              <a href="javascript:;" className="text-base font-medium">{ chat.isGroup ? "Group: " + chat.name : recipientSnapshot?.docs?.[0].data().fullName}</a>
               <div className="text-gray-600">
-                {appState.userOnline.find((userOn) => userOn === recipientSnapshot?.docs?.[0]?.data()?.email)}
+              {!chat.isGroup ? (
+                appState.userOnline?.find((u: any) => u === recipientSnapshot?.docs?.[0]?.data().email) ? (
+                  "Online"
+                ) : (
+                  "Offline"
+                )
+              ) : handleGroupOnline() ? (
+                "Online"
+              ) : (
+                "Offline"
+              )}
               </div>
             </div>
           </div>

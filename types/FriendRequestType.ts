@@ -5,7 +5,7 @@ export interface FriendRequestType {
   id: string;
   senderEmail: string;
   recipientEmail: string;
-  createdAt: string;
+  createdAt: any;
   userInfo?: UserType;
 }
 

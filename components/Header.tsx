@@ -7,6 +7,7 @@ import { useCollection } from "react-firebase-hooks/firestore";
 import { auth, db } from "@/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
 import getRecipientEmail from "@/utils/getRecipientEmail";
+import Image from "next/image";
 
 export default function Header() {
     
@@ -74,14 +75,14 @@ export default function Header() {
         <div className="-intro-y top-bar__content bg-white border-theme-3 dark:bg-dark-2 dark:border-dark-2 border-b w-full h-full flex px-5">
         <a className="hidden md:flex items-center h-full mr-auto" href="http://localhost/page/dashboard">
         <img alt="Topson Messenger Tailwind HTML Admin Template" className="h-8" src="https://topson.left4code.com/dist/images/logo.svg"/>
-        <div className="text-base font-light ml-4"> <span className="font-medium">Topson</span> Messenger </div>
+        <div className="text-base font-light ml-4"> <span className="font-medium">Clone</span> Messenger </div>
         </a>
         <a className="mobile-menu-toggler flex md:hidden items-center h-full mr-auto px-5 -ml-5" href="javascript:;"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" className="feather feather-bar-chart-2 w-5 h-5 transform rotate-90"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg> </a>
         <div className="h-full flex items-center">
         <div className="mr-3">Dark Mode</div>
         <input className="form-check-switch" type="checkbox" id="dark-mode-switcher"/>
         </div>
-        <div className="hidden md:flex items-center px-5"> <a href="javascript:;" data-toggle="modal" data-target="#invite-friends-modal" className="btn btn-primary">Invite Friends</a> </div>
+        <div className="hidden md:flex items-center px-5"></div>
         <div className="notification-dropdown dropdown">
         <a href="javascript:;" className="notification-dropdown__toggler text-gray-600 border-theme-7 dark:border-dark-4 dark:text-gray-300 dropdown-toggle h-full flex items-center px-5 relative -mr-3 md:mr-0 md:border-l md:border-r">
         <div className="relative">
@@ -163,11 +164,19 @@ export default function Header() {
         <div className="account-dropdown dropdown relative">
         <a href="javascript:;" className="h-full dropdown-toggle flex items-center pl-5">
         <div className="w-8 h-8 image-fit">
-        <img alt="Topson Messenger Tailwind HTML Admin Template" className="rounded-full shadow-md" src="https://topson.left4code.com/dist/images/profile-14.jpg"/>
+        {
+            user?.photoURL ? <Image 
+                src={user?.photoURL!}
+                width={48}
+                height={48}
+                alt=""
+                className="rounded-full"
+            /> : null
+        }
         </div>
         <div className="hidden md:block ml-3">
-        <div className="w-28 truncate font-medium leading-tight">Keanu Reeves</div>
-        <div className="account-dropdown__info text-xs text-gray-600">Frontend Engineer</div>
+        <div className="w-28 truncate font-medium leading-tight">{user?.displayName}</div>
+        <div className="account-dropdown__info text-xs text-gray-600">{user?.email}</div>
         </div>
         </a>
         <div className="dropdown-content dropdown-menu absolute w-56 top-0 right-0 z-20">

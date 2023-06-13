@@ -78,14 +78,14 @@ export default function SidebarMessage() {
 </div>
 <div className="intro-y flex-none overflow-x-auto overflow-y-hidden scrollbar-hidden">
 <div className="flex mt-6">
-{appState.userOnline.length > 0
+{appState.userOnline.length > 0 && !appState.userOnline.includes(user?.email!)
   ? appState.userOnline.map((userOn) => (
       <UserOnlineComponent
         key={uuidv4()}
         userOn={userOn}
       />
     ))
-: null}
+: <i>No user online...</i>}
 
 </div>
 </div>
@@ -96,7 +96,6 @@ export default function SidebarMessage() {
       <ChatComponent
         key={chat.id}
         chat={MapChatData(chat)}
-        onShowMessage={() => showMessage(chat)}
         active={chatInfo?.id === chat.id}
       />
     ))

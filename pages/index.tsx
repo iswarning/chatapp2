@@ -538,7 +538,7 @@ const Page: NextPageWithLayout = () => {
 </div> */}
 <SidebarMessage />
 {
-  Object.keys(appState.chatData).length > 0 ? <ChatScreen chat={appState.chatData} /> : null
+  Object.keys(appState.chatData).length > 0 ? <ChatScreen chat={appState.chatData} messages={appState.chatData.messages} /> : null
 }
 {/* <div className="info-content col-span-12 xl:col-span-3 flex flex-col overflow-hidden pl-6 xl:pl-0 pr-6">
 <div className="overflow-y-auto scrollbar-hidden py-6">

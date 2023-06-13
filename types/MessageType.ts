@@ -11,7 +11,7 @@ export interface MessageType {
     seen: Array<string>
     reaction?: Array<ReactionType>
     imageInMessage?: Array<ImageInMessageType>
-    timestamp: string
+    timestamp: any
     userInfo?: UserType
 }
 
