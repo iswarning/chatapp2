@@ -39,26 +39,11 @@ export function setSeenMessage(
   messageSnapShot:
     | firebase.firestore.QuerySnapshot<firebase.firestore.DocumentData>
     | undefined,
-  messages: Array<MessageType>,
   userEmail: string | null | undefined,
   chatId: string
 ) {
   if (messageSnapShot) {
     messageSnapShot?.docs?.forEach((m) => async () => {
-      const msgRef = db
-        .collection("chats")
-        .doc(chatId)
-        .collection("messages")
-        .doc(m.id);
-      const res = await msgRef.get();
-      if (res?.data()?.user === userEmail) return;
-      if (res?.data()?.seen?.includes(userEmail)) return;
-      let result = res?.data()?.seen;
-      result.push(userEmail);
-      await msgRef.update({ seen: result });
-    });
-  } else {
-    messages?.forEach((m: MessageType) => async () => {
       const msgRef = db
         .collection("chats")
         .doc(chatId)

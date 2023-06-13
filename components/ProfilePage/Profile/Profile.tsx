@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth, db } from "@/firebase";
-import { CustomAvatar } from "../../ChatPage/Chat";
+import { CustomAvatar } from "../../ChatPage/ChatComponent";
 import { toast } from "react-toastify";
 import styled from "styled-components";
 import { useRouter } from "next/router";

@@ -1,10 +1,10 @@
-import "@/styles/globals.css";
+// import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import { useAuthState } from "react-firebase-hooks/auth";
 import Login from "./login";
 import { ReactElement, ReactNode, useEffect } from "react";
 import createNewUser from "@/services/users/createNewUser";
-import "bootstrap/dist/css/bootstrap.css";
+// import "bootstrap/dist/css/bootstrap.css";
 import { auth, getMessagingToken, onMessageListener } from "@/firebase";
 import Loading from "@/components/Loading";
 import "react-toastify/dist/ReactToastify.css";

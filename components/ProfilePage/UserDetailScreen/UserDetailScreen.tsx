@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import MailIcon from "@mui/icons-material/Mail";
 import LocalPhoneIcon from "@mui/icons-material/LocalPhone";
-import { CustomAvatar } from "../../ChatPage/Chat";
+import { CustomAvatar } from "../../ChatPage/ChatComponent";
 import styled from "styled-components";
 
 function UserDetailScreen({ userInfo }: any) {

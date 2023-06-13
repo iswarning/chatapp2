@@ -5,7 +5,7 @@ import { auth, db } from "@/firebase";
 import ChatScreen from "../ChatPage/ChatScreen/ChatScreen";
 import { useQuery } from "@tanstack/react-query";
 import Friend from "./Friend/Friend";
-import Chat from "../ChatPage/Chat";
+import Chat from "../ChatPage/ChatComponent";
 
 export default function SidebarAllFriend() {
   const [user] = useAuthState(auth);
