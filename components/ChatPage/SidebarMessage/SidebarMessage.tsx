@@ -78,13 +78,13 @@ export default function SidebarMessage() {
 </div>
 <div className="intro-y flex-none overflow-x-auto overflow-y-hidden scrollbar-hidden">
 <div className="flex mt-6">
-{appState.userOnline.length > 0 && !appState.userOnline.includes(user?.email!)
+{appState.userOnline.length > 0
   ? appState.userOnline.map((userOn) => (
-      <UserOnlineComponent
+    userOn !== user?.email ? <UserOnlineComponent
         key={uuidv4()}
         userOn={userOn}
-      />
-    ))
+      /> : null
+    ))  
 : <i>No user online...</i>}
 
 </div>

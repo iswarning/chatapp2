@@ -2,12 +2,14 @@ import { createSlice } from "@reduxjs/toolkit";
 import { AppState } from "./store";
 import { HYDRATE } from "next-redux-wrapper";
 import { ChatType } from "@/types/ChatType";
+import { MessageType } from "@/types/MessageType";
 
 // Type for our state
 export interface InitialState {
   data: {
-    userOnline: Array<string>;
-    chatData: ChatType
+    userOnline: Array<string>,
+    chatData: ChatType,
+    messageData: Array<MessageType>,
   };
 }
 
@@ -15,7 +17,8 @@ export interface InitialState {
 const initialState: InitialState = {
   data: {
     userOnline: new Array<string>(),
-    chatData: {} as ChatType
+    chatData: {} as ChatType,
+    messageData: new Array<MessageType>(),
   },
 };
 
@@ -30,6 +33,9 @@ export const appSlice = createSlice({
     },
     setChatData(state, action) {
       state.data.chatData = action.payload
+    },
+    setMessageData(state, action) {
+      state.data.messageData = action.payload
     }
   },
 
@@ -44,7 +50,7 @@ export const appSlice = createSlice({
   },
 });
 
-export const { setUserOnline, setChatData } = appSlice.actions;
+export const { setUserOnline, setChatData, setMessageData } = appSlice.actions;
 
 export const selectAppState = (state: AppState) => state.app.data;
 

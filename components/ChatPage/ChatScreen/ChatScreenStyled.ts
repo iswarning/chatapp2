@@ -99,7 +99,6 @@ export const InputMessage = styled.div`
   padding: 20px;
   overflow: hidden;
   max-height: 200px;
-  overflow-y: scroll;
   border: none;
   background-position: center;
   object-fit: cover;

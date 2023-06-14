@@ -19,5 +19,26 @@ const getEmojiData = [
     0x1F62A,
 ]
 
+const getEmojiIcon = [
+    '👍',
+    '😄',
+    '😆',
+    '🤣',
+    '🙂',
+    '😍',
+    '😀',
+    '😅',
+    '😂',
+    '🥰',
+    '😘',
+    '😋',
+    '🤗',
+    '🙄',
+    '😑',
+    '😌',
+    '😴',
+    '😪',
+]
 
-export default getEmojiData;
+
+export { getEmojiData, getEmojiIcon};

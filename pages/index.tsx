@@ -12,6 +12,7 @@ import { selectAppState, setUserOnline } from "@/redux/appSlice";
 import { io } from "socket.io-client";
 import ChatScreen from "@/components/ChatPage/ChatScreen/ChatScreen";
 import { useSelector } from 'react-redux'
+import { MessageType } from "@/types/MessageType";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -22,7 +23,8 @@ const Page: NextPageWithLayout = () => {
   
   const dispatch = useDispatch();
   const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
-  const appState = useSelector(selectAppState)
+  const appState = useSelector(selectAppState);
+  const [messData, setMessData] = useState<Array<MessageType>>()
 
   useEffect(() => {
     console.log(appState)
@@ -538,7 +540,7 @@ const Page: NextPageWithLayout = () => {
 </div> */}
 <SidebarMessage />
 {
-  Object.keys(appState.chatData).length > 0 ? <ChatScreen chat={appState.chatData} messages={appState.chatData.messages} /> : null
+  messData?.length! > 0 ? <ChatScreen chat={appState.chatData} messages={appState.messageData} /> : null
 }
 {/* <div className="info-content col-span-12 xl:col-span-3 flex flex-col overflow-hidden pl-6 xl:pl-0 pr-6">
 <div className="overflow-y-auto scrollbar-hidden py-6">

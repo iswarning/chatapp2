@@ -3,9 +3,8 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { CustomAvatar } from "../ChatComponent";
 import styled from "styled-components";
 import { lazy, useState } from "react";
-import getEmojiData from "@/utils/getEmojiData";
+import {getEmojiData, getEmojiIcon} from "@/utils/getEmojiData";
 import { useCollection } from "react-firebase-hooks/firestore";
-import firebase from "firebase";
 import sendNotificationFCM from "@/utils/sendNotificationFCM";
 import getRecipientEmail from "@/utils/getRecipientEmail";
 import { MessageType } from "@/types/MessageType";
@@ -15,14 +14,17 @@ import UploadFileIcon from "@mui/icons-material/UploadFile";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import Image from "next/image";
 import TimeAgo from "timeago-react";
+import firebase from "firebase";
 
 export default function Message({
   message,
+  timestamp,
   photoURL,
   chatId,
   showAvatar
 }: {
   message: MessageType;
+  timestamp: any;
   photoURL: string;
   chatId: string;
   showAvatar: string | null
@@ -100,59 +102,72 @@ export default function Message({
 
   const handleMessage = () => {
     let messageExport: string = message.message;
-    // if (message.type === "text-image") {
-    //   imageInMessageSnap?.docs?.forEach((img) => {
-    //     messageExport = messageExport.replace(
-    //       img.data().key,
-    //       `<img 
-    //         loading="lazy"
-    //         decoding="async" 
-    //         src="${img.data().url}" 
-    //         style="color: transparent;"/>`
-    //     );
-    //   });
-    // }
-    return <div dangerouslySetInnerHTML={{ __html: messageExport }}></div>;
+    if (message.type === "text-image") {
+      imageInMessageSnap?.docs?.forEach((img) => {
+        messageExport = messageExport.replace(
+          img.data().key,
+          `<img 
+            loading="lazy"
+            decoding="async" 
+            src="${img.data().url}" 
+            style="color: transparent;"/>`
+        );
+      });
+    }
+    return <div 
+            dangerouslySetInnerHTML={{ __html: messageExport }} 
+            style={{fontSize: message.type === 'text' && getEmojiIcon.includes(message.message) && message.message.length === 2 ? '50px' : '' }}>
+            </div>;
   };
 
   const handleFile = () => {
-    const blobPart: Blob[] = [];
-    fileInMessageSnap?.docs?.forEach((file) => {
-      // `url` is the download URL for 'images/stars.jpg'
+    let storageRef = firebase.storage().ref(`public/images/message/${message.id}/#file-msg-0`)
+    storageRef.listAll().then((allFile) => {
+      allFile.items.forEach((file) => {
+        file.getDownloadURL().then((url) => {
+          console.log(url)
+          return <div></div>
+        }).catch(er => console.log(er))
+      })
+    }).catch(er => console.log(er))
+    return <div></div>
+    // const blobPart: Blob[] = [];
+    // fileInMessageSnap?.docs?.forEach((file) => {
+    //   // `url` is the download URL for 'images/stars.jpg'
 
-      // This can be downloaded directly:
-      const xhr = new XMLHttpRequest();
-      xhr.responseType = 'blob';
-      xhr.onload = (event) => {
-        const blob = xhr.response;
-        console.log(blob);
-      };
-      xhr.open('GET', file.data().url);
-      xhr.send();
-    });
-    const file = new Blob(blobPart);
-    if (message.type === "file" && fileInMessageSnap?.docs?.length! > 0) {
-      return (
-        <>
-          <div className="flex m-2">
-            <div className="mx-2">
-              <UploadFileIcon fontSize="large" />
-            </div>
-            <span className="text-2xl mx-2">{file.name}</span>
-            <div className="cursor-pointer mx-2">
-              <FileDownloadIcon fontSize="large" />
-            </div>
-            <br />
-          </div>
-          <div className="flex ml-6">
-            <small>
-              Size: {file.size}
-              {" MB"}
-            </small>
-          </div>
-        </>
-      );
-    }
+    //   // This can be downloaded directly:
+    //   const xhr = new XMLHttpRequest();
+    //   xhr.responseType = 'blob';
+    //   xhr.onload = (event) => {
+    //     const blob = xhr.response;
+    //     console.log(blob);
+    //   };
+    //   xhr.open('GET', file.data().url);
+    //   xhr.send();
+    // });
+    // const file = new Blob(blobPart);
+    // if (message.type === "file" && fileInMessageSnap?.docs?.length! > 0) {
+    //   return (
+    //     <>
+    //       <div className="flex m-2">
+    //         <div className="mx-2">
+    //           <UploadFileIcon fontSize="large" />
+    //         </div>
+    //         <span className="text-2xl mx-2">{file.name}</span>
+    //         <div className="cursor-pointer mx-2">
+    //           <FileDownloadIcon fontSize="large" />
+    //         </div>
+    //         <br />
+    //       </div>
+    //       <div className="flex ml-6">
+    //         <small>
+    //           Size: {file.size}
+    //           {" MB"}
+    //         </small>
+    //       </div>
+    //     </>
+    //   );
+    // }
   };
 
   return (
@@ -165,6 +180,7 @@ export default function Message({
 <div className="w-full">
 <div>
 <div className="chat-text-box__content flex items-center float-right">
+{/* Message action */}
 <div className="hidden sm:block dropdown relative mr-3 mt-3">
 <a href="javascript:;" className="dropdown-toggle w-4 h-4"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
 <div className="dropdown-menu w-40">
@@ -174,6 +190,7 @@ export default function Message({
 </div>
 </div>
 </div>
+{/* Message content */}
 <div className="box leading-relaxed bg-theme-1 text-opacity-80 text-white px-4 py-3 mt-3"> {handleMessage()} </div>
 </div>
 {/* <div className="clear-both"></div>
@@ -202,13 +219,13 @@ export default function Message({
 </div>
 <div className="clear-both mb-2"></div>
 {
-  showAvatar && showAvatar === message.id ? <div className="text-gray-600 text-xs text-right">{ <TimeAgo datetime={(message.timestamp as any).toDate()} /> }</div> : null
+  showAvatar && showAvatar === message.id ? <div className="text-gray-600 text-xs text-right">{ <TimeAgo datetime={timestamp} /> }</div> : null
 }
 </div>
 <div className="chat-text-box__photo w-10 h-10 hidden sm:block flex-none image-fit relative ml-4">
 {
   showAvatar && showAvatar === message.id && userLoggedIn?.photoURL ? <Image
-    src={userLoggedIn?.photoURL!}
+    src={userLoggedIn?.photoURL}
     width={48}
     height={48}
     alt=""
@@ -331,13 +348,23 @@ export default function Message({
 </div>
 <div className="w-full">
 <div>
-{/* message */}
 <div className="chat-text-box__content flex items-center float-left">
-<div className="box leading-relaxed dark:text-gray-300 text-gray-700 px-4 py-3 mt-3">{handleMessage()}</div>
-<div className="hidden sm:block dropdown relative ml-3 mt-3">
+{/* Message action */}
+<div className="hidden sm:block dropdown relative mr-3 mt-3">
 <a href="javascript:;" className="dropdown-toggle w-4 h-4"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
 <div className="dropdown-menu w-40">
 <div className="dropdown-menu__content box dark:bg-dark-1 p-2">
+<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" className="feather feather-corner-up-left w-4 h-4 mr-2"><polyline points="9 14 4 9 9 4"></polyline><path d="M20 20v-7a4 4 0 0 0-4-4H4"></path></svg> Reply </a>
+<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" className="feather feather-trash w-4 h-4 mr-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> Delete </a>
+</div>
+</div>
+</div>
+{/* Message content */}
+<div className="box leading-relaxed dark:text-gray-300 text-gray-700 px-4 py-3 mt-3">{handleMessage()}</div>
+<div className="hidden sm:block dropdown relative ml-3 mt-3">
+<a href="javascript:;" className="dropdown-toggle w-4 h-4"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
+<div className="w-40">
+<div className="box dark:bg-dark-1 p-2">
 <a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" className="feather feather-corner-up-left w-4 h-4 mr-2"><polyline points="9 14 4 9 9 4"></polyline><path d="M20 20v-7a4 4 0 0 0-4-4H4"></path></svg> Reply </a>
 <a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" className="feather feather-trash w-4 h-4 mr-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> Delete </a>
 </div>
@@ -374,11 +401,11 @@ export default function Message({
 </div>
 <div className="clear-both mb-2"></div>
 {
-  showAvatar && showAvatar === message.id ? <div className="text-gray-600 text-xs">{ <TimeAgo datetime={(message.timestamp as any).toDate()} /> }</div> : null
+  showAvatar && showAvatar === message.id ? <div className="text-gray-600 text-xs">{ <TimeAgo datetime={timestamp} /> }</div> : null
 }
 </div>
 </div>
-<div className="clear-both"></div>
+            <div className="clear-both"></div>
           </>
         )
       }
