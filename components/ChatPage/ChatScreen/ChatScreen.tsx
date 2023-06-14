@@ -34,8 +34,8 @@ import {
   sendNotification,
   setSeenMessage,
 } from "../Functions";
-import { useSelector } from 'react-redux';
-import { selectAppState } from "@/redux/appSlice";
+import { useSelector, useDispatch } from 'react-redux';
+import { pushMessage, selectAppState, setMessageData } from "@/redux/appSlice";
 import { ChatType } from "@/types/ChatType";
 import { MapMessageData, MessageType } from "@/types/MessageType";
 import Image from "next/image";
@@ -44,6 +44,17 @@ import useComponentVisible from "@/hooks/useComponentVisible";
 import styled from "styled-components";
 import { getImageTypeFileValid } from "@/utils/getImageTypeFileValid";
 import DropdownAttach from "@/components/DropdownAttach";
+import { useQuery } from "react-query";
+
+const getMessage = async (id: string) => {
+  const snap = await db
+    .collection("chats")
+    .doc(id)
+    .collection("messages")
+    .orderBy("timestamp")
+    .get();
+  return snap;
+};
 
 export default function ChatScreen({ chat, messages }: { chat: ChatType, messages: Array<MessageType> | undefined }) {
   const [user] = useAuthState(auth);
@@ -55,8 +66,9 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
   const [chatId, setChatId] = useState(chat.id);
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
-  
-
+  const [messData,setMessData] = useState(messages)
+  // const { data, status } = useQuery("getMessData", getMessage(chat.id))
+  const dispatch = useDispatch()
   const appState = useSelector(selectAppState)
 
   const [messageSnapShot] = useCollection(
@@ -72,6 +84,8 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
       .collection("users")
       .where("email", "==", getRecipientEmail(chat.users, user))
   );
+
+  
 
   useEffect(() => {
     // getRecipientUser().catch((err) => console.log(err))
@@ -98,7 +112,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
     // return () => {
     //     socket.disconnect()
     // }
-  }, [messageSnapShot]);
+  }, [messages]);
 
   const scrollToBottom = () => {
     endOfMessageRef.current.scrollIntoView({ behavior: "smooth" });
@@ -116,18 +130,18 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
   };
 
   const showMessage = () => {
-    if (messageSnapShot) {
-      return messageSnapShot?.docs?.map((message, index) => (
-        <Message
-          key={message?.id}
-          message={MapMessageData(message)}
-          timestamp={message?.data()?.timestamp?.toDate()}
-          photoURL={getRecipientAvatar()}
-          chatId={chatId}
-          showAvatar={messageSnapShot?.docs[index]?.data()?.user !== messageSnapShot?.docs[index+1]?.data()?.user ? message.id : null}
-        />
-      ));
-    } else {
+    // if (messageSnapShot) {
+    //   return messageSnapShot?.docs?.map((message, index) => (
+    //     <Message
+    //       key={message?.id}
+    //       message={MapMessageData(message)}
+    //       timestamp={message?.data()?.timestamp?.toDate()}
+    //       photoURL={getRecipientAvatar()}
+    //       chatId={chatId}
+    //       showAvatar={messageSnapShot?.docs[index]?.data()?.user !== messageSnapShot?.docs[index+1]?.data()?.user ? message.id : null}
+    //     />
+    //   ));
+    // } else {
       return messages?.map((message: MessageType, index) => (
         <Message
           key={message.id}
@@ -138,7 +152,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
           showAvatar={messages[index]?.user !== messages[index+1]?.user ? message.id : null}
         />
       ));
-    }
+    // }
   };
 
   const sendMessage = async (e: any): Promise<any> => {
@@ -156,7 +170,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
       chatId
     );
 
-    if (messageDoc && listImage.length > 0) {
+    if (messageDoc) {
       const snap = await messageDoc.get();
       await Promise.all(
         Array.prototype.map.call(
@@ -194,6 +208,9 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
         user?.displayName,
         recipientSnapshot?.docs?.[0]?.data().fcm_token
       );
+      console.log(appState.messageData)
+      dispatch(setMessageData([...appState.messageData, MapMessageData(snap)]))
+      console.log(appState.messageData)
     }
 
     const element = document.getElementById("input-message");

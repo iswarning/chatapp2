@@ -36,6 +36,9 @@ export const appSlice = createSlice({
     },
     setMessageData(state, action) {
       state.data.messageData = action.payload
+    },
+    pushMessage(state, action) {
+      state.data.messageData.push(action.payload)
     }
   },
 
@@ -50,7 +53,7 @@ export const appSlice = createSlice({
   },
 });
 
-export const { setUserOnline, setChatData, setMessageData } = appSlice.actions;
+export const { setUserOnline, setChatData, setMessageData, pushMessage } = appSlice.actions;
 
 export const selectAppState = (state: AppState) => state.app.data;
 

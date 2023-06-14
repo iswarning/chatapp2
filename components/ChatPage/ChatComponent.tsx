@@ -50,6 +50,9 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
   );
 
   const handleShowChatScreen = async() => {
+    dispatch(setChatData(chat))
+    const messData = await getMessage(chat.id);
+    dispatch(setMessageData(messData.docs.map((m) => MapMessageData(m))))
     setSeenMessage().catch(err => console.log(err));
   };
 
@@ -203,6 +206,8 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
     return amountUserOnline > 0;
   }
 
+  const classActive = () => " bg-theme-1 dark:bg-theme-1"
+
   return (
     // <div
     //   className={
@@ -316,7 +321,7 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
 // </div>
 <div className="intro-x" onClick={() => handleShowChatScreen()}>
 <div className="zoom-in">
-<div className="chat-list box cursor-pointer relative flex items-center px-4 py-3 mt-4 ">
+<div className={ active ? "chat-list box cursor-pointer relative flex items-center px-4 py-3 mt-4 bg-theme-1 dark:bg-theme-1" : "chat-list box cursor-pointer relative flex items-center px-4 py-3 mt-4"}>
 <div className="w-12 h-12 flex-none image-fit mr-1">
 {
   getRecipientAvatar() ? <Image
