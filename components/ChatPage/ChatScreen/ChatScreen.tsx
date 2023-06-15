@@ -35,7 +35,7 @@ import {
   setSeenMessage,
 } from "../Functions";
 import { useSelector, useDispatch } from 'react-redux';
-import { pushMessage, selectAppState, setMessageData } from "@/redux/appSlice";
+import { selectAppState, setChatData } from "@/redux/appSlice";
 import { ChatType } from "@/types/ChatType";
 import { MapMessageData, MessageType } from "@/types/MessageType";
 import Image from "next/image";
@@ -44,7 +44,6 @@ import useComponentVisible from "@/hooks/useComponentVisible";
 import styled from "styled-components";
 import { getImageTypeFileValid } from "@/utils/getImageTypeFileValid";
 import DropdownAttach from "@/components/DropdownAttach";
-import { useQuery } from "react-query";
 
 const getMessage = async (id: string) => {
   const snap = await db
@@ -56,14 +55,13 @@ const getMessage = async (id: string) => {
   return snap;
 };
 
-export default function ChatScreen({ chat, messages }: { chat: ChatType, messages: Array<MessageType> | undefined }) {
+export default function ChatScreen({ chat, messages }: { chat: ChatType, messages: Array<MessageType> }) {
   const [user] = useAuthState(auth);
   const endOfMessageRef: any = useRef(null);
   const [showEmoji, setShowEmoji] = useState(false);
   const [progress, setProgress] = useState(0);
   const [isLoading, setLoading] = useState(false);
   const [statusSend, setStatusSend] = useState("");
-  const [chatId, setChatId] = useState(chat.id);
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
   const [messData,setMessData] = useState(messages)
@@ -74,7 +72,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
   const [messageSnapShot] = useCollection(
     db
       .collection("chats")
-      .doc(chatId)
+      .doc(chat.id)
       .collection("messages")
       .orderBy("timestamp")
   );
@@ -105,7 +103,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
     //     console.log(data.sender === user?.email)
     //     if(data.sender === user?.email) {
     //         setIsOpen(false);
-    //         window.open(router.basePath + "/video-call/" + data.chatId);
+    //         window.open(router.basePath + "/video-call/" + data.chat.id);
     //     }
     // })
 
@@ -137,7 +135,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
     //       message={MapMessageData(message)}
     //       timestamp={message?.data()?.timestamp?.toDate()}
     //       photoURL={getRecipientAvatar()}
-    //       chatId={chatId}
+    //       chat.id={chat.id}
     //       showAvatar={messageSnapShot?.docs[index]?.data()?.user !== messageSnapShot?.docs[index+1]?.data()?.user ? message.id : null}
     //     />
     //   ));
@@ -148,7 +146,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
           message={message}
           timestamp={message.timestamp.toDate()}
           photoURL={getRecipientAvatar()}
-          chatId={chatId}
+          chatId={chat.id}
           showAvatar={messages[index]?.user !== messages[index+1]?.user ? message.id : null}
         />
       ));
@@ -161,13 +159,13 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
 
     let { listImage, message } = handleImageInMessage();
 
-    setSeenMessage(messages, user?.email, chatId);
+    setSeenMessage(messages, user?.email, chat.id);
 
     const { messageDoc } = await addMessageToFirebase(
       message,
       listImage?.length > 0 ? "text-image" : "text",
       user?.email,
-      chatId
+      chat.id
     );
 
     if (messageDoc) {
@@ -194,7 +192,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
                   pushUrlImageToFirestore(
                     snap.id,
                     index,
-                    chatId,
+                    chat.id,
                     scrollToBottom
                   );
                 }
@@ -208,9 +206,10 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
         user?.displayName,
         recipientSnapshot?.docs?.[0]?.data().fcm_token
       );
-      console.log(appState.messageData)
-      dispatch(setMessageData([...appState.messageData, MapMessageData(snap)]))
-      console.log(appState.messageData)
+      dispatch(setChatData({
+        ...appState.chatData,
+        messages: [...appState.chatData.messages!, MapMessageData(snap)]
+      }))
     }
 
     const element = document.getElementById("input-message");
@@ -241,7 +240,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
   //             let data = {
   //                 sender: user?.email,
   //                 recipient: getRecipientEmail(chat.users, user),
-  //                 chatId: chatId,
+  //                 chat.id: chat.id,
   //                 isGroup: chat.isGroup
   //             }
   //             socket.emit("call-video-one-to-one", JSON.stringify(data));
@@ -258,7 +257,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
     setShowEmoji(false);
   };
 
-  setSeenMessage(messages, user?.email, chatId);
+  setSeenMessage(messages, user?.email, chat.id);
   
   const handleGroupOnline = (): boolean => {
     let amountUserOnline = 0;
@@ -304,7 +303,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
 
   return (
     //     <VideoCallContainer isOpen={isOpen} >
-    //         <VideoCallScreen statusCall='Calling' photoURL={chat.isGroup ? chat.photoURL : recipientUser.photoURL} sender={user?.email} recipient={getRecipientEmail(chat.users, user)} chatId={chatId} onClose={() => setIsOpen(false)} isGroup={chat.isGroup} />
+    //         <VideoCallScreen statusCall='Calling' photoURL={chat.isGroup ? chat.photoURL : recipientUser.photoURL} sender={user?.email} recipient={getRecipientEmail(chat.users, user)} chat.id={chat.id} onClose={() => setIsOpen(false)} isGroup={chat.isGroup} />
     //     </VideoCallContainer>
     <>
       {/* <Loading isShow={isLoading} />
@@ -581,7 +580,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
         <EndOfMessage ref={endOfMessageRef} /> 
         </ScrollBarCustom>
         <div className="intro-y chat-input box border-theme-3 dark:bg-dark-2 dark:border-dark-2 border flex items-center px-5 py-4">
-        <DropdownAttach chatId={chatId} scrollToBottom={scrollToBottom} />
+        <DropdownAttach chatId={chat.id} scrollToBottom={scrollToBottom} />
         <InputMessage
           contentEditable="true"
           className="w-full block outline-none py-4 px-4 bg-transparent"
@@ -616,6 +615,8 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
     </>
   );
 }
+
+
 
 const ScrollBarCustom = styled.div`
   &::-webkit-scrollbar {

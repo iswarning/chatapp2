@@ -9,7 +9,7 @@ import TimeAgo from "timeago-react";
 import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import {useSelector} from 'react-redux'
-import { selectAppState, setChatData, setMessageData } from "@/redux/appSlice";
+import { selectAppState, setChatData } from "@/redux/appSlice";
 import { useDispatch } from 'react-redux'
 import { ChatType } from "@/types/ChatType";
 import { MapMessageData } from "@/types/MessageType";
@@ -50,9 +50,10 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
   );
 
   const handleShowChatScreen = async() => {
-    dispatch(setChatData(chat))
+    let chatData = chat;
     const messData = await getMessage(chat.id);
-    dispatch(setMessageData(messData.docs.map((m) => MapMessageData(m))))
+    chatData.messages = messData.docs.map((m) => MapMessageData(m));
+    dispatch(setChatData(chatData))
     setSeenMessage().catch(err => console.log(err));
   };
 

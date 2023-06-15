@@ -1,14 +1,59 @@
 import InsertPhotoIcon from "@mui/icons-material/InsertPhoto";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import { useState } from "react";
-import { onAttachFile, onImageChange } from "./ChatPage/Functions";
+import { addMessageToFirebase, handleImageInMessage, onAttachFile, pushUrlImageToFirestore } from "./ChatPage/Functions";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { auth } from "../firebase";
+import { auth, db, storage } from "../firebase";
+import { toast } from "react-toastify";
+import { useDispatch, useSelector } from 'react-redux'
+import { selectAppState, setChatData } from "@/redux/appSlice";
+import { MapMessageData } from "@/types/MessageType";
 
 export default function DropdownAttach({ chatId, scrollToBottom }: { chatId: string, scrollToBottom: any }) {
 
   const [showDropdownAttach, setShowDropdownAttach] = useState(false);
   const [user] = useAuthState(auth);
+  const dispatch = useDispatch()
+  const appState = useSelector(selectAppState)
+
+  async function onImageChange(event: any) {
+    let urls = [];
+    let count = 0;
+    if (event.target.files && event.target.files.length > 0) {
+      for (const file of event.target.files) {
+        let img = file;
+        let imgType = img["type"];
+        let validImageTypes = ["image/jpeg", "image/png"];
+        let fileSize = img.size / 1024 / 1024;
+        if (!validImageTypes.includes(imgType)) {
+          toast("Image upload invalid !", {
+            hideProgressBar: true,
+            type: "error",
+            autoClose: 5000,
+          });
+          return;
+        }
+        if (fileSize > 5) {
+          toast("Size image no larger than 5 MB !", {
+            hideProgressBar: true,
+            type: "error",
+            autoClose: 5000,
+          });
+          return;
+        }
+
+        storage.ref(`public/images/message/${}/#img-attach-msg/${}`)
+
+        dispatch(setChatData({
+          ...appState.chatData,
+          messages: [...appState.chatData.messages!, MapMessageData(snap)]
+        }))
+      }
+
+      const  { messageDoc } = await addMessageToFirebase( "#img-attach-msg" ,"image", user?.email, chatId);
+
+    }
+  }
 
     return (
       <div className="dropdown relative" data-placement="top">

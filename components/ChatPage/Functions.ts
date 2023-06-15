@@ -6,35 +6,7 @@ import { ChatType } from "@/types/ChatType";
 import sendNotificationFCM from "@/utils/sendNotificationFCM";
 import { getImageTypeFileValid } from "@/utils/getImageTypeFileValid";
 
-export function onImageChange(event: any) {
-  if (event.target.files && event.target.files.length > 0) {
-    for (const file of event.target.files) {
-      let img = file;
-      let imgType = img["type"];
-      let validImageTypes = ["image/jpeg", "image/png"];
-      let fileSize = img.size / 1024 / 1024;
-      if (!validImageTypes.includes(imgType)) {
-        toast("Image upload invalid !", {
-          hideProgressBar: true,
-          type: "error",
-          autoClose: 5000,
-        });
-        return;
-      }
-      if (fileSize > 5) {
-        toast("Size image no larger than 5 MB !", {
-          hideProgressBar: true,
-          type: "error",
-          autoClose: 5000,
-        });
-        return;
-      }
-      const imageElement = document.createElement("img");
-      imageElement.src = URL.createObjectURL(img);
-      document.getElementById("input-message")?.append(imageElement);
-    }
-  }
-}
+
 
 export function setSeenMessage(
   messages: Array<MessageType>,
