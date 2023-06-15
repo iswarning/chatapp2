@@ -5,7 +5,7 @@ import { MessageType } from "@/types/MessageType";
 import { ChatType } from "@/types/ChatType";
 import sendNotificationFCM from "@/utils/sendNotificationFCM";
 import { getImageTypeFileValid } from "@/utils/getImageTypeFileValid";
-
+import { v4 as uuidv4 } from 'uuid'
 
 
 export function setSeenMessage(
@@ -55,12 +55,13 @@ export function sendNotification(
 
 export function pushUrlImageToFirestore(
   messId: string,
-  index: number,
   chatId: string,
-  scrollToBottom: any
+  scrollToBottom: any,
+  key: string,
+  path: string
 ) {
   storage
-    .ref(`public/images/message/${messId}/#img-msg-${index}`)
+    .ref(path)
     .getDownloadURL()
     .then(async (url) => {
       await db
@@ -71,7 +72,8 @@ export function pushUrlImageToFirestore(
         .collection("imageInMessage")
         .add({
           url: url,
-          key: `#img-msg-${index}`,
+          key: key,
+          path: path
         });
       scrollToBottom();
     })
@@ -85,13 +87,17 @@ export function handleImageInMessage() {
 
   let message = "";
   let countImg = 0;
-  for (let i = 0; i < sizeInput; i++) {
+  let listElementImg: any = {};
+  let key = uuidv4();
+  for (let i = 0; i < sizeInput; i++) { 
     switch (inputMsgElement?.childNodes[i].nodeName) {
       case "#text":
         message += inputMsgElement?.childNodes[i].nodeValue;
         break;
       case "IMG":
-        message += `<br>#img-msg-${countImg}<br>`;
+        message += `<br>${key}<br>`;
+        key = uuidv4();
+        listElementImg[key] = listImage[countImg]
         countImg++;
         break;
       case "BR":
@@ -105,7 +111,9 @@ export function handleImageInMessage() {
               message += element.nodeValue + "<br>";
               break;
             case "IMG":
-              message += `<br>#img-msg-${countImg}<br>`;
+              message += `<br>${key}<br>`;
+              key = uuidv4();
+              listElementImg[key] = listImage[countImg]
               countImg++;
               break;
             case "BR":
@@ -117,7 +125,7 @@ export function handleImageInMessage() {
     }
   }
 
-  return { listImage, message };
+  return { listElementImg, message };
 }
 
 export function pushUrlFileToFirestore(
@@ -126,10 +134,11 @@ export function pushUrlFileToFirestore(
   scrollToBottom: any,
   key: string,
   size: number,
+  path: string
 ) {
   storage
     .ref(
-      `public/files/message/${messId}/#file-msg-0/${key}`
+      `public/files/chat-room/#file-msg-0/${key}`
     )
     .getDownloadURL()
     .then(async (url) => {
@@ -204,7 +213,7 @@ export const onAttachFile = async (
       start = end;
       end = start + chunkSize;
     }
-    const { messageDoc } = await addMessageToFirebase("#file-msg-0", "file", userEmail, chatId);
+    const { messageDoc } = await addMessageToFirebase("#file-in-message", "file", userEmail, chatId);
 
     await db
       .collection("chats")
@@ -213,16 +222,16 @@ export const onAttachFile = async (
       .doc(messageDoc.id)
       .collection("fileInMessage")
       .add({
-        key: "#file-msg-0",
         size: fileSize,
         name: file.name,
     });
 
     await Promise.all(
       Array.prototype.map.call(chunks, async (chunk: Blob, index) => {
-        let key = `chunk-${index}`;
+        let key = uuidv4();
+        let path = `public/files/chat-room/${chatId}/${key}`
         storage
-          .ref(`public/files/message/${messageDoc.id}/#file-msg-0/${key}`)
+          .ref()
           .put(chunk)
           .on(
             "state_changed",
@@ -239,7 +248,8 @@ export const onAttachFile = async (
                 chatId,
                 scrollToBottom,
                 key,
-                chunk.size
+                chunk.size,
+                path
               );
             }
           );

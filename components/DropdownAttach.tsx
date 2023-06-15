@@ -8,6 +8,7 @@ import { toast } from "react-toastify";
 import { useDispatch, useSelector } from 'react-redux'
 import { selectAppState, setChatData } from "@/redux/appSlice";
 import { MapMessageData } from "@/types/MessageType";
+import { v4 as uuidv4 } from 'uuid'
 
 export default function DropdownAttach({ chatId, scrollToBottom }: { chatId: string, scrollToBottom: any }) {
 
@@ -17,14 +18,13 @@ export default function DropdownAttach({ chatId, scrollToBottom }: { chatId: str
   const appState = useSelector(selectAppState)
 
   async function onImageChange(event: any) {
-    let urls = [];
-    let count = 0;
     if (event.target.files && event.target.files.length > 0) {
       for (const file of event.target.files) {
         let img = file;
         let imgType = img["type"];
         let validImageTypes = ["image/jpeg", "image/png"];
         let fileSize = img.size / 1024 / 1024;
+
         if (!validImageTypes.includes(imgType)) {
           toast("Image upload invalid !", {
             hideProgressBar: true,
@@ -33,6 +33,7 @@ export default function DropdownAttach({ chatId, scrollToBottom }: { chatId: str
           });
           return;
         }
+
         if (fileSize > 5) {
           toast("Size image no larger than 5 MB !", {
             hideProgressBar: true,
@@ -41,17 +42,59 @@ export default function DropdownAttach({ chatId, scrollToBottom }: { chatId: str
           });
           return;
         }
+        
+      }
+      
+      const  { messageDoc } = await addMessageToFirebase( "#img-attach-msg" ,"image", user?.email, chatId);
 
-        storage.ref(`public/images/message/${}/#img-attach-msg/${}`)
+      if (messageDoc) {
+
+        const snap = await messageDoc.get();
+
+        for (const file of event.target.files) {
+          let key = uuidv4();
+          let path = `public/images/chat-room/${chatId}/${key}`;
+          storage
+          .ref(path)
+          .put(file)
+          .on(
+            "state_changed",
+            (snapshot) => {
+              const prog = Math.round(
+                (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+              );
+              console.log(prog)
+            },
+            (err) => console.log(err),
+            () => {
+              storage
+                .ref(path)
+                .getDownloadURL()
+                .then(async (url) => {
+                  await db
+                    .collection("chats")
+                    .doc(chatId)
+                    .collection("messages")
+                    .doc(snap.id)
+                    .collection("imageAttach")
+                    .add({
+                      url: url,
+                      key: key,
+                    });
+                  scrollToBottom();
+                })
+                .catch((err) => console.log(err));
+            }
+          );
+        }
 
         dispatch(setChatData({
           ...appState.chatData,
           messages: [...appState.chatData.messages!, MapMessageData(snap)]
         }))
+
       }
-
-      const  { messageDoc } = await addMessageToFirebase( "#img-attach-msg" ,"image", user?.email, chatId);
-
+      
     }
   }
 

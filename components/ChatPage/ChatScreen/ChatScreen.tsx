@@ -28,7 +28,6 @@ import { toast } from "react-toastify";
 import {
   addMessageToFirebase,
   handleImageInMessage,
-  onImageChange,
   pushUrlFileToFirestore,
   pushUrlImageToFirestore,
   sendNotification,
@@ -44,6 +43,7 @@ import useComponentVisible from "@/hooks/useComponentVisible";
 import styled from "styled-components";
 import { getImageTypeFileValid } from "@/utils/getImageTypeFileValid";
 import DropdownAttach from "@/components/DropdownAttach";
+import { v4 as uuidv4 } from 'uuid'
 
 const getMessage = async (id: string) => {
   const snap = await db
@@ -157,27 +157,25 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
     setStatusSend("Sending...");
     e.preventDefault();
 
-    let { listImage, message } = handleImageInMessage();
+    let { listElementImg, message } = handleImageInMessage();
 
     setSeenMessage(messages, user?.email, chat.id);
 
     const { messageDoc } = await addMessageToFirebase(
       message,
-      listImage?.length > 0 ? "text-image" : "text",
+      listElementImg?.length > 0 ? "text-image" : "text",
       user?.email,
       chat.id
     );
 
     if (messageDoc) {
       const snap = await messageDoc.get();
-      await Promise.all(
-        Array.prototype.map.call(
-          listImage,
-          async (item: HTMLImageElement, index) => {
-            const response = await fetch(item?.src);
+      for(const key of Object.keys(listElementImg)) {
+            const response = await fetch(listElementImg[key].src);
             const blob = await response.blob();
+            let path = `public/images/chat-room/${chat.id}/${key}`
             storage
-              .ref(`public/images/message/${snap.id}/#img-msg-${index}`)
+              .ref(key)
               .put(blob)
               .on(
                 "state_changed",
@@ -191,15 +189,14 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
                 () => {
                   pushUrlImageToFirestore(
                     snap.id,
-                    index,
                     chat.id,
-                    scrollToBottom
+                    scrollToBottom,
+                    key,
+                    path
                   );
                 }
               );
-          }
-        )
-      );
+      }
       sendNotification(
         snap,
         chat,

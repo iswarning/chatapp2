@@ -2,7 +2,7 @@ import { auth, db, storage } from "@/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { CustomAvatar } from "../ChatComponent";
 import styled from "styled-components";
-import { lazy, useState } from "react";
+import { lazy, useEffect, useState } from "react";
 import {getEmojiData, getEmojiIcon} from "@/utils/getEmojiData";
 import { useCollection } from "react-firebase-hooks/firestore";
 import sendNotificationFCM from "@/utils/sendNotificationFCM";
@@ -120,17 +120,18 @@ export default function Message({
             </div>;
   };
 
+  useEffect(() => {
+    handleFile()
+  },[])
+
   const handleFile = () => {
-    let storageRef = firebase.storage().ref(`public/images/message/${message.id}/#file-msg-0`)
-    storageRef.listAll().then((allFile) => {
-      allFile.items.forEach((file) => {
-        file.getDownloadURL().then((url) => {
-          console.log(url)
-          return <div></div>
-        }).catch(er => console.log(er))
+    fileInMessageSnap?.docs?.forEach((doc) => {
+      fetch(doc.data().url)
+      .then((response) => response.blob())
+      .then((blob) => {
+        console.log(blob);
       })
-    }).catch(er => console.log(er))
-    return <div></div>
+    })
     // const blobPart: Blob[] = [];
     // fileInMessageSnap?.docs?.forEach((file) => {
     //   // `url` is the download URL for 'images/stars.jpg'
