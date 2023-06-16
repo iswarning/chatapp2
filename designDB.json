@@ -48,5 +48,12 @@
         "senderEmail": "chivinh1998@gmail.com",
         "recipientEmail": "hacker20001235@gmail.com",
         "createdAt": ""
+    },
+
+
+    "path-storage": {
+        "images":        "public/chat-room/${chatId}/photos/${key}",
+        "text-images":   "public/chat-room/${chatId}/photos/${key}",
+        "files":        "public/chat-room/${chatId}/files/${key}"
     }
 }

@@ -73,7 +73,6 @@ export function pushUrlImageToFirestore(
         .add({
           url: url,
           key: key,
-          path: path
         });
       scrollToBottom();
     })
@@ -88,15 +87,15 @@ export function handleImageInMessage() {
   let message = "";
   let countImg = 0;
   let listElementImg: any = {};
-  let key = uuidv4();
+  
   for (let i = 0; i < sizeInput; i++) { 
+    let key = uuidv4();
     switch (inputMsgElement?.childNodes[i].nodeName) {
       case "#text":
         message += inputMsgElement?.childNodes[i].nodeValue;
         break;
       case "IMG":
         message += `<br>${key}<br>`;
-        key = uuidv4();
         listElementImg[key] = listImage[countImg]
         countImg++;
         break;
@@ -112,7 +111,6 @@ export function handleImageInMessage() {
               break;
             case "IMG":
               message += `<br>${key}<br>`;
-              key = uuidv4();
               listElementImg[key] = listImage[countImg]
               countImg++;
               break;
@@ -137,9 +135,7 @@ export function pushUrlFileToFirestore(
   path: string
 ) {
   storage
-    .ref(
-      `public/files/chat-room/#file-msg-0/${key}`
-    )
+    .ref(path)
     .getDownloadURL()
     .then(async (url) => {
       await db
@@ -151,7 +147,7 @@ export function pushUrlFileToFirestore(
         .add({
           url: url,
           key: key,
-          size: size,
+          size: size
         });
       scrollToBottom();
     })
@@ -183,6 +179,7 @@ export const onAttachFile = async (
   userEmail: string | null | undefined,
   chatId: string,
   scrollToBottom: any) => {
+  event.preventDefault()
   if (event.target.files && event.target.files[0]) {
     let file: Blob = event.target.files[0];
     let fileType = file.name.split(".").pop();
@@ -213,7 +210,8 @@ export const onAttachFile = async (
       start = end;
       end = start + chunkSize;
     }
-    const { messageDoc } = await addMessageToFirebase("#file-in-message", "file", userEmail, chatId);
+    
+    const { messageDoc } = await addMessageToFirebase("", "file", userEmail, chatId);
 
     await db
       .collection("chats")
@@ -229,7 +227,7 @@ export const onAttachFile = async (
     await Promise.all(
       Array.prototype.map.call(chunks, async (chunk: Blob, index) => {
         let key = uuidv4();
-        let path = `public/files/chat-room/${chatId}/${key}`
+        let path = `public/chat-room/${chatId}/files/${key}`
         storage
           .ref()
           .put(chunk)

@@ -18,6 +18,7 @@ export default function DropdownAttach({ chatId, scrollToBottom }: { chatId: str
   const appState = useSelector(selectAppState)
 
   async function onImageChange(event: any) {
+    event.preventDefault();
     if (event.target.files && event.target.files.length > 0) {
       for (const file of event.target.files) {
         let img = file;
@@ -45,7 +46,7 @@ export default function DropdownAttach({ chatId, scrollToBottom }: { chatId: str
         
       }
       
-      const  { messageDoc } = await addMessageToFirebase( "#img-attach-msg" ,"image", user?.email, chatId);
+      const  { messageDoc } = await addMessageToFirebase("" ,"image", user?.email, chatId);
 
       if (messageDoc) {
 
@@ -53,7 +54,7 @@ export default function DropdownAttach({ chatId, scrollToBottom }: { chatId: str
 
         for (const file of event.target.files) {
           let key = uuidv4();
-          let path = `public/images/chat-room/${chatId}/${key}`;
+          let path = `public/chat-room/${chatId}/photos/${key}`;
           storage
           .ref(path)
           .put(file)
@@ -79,7 +80,7 @@ export default function DropdownAttach({ chatId, scrollToBottom }: { chatId: str
                     .collection("imageAttach")
                     .add({
                       url: url,
-                      key: key,
+                      key: key
                     });
                   scrollToBottom();
                 })
@@ -101,7 +102,7 @@ export default function DropdownAttach({ chatId, scrollToBottom }: { chatId: str
     return (
       <div className="dropdown relative" data-placement="top">
         <a href="javascript:void(0)" className="text-gray-600 hover:text-theme-1 dropdown-toggle" onClick={() => setShowDropdownAttach(!showDropdownAttach)}> 
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" className="feather feather-plus w-5 h-5 sm:w-6 sm:h-6">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-plus w-5 h-5 sm:w-6 sm:h-6">
             <line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line>
           </svg> 
         </a>

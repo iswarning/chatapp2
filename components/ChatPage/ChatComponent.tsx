@@ -88,10 +88,11 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
 
       if (lastMessage?.type === "image") {
         if (lastMessage?.user === user?.email) {
-          return <div className="text-opacity-80 truncate mt-0.5 text-gray-800 dark:text-gray-500 ">You: <ImageOutlinedIcon style={StyleIcon} /> Image</div>
+          return <div className={active ? "text-opacity-80 truncate mt-0.5 text-white" : "text-opacity-80 truncate mt-0.5 text-gray-800 dark:text-gray-500"}>
+            You: <ImageOutlinedIcon style={StyleIcon} /> Image</div>
         } else
           return (
-            <div className="text-opacity-80 truncate mt-0.5 text-gray-800 dark:text-gray-500">
+            <div className={active ? "text-opacity-80 truncate mt-0.5 text-white" : "text-opacity-80 truncate mt-0.5 text-gray-800 dark:text-gray-500"}>
               {userInfoOfLastMessageSnapshot?.docs?.[0]?.data()?.fullName}
               : <ImageOutlinedIcon style={StyleIcon} /> Image</div>
             );
@@ -99,19 +100,21 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
       
       if (lastMessage?.type === "text-image") {
         if (lastMessage?.user === user?.email) {
-          return <div className="text-opacity-80 truncate mt-0.5 text-gray-800 dark:text-gray-500">You sent a message</div>
+          return <div className={active ? "text-opacity-80 truncate mt-0.5 text-white" : "text-opacity-80 truncate mt-0.5 text-gray-800 dark:text-gray-500"}>
+            You sent a message</div>
         } else
-          return <div className="text-opacity-80 truncate mt-0.5 text-gray-800 dark:text-gray-500">
+          return <div className={active ? "text-opacity-80 truncate mt-0.5 text-white" : "text-opacity-80 truncate mt-0.5 text-gray-800 dark:text-gray-500"}>
             {userInfoOfLastMessageSnapshot?.docs?.[0]?.data()?.fullName}
             sent a message</div>
       }
 
       if (lastMessage?.type === "text") {
         if (lastMessage?.user === user?.email) {
-          return <div className="text-opacity-80 truncate mt-0.5 text-gray-800 dark:text-gray-500">You: {lastMessage?.message}</div>
+          return <div className={active ? "text-opacity-80 truncate mt-0.5 text-white" : "text-opacity-80 truncate mt-0.5 text-gray-800 dark:text-gray-500"}>
+            You: {lastMessage?.message}</div>
         } else
           return (
-            <div className="text-opacity-80 truncate mt-0.5 text-gray-800 dark:text-gray-500">
+            <div className={active ? "text-opacity-80 truncate mt-0.5 text-white" : "text-opacity-80 truncate mt-0.5 text-gray-800 dark:text-gray-500"}>
               {userInfoOfLastMessageSnapshot?.docs?.[0]?.data()?.fullName} : {lastMessage?.message}
             </div>
           );
@@ -119,10 +122,10 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
 
       if (lastMessage?.type === "file") {
         if (lastMessage?.user === user?.email) {
-          return <div className="text-opacity-80 truncate mt-0.5 text-gray-800 dark:text-gray-500">You: <InsertDriveFileOutlinedIcon style={StyleIcon}/> File</div>
+          return <div className={active ? "text-opacity-80 truncate mt-0.5 text-white" : "text-opacity-80 truncate mt-0.5 text-gray-800 dark:text-gray-500"}>You: <InsertDriveFileOutlinedIcon style={StyleIcon}/> File</div>
         } else
           return (
-            <div className="text-opacity-80 truncate mt-0.5 text-gray-800 dark:text-gray-500">
+            <div className={active ? "text-opacity-80 truncate mt-0.5 text-white" : "text-opacity-80 truncate mt-0.5 text-gray-800 dark:text-gray-500"}>
               {userInfoOfLastMessageSnapshot?.docs?.[0]?.data()?.fullName}
               : 
               <InsertDriveFileOutlinedIcon style={StyleIcon}/> File</div>
@@ -133,19 +136,20 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
       
       if (lastMessageSnapshot?.docs?.[0].data().type === "image") {
         if (lastMessage?.user === user?.email) {
-          return <div className="text-opacity-80 truncate mt-0.5 text-gray-800 dark:text-gray-500 ">You: <ImageOutlinedIcon style={StyleIcon} /> Image</div>
+          return <div className={active ? "text-opacity-80 truncate mt-0.5 text-white" : "text-opacity-80 truncate mt-0.5 text-gray-800 dark:text-gray-500"}>
+            You: <ImageOutlinedIcon style={StyleIcon} /> Image</div>
         } else
-          return <div className="text-opacity-80 truncate mt-0.5 text-gray-800 dark:text-gray-500">
+          return <div className={active ? "text-opacity-80 truncate mt-0.5 text-white" : "text-opacity-80 truncate mt-0.5 text-gray-800 dark:text-gray-500"}>
               {recipientSnapshot?.docs?.[0]?.data()?.fullName}
               : <ImageOutlinedIcon style={StyleIcon} /> Image</div>
       }
 
       if (lastMessage?.type === "text-image") {
         if (lastMessage?.user === user?.email) {
-          return <div className="text-opacity-80 truncate mt-0.5 text-gray-800 dark:text-gray-500 ">You sent a message</div>
+          return <div className={active ? "text-opacity-80 truncate mt-0.5 text-white" : "text-opacity-80 truncate mt-0.5 text-gray-800 dark:text-gray-500"}>You sent a message</div>
         } else
           return (
-            <div className="text-opacity-80 truncate mt-0.5 text-gray-800 dark:text-gray-500 ">
+            <div className={active ? "text-opacity-80 truncate mt-0.5 text-white" : "text-opacity-80 truncate mt-0.5 text-gray-800 dark:text-gray-500"}>
               {recipientSnapshot?.docs?.[0].data().fullName} sent a message
             </div>
           );
@@ -153,19 +157,19 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
 
       if (lastMessage.type === "text") {
         if (lastMessage.user === user?.email) {
-          return <div className="text-opacity-80 truncate mt-0.5 text-gray-800 dark:text-gray-500 ">
+          return <div className={active ? "text-opacity-80 truncate mt-0.5 text-white" : "text-opacity-80 truncate mt-0.5 text-gray-800 dark:text-gray-500"}>
             You: {lastMessage?.message}
           </div>
-        } else return <div className="text-opacity-80 truncate mt-0.5 text-gray-800 dark:text-gray-500 ">{lastMessage?.message}</div>;
+        } else return <div className={active ? "text-opacity-80 truncate mt-0.5 text-white" : "text-opacity-80 truncate mt-0.5 text-gray-800 dark:text-gray-500"}>{lastMessage?.message}</div>;
       }
 
       if (lastMessage?.type === "file") { 
         if (lastMessage?.user === user?.email) {
-          return <div className="text-opacity-80 truncate mt-0.5 text-gray-800 dark:text-gray-500">
+          return <div className={active ? "text-opacity-80 truncate mt-0.5 text-white" : "text-opacity-80 truncate mt-0.5 text-gray-800 dark:text-gray-500"}>
             You: <InsertDriveFileOutlinedIcon style={StyleIcon}/> File
           </div>;
         } else
-          return <div className="text-opacity-80 truncate mt-0.5 text-gray-800 dark:text-gray-500">
+          return <div className={active ? "text-opacity-80 truncate mt-0.5 text-white" : "text-opacity-80 truncate mt-0.5 text-gray-800 dark:text-gray-500"}>
           {recipientSnapshot?.docs?.[0]?.data()?.fullName}
           : <InsertDriveFileOutlinedIcon style={StyleIcon} /> File</div>
       }
@@ -206,8 +210,6 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
     })
     return amountUserOnline > 0;
   }
-
-  const classActive = () => " bg-theme-1 dark:bg-theme-1"
 
   return (
     // <div
@@ -307,11 +309,11 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
 //     ) : null}
 // </div>
 // <div className="chat-list__action dropdown transition duration-200 opacity-0 mt-1 -mb-1 -mr-1 ml-auto">
-// <a className="dropdown-toggle block text-opacity-70 text-white" href="javascript:;"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" className="feather feather-chevron-down w-6 h-6"><polyline points="6 9 12 15 18 9"></polyline></svg> </a>
+// <a className="dropdown-toggle block text-opacity-70 text-white" href="javascript:;"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-chevron-down w-6 h-6"><polyline points="6 9 12 15 18 9"></polyline></svg> </a>
 // <div className="dropdown-menu w-40">
 // <div className="dropdown-menu__content box dark:bg-dark-1 p-2">
-// <a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share Contact </a>
-// <a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" className="feather feather-copy w-4 h-4 mr-2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Copy Contact </a>
+// <a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share Contact </a>
+// <a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-copy w-4 h-4 mr-2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Copy Contact </a>
 // </div>
 // </div>
 // </div>
@@ -346,13 +348,13 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
 )}
 </div>
 <div className="ml-2 overflow-hidden">
-<a href="javascript:;" className="font-medium text-gray-800 dark:text-white">{ chat.isGroup ? "Group: " + chat.name : recipientSnapshot?.docs?.[0]?.data().fullName}</a>
+<a href="javascript:;" className={active ? "font-medium text-white" :"font-medium text-gray-800 dark:text-white"}>{ chat.isGroup ? "Group: " + chat.name : recipientSnapshot?.docs?.[0]?.data().fullName}</a>
 {lastMessageSnapshot?.docs.length! > 0
     ? handleShowLastMessage()
 : ""}
 </div>
 <div className="ml-auto">
-<div className="whitespace-nowrap text-opacity-80 text-xs text-gray-800 dark:text-gray-600">
+<div className={active ? "whitespace-nowrap text-opacity-80 text-xs text-white" : "whitespace-nowrap text-opacity-80 text-xs text-gray-800 dark:text-gray-600"}>
 {lastMessageSnapshot?.docs.length! > 0 ? (
       lastMessage?.timestamp?.toDate() ? (
         <TimeAgo datetime={lastMessage?.timestamp?.toDate()} />
@@ -362,7 +364,7 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
     ) : null}
 </div>
 <div className="chat-list__action dropdown transition duration-200 opacity-0 mt-1 -mb-1 -mr-1 ml-auto">
-<a className="dropdown-toggle block text-opacity-70 text-gray-500" href="javascript:;"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" className="feather feather-chevron-down w-6 h-6"><polyline points="6 9 12 15 18 9"></polyline></svg> </a>
+<a className="dropdown-toggle block text-opacity-70 text-gray-500" href="javascript:;"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-chevron-down w-6 h-6"><polyline points="6 9 12 15 18 9"></polyline></svg> </a>
 
 </div>
 </div>
