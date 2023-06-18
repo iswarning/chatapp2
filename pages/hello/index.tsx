@@ -1415,6 +1415,7 @@ export default function Hello() {
 </div>
 </div>
 <div className="clear-both"></div>
+
 <div className="chat-text-box__content flex items-center float-left">
 <div className="box text-gray-700 dark:text-gray-300 flex flex-col sm:flex-row items-center mt-3 p-3">
 <div className="chat-text-box__content__icon text-white w-12 flex-none bg-contain relative bg-no-repeat bg-center block">
@@ -1440,6 +1441,7 @@ export default function Hello() {
 </div>
 </div>
 </div>
+
 </div>
 <div className="clear-both mb-2"></div>
 <div className="text-gray-600 text-xs">2 mins ago</div>
@@ -1567,6 +1569,7 @@ export default function Hello() {
 <div className="box leading-relaxed bg-theme-1 text-opacity-80 text-white px-4 py-3 mt-3"> Lorem ipsum </div>
 </div>
 <div className="clear-both"></div>
+
 <div className="chat-text-box__content flex items-center float-right">
 <div className="hidden sm:block dropdown relative mr-3 mt-3">
 <a href="javascript:;" className="dropdown-toggle w-4 h-4"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
@@ -1592,6 +1595,7 @@ export default function Hello() {
 </div>
 </div>
 </div>
+
 </div>
 <div className="clear-both mb-2"></div>
 <div className="text-gray-600 text-xs text-right">1 secs ago</div>

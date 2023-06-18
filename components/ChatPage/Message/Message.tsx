@@ -24,31 +24,27 @@ import ShowImageFullScreen from "./ShowImageFullScreen";
 import SenderTemplateTextImage from "./SenderTemplateTextImage";
 import RecieverTemplateTextImage from "./RecieverTemplateTextImage";
 import { MapImageInMessageData } from "@/types/ImageInMessageType";
+import SenderTemplateFile from "./SenderTemplateFile";
+import { MapFileInMessageData } from "@/types/FileInMessageType";
+import { MapChunkFileData } from "@/types/ChunkFileType";
 
 export default function Message({
   message,
   timestamp,
-  photoURL,
   chatId,
-  showAvatar
+  lastIndex,
+  scrollToBottom
 }: {
   message: MessageType;
   timestamp: any;
-  photoURL: string;
   chatId: string;
-  showAvatar: string | null
+  lastIndex: boolean;
+  scrollToBottom: any
 }) {
   const [userLoggedIn] = useAuthState(auth);
   const [isShown, setIsShown] = useState(false);
-  const [isShownReaction, setIsShownReaction] = useState(false);
-  const [load, setLoad] = useState(0);
-  const appState = useSelector(selectAppState);
   const [isShowImageFullscreen, setShowImageFullscreen] = useState(false);
   const [urlImage, setUrlImage] = useState("");
-  const formatDate = (dt: any)  => {
-    let d = new Date(dt);
-    return d.getHours() + ":" + d.getMinutes();
-  };
 
   const [reactionSnapshot] = useCollection(
     db
@@ -111,6 +107,16 @@ export default function Message({
       .collection("fileInMessage")
   );
 
+  const [chunks] = useCollection(
+    db
+      .collection("chats")
+      .doc(chatId)
+      .collection("messages")
+      .doc(message.id)
+      .collection("fileInMessage")
+      .doc(fileInMessageSnap?.docs?.[0].id).collection("chunks")
+  );
+
   const [imageAttachSnap] = useCollection(
     db
       .collection("chats")
@@ -119,26 +125,6 @@ export default function Message({
       .doc(message.id)
       .collection("imageAttach")
   );
-
-  const handleMessage = () => {
-    let messageExport: string = message.message;
-    if (message.type === "text-image") {
-      imageInMessageSnap?.docs?.forEach((img) => {
-        messageExport = messageExport.replace(
-          img.data().key,
-          `<img 
-            loading="lazy"
-            decoding="async" 
-            src="${img.data().url}" 
-            style="color: transparent;"/>`
-        );
-      });
-    }
-    return <div 
-            dangerouslySetInnerHTML={{ __html: messageExport }} 
-            style={{fontSize: message.type === 'text' && getEmojiIcon.includes(message.message) && message.message.length === 2 ? '50px' : '' }}>
-            </div>;
-  };
 
   const handleFile = () => {
     // fileInMessageSnap?.docs?.forEach((doc) => {
@@ -194,35 +180,33 @@ export default function Message({
         message.user === userLoggedIn?.email ? 
           <>
             {
-              message.type === "text" ? <SenderTemplateText message={message} showAvatar={showAvatar} photoURL={userLoggedIn.photoURL} timestamp={timestamp} /> : null
+              message.type === "text" ? <SenderTemplateText message={message} timestamp={timestamp} lastIndex={lastIndex} /> : null
             }
             {
-              message.type === "text-image" ? <SenderTemplateTextImage imgs={imageInMessageSnap?.docs?.map((doc) => MapImageInMessageData(doc))!} message={message} showAvatar={showAvatar!} photoURL={userLoggedIn.photoURL!} timestamp={timestamp} /> : null
+              message.type === "text-image" ? <SenderTemplateTextImage imgs={imageInMessageSnap?.docs?.map((doc) => MapImageInMessageData(doc))!} message={message} timestamp={new Date(timestamp).getTime()} lastIndex={lastIndex} scrollToBottom={() => scrollToBottom()} /> : null
             }
-            {/* {
-              message.type === "file" ? <SenderTemplateText message={message} showAvatar={showAvatar} photoURL={userLoggedIn.photoURL} timestamp={timestamp} /> : null
-            } */}
             {
-              message.type === "image" ? <SenderTemplateImage imgs={imageAttachSnap?.docs.map((doc) => MapImageAttachData(doc))} message={message} showAvatar={showAvatar} photoURL={userLoggedIn.photoURL} timestamp={timestamp} onShowImage={(urlImage: any) => {setUrlImage(urlImage);setShowImageFullscreen(true)}} /> : null
+              message.type === "file" ? <SenderTemplateFile file={MapFileInMessageData(fileInMessageSnap?.docs?.[0]!)} chunks={chunks?.docs.map((chunk) => MapChunkFileData(chunk))!} message={message} chatId={chatId} lastIndex={lastIndex} timestamp={new Date(timestamp).getTime()} /> : null
+            }
+            {
+              message.type === "image" ? <SenderTemplateImage imgs={imageAttachSnap?.docs.map((doc) => MapImageAttachData(doc))} timestamp={new Date(timestamp).getTime()} onShowImage={(urlImage: any) => {setUrlImage(urlImage);setShowImageFullscreen(true)}} lastIndex={lastIndex} /> : null
             }
           </> : 
           <>
             {
-              message.type === "text" ? <RecieverTemplateText message={message} showAvatar={showAvatar} photoURL={userLoggedIn?.photoURL} timestamp={timestamp} /> : null
+              message.type === "text" ? <RecieverTemplateText message={message} timestamp={new Date(timestamp).getTime()} lastIndex={lastIndex} /> : null
             }
             {
-              message.type === "text-image" ? <RecieverTemplateTextImage imgs={imageInMessageSnap?.docs?.map((doc) => MapImageInMessageData(doc))!} message={message} showAvatar={showAvatar} photoURL={userLoggedIn?.photoURL} timestamp={timestamp} /> : null
+              message.type === "text-image" ? <RecieverTemplateTextImage imgs={imageInMessageSnap?.docs?.map((doc) => MapImageInMessageData(doc))!} message={message} timestamp={new Date(timestamp).getTime()} lastIndex={lastIndex} /> : null
             }
-            {/* {
-              message.type === "file" ? <SenderTemplateText message={message} showAvatar={showAvatar} photoURL={userLoggedIn.photoURL} timestamp={timestamp} /> : null
-            } */}
+
             {
-              message.type === "image" ? <RecieverTemplateImage imgs={imageAttachSnap?.docs.map((doc) => MapImageAttachData(doc))} message={message} showAvatar={showAvatar} photoURL={userLoggedIn?.photoURL!} timestamp={timestamp} /> : null
+              message.type === "image" ? <RecieverTemplateImage imgs={imageAttachSnap?.docs.map((doc) => MapImageAttachData(doc))} timestamp={new Date(timestamp).getTime()} lastIndex={lastIndex} onShowImage={(urlImage: any) => {setUrlImage(urlImage);setShowImageFullscreen(true)}} /> : null
             }
           </>
       }
       {
-        isShowImageFullscreen ? <ShowImageFullScreen urlImage={urlImage} onHide={() => setShowImageFullscreen(!ShowImageFullScreen)} /> : null
+        isShowImageFullscreen ? <ShowImageFullScreen urlImage={urlImage} onHide={() => setShowImageFullscreen(!ShowImageFullScreen)} chatId={chatId} /> : null
       }
     </>
   );

@@ -1,48 +1,28 @@
-import TimeAgo from "timeago-react";
-import Image from "next/image";
 import { ImageAttachType } from "@/types/ImageAttachType";
-import { MessageType } from "@/types/MessageType";
-import ActionMessage from "./ActionMessage";
+import DropdownActionMessage from "./DropdownActionMessage";
 
-export default function RecieverTemplateImage({imgs, message, showAvatar, photoURL, timestamp}: { imgs: Array<ImageAttachType> | undefined, message: MessageType, showAvatar: string | null, photoURL: string | null, timestamp: any }) {
+export default function RecieverTemplateImage({imgs, timestamp, lastIndex, onShowImage}: { imgs: Array<ImageAttachType> | undefined, timestamp: any, lastIndex: boolean, onShowImage: any }) {
+
 
     return (
         <div className="-intro-x chat-text-box flex items-end float-left mb-4">
-            <div className="chat-text-box__photo w-10 h-10 hidden sm:block flex-none image-fit relative mr-4">
-                {
-                    showAvatar && showAvatar === message.id && photoURL ? <Image
-                        src={photoURL}
-                        width={48}
-                        height={48}
-                        alt=""
-                        className="rounded-full"
-                    /> : null
-                }
+            <div className="mr-4">
+
             </div>
             <div className="w-full">
                 <div>
-                    <div className="chat-text-box__content flex items-center float-left">
+                    <div className="chat-text-box__content flex items-center float-left" title={ timestamp }>
                         <div className="rounded-md text-gray-700 chat-text-box__content__text--image flex justify-end mt-3">
                         {
-                            imgs && imgs?.length > 0 ? imgs.map((img) => <div key={img.key} className="tooltip w-16 h-16 image-fit zoom-in">
+                            imgs && imgs?.length > 0 ? imgs.map((img, i) => <div key={img.key} className={ i === 0 ? "tooltip w-16 h-16 image-fit zoom-in" : "tooltip w-16 h-16 image-fit zoom-in ml-2"} onClick={() => onShowImage(img.url)}>
                                 <img alt="" className="rounded-md" src={img.url}/>
                             </div> ) : null
                         }
                         </div>
-                        <ActionMessage />
+                        <DropdownActionMessage />
                     </div>
                     <div className="clear-both"></div>
                 </div>
-                {
-                    showAvatar && showAvatar === message.id ? 
-                    <>
-                        <div className="clear-both mb-2"></div>
-                        <div className="text-gray-600 text-xs text-right">
-                            { <TimeAgo datetime={timestamp} /> }
-                        </div>
-                    </>
-                    : null
-                }
             </div>
         </div>
     )

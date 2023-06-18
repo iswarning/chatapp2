@@ -27,12 +27,12 @@ const Page: NextPageWithLayout = () => {
   const [messData, setMessData] = useState<Array<MessageType>>()
 
   useEffect(() => {
-    socket.on("get-user-online", (data) => {
-      dispatch(setUserOnline(data))
-    });
-    return () => {
-      socket.disconnect();
-    };
+    // socket.on("get-user-online", (data) => {
+    //   dispatch(setUserOnline(data))
+    // });
+    // return () => {
+    //   socket.disconnect();
+    // };
   }, []);
 
   return (
@@ -60,7 +60,7 @@ const Page: NextPageWithLayout = () => {
 {/* <div className="side-content col-span-12 xl:col-span-3 -mt-16 xl:mt-0 pt-20 xl:-mr-6 px-6 xl:pt-6 flex-col overflow-hidden" data-content="profile">
 <div className="intro-y text-xl font-medium">Profile</div>
 <div className="intro-y box relative px-4 py-6 mt-5">
-<a href="javascript:;" className="text-gray-600 tooltip w-8 h-8 block flex items-center justify-center absolute top-0 right-0 mr-1 mt-1"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-edit-2 w-4 h-4"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg> </a>
+<a href="javascript:void(0)" className="text-gray-600 tooltip w-8 h-8 block flex items-center justify-center absolute top-0 right-0 mr-1 mt-1"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-edit-2 w-4 h-4"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg> </a>
 <div className="w-20 h-20 mx-auto image-fit">
 <img alt="Topson Messenger Tailwind HTML Admin Template" className="rounded-full" src="https://topson.left4code.com/dist/images/profile-9.jpg"/>
 <div className="bg-green-500 border-white w-3 h-3 absolute right-0 top-0 mt-1 mr-1 rounded-full border-2"></div>
@@ -140,13 +140,13 @@ const Page: NextPageWithLayout = () => {
 <div className="bg-green-500 border-white w-3 h-3 absolute right-0 bottom-0 rounded-full border-2"></div>
 </div>
 <div className="ml-2 overflow-hidden">
-<a href="javascript:;" className="font-medium">John Travolta</a>
+<a href="javascript:void(0)" className="font-medium">John Travolta</a>
 <div className="flex items-center text-xs mt-0.5">
 <div className="text-gray-600 dark:text-gray-500 truncate">Last seen 26 seconds ago ago</div>
 </div>
 </div>
 <div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:;" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
+<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
 <div className="dropdown-menu w-40">
 <div className="dropdown-menu__content box dark:bg-dark-1 p-2">
 <a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share Contact </a>
@@ -163,13 +163,13 @@ const Page: NextPageWithLayout = () => {
 <div className="bg-green-500 border-white w-3 h-3 absolute right-0 bottom-0 rounded-full border-2"></div>
 </div>
 <div className="ml-2 overflow-hidden">
-<a href="javascript:;" className="font-medium">Brad Pitt</a>
+<a href="javascript:void(0)" className="font-medium">Brad Pitt</a>
 <div className="flex items-center text-xs mt-0.5">
 <div className="text-gray-600 dark:text-gray-500 truncate">Last seen 59 seconds ago ago</div>
 </div>
 </div>
 <div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:;" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
+<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
 <div className="dropdown-menu w-40">
 <div className="dropdown-menu__content box dark:bg-dark-1 p-2">
 <a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share Contact </a>
@@ -186,13 +186,13 @@ const Page: NextPageWithLayout = () => {
 <div className="bg-green-500 border-white w-3 h-3 absolute right-0 bottom-0 rounded-full border-2"></div>
 </div>
 <div className="ml-2 overflow-hidden">
-<a href="javascript:;" className="font-medium">Leonardo DiCaprio</a>
+<a href="javascript:void(0)" className="font-medium">Leonardo DiCaprio</a>
 <div className="flex items-center text-xs mt-0.5">
 <div className="text-gray-600 dark:text-gray-500 truncate">Last seen 29 seconds ago ago</div>
 </div>
 </div>
 <div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:;" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
+<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
 <div className="dropdown-menu w-40">
 <div className="dropdown-menu__content box dark:bg-dark-1 p-2">
 <a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share Contact </a>
@@ -210,13 +210,13 @@ const Page: NextPageWithLayout = () => {
 <div className="bg-green-500 border-white w-3 h-3 absolute right-0 bottom-0 rounded-full border-2"></div>
 </div>
 <div className="ml-2 overflow-hidden">
-<a href="javascript:;" className="font-medium">John Travolta</a>
+<a href="javascript:void(0)" className="font-medium">John Travolta</a>
 <div className="flex items-center text-xs mt-0.5">
 <div className="text-gray-600 dark:text-gray-500 truncate">Last seen 26 seconds ago ago</div>
 </div>
 </div>
 <div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:;"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
+<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
 <div className="dropdown-menu w-40">
 <div className="dropdown-menu__content box dark:bg-dark-1 p-2">
 <a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share Contact </a>
@@ -233,13 +233,13 @@ const Page: NextPageWithLayout = () => {
 <div className="bg-green-500 border-white w-3 h-3 absolute right-0 bottom-0 rounded-full border-2"></div>
 </div>
 <div className="ml-2 overflow-hidden">
-<a href="javascript:;" className="font-medium">Brad Pitt</a>
+<a href="javascript:void(0)" className="font-medium">Brad Pitt</a>
 <div className="flex items-center text-xs mt-0.5">
 <div className="text-gray-600 dark:text-gray-500 truncate">Last seen 59 seconds ago ago</div>
 </div>
 </div>
 <div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:;"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
+<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
 <div className="dropdown-menu w-40">
 <div className="dropdown-menu__content box dark:bg-dark-1 p-2">
 <a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share Contact </a>
@@ -256,13 +256,13 @@ const Page: NextPageWithLayout = () => {
 <div className="bg-green-500 border-white w-3 h-3 absolute right-0 bottom-0 rounded-full border-2"></div>
 </div>
 <div className="ml-2 overflow-hidden">
-<a href="javascript:;" className="font-medium">Leonardo DiCaprio</a>
+<a href="javascript:void(0)" className="font-medium">Leonardo DiCaprio</a>
 <div className="flex items-center text-xs mt-0.5">
 <div className="text-gray-600 dark:text-gray-500 truncate">Last seen 29 seconds ago ago</div>
 </div>
 </div>
 <div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:;"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
+<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
 <div className="dropdown-menu w-40">
 <div className="dropdown-menu__content box dark:bg-dark-1 p-2">
 <a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share Contact </a>
@@ -279,13 +279,13 @@ const Page: NextPageWithLayout = () => {
 <div className="bg-green-500 border-white w-3 h-3 absolute right-0 bottom-0 rounded-full border-2"></div>
 </div>
 <div className="ml-2 overflow-hidden">
-<a href="javascript:;" className="font-medium">Sylvester Stallone</a>
+<a href="javascript:void(0)" className="font-medium">Sylvester Stallone</a>
 <div className="flex items-center text-xs mt-0.5">
 <div className="text-gray-600 dark:text-gray-500 truncate">Last seen 42 minutes ago ago</div>
 </div>
 </div>
 <div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:;"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
+<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
 <div className="dropdown-menu w-40">
 <div className="dropdown-menu__content box dark:bg-dark-1 p-2">
 <a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share Contact </a>
@@ -303,13 +303,13 @@ const Page: NextPageWithLayout = () => {
 <div className="bg-green-500 border-white w-3 h-3 absolute right-0 bottom-0 rounded-full border-2"></div>
 </div>
 <div className="ml-2 overflow-hidden">
-<a href="javascript:;" className="font-medium">John Travolta</a>
+<a href="javascript:void(0)" className="font-medium">John Travolta</a>
 <div className="flex items-center text-xs mt-0.5">
 <div className="text-gray-600 dark:text-gray-500 truncate">Last seen 26 seconds ago ago</div>
 </div>
 </div>
 <div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:;"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
+<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
 <div className="dropdown-menu w-40">
 <div className="dropdown-menu__content box dark:bg-dark-1 p-2">
 <a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share Contact </a>
@@ -326,13 +326,13 @@ const Page: NextPageWithLayout = () => {
 <div className="bg-green-500 border-white w-3 h-3 absolute right-0 bottom-0 rounded-full border-2"></div>
 </div>
 <div className="ml-2 overflow-hidden">
-<a href="javascript:;" className="font-medium">Brad Pitt</a>
+<a href="javascript:void(0)" className="font-medium">Brad Pitt</a>
 <div className="flex items-center text-xs mt-0.5">
 <div className="text-gray-600 dark:text-gray-500 truncate">Last seen 59 seconds ago ago</div>
 </div>
 </div>
 <div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:;"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
+<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
 <div className="dropdown-menu w-40">
 <div className="dropdown-menu__content box dark:bg-dark-1 p-2">
 <a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share Contact </a>
@@ -352,7 +352,7 @@ const Page: NextPageWithLayout = () => {
 {/* <div className="side-content col-span-12 xl:col-span-3 -mt-16 xl:mt-0 pt-20 xl:-mr-6 px-6 xl:pt-6 flex-col overflow-hidden" data-content="groups">
 <div className="intro-y text-xl font-medium">Create Group</div>
 <div className="intro-y box p-2 mt-5 mb-6">
-<div className="boxed-tabs nav nav-tabs justify-center flex" role="tablist"> <a data-toggle="tab" data-target="#group-members" href="javascript:;" className="hover:bg-gray-100 dark:hover:bg-dark-2 flex-1 py-2 rounded-md text-center active" id="group-members-tab" role="tab" aria-controls="group-members" aria-selected="true">Members</a> <a data-toggle="tab" data-target="#group-details" href="javascript:;" className="hover:bg-gray-100 dark:hover:bg-dark-2 flex-1 py-2 rounded-md text-center" id="group-details-tab" role="tab" aria-controls="group-details" aria-selected="false">Details</a> </div>
+<div className="boxed-tabs nav nav-tabs justify-center flex" role="tablist"> <a data-toggle="tab" data-target="#group-members" href="javascript:void(0)" className="hover:bg-gray-100 dark:hover:bg-dark-2 flex-1 py-2 rounded-md text-center active" id="group-members-tab" role="tab" aria-controls="group-members" aria-selected="true">Members</a> <a data-toggle="tab" data-target="#group-details" href="javascript:void(0)" className="hover:bg-gray-100 dark:hover:bg-dark-2 flex-1 py-2 rounded-md text-center" id="group-details-tab" role="tab" aria-controls="group-details" aria-selected="false">Details</a> </div>
 </div>
 <div className="intro-y overflow-y-auto scrollbar-hidden -mx-5 px-5">
 <div className="tab-content">
@@ -367,7 +367,7 @@ const Page: NextPageWithLayout = () => {
 <div className="bg-green-500 border-white w-3 h-3 absolute right-0 bottom-0 rounded-full border-2"></div>
 </div>
 <div className="ml-2 overflow-hidden">
-<a href="javascript:;" className="font-medium">John Travolta</a>
+<a href="javascript:void(0)" className="font-medium">John Travolta</a>
 <div className="flex items-center text-xs">
 <div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">Last seen 26 seconds ago ago</div>
 </div>
@@ -382,7 +382,7 @@ const Page: NextPageWithLayout = () => {
 <div className="bg-green-500 border-white w-3 h-3 absolute right-0 bottom-0 rounded-full border-2"></div>
 </div>
 <div className="ml-2 overflow-hidden">
-<a href="javascript:;" className="font-medium">Brad Pitt</a>
+<a href="javascript:void(0)" className="font-medium">Brad Pitt</a>
 <div className="flex items-center text-xs">
 <div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">Last seen 59 seconds ago ago</div>
 </div>
@@ -397,7 +397,7 @@ const Page: NextPageWithLayout = () => {
 <div className="bg-green-500 border-white w-3 h-3 absolute right-0 bottom-0 rounded-full border-2"></div>
 </div>
 <div className="ml-2 overflow-hidden">
-<a href="javascript:;" className="font-medium">Leonardo DiCaprio</a>
+<a href="javascript:void(0)" className="font-medium">Leonardo DiCaprio</a>
 <div className="flex items-center text-xs">
 <div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">Last seen 29 seconds ago ago</div>
 </div>
@@ -413,7 +413,7 @@ const Page: NextPageWithLayout = () => {
 <div className="bg-green-500 border-white w-3 h-3 absolute right-0 bottom-0 rounded-full border-2"></div>
 </div>
 <div className="ml-2 overflow-hidden">
-<a href="javascript:;" className="font-medium">John Travolta</a>
+<a href="javascript:void(0)" className="font-medium">John Travolta</a>
 <div className="flex items-center text-xs">
 <div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">Last seen 26 seconds ago ago</div>
 </div>
@@ -428,7 +428,7 @@ const Page: NextPageWithLayout = () => {
 <div className="bg-green-500 border-white w-3 h-3 absolute right-0 bottom-0 rounded-full border-2"></div>
 </div>
 <div className="ml-2 overflow-hidden">
-<a href="javascript:;" className="font-medium">Brad Pitt</a>
+<a href="javascript:void(0)" className="font-medium">Brad Pitt</a>
 <div className="flex items-center text-xs">
 <div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">Last seen 59 seconds ago ago</div>
 </div>
@@ -443,7 +443,7 @@ const Page: NextPageWithLayout = () => {
 <div className="bg-green-500 border-white w-3 h-3 absolute right-0 bottom-0 rounded-full border-2"></div>
 </div>
 <div className="ml-2 overflow-hidden">
-<a href="javascript:;" className="font-medium">Leonardo DiCaprio</a>
+<a href="javascript:void(0)" className="font-medium">Leonardo DiCaprio</a>
 <div className="flex items-center text-xs">
 <div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">Last seen 29 seconds ago ago</div>
 </div>
@@ -458,7 +458,7 @@ const Page: NextPageWithLayout = () => {
 <div className="bg-green-500 border-white w-3 h-3 absolute right-0 bottom-0 rounded-full border-2"></div>
 </div>
 <div className="ml-2 overflow-hidden">
-<a href="javascript:;" className="font-medium">Sylvester Stallone</a>
+<a href="javascript:void(0)" className="font-medium">Sylvester Stallone</a>
 <div className="flex items-center text-xs">
 <div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">Last seen 42 minutes ago ago</div>
 </div>
@@ -474,7 +474,7 @@ const Page: NextPageWithLayout = () => {
 <div className="bg-green-500 border-white w-3 h-3 absolute right-0 bottom-0 rounded-full border-2"></div>
 </div>
 <div className="ml-2 overflow-hidden">
-<a href="javascript:;" className="font-medium">John Travolta</a>
+<a href="javascript:void(0)" className="font-medium">John Travolta</a>
 <div className="flex items-center text-xs">
 <div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">Last seen 26 seconds ago ago</div>
 </div>
@@ -489,7 +489,7 @@ const Page: NextPageWithLayout = () => {
 <div className="bg-green-500 border-white w-3 h-3 absolute right-0 bottom-0 rounded-full border-2"></div>
 </div>
 <div className="ml-2 overflow-hidden">
-<a href="javascript:;" className="font-medium">Brad Pitt</a>
+<a href="javascript:void(0)" className="font-medium">Brad Pitt</a>
 <div className="flex items-center text-xs">
 <div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">Last seen 59 seconds ago ago</div>
 </div>
@@ -539,12 +539,12 @@ const Page: NextPageWithLayout = () => {
 </div> */}
 <SidebarMessage />
 {
-  Object.keys(appState.chatData).length > 0 ? <ChatScreen chat={appState.chatData} messages={appState.chatData.messages!} /> : null
+  Object.keys(appState.currentChat).length > 0 ? <ChatScreen chat={appState.currentChat} messages={appState.currentMessages} /> : null
 }
 {/* <div className="info-content col-span-12 xl:col-span-3 flex flex-col overflow-hidden pl-6 xl:pl-0 pr-6">
 <div className="overflow-y-auto scrollbar-hidden py-6">
 <div className="intro-y box relative px-4 py-6">
-<a href="javascript:;" className="text-gray-600 tooltip w-8 h-8 block flex items-center justify-center absolute top-0 right-0 mr-1 mt-1"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-edit-2 w-4 h-4"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg> </a>
+<a href="javascript:void(0)" className="text-gray-600 tooltip w-8 h-8 block flex items-center justify-center absolute top-0 right-0 mr-1 mt-1"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-edit-2 w-4 h-4"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg> </a>
 <div className="w-20 h-20 mx-auto image-fit">
 <img alt="Topson Messenger Tailwind HTML Admin Template" className="rounded-full" src="https://topson.left4code.com/dist/images/profile-9.jpg"/>
 <div className="bg-green-500 border-white w-3 h-3 absolute right-0 top-0 mt-1 mr-1 rounded-full border-2"></div>
@@ -590,7 +590,7 @@ const Page: NextPageWithLayout = () => {
 <div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">1.2 MB Image File</div>
 </div>
 <div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:;" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
+<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
 <div className="dropdown-menu w-40">
 <div className="dropdown-menu__content box dark:bg-dark-1 p-2">
 <a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share </a>
@@ -608,7 +608,7 @@ const Page: NextPageWithLayout = () => {
 <div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">20 MB Audio File</div>
 </div>
 <div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:;" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
+<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
 <div className="dropdown-menu w-40">
 <div className="dropdown-menu__content box dark:bg-dark-1 p-2">
 <a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share </a>
@@ -626,7 +626,7 @@ const Page: NextPageWithLayout = () => {
 <div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">120 MB Document File</div>
 </div>
 <div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:;" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
+<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
 <div className="dropdown-menu w-40">
 <div className="dropdown-menu__content box dark:bg-dark-1 p-2">
 <a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share </a>
@@ -644,7 +644,7 @@ const Page: NextPageWithLayout = () => {
 <div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">20 KB Zipped File</div>
 </div>
 <div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:;" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
+<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
 <div className="dropdown-menu w-40">
 <div className="dropdown-menu__content box dark:bg-dark-1 p-2">
 <a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share </a>
@@ -662,7 +662,7 @@ const Page: NextPageWithLayout = () => {
 <div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">1.2 MB Image File</div>
 </div>
 <div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:;" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
+<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
 <div className="dropdown-menu w-40">
 <div className="dropdown-menu__content box dark:bg-dark-1 p-2">
 <a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share </a>
@@ -680,7 +680,7 @@ const Page: NextPageWithLayout = () => {
 <div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">1.2 MB Image File</div>
 </div>
 <div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:;" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
+<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
 <div className="dropdown-menu w-40">
 <div className="dropdown-menu__content box dark:bg-dark-1 p-2">
 <a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share </a>
@@ -698,7 +698,7 @@ const Page: NextPageWithLayout = () => {
 <div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">1.2 MB Image File</div>
 </div>
 <div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:;" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
+<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
 <div className="dropdown-menu w-40">
 <div className="dropdown-menu__content box dark:bg-dark-1 p-2">
 <a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share </a>
@@ -716,7 +716,7 @@ const Page: NextPageWithLayout = () => {
 <div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">1 MB Image File</div>
 </div>
 <div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:;" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
+<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
 <div className="dropdown-menu w-40">
 <div className="dropdown-menu__content box dark:bg-dark-1 p-2">
 <a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share </a>
@@ -734,7 +734,7 @@ const Page: NextPageWithLayout = () => {
 <div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">2.2 MB Text File</div>
 </div>
 <div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:;" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
+<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
 <div className="dropdown-menu w-40">
 <div className="dropdown-menu__content box dark:bg-dark-1 p-2">
 <a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share </a>
@@ -752,7 +752,7 @@ const Page: NextPageWithLayout = () => {
 <div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">4 MB Document File</div>
 </div>
 <div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:;" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
+<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
 <div className="dropdown-menu w-40">
 <div className="dropdown-menu__content box dark:bg-dark-1 p-2">
 <a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share </a>
@@ -770,7 +770,7 @@ const Page: NextPageWithLayout = () => {
 <div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">20 MB Audio File</div>
 </div>
 <div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:;" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
+<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
 <div className="dropdown-menu w-40">
 <div className="dropdown-menu__content box dark:bg-dark-1 p-2">
 <a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share </a>
@@ -788,7 +788,7 @@ const Page: NextPageWithLayout = () => {
 <div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">4 MB Document File</div>
 </div>
 <div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:;" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
+<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
 <div className="dropdown-menu w-40">
 <div className="dropdown-menu__content box dark:bg-dark-1 p-2">
 <a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share </a>
@@ -806,7 +806,7 @@ const Page: NextPageWithLayout = () => {
 <div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">2.2 MB Text File</div>
 </div>
 <div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:;" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
+<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
 <div className="dropdown-menu w-40">
 <div className="dropdown-menu__content box dark:bg-dark-1 p-2">
 <a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share </a>
@@ -824,7 +824,7 @@ const Page: NextPageWithLayout = () => {
 <div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">1.2 MB Image File</div>
 </div>
 <div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:;" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
+<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
 <div className="dropdown-menu w-40">
 <div className="dropdown-menu__content box dark:bg-dark-1 p-2">
 <a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share </a>
@@ -842,7 +842,7 @@ const Page: NextPageWithLayout = () => {
 <div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">120 MB Document File</div>
 </div>
 <div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:;" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
+<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
 <div className="dropdown-menu w-40">
 <div className="dropdown-menu__content box dark:bg-dark-1 p-2">
 <a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share </a>
@@ -860,7 +860,7 @@ const Page: NextPageWithLayout = () => {
 <div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">1.2 MB Image File</div>
 </div>
 <div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:;" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
+<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
 <div className="dropdown-menu w-40">
 <div className="dropdown-menu__content box dark:bg-dark-1 p-2">
 <a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share </a>
@@ -878,7 +878,7 @@ const Page: NextPageWithLayout = () => {
 <div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">1.2 MB Image File</div>
 </div>
 <div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:;" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
+<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
 <div className="dropdown-menu w-40">
 <div className="dropdown-menu__content box dark:bg-dark-1 p-2">
 <a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share </a>
@@ -896,7 +896,7 @@ const Page: NextPageWithLayout = () => {
 <div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">1 MB Image File</div>
 </div>
 <div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:;" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
+<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
 <div className="dropdown-menu w-40">
 <div className="dropdown-menu__content box dark:bg-dark-1 p-2">
 <a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share </a>
@@ -914,7 +914,7 @@ const Page: NextPageWithLayout = () => {
 <div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">1 KB Script File</div>
 </div>
 <div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:;" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
+<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
 <div className="dropdown-menu w-40">
 <div className="dropdown-menu__content box dark:bg-dark-1 p-2">
 <a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share </a>
@@ -932,7 +932,7 @@ const Page: NextPageWithLayout = () => {
 <div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">1 KB Script File</div>
 </div>
 <div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:;" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
+<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
 <div className="dropdown-menu w-40">
 <div className="dropdown-menu__content box dark:bg-dark-1 p-2">
 <a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share </a>

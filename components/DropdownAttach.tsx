@@ -1,12 +1,12 @@
 import InsertPhotoIcon from "@mui/icons-material/InsertPhoto";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
-import { useState } from "react";
+import { ChangeEvent, useState } from "react";
 import { addMessageToFirebase, handleImageInMessage, onAttachFile, pushUrlImageToFirestore } from "./ChatPage/Functions";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth, db, storage } from "../firebase";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from 'react-redux'
-import { selectAppState, setChatData } from "@/redux/appSlice";
+import { selectAppState, setCurrentChat, setCurrentMessages } from "@/redux/appSlice";
 import { MapMessageData } from "@/types/MessageType";
 import { v4 as uuidv4 } from 'uuid'
 
@@ -89,10 +89,7 @@ export default function DropdownAttach({ chatId, scrollToBottom }: { chatId: str
           );
         }
 
-        dispatch(setChatData({
-          ...appState.chatData,
-          messages: [...appState.chatData.messages!, MapMessageData(snap)]
-        }))
+        dispatch(setCurrentMessages([...appState.currentMessages, MapMessageData(snap)]))
 
       }
       
@@ -114,7 +111,7 @@ export default function DropdownAttach({ chatId, scrollToBottom }: { chatId: str
                   type="file"
                   hidden
                   id="upload-image"
-                  onChange={onImageChange}
+                  onChange={(e) => onImageChange(e)}
                   multiple
                 />
                 <InsertPhotoIcon
@@ -129,7 +126,7 @@ export default function DropdownAttach({ chatId, scrollToBottom }: { chatId: str
                   type="file"
                   hidden
                   id="upload-file"
-                  onChange={(event) => onAttachFile(event, user?.email, chatId, scrollToBottom)}
+                  onChange={(event) => onAttachFile(event, user?.email, appState.currentChat, scrollToBottom)}
                 />
                 <AttachFileIcon
                   fontSize="small"

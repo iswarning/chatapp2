@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext } from 'react'
+import { useEffect, useState, useContext, ReactEventHandler, SyntheticEvent, useRef } from 'react'
 import { 
     faMagnifyingGlassPlus,
     faMagnifyingGlassMinus,
@@ -16,17 +16,45 @@ import { v4 as uuidv4 } from 'uuid'
 import 'html2canvas'
 import html2canvas from 'html2canvas'
 
-export default function ShowImageFullScreen({urlImage, onHide}: { urlImage: string, onHide: any }) {
+const useImageLoaded = () => {
+    const [loaded, setLoaded] = useState(false)
+    const ref: any = useRef()
+  
+    const onLoad = () => {
+      setLoaded(true)
+    }
+  
+    useEffect(() => {
+      if (ref.current && ref.current.complete) {
+        onLoad()
+      }
+    })
+  
+    return [ref, loaded, onLoad]
+}
+
+export default function ShowImageFullScreen(
+    { 
+        urlImage, 
+        onHide,
+        chatId,
+    }: { 
+        urlImage: string, 
+        onHide: any,
+        chatId: string
+    }) {
 
     const [scale, setScale] = useState(100)
     const [rotate, setRotate] = useState(0)
-    const [urls, setUrls]: any = useState([])
+    const [urls, setUrls] = useState<Array<string>>()
     const [urlImg, setUrlImg] = useState(urlImage)
     const appState = useSelector(selectAppState)
+    const [ref, loaded, onLoad] = useImageLoaded()
 
     useEffect(() => {
         const getListImage = async() => {
-            let path = `public/chat-room/${appState.chatData.id}/photos`
+
+            let path = `public/chat-room/${appState.currentChat.id}/photos`
             try {
                 (await storage.ref(path).listAll()).items.forEach((photo) => {
                     photo.getDownloadURL().then((url) => setUrls((u: any) => [...u, url])).catch(err => console.log(err))
@@ -45,7 +73,7 @@ export default function ShowImageFullScreen({urlImage, onHide}: { urlImage: stri
 
     const handleZoomOut = () => {
         if(scale > 100)
-            setScale(scale - 20)
+            setScale(scale - 50)
     }
 
     const handleRotateLeft = () => {
@@ -62,7 +90,7 @@ export default function ShowImageFullScreen({urlImage, onHide}: { urlImage: stri
     }
 
     const handleChangeImage = (url: any) => {
-        document.querySelectorAll(".image-box img").forEach((selector) => {
+        document.querySelectorAll(".image").forEach((selector) => {
             selector.classList.remove("active")
         })
         setUrlImg(url);
@@ -76,6 +104,10 @@ export default function ShowImageFullScreen({urlImage, onHide}: { urlImage: stri
         }).catch(err => console.log(err))
     }
 
+    const handleOnload = (event: SyntheticEvent<HTMLImageElement, Event>) => {
+        console.log()
+    }
+
     return (
         <ScreenContainer>
             <ActionBarTop className='top-0 position-fixed right-0 d-flex'>
@@ -84,13 +116,14 @@ export default function ShowImageFullScreen({urlImage, onHide}: { urlImage: stri
             <div className='flex' >
                 <ContainerImage id='container-main-image'>
                     <MainImage src={urlImg} alt='' style={StyleImage} width={450} height={400}/>
+                    {loaded && <h1>Loaded!</h1>}
                 </ContainerImage>
-                <ImageBox className='flex-column' style={{overflowY: urls.length > 7 ? 'scroll' : 'unset'}}>
-                    { urls.map((url: string) => <div key={uuidv4()} onClick={() => handleChangeImage(url)}>
+                <ImageBox className='flex-column' style={{overflowY: urls?.length! > 7 ? 'scroll' : 'unset'}}>
+                    { urls?.map((url: string) => <div key={uuidv4()} onClick={() => handleChangeImage(url)}>
                         {
                             (urlImg === url && urlImage !== urlImg) || urlImage === url ?
-                            <ImageBoxElementActive alt='' src={url} width={100} height={100}/>
-                            : <ImageBoxElement alt='' src={url} width={100} height={100}/>
+                            <ImageBoxElementActive className='image' alt='' src={url} width={100} height={100}/>
+                            : <ImageBoxElement className='image' ref={ref} onLoad={onLoad} alt='' src={url} width={100} height={100}/>
                         }
                     </div>)
                     }

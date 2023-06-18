@@ -9,7 +9,7 @@ import TimeAgo from "timeago-react";
 import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import {useSelector} from 'react-redux'
-import { selectAppState, setChatData } from "@/redux/appSlice";
+import { selectAppState, setCurrentChat, setCurrentMessages, setListChat } from "@/redux/appSlice";
 import { useDispatch } from 'react-redux'
 import { ChatType } from "@/types/ChatType";
 import { MapMessageData } from "@/types/MessageType";
@@ -50,10 +50,19 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
   );
 
   const handleShowChatScreen = async() => {
-    let chatData = chat;
-    const messData = await getMessage(chat.id);
-    chatData.messages = messData.docs.map((m) => MapMessageData(m));
-    dispatch(setChatData(chatData))
+    let chatExist = appState.listChat.find((c) => c.id === chat.id);
+
+    if (chatExist) {
+      dispatch(setCurrentChat(chatExist))
+      dispatch(setCurrentMessages(chatExist.messages))
+    } else {
+      const messData = await getMessage(chat.id);
+      const currentMessages = messData.docs.map((m) => MapMessageData(m));
+      dispatch(setCurrentChat(chat))
+      dispatch(setCurrentMessages(currentMessages))
+      dispatch(setListChat([...appState.listChat, { ...chat, messages: currentMessages }]))
+    }
+
     setSeenMessage().catch(err => console.log(err));
   };
 
@@ -291,7 +300,7 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
 // <div className="bg-green-500 border-white w-3 h-3 absolute right-0 bottom-0 rounded-full border-2"></div>
 // </div>
 // <div className="ml-2 overflow-hidden">
-// <a href="javascript:;" className="font-medium text-white">{recipientSnapshot?.docs?.[0]?.data().fullName}</a>
+// <a href="javascript:void(0)" className="font-medium text-white">{recipientSnapshot?.docs?.[0]?.data().fullName}</a>
 // <div className="text-opacity-80 truncate mt-0.5 text-white">
 // {lastMessageSnapshot?.docs.length! > 0
 //     ? handleShowLastMessage()
@@ -309,7 +318,7 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
 //     ) : null}
 // </div>
 // <div className="chat-list__action dropdown transition duration-200 opacity-0 mt-1 -mb-1 -mr-1 ml-auto">
-// <a className="dropdown-toggle block text-opacity-70 text-white" href="javascript:;"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-chevron-down w-6 h-6"><polyline points="6 9 12 15 18 9"></polyline></svg> </a>
+// <a className="dropdown-toggle block text-opacity-70 text-white" href="javascript:void(0)"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-chevron-down w-6 h-6"><polyline points="6 9 12 15 18 9"></polyline></svg> </a>
 // <div className="dropdown-menu w-40">
 // <div className="dropdown-menu__content box dark:bg-dark-1 p-2">
 // <a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share Contact </a>
@@ -348,7 +357,7 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
 )}
 </div>
 <div className="ml-2 overflow-hidden">
-<a href="javascript:;" className={active ? "font-medium text-white" :"font-medium text-gray-800 dark:text-white"}>{ chat.isGroup ? "Group: " + chat.name : recipientSnapshot?.docs?.[0]?.data().fullName}</a>
+<a href="javascript:void(0)" className={active ? "font-medium text-white" :"font-medium text-gray-800 dark:text-white"}>{ chat.isGroup ? "Group: " + chat.name : recipientSnapshot?.docs?.[0]?.data().fullName}</a>
 {lastMessageSnapshot?.docs.length! > 0
     ? handleShowLastMessage()
 : ""}
@@ -356,7 +365,7 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
 <div className="ml-auto">
 <div className={active ? "whitespace-nowrap text-opacity-80 text-xs text-white" : "whitespace-nowrap text-opacity-80 text-xs text-gray-800 dark:text-gray-600"}>
 {lastMessageSnapshot?.docs.length! > 0 ? (
-      lastMessage?.timestamp?.toDate() ? (
+      lastMessage?.timestamp ? (
         <TimeAgo datetime={lastMessage?.timestamp?.toDate()} />
       ) : (
         "Unavailable"
@@ -364,7 +373,7 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
     ) : null}
 </div>
 <div className="chat-list__action dropdown transition duration-200 opacity-0 mt-1 -mb-1 -mr-1 ml-auto">
-<a className="dropdown-toggle block text-opacity-70 text-gray-500" href="javascript:;"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-chevron-down w-6 h-6"><polyline points="6 9 12 15 18 9"></polyline></svg> </a>
+<a className="dropdown-toggle block text-opacity-70 text-gray-500" href="javascript:void(0)"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-chevron-down w-6 h-6"><polyline points="6 9 12 15 18 9"></polyline></svg> </a>
 
 </div>
 </div>

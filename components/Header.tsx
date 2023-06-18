@@ -77,14 +77,14 @@ export default function Header() {
         <img alt="Topson Messenger Tailwind HTML Admin Template" className="h-8" src="https://topson.left4code.com/dist/images/logo.svg"/>
         <div className="text-base font-light ml-4"> <span className="font-medium">Clone</span> Messenger </div>
         </a>
-        <a className="mobile-menu-toggler flex md:hidden items-center h-full mr-auto px-5 -ml-5" href="javascript:;"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-bar-chart-2 w-5 h-5 transform rotate-90"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg> </a>
+        <a className="mobile-menu-toggler flex md:hidden items-center h-full mr-auto px-5 -ml-5" href="javascript:void(0)"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-bar-chart-2 w-5 h-5 transform rotate-90"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg> </a>
         <div className="h-full flex items-center">
         <div className="mr-3">Dark Mode</div>
         <input className="form-check-switch" type="checkbox" id="dark-mode-switcher"/>
         </div>
         <div className="hidden md:flex items-center px-5"></div>
         <div className="notification-dropdown dropdown">
-        <a href="javascript:;" className="notification-dropdown__toggler text-gray-600 border-theme-7 dark:border-dark-4 dark:text-gray-300 dropdown-toggle h-full flex items-center px-5 relative -mr-3 md:mr-0 md:border-l md:border-r">
+        <a href="javascript:void(0)" className="notification-dropdown__toggler text-gray-600 border-theme-7 dark:border-dark-4 dark:text-gray-300 dropdown-toggle h-full flex items-center px-5 relative -mr-3 md:mr-0 md:border-l md:border-r">
         <div className="relative">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-bell w-5 h-5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
         <div className="w-2 h-2 bg-theme-1 text-white flex items-center justify-center absolute -mt-0.5 top-0 right-0 rounded-full"></div>
@@ -100,7 +100,7 @@ export default function Header() {
         </div>
         <div className="ml-2 overflow-hidden">
         <div className="flex items-center">
-        <a href="javascript:;" className="font-medium truncate mr-5">Keanu Reeves</a>
+        <a href="javascript:void(0)" className="font-medium truncate mr-5">Keanu Reeves</a>
         <div className="text-opacity-50 text-gray-800 text-xs ml-auto whitespace-nowrap -mt-0.5">05:09 AM</div>
         </div>
         <div className="text-opacity-70 text-gray-800 dark:text-gray-500 w-full truncate mt-0.5">There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomi</div>
@@ -113,7 +113,7 @@ export default function Header() {
         </div>
         <div className="ml-2 overflow-hidden">
         <div className="flex items-center">
-        <a href="javascript:;" className="font-medium truncate mr-5">Leonardo DiCaprio</a>
+        <a href="javascript:void(0)" className="font-medium truncate mr-5">Leonardo DiCaprio</a>
         <div className="text-opacity-50 text-gray-800 text-xs ml-auto whitespace-nowrap -mt-0.5">01:10 PM</div>
         </div>
         <div className="text-opacity-70 text-gray-800 dark:text-gray-500 w-full truncate mt-0.5">It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem </div>
@@ -126,7 +126,7 @@ export default function Header() {
         </div>
         <div className="ml-2 overflow-hidden">
         <div className="flex items-center">
-        <a href="javascript:;" className="font-medium truncate mr-5">Christian Bale</a>
+        <a href="javascript:void(0)" className="font-medium truncate mr-5">Christian Bale</a>
         <div className="text-opacity-50 text-gray-800 text-xs ml-auto whitespace-nowrap -mt-0.5">05:09 AM</div>
         </div>
         <div className="text-opacity-70 text-gray-800 dark:text-gray-500 w-full truncate mt-0.5">It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem </div>
@@ -139,7 +139,7 @@ export default function Header() {
         </div>
         <div className="ml-2 overflow-hidden">
         <div className="flex items-center">
-        <a href="javascript:;" className="font-medium truncate mr-5">Kevin Spacey</a>
+        <a href="javascript:void(0)" className="font-medium truncate mr-5">Kevin Spacey</a>
         <div className="text-opacity-50 text-gray-800 text-xs ml-auto whitespace-nowrap -mt-0.5">06:05 AM</div>
         </div>
         <div className="text-opacity-70 text-gray-800 dark:text-gray-500 w-full truncate mt-0.5">There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomi</div>
@@ -152,7 +152,7 @@ export default function Header() {
         </div>
         <div className="ml-2 overflow-hidden">
         <div className="flex items-center">
-        <a href="javascript:;" className="font-medium truncate mr-5">Tom Hanks</a>
+        <a href="javascript:void(0)" className="font-medium truncate mr-5">Tom Hanks</a>
         <div className="text-opacity-50 text-gray-800 text-xs ml-auto whitespace-nowrap -mt-0.5">05:09 AM</div>
         </div>
         <div className="text-opacity-70 text-gray-800 dark:text-gray-500 w-full truncate mt-0.5">There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomi</div>
@@ -162,7 +162,7 @@ export default function Header() {
         </div>
         </div>
         <div className="account-dropdown dropdown relative">
-        <a href="javascript:;" className="h-full dropdown-toggle flex items-center pl-5">
+        <a href="javascript:void(0)" className="h-full dropdown-toggle flex items-center pl-5">
         <div className="w-8 h-8 image-fit">
         {
             user?.photoURL ? <Image 

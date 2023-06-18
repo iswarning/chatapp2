@@ -96,7 +96,7 @@ export default function SidebarMessage() {
       <ChatComponent
         key={chat.id}
         chat={MapChatData(chat)}
-        active={appState.chatData?.id === chat.id}
+        active={appState.currentChat?.id === chat.id}
       />
     ))
 : null}

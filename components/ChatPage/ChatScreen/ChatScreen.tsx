@@ -1,4 +1,4 @@
-import { auth, db, storage } from "@/firebase";
+import { auth, db, onMessageListener, storage } from "@/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useCollection } from "react-firebase-hooks/firestore";
 import Message from "../Message/Message";
@@ -34,7 +34,7 @@ import {
   setSeenMessage,
 } from "../Functions";
 import { useSelector, useDispatch } from 'react-redux';
-import { selectAppState, setChatData } from "@/redux/appSlice";
+import { addNewMessage, pushMessageToListChat, selectAppState, setListChat, setStatusSend } from "@/redux/appSlice";
 import { ChatType } from "@/types/ChatType";
 import { MapMessageData, MessageType } from "@/types/MessageType";
 import Image from "next/image";
@@ -61,7 +61,6 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
   const [showEmoji, setShowEmoji] = useState(false);
   const [progress, setProgress] = useState(0);
   const [isLoading, setLoading] = useState(false);
-  const [statusSend, setStatusSend] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
   const [messData,setMessData] = useState(messages)
@@ -83,7 +82,35 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
       .where("email", "==", getRecipientEmail(chat.users, user))
   );
 
-  
+  const getNewMessage = async() => {
+    const doc = await db.collection("chats").doc(chat.id).collection("messages").orderBy("timestamp").limitToLast(1).get()
+    return MapMessageData(doc?.docs?.[0])
+  }
+
+  useEffect(() => {
+    onMessageListener()
+      .then(() => {
+        getNewMessage().then((newMsg) => {
+          if (!appState.currentMessages?.find((msg) => msg.id === newMsg.id)) {
+            dispatch(addNewMessage(newMsg))
+            dispatch(pushMessageToListChat({ chat: chat, newMessage: newMsg }))
+          }
+        })
+      })
+      .catch((err) => console.log(err));
+  },[]);
+
+  useEffect(() => {
+    const channel = new BroadcastChannel("notifications");
+      channel.addEventListener("message", () => {
+        getNewMessage().then((newMsg) => {
+          if (!appState.currentMessages?.find((msg) => msg.id === newMsg.id)) {
+            dispatch(addNewMessage(newMsg))
+            dispatch(pushMessageToListChat({ chat: chat, newMessage: newMsg }))
+          }
+        })
+    });
+  },[]);
 
   useEffect(() => {
     // getRecipientUser().catch((err) => console.log(err))
@@ -144,17 +171,17 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
         <Message
           key={message.id}
           message={message}
-          timestamp={message.timestamp.toDate()}
-          photoURL={getRecipientAvatar()}
+          timestamp={message.timestamp}
           chatId={chat.id}
-          showAvatar={messages[index]?.user !== messages[index+1]?.user ? message.id : null}
+          lastIndex={messages[index] === messages[messages.length - 1]}
+          scrollToBottom={() => scrollToBottom()}
         />
       ));
     // }
   };
 
   const sendMessage = async (e: any): Promise<any> => {
-    setStatusSend("Sending...");
+    dispatch(setStatusSend(1))
     e.preventDefault();
 
     let { listElementImg, message } = handleImageInMessage();
@@ -163,7 +190,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
 
     const { messageDoc } = await addMessageToFirebase(
       message,
-      listElementImg?.length > 0 ? "text-image" : "text",
+      Object.keys(listElementImg).length > 0 ? "text-image" : "text",
       user?.email,
       chat.id
     );
@@ -204,17 +231,24 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
         user?.displayName,
         recipientSnapshot?.docs?.[0]?.data().fcm_token
       );
-      dispatch(setChatData({
-        ...appState.chatData,
-        messages: [...appState.chatData.messages!, MapMessageData(snap)]
-      }))
+      dispatch(addNewMessage(MapMessageData(snap)))
+      dispatch(pushMessageToListChat({ chat: chat, newMessage: MapMessageData(snap) }))
+    } else {
+      toast("Error when send message !", {
+        hideProgressBar: true,
+        type: "error",
+        autoClose: 5000,
+      });
+      const element = document.getElementById("input-message");
+      if (element) element.innerHTML = "";
+      return
     }
 
     const element = document.getElementById("input-message");
     if (element) element.innerHTML = "";
 
     scrollToBottom();
-    setStatusSend("Sent");
+    dispatch(setStatusSend(2))
   };
 
   const onSendMessage = (msg: string) => {
@@ -455,7 +489,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
               {handleShowAvatarOnline()}
             </div>
             <div className="ml-2 overflow-hidden">
-              <a href="javascript:;" className="text-base font-medium">{ chat.isGroup ? "Group: " + chat.name : recipientSnapshot?.docs?.[0].data().fullName}</a>
+              <a href="javascript:void(0)" className="text-base font-medium">{ chat.isGroup ? "Group: " + chat.name : recipientSnapshot?.docs?.[0].data().fullName}</a>
               <div className="text-gray-600">
               {handleShowTextOnline()}
               </div>
@@ -464,7 +498,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
           <a className="text-gray-600 hover:text-theme-1" href=""> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-camera w-4 h-4 sm:w-6 sm:h-6"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg> </a>
           <a className="text-gray-600 hover:text-theme-1 ml-2 sm:ml-5" href=""> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-mic w-4 h-4 sm:w-6 sm:h-6"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg> </a>
         </div>
-        <ScrollBarCustom className="overflow-y-scroll pt-5 flex-1 px-4">
+        <ScrollBarCustom className="overflow-y-auto pt-5 flex-1 px-4">
         {showMessage()}
         {/* <div className="-intro-x chat-text-box flex items-end float-left mb-4">
         <div className="chat-text-box__photo w-10 h-10 hidden sm:block flex-none image-fit relative mr-4">
@@ -475,7 +509,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
         <div className="chat-text-box__content flex items-center float-left">
         <div className="box leading-relaxed dark:text-gray-300 text-gray-700 px-4 py-3 mt-3"> Lorem ipsum sit amen dolor, lorem ipsum sit amen dolor </div>
         <div className="hidden sm:block dropdown relative ml-3 mt-3">
-        <a href="javascript:;" className="dropdown-toggle w-4 h-4"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
+        <a href="javascript:void(0)" className="dropdown-toggle w-4 h-4"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
         <div className="dropdown-menu w-40">
         <div className="dropdown-menu__content box dark:bg-dark-1 p-2">
         <a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-corner-up-left w-4 h-4 mr-2"><polyline points="9 14 4 9 9 4"></polyline><path d="M20 20v-7a4 4 0 0 0-4-4H4"></path></svg> Reply </a>
@@ -495,7 +529,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
         </div>
         </div>
         <div className="hidden sm:block dropdown relative ml-3 mt-3">
-        <a href="javascript:;" className="dropdown-toggle w-4 h-4"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
+        <a href="javascript:void(0)" className="dropdown-toggle w-4 h-4"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
         <div className="dropdown-menu w-40">
         <div className="dropdown-menu__content box dark:bg-dark-1 p-2">
         <a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-corner-up-left w-4 h-4 mr-2"><polyline points="9 14 4 9 9 4"></polyline><path d="M20 20v-7a4 4 0 0 0-4-4H4"></path></svg> Reply </a>
@@ -508,7 +542,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
         <div className="chat-text-box__content flex items-center float-left">
         <div className="box leading-relaxed dark:text-gray-300 text-gray-700 px-4 py-3 mt-3"> Contrary to popular belief </div>
         <div className="hidden sm:block dropdown relative ml-3 mt-3">
-        <a href="javascript:;" className="dropdown-toggle w-4 h-4"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
+        <a href="javascript:void(0)" className="dropdown-toggle w-4 h-4"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
         <div className="dropdown-menu w-40">
         <div className="dropdown-menu__content box dark:bg-dark-1 p-2">
         <a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-corner-up-left w-4 h-4 mr-2"><polyline points="9 14 4 9 9 4"></polyline><path d="M20 20v-7a4 4 0 0 0-4-4H4"></path></svg> Reply </a>
@@ -528,7 +562,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
         <div>
         <div className="chat-text-box__content flex items-center float-right">
         <div className="hidden sm:block dropdown relative mr-3 mt-3">
-        <a href="javascript:;" className="dropdown-toggle w-4 h-4"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
+        <a href="javascript:void(0)" className="dropdown-toggle w-4 h-4"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
         <div className="dropdown-menu w-40">
         <div className="dropdown-menu__content box dark:bg-dark-1 p-2">
         <a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-corner-up-left w-4 h-4 mr-2"><polyline points="9 14 4 9 9 4"></polyline><path d="M20 20v-7a4 4 0 0 0-4-4H4"></path></svg> Reply </a>
@@ -545,9 +579,9 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
         <div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">1.4 MB Image File</div>
         </div>
         <div className="sm:ml-20 mt-3 sm:mt-0 flex">
-        <a href="javascript:;" className="tooltip w-8 h-8 block border rounded-full flex-none flex items-center justify-center ml-2"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-download w-4 h-4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> </a>
-        <a href="javascript:;" className="tooltip w-8 h-8 block border rounded-full flex-none flex items-center justify-center ml-2"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share w-4 h-4"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg> </a>
-        <a href="javascript:;" className="tooltip w-8 h-8 block border rounded-full flex-none flex items-center justify-center ml-2"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-horizontal w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg> </a>
+        <a href="javascript:void(0)" className="tooltip w-8 h-8 block border rounded-full flex-none flex items-center justify-center ml-2"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-download w-4 h-4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> </a>
+        <a href="javascript:void(0)" className="tooltip w-8 h-8 block border rounded-full flex-none flex items-center justify-center ml-2"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share w-4 h-4"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg> </a>
+        <a href="javascript:void(0)" className="tooltip w-8 h-8 block border rounded-full flex-none flex items-center justify-center ml-2"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-horizontal w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg> </a>
         </div>
         </div>
         </div>
@@ -583,11 +617,12 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
           contentEditable="true"
           className="w-full block outline-none py-4 px-4 bg-transparent"
           onClick={() => setSeenMessage}
+          style={{overflowY: 'auto'}}
           id="input-message"
         />
         
         <div className="dropdown relative mr-3 sm:mr-5">
-        <a href="javascript:;" className="text-gray-600 hover:text-theme-1 dropdown-toggle w-4 h-4 sm:w-5 sm:h-5 block" onClick={() => setShowEmoji(!showEmoji)}> 
+        <a href="javascript:void(0)" className="text-gray-600 hover:text-theme-1 w-4 h-4 sm:w-5 sm:h-5 block" onClick={() => setShowEmoji(!showEmoji)}> 
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-smile w-full h-full">
             <circle cx="12" cy="12" r="10"></circle>
             <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
@@ -600,7 +635,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
         }
         </div>
         <a 
-        href="javascript:;" 
+        href="javascript:void(0)" 
         className="bg-theme-1 text-white w-8 h-8 sm:w-10 sm:h-10 block rounded-full flex-none flex items-center justify-center"
         onClick={(event) => sendMessage(event)}> 
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-send w-4 h-4 sm:w-5 sm:h-5">
