@@ -2,63 +2,66 @@ import { db } from '@/firebase';
 import { ChunkFileType } from '@/types/ChunkFileType';
 import { FileInMessageType } from '@/types/FileInMessageType'
 import { MessageType } from '@/types/MessageType';
+import { CircularProgress } from '@mui/material';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react'
 import { useCollection } from 'react-firebase-hooks/firestore';
 
-export default function SenderTemplateFile({ file, chunks, message, chatId, timestamp, lastIndex }: { file: FileInMessageType | undefined, chunks: Array<ChunkFileType>, message: MessageType, chatId: string, timestamp: any, lastIndex: boolean }) {
+export default function SenderTemplateFile({ file, message, chatId, timestamp, lastIndex }: { file: FileInMessageType | undefined, message: MessageType, chatId: string, timestamp: any, lastIndex: boolean }) {
 
-    const [fileDownload, setFileDownload] = useState<string>();
-    const [blobParts, setBlobParts] = useState<Array<BlobPart>>([])
+    const [chunks] = useCollection(
+        db
+          .collection("chats")
+          .doc(chatId)
+          .collection("messages")
+          .doc(message.id)
+          .collection("fileInMessage")
+          .doc(file?.id).collection("chunks")
+    );
 
-    // const handleChunksFile = () => {
-    //     // let blobs = new Blob();
-    //     chunks?.forEach((chunk) => {
-    //         fetch(chunk.data().url)
-    //         .then((response) => {
-    //             response.blob().then((blob) => {
-    //                 console.log(blob)
-    //             }).catch(err => console.log(err))
-    //         }).catch(err => console.log(err))
-    //     })
-    //     // console.log(blobs.)
-    // }
+    const handleChunksFile = async() => {
 
-    useEffect(() => {
-        const handleChunksFile = () => {
-            chunks?.forEach(async(chunk) => {
-                const response = await fetch(chunk.url);
+        let blobParts: Blob[] = [];
+
+        await Promise.all(
+            Array.prototype.map.call(chunks?.docs, async(chunk) => {
+                const response = await fetch(chunk.data().url);
                 const blob = await response.blob();
-                setBlobParts((old) => [...old!, blob])
+                blobParts.push(blob)
             })
-        }
-        handleChunksFile()
-    },[])
+        )
 
-    const handleChunksFile = () => {
-        console.log(blobParts)
-        // let blobParts: Array<BlobPart> = [];
-        // chunks.forEach(async(chunk) => {
-        //     const response = await fetch(chunk.url);
-        //     const blob = await response.blob();
-        //     blobParts.push(blob)
-        //     console.log(blobParts, blob)
-        // })
-        // // await Promise.all(
-        // //     Array.prototype.map.call(chunks?.docs, async(chunk) => {
-        // //         const response = await fetch(chunk.data().url);
-        // //         const blob = await response.blob();
-        // //         blobParts.push(blob)
-        // //         console.log({blobParts, blob})
-        // //     })
-        // // )
-        // if (blobParts?.length! > 0) {
-        //     let blob = new Blob(blobParts)
-        //     let url = URL.createObjectURL(blob)
-        //     console.log(blob)
-        //     setFileDownload(url)
-        //     URL.revokeObjectURL(url);
-        // }
+        let blob = new Blob(blobParts, { type: file?.type })
+        downloadBlob(blob, file?.name!)
+
+    }
+
+    function downloadBlob(blob: Blob, name: string) {
+        // Convert your blob into a Blob URL (a special url that points to an object in the browser's memory)
+        const blobUrl = URL.createObjectURL(blob);
+      
+        // Create a link element
+        const link = document.createElement("a");
+      
+        // Set link's href to point to the Blob URL
+        link.href = blobUrl;
+        link.download = name;
+      
+        // Append link to the body
+        document.body.appendChild(link);
+      
+        // Dispatch click event on the link
+        // This is necessary as link.click() does not work on the latest firefox
+        link.dispatchEvent(
+          new MouseEvent('click', { 
+            bubbles: true, 
+            cancelable: true, 
+            view: window 
+          })
+        );
+      
+        // Remove link from body
+        document.body.removeChild(link);
     }
   
     return (
@@ -82,11 +85,11 @@ export default function SenderTemplateFile({ file, chunks, message, chatId, time
                                 <div className="absolute m-auto top-0 left-0 right-0 bottom-0 flex items-center justify-center">{file?.type?.toUpperCase()}</div>
                             </div>
                             <div className="sm:ml-3 mt-3 sm:mt-0 text-center sm:text-left">
-                                <div className="text-gray-700 dark:text-gray-300 whitespace-nowrap font-medium truncate">{file?.name}</div>
+                                <div className="text-gray-700 dark:text-gray-300 whitespace-nowrap font-medium truncate">{file?.name.length >= 20 ? file.name.substring(0, 20) + "..." : file?.name}</div>
                                 <div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">Size: { Number((file?.size!).toFixed(1)) } MB</div>
                             </div>
                             <div className="sm:ml-20 mt-3 sm:mt-0 flex">
-                                <button className="tooltip w-8 h-8 block border rounded-full flex-none flex items-center justify-center ml-2" onClick={() => handleChunksFile()}> 
+                                <button className="tooltip w-8 h-8 block border rounded-full flex-none flex items-center justify-center ml-2 outline-none" onClick={() => handleChunksFile()}> 
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-download w-4 h-4">
                                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                                         <polyline points="7 10 12 15 17 10"></polyline>
@@ -100,9 +103,24 @@ export default function SenderTemplateFile({ file, chunks, message, chatId, time
                     </div>
                 </div>
             </div>
-        </div> : null
+
+        </div> : <>
+            <div className="-intro-x chat-text-box flex items-end float-right mb-4">
+                <div className="mr-4">
+                </div>
+                <div className="w-full">
+                    <div>
+                        <div className="chat-text-box__content flex items-center float-right">
+                            
+                            <div className="box leading-relaxed dark:text-gray-300 text-gray-700 px-4 py-3 mt-3"><CircularProgress color='info' /></div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </>
     }
-        
+    <div className="clear-both"></div>
     </>
   )
 }

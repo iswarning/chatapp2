@@ -1,5 +1,5 @@
 import { ImageAttachType } from "@/types/ImageAttachType";
-import DropdownActionMessage from "./DropdownActionMessage";
+import DropdownActionMessage from "../DropdownActionMessage";
 
 export default function RecieverTemplateImage({imgs, timestamp, lastIndex, onShowImage}: { imgs: Array<ImageAttachType> | undefined, timestamp: any, lastIndex: boolean, onShowImage: any }) {
 

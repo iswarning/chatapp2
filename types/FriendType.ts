@@ -11,6 +11,6 @@ export const MapFriendData = (friend: firebase.firestore.DocumentSnapshot<fireba
   let friendData: FriendType = {} as FriendType; 
   friendData.id = friend?.id;
   friendData.users = friend?.data()?.users;
-  friendData.userInfo = MapUserData(userInfo);
+  friendData.userInfo = MapUserData(userInfo)
   return friendData
 }

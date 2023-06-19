@@ -1,16 +1,17 @@
 import InsertPhotoIcon from "@mui/icons-material/InsertPhoto";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
-import { ChangeEvent, useState } from "react";
-import { addMessageToFirebase, handleImageInMessage, onAttachFile, pushUrlImageToFirestore } from "./ChatPage/Functions";
+import { useState } from "react";
+import { addMessageToFirebase, processAttachFile } from "./ChatPage/Functions";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth, db, storage } from "../firebase";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from 'react-redux'
-import { selectAppState, setCurrentChat, setCurrentMessages } from "@/redux/appSlice";
-import { MapMessageData } from "@/types/MessageType";
+import { addNewMessage, pushMessageToListChat, selectAppState, setCurrentMessages } from "@/redux/appSlice";
+import { MapMessageData, MessageType } from "@/types/MessageType";
 import { v4 as uuidv4 } from 'uuid'
+import sendNotificationFCM from "@/utils/sendNotificationFCM";
 
-export default function DropdownAttach({ chatId, scrollToBottom }: { chatId: string, scrollToBottom: any }) {
+export default function DropdownAttach({ chatId, scrollToBottom, recipient }: { chatId: string, scrollToBottom: any, recipient: any }) {
 
   const [showDropdownAttach, setShowDropdownAttach] = useState(false);
   const [user] = useAuthState(auth);
@@ -96,6 +97,31 @@ export default function DropdownAttach({ chatId, scrollToBottom }: { chatId: str
     }
   }
 
+  const handleAttachFile = (event: any) => {
+    processAttachFile(event, user?.email, appState.currentChat, scrollToBottom).then((messageExport) => {
+
+      if (messageExport) {
+
+        let bodyNotify = "";
+
+        if (appState.currentChat.isGroup) {
+          bodyNotify = appState.currentChat.name + " sent a file "
+        } else {
+          bodyNotify = recipient.data().fullName + " sent a file "
+        }
+
+        sendNotificationFCM("New message !", bodyNotify, recipient?.data()?.fcm_token).catch(
+          (err) => console.log(err)
+        );
+
+        dispatch(addNewMessage(messageExport))
+        dispatch(pushMessageToListChat({ chat: appState.currentChat, newMessage: messageExport }))
+
+      }
+
+    }) 
+  }
+
     return (
       <div className="dropdown relative" data-placement="top">
         <a href="javascript:void(0)" className="text-gray-600 hover:text-theme-1 dropdown-toggle" onClick={() => setShowDropdownAttach(!showDropdownAttach)}> 
@@ -111,14 +137,11 @@ export default function DropdownAttach({ chatId, scrollToBottom }: { chatId: str
                   type="file"
                   hidden
                   id="upload-image"
-                  onChange={(e) => onImageChange(e)}
+                  onChange={onImageChange}
                   multiple
                 />
                 <InsertPhotoIcon
                   fontSize="small"
-                  onClick={() =>
-                    document.getElementById("upload-image")?.click()
-                  }
                 />
               </a>
               <a onClick={() => document.getElementById("upload-file")?.click()} href="javascript:void(0)" className="shadow-md text-gray-600 bg-white rounded-full dark:text-gray-300 dark:bg-dark-3 hover:bg-theme-1 hover:text-white dark:hover:bg-theme-1 flex items-center block p-3 transition duration-300 rounded-md mb-2"> 
@@ -126,13 +149,10 @@ export default function DropdownAttach({ chatId, scrollToBottom }: { chatId: str
                   type="file"
                   hidden
                   id="upload-file"
-                  onChange={(event) => onAttachFile(event, user?.email, appState.currentChat, scrollToBottom)}
+                  onChange={handleAttachFile}
                 />
                 <AttachFileIcon
                   fontSize="small"
-                  onClick={() =>
-                    document.getElementById("upload-file")?.click()
-                  }
                 />
               </a>
             </div>

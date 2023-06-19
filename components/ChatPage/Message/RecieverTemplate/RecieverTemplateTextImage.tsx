@@ -1,7 +1,7 @@
 import { ImageInMessageType } from "@/types/ImageInMessageType";
 import { MessageType } from "@/types/MessageType";
 import { getEmojiIcon } from "@/utils/getEmojiData";
-import DropdownActionMessage from "./DropdownActionMessage";
+import DropdownActionMessage from "../DropdownActionMessage";
 
 export default function RecieverTemplateTextImage(
     { 

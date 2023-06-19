@@ -7327,3 +7327,21 @@ video {
         grid-column: span 6/span 6
     }
 }
+
+button,
+input[type=button] {
+  outline: none;
+}
+button::-moz-focus-inner,
+input[type=button]::-moz-focus-inner {
+  border: 0;
+}
+
+/*
+  Accessibility (A11Y)
+  Don't forget! User accessibility is important
+*/
+button:focus,
+input[type=button]:focus {
+  /* your custom focused styles here */
+} 

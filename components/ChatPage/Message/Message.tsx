@@ -15,18 +15,19 @@ import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import Image from "next/image";
 import TimeAgo from "timeago-react";
 import firebase from "firebase";
-import SenderTemplateText from "./SenderTemplateText";
+import SenderTemplateText from "./SenderTemplate/SenderTemplateText";
 import { MapImageAttachData } from "@/types/ImageAttachType";
-import SenderTemplateImage from "./SenderTemplateImage";
-import RecieverTemplateText from "./RecieverTemplateText";
-import RecieverTemplateImage from "./RecieverTemplateImage";
+import SenderTemplateImage from "./SenderTemplate/SenderTemplateImage";
+import RecieverTemplateText from "./RecieverTemplate/RecieverTemplateText";
+import RecieverTemplateImage from "./RecieverTemplate/RecieverTemplateImage";
 import ShowImageFullScreen from "./ShowImageFullScreen";
-import SenderTemplateTextImage from "./SenderTemplateTextImage";
-import RecieverTemplateTextImage from "./RecieverTemplateTextImage";
+import SenderTemplateTextImage from "./SenderTemplate/SenderTemplateTextImage";
+import RecieverTemplateTextImage from "./RecieverTemplate/RecieverTemplateTextImage";
 import { MapImageInMessageData } from "@/types/ImageInMessageType";
-import SenderTemplateFile from "./SenderTemplateFile";
+import SenderTemplateFile from "./SenderTemplate/SenderTemplateFile";
 import { MapFileInMessageData } from "@/types/FileInMessageType";
 import { MapChunkFileData } from "@/types/ChunkFileType";
+import RecieverTemplateFile from "./RecieverTemplate/RecieverTemplateFile";
 
 export default function Message({
   message,
@@ -107,16 +108,6 @@ export default function Message({
       .collection("fileInMessage")
   );
 
-  const [chunks] = useCollection(
-    db
-      .collection("chats")
-      .doc(chatId)
-      .collection("messages")
-      .doc(message.id)
-      .collection("fileInMessage")
-      .doc(fileInMessageSnap?.docs?.[0].id).collection("chunks")
-  );
-
   const [imageAttachSnap] = useCollection(
     db
       .collection("chats")
@@ -125,53 +116,6 @@ export default function Message({
       .doc(message.id)
       .collection("imageAttach")
   );
-
-  const handleFile = () => {
-    // fileInMessageSnap?.docs?.forEach((doc) => {
-    //   fetch(doc.data().url)
-    //   .then((response) => response.blob())
-    //   .then((blob) => {
-    //     console.log(blob);
-    //   })
-    // })
-    // const blobPart: Blob[] = [];
-    // fileInMessageSnap?.docs?.forEach((file) => {
-    //   // `url` is the download URL for 'images/stars.jpg'
-
-    //   // This can be downloaded directly:
-    //   const xhr = new XMLHttpRequest();
-    //   xhr.responseType = 'blob';
-    //   xhr.onload = (event) => {
-    //     const blob = xhr.response;
-    //     console.log(blob);
-    //   };
-    //   xhr.open('GET', file.data().url);
-    //   xhr.send();
-    // });
-    // const file = new Blob(blobPart);
-    // if (message.type === "file" && fileInMessageSnap?.docs?.length! > 0) {
-    //   return (
-    //     <>
-    //       <div className="flex m-2">
-    //         <div className="mx-2">
-    //           <UploadFileIcon fontSize="large" />
-    //         </div>
-    //         <span className="text-2xl mx-2">{file.name}</span>
-    //         <div className="cursor-pointer mx-2">
-    //           <FileDownloadIcon fontSize="large" />
-    //         </div>
-    //         <br />
-    //       </div>
-    //       <div className="flex ml-6">
-    //         <small>
-    //           Size: {file.size}
-    //           {" MB"}
-    //         </small>
-    //       </div>
-    //     </>
-    //   );
-    // }
-  };
 
   return (
     <>
@@ -186,7 +130,7 @@ export default function Message({
               message.type === "text-image" ? <SenderTemplateTextImage imgs={imageInMessageSnap?.docs?.map((doc) => MapImageInMessageData(doc))!} message={message} timestamp={new Date(timestamp).getTime()} lastIndex={lastIndex} scrollToBottom={() => scrollToBottom()} /> : null
             }
             {
-              message.type === "file" ? <SenderTemplateFile file={MapFileInMessageData(fileInMessageSnap?.docs?.[0]!)} chunks={chunks?.docs.map((chunk) => MapChunkFileData(chunk))!} message={message} chatId={chatId} lastIndex={lastIndex} timestamp={new Date(timestamp).getTime()} /> : null
+              message.type === "file" ? <SenderTemplateFile file={MapFileInMessageData(fileInMessageSnap?.docs?.[0]!)} message={message} chatId={chatId} lastIndex={lastIndex} timestamp={new Date(timestamp).getTime()} /> : null
             }
             {
               message.type === "image" ? <SenderTemplateImage imgs={imageAttachSnap?.docs.map((doc) => MapImageAttachData(doc))} timestamp={new Date(timestamp).getTime()} onShowImage={(urlImage: any) => {setUrlImage(urlImage);setShowImageFullscreen(true)}} lastIndex={lastIndex} /> : null
@@ -194,12 +138,14 @@ export default function Message({
           </> : 
           <>
             {
-              message.type === "text" ? <RecieverTemplateText message={message} timestamp={new Date(timestamp).getTime()} lastIndex={lastIndex} /> : null
+              message.type === "text" ? <RecieverTemplateText message={message} timestamp={timestamp.toDate()} lastIndex={lastIndex} /> : null
             }
             {
               message.type === "text-image" ? <RecieverTemplateTextImage imgs={imageInMessageSnap?.docs?.map((doc) => MapImageInMessageData(doc))!} message={message} timestamp={new Date(timestamp).getTime()} lastIndex={lastIndex} /> : null
             }
-
+            {
+              message.type === "file" ? <RecieverTemplateFile file={MapFileInMessageData(fileInMessageSnap?.docs?.[0]!)} message={message} chatId={chatId} lastIndex={lastIndex} timestamp={new Date(timestamp).getTime()} /> : null
+            }
             {
               message.type === "image" ? <RecieverTemplateImage imgs={imageAttachSnap?.docs.map((doc) => MapImageAttachData(doc))} timestamp={new Date(timestamp).getTime()} lastIndex={lastIndex} onShowImage={(urlImage: any) => {setUrlImage(urlImage);setShowImageFullscreen(true)}} /> : null
             }

@@ -16,6 +16,7 @@ import requestPermission from "@/utils/requestPermission";
 import { io } from "socket.io-client";
 import { wrapper } from "../redux/store";
 import { Provider } from "react-redux";
+import Layout from "@/components/Layout";
 
 config.autoAddCss = false;
 
@@ -125,12 +126,10 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
   //       <VideoCallScreen statusCall='Incoming Call' photoURL={user?.photoURL} sender={recipient} recipient={sender}  chatId={chatRoomId}  onClose={() => setIsOpen(false)} isGroup={isGroup} />
   //   </VideoCallContainer>
 
-  const getLayout = Component.getLayout ?? ((page) => page);
-
-  return getLayout(
-    <Provider store={store}>
+  return <Provider store={store}>
+    <Layout>
       <Component {...props.pageProps} />
       <ToastContainer />
-    </Provider>
-  );
+    </Layout>
+  </Provider>
 }

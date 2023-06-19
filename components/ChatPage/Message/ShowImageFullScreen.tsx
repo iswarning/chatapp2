@@ -46,7 +46,7 @@ export default function ShowImageFullScreen(
 
     const [scale, setScale] = useState(100)
     const [rotate, setRotate] = useState(0)
-    const [urls, setUrls] = useState<Array<string>>()
+    const [urls, setUrls] = useState<Array<string>>([])
     const [urlImg, setUrlImg] = useState(urlImage)
     const appState = useSelector(selectAppState)
     const [ref, loaded, onLoad] = useImageLoaded()
@@ -122,7 +122,7 @@ export default function ShowImageFullScreen(
                     { urls?.map((url: string) => <div key={uuidv4()} onClick={() => handleChangeImage(url)}>
                         {
                             (urlImg === url && urlImage !== urlImg) || urlImage === url ?
-                            <ImageBoxElementActive className='image' alt='' src={url} width={100} height={100}/>
+                            <ImageBoxElementActive className='image' ref={ref} onLoad={onLoad} alt='' src={url} width={100} height={100}/>
                             : <ImageBoxElement className='image' ref={ref} onLoad={onLoad} alt='' src={url} width={100} height={100}/>
                         }
                     </div>)

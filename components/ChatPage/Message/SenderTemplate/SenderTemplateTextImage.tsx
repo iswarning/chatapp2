@@ -6,7 +6,7 @@ import { ImageInMessageType } from "@/types/ImageInMessageType";
 import { MessageType } from "@/types/MessageType";
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import { SentIcon } from "./SenderTemplateText";
-import DropdownActionMessage from "./DropdownActionMessage";
+import DropdownActionMessage from "../DropdownActionMessage";
 
 export default function SenderTemplateTextImage(
     { 

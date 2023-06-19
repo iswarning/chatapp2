@@ -1,7 +1,7 @@
 import { db, storage } from "@/firebase";
 import { toast } from "react-toastify";
 import firebase from "firebase";
-import { MessageType } from "@/types/MessageType";
+import { MapMessageData, MessageType } from "@/types/MessageType";
 import { ChatType } from "@/types/ChatType";
 import sendNotificationFCM from "@/utils/sendNotificationFCM";
 import { getImageTypeFileValid } from "@/utils/getImageTypeFileValid";
@@ -177,7 +177,7 @@ export async function addMessageToFirebase(
   return { messageDoc };
 };
 
-export const onAttachFile = async (
+export const processAttachFile = async (
   event: any,
   userEmail: string | null | undefined,
   chat: ChatType,
@@ -215,6 +215,15 @@ export const onAttachFile = async (
     }
     
     const { messageDoc } = await addMessageToFirebase("", "file", userEmail, chat.id);
+
+    if (!messageDoc) {
+      toast("Error while send message !", {
+        hideProgressBar: true,
+        type: "error",
+        autoClose: 5000,
+      });
+      return;
+    }
 
     const fileDoc = await db
       .collection("chats")
@@ -260,7 +269,9 @@ export const onAttachFile = async (
         })
       );
 
-    // const messageSnap = await messageDoc.get();
+    const messageExport = MapMessageData(await messageDoc.get())
+
+    return messageExport
 
     // let bodyNotify;
 
@@ -280,6 +291,6 @@ export const onAttachFile = async (
     // sendNotificationFCM("New message !", "Send file success", recipientFcmToken).catch(
     //   (err) => console.log(err)
     // );
-      }
+    }
   }
 };

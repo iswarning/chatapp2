@@ -1,6 +1,7 @@
 import { MessageType } from "@/types/MessageType";
 import { getEmojiIcon } from "@/utils/getEmojiData";
-import DropdownActionMessage from "./DropdownActionMessage";
+import DropdownActionMessage from "../DropdownActionMessage";
+import TimeAgo from "timeago-react";
 
 export default function RecieverTemplateText({ message, timestamp, lastIndex }: { message: MessageType, timestamp: any, lastIndex: boolean }) {
 

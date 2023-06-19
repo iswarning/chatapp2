@@ -7,12 +7,16 @@ import { NextPageWithLayout } from "./_app";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@/firebase";
 import Loading from "@/components/Loading";
-import {useDispatch} from 'react-redux'
-import { selectAppState, setUserOnline } from "@/redux/appSlice";
+import {useDispatch, useSelector} from 'react-redux'
+import { SidebarType, selectAppState, setListChat, setListFriend, setListFriendRequest, setSidebar, setUserInfo, setUserOnline } from "@/redux/appSlice";
 import { io } from "socket.io-client";
 import ChatScreen from "@/components/ChatPage/ChatScreen/ChatScreen";
-import { useSelector } from 'react-redux'
 import { MessageType } from "@/types/MessageType";
+import InfoContentScreen from "@/components/ChatPage/InfoContentScreen/InfoContentScreen";
+import SidebarGroups from "@/components/SidebarGroups";
+import SidebarContact from "@/components/SidebarContact";
+import SidebarProfile from "@/components/SidebarProfile";
+import getInitialState from "@/utils/getInitialState";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -27,12 +31,23 @@ const Page: NextPageWithLayout = () => {
   const [messData, setMessData] = useState<Array<MessageType>>()
 
   useEffect(() => {
-    // socket.on("get-user-online", (data) => {
-    //   dispatch(setUserOnline(data))
-    // });
-    // return () => {
-    //   socket.disconnect();
-    // };
+    setLoading(true)
+    getInitialState(user?.uid).then((data) => {
+      dispatch(setUserInfo(data.userInfo))
+      dispatch(setListFriend(data.listFriend))
+      dispatch(setListFriendRequest(data.listFriendRequest))
+    })
+    .catch(err => console.log(err))
+    .finally(() => setLoading(false))
+  },[])
+
+  useEffect(() => {
+    socket.on("get-user-online", (data) => {
+      dispatch(setUserOnline(data))
+    });
+    return () => {
+      socket.disconnect();
+    };
   }, []);
 
   return (
@@ -537,9 +552,27 @@ const Page: NextPageWithLayout = () => {
 </div>
 </div>
 </div> */}
-<SidebarMessage />
 {
-  Object.keys(appState.currentChat).length > 0 ? <ChatScreen chat={appState.currentChat} messages={appState.currentMessages} /> : null
+  appState.currentSidebar === SidebarType.CHAT ? <SidebarMessage /> : null
+}
+
+{
+  appState.currentSidebar === SidebarType.GROUPS ? <SidebarGroups /> : null
+}
+
+{
+  appState.currentSidebar === SidebarType.CONTACTS ? <SidebarContact /> : null
+}
+
+{
+  appState.currentSidebar === SidebarType.PROFILE ? <SidebarProfile /> : null
+}
+
+{
+  Object.keys(appState.currentChat).length > 0 ? <>
+    <ChatScreen chat={appState.currentChat} messages={appState.currentMessages} />
+    <InfoContentScreen />
+  </>  : null
 }
 {/* <div className="info-content col-span-12 xl:col-span-3 flex flex-col overflow-hidden pl-6 xl:pl-0 pr-6">
 <div className="overflow-y-auto scrollbar-hidden py-6">
@@ -951,8 +984,8 @@ const Page: NextPageWithLayout = () => {
   );
 };
 
-Page.getLayout = function getLayout(page: ReactElement) {
-  return <Layout>{page}</Layout>;
-};
+// Page.getLayout = function getLayout(page: ReactElement) {
+//   return <Layout>{page}</Layout>;
+// };
 
 export default Page;

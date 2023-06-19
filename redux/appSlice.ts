@@ -7,6 +7,12 @@ import { UserType } from "@/types/UserType";
 import { FriendType } from "@/types/FriendType";
 import { FriendRequestType } from "@/types/FriendRequestType";
 
+export enum SidebarType {
+  CHAT,
+  GROUPS,
+  CONTACTS,
+  PROFILE,
+}
 // Type for our state
 export interface InitialState {
   data: {
@@ -17,7 +23,8 @@ export interface InitialState {
     currentChat: ChatType,
     currentMessages: Array<MessageType>,
     userOnline: Array<string>,
-    statusSend: Number
+    statusSend: number,
+    currentSidebar: SidebarType
   };
 }
 
@@ -31,7 +38,8 @@ const initialState: InitialState = {
     currentChat: {} as ChatType,
     currentMessages: Array<MessageType>(),
     userOnline: Array<string>(),
-    statusSend: 0
+    statusSend: 0,
+    currentSidebar: SidebarType.CHAT
   },
 };
 
@@ -45,6 +53,14 @@ export const appSlice = createSlice({
       state.data.userOnline = action.payload;
     },
 
+    setUserInfo(state, action) {
+      state.data.userInfo = action.payload;
+    },
+
+    /**
+     * @param chat: ChatType
+     * @param newMessage: MessageType
+     */
     pushMessageToListChat(state, action) {
       state.data.listChat.forEach((chat, index) => {
         if (chat.id === action.payload.chat.id && chat?.messages) {
@@ -56,6 +72,14 @@ export const appSlice = createSlice({
 
     setListChat(state, action) {
       state.data.listChat = action.payload;
+    },
+
+    setListFriend(state, action) {
+      state.data.listFriend = action.payload;
+    },
+
+    setListFriendRequest(state, action) {
+      state.data.listFriendRequest = action.payload;
     },
 
     setCurrentChat(state, action) {
@@ -72,6 +96,10 @@ export const appSlice = createSlice({
 
     setStatusSend(state, action) {
       state.data.statusSend = action.payload
+    },
+
+    setSidebar(state, action) {
+      state.data.currentSidebar = action.payload
     }
 
   },
@@ -87,7 +115,17 @@ export const appSlice = createSlice({
   },
 });
 
-export const { setUserOnline, setListChat, setCurrentChat, setCurrentMessages, addNewMessage, setStatusSend, pushMessageToListChat } = appSlice.actions;
+export const { setUserOnline,
+  setUserInfo, 
+  setListChat, 
+  setCurrentChat, 
+  setCurrentMessages, 
+  addNewMessage, 
+  setStatusSend, 
+  pushMessageToListChat, 
+  setSidebar,
+  setListFriend,
+  setListFriendRequest } = appSlice.actions;
 
 export const selectAppState = (state: AppState) => state.app.data;
 
