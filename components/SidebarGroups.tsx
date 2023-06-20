@@ -1,4 +1,4 @@
-import { selectAppState, setListChat } from '@/redux/appSlice'
+import { selectAppState } from '@/redux/appSlice'
 import { UserType } from '@/types/UserType'
 import Image from 'next/image'
 import React, { useState } from 'react'
@@ -156,6 +156,7 @@ export default function SidebarGroups() {
                                 {
                                     friendSnapshot ? friendSnapshot.docs.map((friend) => 
                                         <MemberElement 
+                                        key={friend.id}
                                         email={getRecipientEmail(friend.data().users, appState.userInfo)} 
                                         handleAddMemberToGroup={(checked: boolean, userInfo: UserType) => handleAddMemberToGroup(checked, userInfo)} 
                                         listMember={listMember}

@@ -6,10 +6,9 @@ import { useCollection } from "react-firebase-hooks/firestore";
 import styled from "styled-components";
 import Image from "next/image";
 import TimeAgo from "timeago-react";
-import { useEffect, useRef, useState } from "react";
-import { io } from "socket.io-client";
+import { useEffect, useState } from "react";
 import {useSelector} from 'react-redux'
-import { selectAppState, setCurrentChat, setCurrentMessages, setListChat } from "@/redux/appSlice";
+import { selectAppState, setCurrentChat, setCurrentMessages } from "@/redux/appSlice";
 import { useDispatch } from 'react-redux'
 import { ChatType } from "@/types/ChatType";
 import { MapMessageData } from "@/types/MessageType";

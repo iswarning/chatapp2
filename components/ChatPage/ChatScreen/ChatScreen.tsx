@@ -1,26 +1,11 @@
-import { auth, db, onMessageListener, storage } from "@/firebase";
+import { auth, db, storage } from "@/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useCollection } from "react-firebase-hooks/firestore";
 import Message from "../Message/Message";
 import { useEffect, useRef, useState } from "react";
 import getRecipientEmail from "@/utils/getRecipientEmail";
 import { useRouter } from "next/router";
-import firebase from "firebase";
-import CallIcon from "@mui/icons-material/Call";
-import VideocamIcon from "@mui/icons-material/Videocam";
-import { IconButton, Modal } from "@mui/material";
-import {getEmojiData} from "@/utils/getEmojiData";
-import sendNotificationFCM from "@/utils/sendNotificationFCM";
-import SendIcon from "@mui/icons-material/Send";
-import Loading from "@/components/Loading";
-import DoneAllIcon from "@mui/icons-material/DoneAll";
-import UserDetailScreen from "@/components/ProfilePage/UserDetailScreen/UserDetailScreen";
-import TagFacesIcon from "@mui/icons-material/TagFaces";
-import InsertPhotoIcon from "@mui/icons-material/InsertPhoto";
-import AttachFileIcon from "@mui/icons-material/AttachFile";
 import {
-  EmojiContainer,
-  EmojiElement,
   EndOfMessage,
   InputMessage,
 } from "./ChatScreenStyled";
@@ -33,16 +18,13 @@ import {
   setSeenMessage,
 } from "../Functions";
 import { useSelector, useDispatch } from 'react-redux';
-import { addNewMessage, pushMessageToListChat, selectAppState, setListChat, setStatusSend } from "@/redux/appSlice";
+import { selectAppState, setStatusSend } from "@/redux/appSlice";
 import { ChatType } from "@/types/ChatType";
 import { MapMessageData, MessageType } from "@/types/MessageType";
 import Image from "next/image";
 import EmojiContainerComponent from "@/components/EmojiContainerComponent";
-import useComponentVisible from "@/hooks/useComponentVisible";
 import styled from "styled-components";
-import { getImageTypeFileValid } from "@/utils/getImageTypeFileValid";
 import DropdownAttach from "@/components/DropdownAttach";
-import { v4 as uuidv4 } from 'uuid'
 
 const getMessage = async (id: string) => {
   const snap = await db

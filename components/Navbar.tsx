@@ -1,7 +1,5 @@
 import { auth, db } from '@/firebase'
-import { SidebarType, selectAppState, setListFriend, setSidebar } from '@/redux/appSlice'
-import { MapFriendData } from '@/types/FriendType'
-import { useEffect } from 'react'
+import { SidebarType, selectAppState, setSidebar } from '@/redux/appSlice'
 import { useAuthState } from 'react-firebase-hooks/auth'
 import {useSelector,useDispatch} from 'react-redux'
 export default function Navbar() {
@@ -12,22 +10,6 @@ export default function Navbar() {
 
     const CLASS_ACTIVE = "-intro-x side-menu__content__link text-gray-600 dark:text-gray-300 relative tooltip py-5 side-menu__content__link--active"
     const CLASS_NOT_ACTIVE = "-intro-x side-menu__content__link text-gray-600 dark:text-gray-300 relative tooltip py-5"
-
-    // const getListFriend = async() => {
-    //     const friendSnap = await db.collection("friends").where("users",'array-contains', user?.email).get()
-    //     await Promise.all(
-    //         Array.prototype.map.call(friendSnap?.docs, async(snap) => {
-
-    //         })
-    //     )
-    //     dispatch(setListFriend(friendSnap?.docs?.map((snap) => MapFriendData(snap))))
-    // }
-
-    // const handleShowGroupScreen = () => {
-    //     getListFriend()
-    //     .catch(err => console.log(err))
-    //     .finally(() => dispatch(setSidebar(SidebarType.GROUPS)))
-    // }
 
     return (
         <div className="side-menu hidden md:block top-0 left-0 fixed w-16 h-screen">

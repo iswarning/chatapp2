@@ -6,8 +6,7 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { auth, db, storage } from "../firebase";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from 'react-redux'
-import { addNewMessage, pushMessageToListChat, selectAppState, setCurrentMessages } from "@/redux/appSlice";
-import { MapMessageData, MessageType } from "@/types/MessageType";
+import { selectAppState } from "@/redux/appSlice";
 import { v4 as uuidv4 } from 'uuid'
 import sendNotificationFCM from "@/utils/sendNotificationFCM";
 

@@ -1,14 +1,13 @@
 import Head from "next/head";
 import { Inter } from "next/font/google";
 import SidebarMessage from "@/components/ChatPage/SidebarMessage/SidebarMessage";
-import Layout from "@/components/Layout";
-import { ReactElement, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { NextPageWithLayout } from "./_app";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@/firebase";
 import Loading from "@/components/Loading";
 import {useDispatch, useSelector} from 'react-redux'
-import { SidebarType, selectAppState, setListChat, setListFriend, setListFriendRequest, setSidebar, setUserInfo, setUserOnline } from "@/redux/appSlice";
+import { SidebarType, selectAppState, setUserInfo, setUserOnline } from "@/redux/appSlice";
 import { io } from "socket.io-client";
 import ChatScreen from "@/components/ChatPage/ChatScreen/ChatScreen";
 import { MessageType } from "@/types/MessageType";

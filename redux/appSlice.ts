@@ -17,9 +17,6 @@ export enum SidebarType {
 export interface InitialState {
   data: {
     userInfo:  UserType,
-    listFriend: Array<FriendType>,
-    listFriendRequest: Array<FriendRequestType>,
-    listChat: Array<ChatType>,
     currentChat: ChatType,
     currentMessages: Array<MessageType>,
     userOnline: Array<string>,
@@ -32,9 +29,6 @@ export interface InitialState {
 const initialState: InitialState = {
   data: {
     userInfo:  {} as UserType,
-    listFriend: Array<FriendType>(),
-    listFriendRequest: Array<FriendRequestType>(),
-    listChat: Array<ChatType>(),
     currentChat: {} as ChatType,
     currentMessages: Array<MessageType>(),
     userOnline: Array<string>(),
@@ -55,31 +49,6 @@ export const appSlice = createSlice({
 
     setUserInfo(state, action) {
       state.data.userInfo = action.payload;
-    },
-
-    /**
-     * @param chat: ChatType
-     * @param newMessage: MessageType
-     */
-    pushMessageToListChat(state, action) {
-      state.data.listChat.forEach((chat, index) => {
-        if (chat.id === action.payload.chat.id && chat?.messages) {
-          chat.messages = [ ...chat.messages, action.payload.newMessage ]
-          state.data.listChat[index] = chat;
-        }
-      })
-    },
-
-    setListChat(state, action) {
-      state.data.listChat = action.payload;
-    },
-
-    setListFriend(state, action) {
-      state.data.listFriend = action.payload;
-    },
-
-    setListFriendRequest(state, action) {
-      state.data.listFriendRequest = action.payload;
     },
 
     setCurrentChat(state, action) {
@@ -117,15 +86,12 @@ export const appSlice = createSlice({
 
 export const { setUserOnline,
   setUserInfo, 
-  setListChat, 
   setCurrentChat, 
   setCurrentMessages, 
   addNewMessage, 
   setStatusSend, 
-  pushMessageToListChat, 
   setSidebar,
-  setListFriend,
-  setListFriendRequest } = appSlice.actions;
+   } = appSlice.actions;
 
 export const selectAppState = (state: AppState) => state.app.data;
 

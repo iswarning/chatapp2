@@ -27,7 +27,7 @@ export default function SidebarContact() {
 <div className="intro-x">
 
 {
-  friendSnapshot ? friendSnapshot.docs.map((friend) => <FriendElement email={getRecipientEmail(friend.data().users, { email: appState.userInfo.email })} />) : null
+  friendSnapshot ? friendSnapshot.docs.map((friend) => <FriendElement key={friend.id} email={getRecipientEmail(friend.data().users, { email: appState.userInfo.email })} />) : null
 }
 
 </div>
