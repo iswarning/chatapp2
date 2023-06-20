@@ -1,8 +1,14 @@
+import { auth } from '@/firebase'
+import { selectAppState } from '@/redux/appSlice'
 import React from 'react'
-
+import { useAuthState } from 'react-firebase-hooks/auth'
+import { useSelector } from 'react-redux'
 export default function InfoContentScreen() {
 
-    
+    const [user] = useAuthState(auth)
+    const appState = useSelector(selectAppState)
+
+    // const photoURL = appState.currentChat.isGroup ? appState.currentChat.photoURL.length > 0 ? appState.currentChat.photoURL : "/images/group-default.png" : ap
 
   return (
     <div className="info-content col-span-12 xl:col-span-3 flex flex-col overflow-hidden pl-6 xl:pl-0 pr-6">
@@ -13,7 +19,7 @@ export default function InfoContentScreen() {
                         <img alt="Topson Messenger Tailwind HTML Admin Template" className="rounded-full" src="https://topson.left4code.com/dist/images/profile-9.jpg"/>
                         <div className="bg-green-500 border-white w-3 h-3 absolute right-0 top-0 mt-1 mr-1 rounded-full border-2"></div>
                     </div>
-                <div className="text-base font-medium text-center mt-3">John Travolta</div>
+                <div className="text-base font-medium text-center mt-3">{}</div>
                 <div className="text-gray-600 text-center text-xs uppercase mt-0.5">Software Engineer</div>
             </div>
             <div className="intro-y box p-4 mt-3">

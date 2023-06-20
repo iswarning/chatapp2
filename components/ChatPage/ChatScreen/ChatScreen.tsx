@@ -63,41 +63,19 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
   const dispatch = useDispatch()
   const appState = useSelector(selectAppState)
 
+  const [messageSnapshot] = useCollection(
+    db
+    .collection("chats")
+    .doc(chat.id)
+    .collection("messages")
+    .orderBy("timestamp")
+  )
+
   const [recipientSnapshot] = useCollection(
     db
       .collection("users")
       .where("email", "==", getRecipientEmail(chat.users, user))
   );
-
-  const getNewMessage = async() => {
-    const doc = await db.collection("chats").doc(chat.id).collection("messages").orderBy("timestamp").limitToLast(1).get()
-    return MapMessageData(doc?.docs?.[0])
-  }
-
-  useEffect(() => {
-    onMessageListener()
-      .then(() => {
-        getNewMessage().then((newMsg) => {
-          if (!appState.currentMessages?.find((msg) => msg.id === newMsg.id)) {
-            dispatch(addNewMessage(newMsg))
-            dispatch(pushMessageToListChat({ chat: chat, newMessage: newMsg }))
-          }
-        }).catch(err => console.log(err))
-      })
-      .catch((err) => console.log(err));
-  },[]);
-
-  useEffect(() => {
-    const channel = new BroadcastChannel("notifications");
-      channel.addEventListener("message", () => {
-        getNewMessage().then((newMsg) => {
-          if (!appState.currentMessages?.find((msg) => msg.id === newMsg.id)) {
-            dispatch(addNewMessage(newMsg))
-            dispatch(pushMessageToListChat({ chat: chat, newMessage: newMsg }))
-          }
-        }).catch(err => console.log(err))
-    });
-  },[]);
 
   useEffect(() => {
     // getRecipientUser().catch((err) => console.log(err))
@@ -124,7 +102,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
     // return () => {
     //     socket.disconnect()
     // }
-  }, [messages]);
+  }, [messageSnapshot]);
 
   const scrollToBottom = () => {
     endOfMessageRef.current.scrollIntoView({ behavior: "smooth" });
@@ -142,6 +120,18 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
   };
 
   const showMessage = () => {
+    if (messageSnapshot) {
+      return messageSnapshot.docs?.map((message, index) => (
+        <Message
+          key={message.id}
+          message={MapMessageData(message)}
+          timestamp={message.data().timestamp}
+          chatId={chat.id}
+          lastIndex={messages[index] === messages[messages.length - 1]}
+          scrollToBottom={() => scrollToBottom()}
+        />
+      ));
+    } else {
       return messages?.map((message: MessageType, index) => (
         <Message
           key={message.id}
@@ -152,6 +142,8 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
           scrollToBottom={() => scrollToBottom()}
         />
       ));
+    }
+
   };
 
   const sendMessage = async (e: any): Promise<any> => {
@@ -171,8 +163,8 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
 
     if (messageDoc) {
       const snap = await messageDoc.get();
-      console.log(listElementImg)
-      for(const key of Object.keys(listElementImg)) {
+      if (Object.keys(listElementImg).length > 0) {
+        for(const key of Object.keys(listElementImg)) {
             const response = await fetch(listElementImg[key].src);
             const blob = await response.blob();
             let path = `public/chat-room/${chat.id}/photos/${key}`
@@ -198,6 +190,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
                   );
                 }
               );
+        }
       }
       sendNotification(
         snap,
@@ -205,8 +198,6 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
         user?.displayName,
         recipientSnapshot?.docs?.[0]?.data().fcm_token
       );
-      dispatch(addNewMessage(MapMessageData(snap)))
-      dispatch(pushMessageToListChat({ chat: chat, newMessage: MapMessageData(snap) }))
     } else {
       toast("Error when send message !", {
         hideProgressBar: true,

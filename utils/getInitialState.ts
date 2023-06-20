@@ -20,41 +20,41 @@ export default async function getInitialState(userId: string | undefined) {
 
   data.userInfo = MapUserData(userInfo);
 
-  const listFriend = await db
-    .collection("friends")
-    .where("users", "array-contains", userInfo?.data()?.email)
-    .get();
+  // const listFriend = await db
+  //   .collection("friends")
+  //   .where("users", "array-contains", userInfo?.data()?.email)
+  //   .get();
 
-  for (const friend of listFriend?.docs || []) {
-    let info = await db
-      .collection("users")
-      .where(
-        "email",
-        "==",
-        getRecipientEmail(friend.data().users, userInfo?.data())
-      )
-      .get();
+  // for (const friend of listFriend?.docs || []) {
+  //   let info = await db
+  //     .collection("users")
+  //     .where(
+  //       "email",
+  //       "==",
+  //       getRecipientEmail(friend.data().users, userInfo?.data())
+  //     )
+  //     .get();
 
-    let itemToPush: FriendType = MapFriendData(friend, info?.docs?.[0])
+  //   let itemToPush: FriendType = MapFriendData(friend, info?.docs?.[0])
 
-    data.listFriend.push(itemToPush);
-  }
+  //   data.listFriend.push(itemToPush);
+  // }
 
-  const listFriendRequest = await db
-    .collection("friend_requests")
-    .where("recipientEmail", "==", userInfo?.data()?.email)
-    .get();
+  // const listFriendRequest = await db
+  //   .collection("friend_requests")
+  //   .where("recipientEmail", "==", userInfo?.data()?.email)
+  //   .get();
 
-  for (const fR of listFriendRequest?.docs || []) {
-    let info = await db
-      .collection("users")
-      .where("email", "==", fR?.data().senderEmail)
-      .get();
+  // for (const fR of listFriendRequest?.docs || []) {
+  //   let info = await db
+  //     .collection("users")
+  //     .where("email", "==", fR?.data().senderEmail)
+  //     .get();
 
-    let itemToPush: FriendRequestType = MapFriendRequestData(fR, info?.docs?.[0])
+  //   let itemToPush: FriendRequestType = MapFriendRequestData(fR, info?.docs?.[0])
 
-    data.listFriendRequest.push(itemToPush);
-  }
+  //   data.listFriendRequest.push(itemToPush);
+  // }
 
   return data;
 }

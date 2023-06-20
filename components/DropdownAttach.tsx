@@ -90,8 +90,6 @@ export default function DropdownAttach({ chatId, scrollToBottom, recipient }: { 
           );
         }
 
-        dispatch(setCurrentMessages([...appState.currentMessages, MapMessageData(snap)]))
-
       }
       
     }
@@ -113,9 +111,6 @@ export default function DropdownAttach({ chatId, scrollToBottom, recipient }: { 
         sendNotificationFCM("New message !", bodyNotify, recipient?.data()?.fcm_token).catch(
           (err) => console.log(err)
         );
-
-        dispatch(addNewMessage(messageExport))
-        dispatch(pushMessageToListChat({ chat: appState.currentChat, newMessage: messageExport }))
 
       }
 

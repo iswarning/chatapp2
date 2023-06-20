@@ -50,20 +50,11 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
   );
 
   const handleShowChatScreen = async() => {
-    let chatExist = appState.listChat.find((c) => c.id === chat.id);
-
-    if (chatExist) {
-      dispatch(setCurrentChat(chatExist))
-      dispatch(setCurrentMessages(chatExist.messages))
-    } else {
-      const messData = await getMessage(chat.id);
-      const currentMessages = messData.docs.map((m) => MapMessageData(m));
-      dispatch(setCurrentChat(chat))
-      dispatch(setCurrentMessages(currentMessages))
-      dispatch(setListChat([...appState.listChat, { ...chat, messages: currentMessages }]))
-    }
-
-    setSeenMessage().catch(err => console.log(err));
+    const messData = await getMessage(chat.id);
+    const currentMessages = messData.docs.map((m) => MapMessageData(m));
+    dispatch(setCurrentChat(chat))
+    dispatch(setCurrentMessages(currentMessages))
+    // setSeenMessage().catch(err => console.log(err));
   };
 
   const getMessage = async (id: string) => {

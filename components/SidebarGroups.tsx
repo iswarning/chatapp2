@@ -1,9 +1,17 @@
-import { selectAppState } from '@/redux/appSlice'
+import { selectAppState, setListChat } from '@/redux/appSlice'
 import { UserType } from '@/types/UserType'
 import Image from 'next/image'
 import React, { useState } from 'react'
-import {useSelector} from 'react-redux'
+import {useSelector,useDispatch} from 'react-redux'
 import {useForm} from 'react-hook-form'
+import { db, storage } from '@/firebase'
+import { toast } from 'react-toastify'
+import { MapChatData } from '@/types/ChatType'
+import { v4 as uuidv4 } from 'uuid'
+import { useCollection } from 'react-firebase-hooks/firestore'
+import { useQuery } from '@tanstack/react-query'
+import MemberElement from './MemberElement'
+import getRecipientEmail from '@/utils/getRecipientEmail'
 
 export default function SidebarGroups() {
 
@@ -13,6 +21,8 @@ export default function SidebarGroups() {
     const CLASS_ACTIVE = "hover:bg-gray-100 dark:hover:bg-dark-2 flex-1 py-2 rounded-md text-center active"
     const CLASS_NOT_ACTIVE = "hover:bg-gray-100 dark:hover:bg-dark-2 flex-1 py-2 rounded-md text-center"
     const appState = useSelector(selectAppState)
+    const [image, setImage]: any = useState(null);
+    const dispatch = useDispatch()
 
     const {
         register,
@@ -20,13 +30,108 @@ export default function SidebarGroups() {
         formState: { errors },
       } = useForm();
 
-    const handleAddMemberToGroup = (event: React.ChangeEvent<HTMLInputElement>, member: UserType | undefined) => {
-        if (event.target.checked) {
+    const [friendSnapshot] = useCollection(
+        db.collection("friends").where("users", "array-contains", appState.userInfo?.email)
+    );
+
+    const handleAddMemberToGroup = (checked: any, member: UserType | undefined) => {
+        if (checked) {
             setListMember((old) => [...old, member])
         } else {
-            setListMember(listMember.filter((mem) => mem?.id === member?.id))
+            removeMember(member)
         }
     }
+
+    const removeMember = (userInfo: UserType | undefined) => {
+        let array = [...listMember]; // make a separate copy of the array
+        let itemExist = listMember.findIndex((mem: UserType | undefined) => mem?.id === userInfo?.id);
+        if (listMember.length === 1) {
+          setListMember([]);
+          return;
+        }
+        if (itemExist) {
+          array.splice(itemExist, 1);
+          setListMember(array);
+        }
+    };
+
+    const handleCreateNewGroupChat = (data: any) => {
+        let members = listMember.map((m: any) => m.email);
+        db.collection('chats').add({
+            users: [...members, appState.userInfo.email],
+            photoURL: "",
+            isGroup: true,
+            name: data.groupName,
+            admin: appState.userInfo.email
+        })
+        .then(doc => {
+            doc.get().then(snap => {
+                if (image) {
+                    fetch(image)
+                    .then((response) => response.blob())
+                    .then((blob) => {
+                        let key = uuidv4()
+                        let path = `public/chat-room/${snap.id}/avatar-group/${key}`
+                        storage
+                        .ref(path)
+                        .put(blob)
+                        .on(
+                            "state_changed",
+                            () => {
+
+                            },
+                            (err) => console.log(err),
+                            () => {
+                                storage
+                                .ref(path)
+                                .getDownloadURL()
+                                .then((url) => {
+                                    db
+                                    .collection("chats")
+                                    .doc(snap.id)
+                                    .update({ photoURL: url })
+                                })
+                            }
+                        )
+                    })
+                }
+            })
+        })
+        .finally(() => {
+            toast("Created group successfully !", {
+                hideProgressBar: true,
+                type: "info",
+                autoClose: 5000,
+            });
+        })
+    };
+
+    const onImageChange = (event: any) => {
+        event.preventDefault()
+        if (event.target.files && event.target.files[0]) {
+          let img = event.target.files[0];
+          let imgType = img["type"];
+          let validImageTypes = ["image/jpeg", "image/png"];
+          let fileSize = img.size / 1024 / 1024;
+          if (!validImageTypes.includes(imgType)) {
+            toast("Image upload invalid !", {
+              hideProgressBar: true,
+              type: "error",
+              autoClose: 5000,
+            });
+            return;
+          }
+          if (fileSize > 5) {
+            toast("Size image no larger than 5 MB !", {
+              hideProgressBar: true,
+              type: "error",
+              autoClose: 5000,
+            });
+            return;
+          }
+          setImage(URL.createObjectURL(img));
+        }
+    };
 
   return (
     <>
@@ -49,29 +154,12 @@ export default function SidebarGroups() {
                             <div className="user-list">
                                 <div className="intro-x pb-6">
                                 {
-                                    appState.listFriend.length > 0 ? appState.listFriend.map((friend) => <div key={friend.id} className="intro-x block">
-                                        <div className="box dark:bg-dark-3 cursor-pointer relative flex items-center px-4 py-3 zoom-in ">
-                                            <div className="w-10 h-10 flex-none image-fit mr-1">
-                                                {
-                                                    friend?.userInfo?.photoURL ? <Image src={friend?.userInfo?.photoURL} width={48} height={48} alt='' className="rounded-full" /> : null
-                                                }
-                                                {
-                                                    appState.userOnline?.find((u: any) => u === friend?.userInfo?.email) ? (
-                                                        <div className="border-white w-3 h-3 absolute right-0 bottom-0 rounded-full border-2" style={{background: 'green'}}></div>
-                                                      ) : (
-                                                        <span className="border-white w-3 h-3 absolute right-0 bottom-0 rounded-full border-2" style={{background: 'gray'}}></span>
-                                                      )
-                                                }
-                                            </div>
-                                            <div className="ml-2 overflow-hidden">
-                                                <a href="javascript:void(0)" className="font-medium">{friend?.userInfo?.fullName}</a>
-                                                <div className="flex items-center text-xs">
-                                                    <div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">{friend?.userInfo?.email}</div>
-                                                </div>
-                                            </div>
-                                            <input className="form-check-switch ml-auto" type="checkbox" id="user-list-a-0" onChange={(event) => handleAddMemberToGroup(event, friend?.userInfo)}/>
-                                        </div>
-                                    </div>)  : null
+                                    friendSnapshot ? friendSnapshot.docs.map((friend) => 
+                                        <MemberElement 
+                                        email={getRecipientEmail(friend.data().users, appState.userInfo)} 
+                                        handleAddMemberToGroup={(checked: boolean, userInfo: UserType) => handleAddMemberToGroup(checked, userInfo)} 
+                                        listMember={listMember}
+                                        />)  : null
                                 }
                                 </div>
                                 <div className="user-list__action bg-theme-2 dark:bg-dark-6 -mx-5 px-5 pb-6">
@@ -79,19 +167,28 @@ export default function SidebarGroups() {
                                 </div>
                             </div>
                         </div> : <div className="tab-pane active" id="group-details" role="tabpanel" aria-labelledby="group-details-tab">
-                            <form onSubmit={handleSubmit((data) => console.log(data))}>
+                            <form onSubmit={handleSubmit(handleCreateNewGroupChat)}>
                             <div className="box p-4 mt-3 mb-6">
                                 <div>
                                     <label htmlFor="create-group-form-1" className="form-label">Photo</label>
                                     <div className="image-upload border shadow-sm relative flex flex-col items-center justify-center rounded-md py-8 mt-3">
-                                        <div className="image-upload__icon w-12 h-12 rounded-full flex items-center justify-center"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-image w-5 h-5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg> </div>
+                                    
+                                        {
+                                            image && image.length > 0 ? <Image src={image} width={48} height={48} alt='' className='image-upload__icon w-12 h-12 rounded-full flex items-center justify-center' /> :  
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-image w-5 h-5">
+                                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                                    <polyline points="21 15 16 10 5 21"></polyline>
+                                                </svg>
+                                        }
+                                        
                                         <div className="image-upload__info mt-2">Choose your group profile photo</div>
-                                        <input type="file" className="w-full h-full top-0 left-0 absolute opacity-0" id="create-group-form-1" {...register('photo')}/>
+                                        <input type="file" className="w-full h-full top-0 left-0 absolute opacity-0" id="create-group-form-1" onChange={onImageChange}/>
                                     </div>
                                 </div>
                                 <div className="mt-3">
                                     <label htmlFor="create-group-form-2" className="form-label">Group Name</label>
-                                    <input type="text" className="form-control" id="create-group-form-2" {...register('groupName')}/>
+                                    <input type="text" className="form-control" id="create-group-form-2" {...register('groupName', { required: true })}/>
                                 </div>
                                 <div className="mt-3">
                                     <label htmlFor="create-group-form-3" className="form-label">Tagline</label>
@@ -107,7 +204,7 @@ export default function SidebarGroups() {
                                     <label htmlFor="create-group-form-5" className="form-label">Description</label>
                                     <textarea className="form-control" rows={5} id="create-group-form-5" {...register('description')}></textarea>
                                 </div>
-                                <button className="btn btn-primary w-full mt-3">Create Group</button>
+                                <button type='submit' className="btn btn-primary w-full mt-3" disabled={listMember.length < 2}>Create Group</button>
                             </div>
                             </form>
 

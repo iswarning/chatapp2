@@ -34,8 +34,6 @@ const Page: NextPageWithLayout = () => {
     setLoading(true)
     getInitialState(user?.uid).then((data) => {
       dispatch(setUserInfo(data.userInfo))
-      dispatch(setListFriend(data.listFriend))
-      dispatch(setListFriendRequest(data.listFriendRequest))
     })
     .catch(err => console.log(err))
     .finally(() => setLoading(false))
