@@ -17,7 +17,7 @@ import { io } from "socket.io-client";
 import { wrapper } from "../redux/store";
 import { Provider } from "react-redux";
 import Layout from "@/components/Layout";
-
+import VideoCallScreen from "@/components/VideoCallScreen/VideoCallScreen";
 config.autoAddCss = false;
 
 export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
@@ -38,8 +38,6 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
   // const [isGroup, setIsGroup] = useState(false);
   // const router = useRouter();
 
-  const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
-
   // const [queryClient] = useState(() => new QueryClient());
 
   useEffect(() => {
@@ -52,7 +50,8 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
         })
         .catch((err) => console.log(err));
 
-      socket.emit("login", { userId: user?.email });
+        const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
+        socket.emit("login", { userId: user?.email });
 
       // getNotification(user?.email)
       // const channel = new BroadcastChannel("notifications");
@@ -122,14 +121,12 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
 
   if (loading) return <Loading />;
 
-  //   <VideoCallContainer isOpen={isOpen} ariaHideApp={false}>
-  //       <VideoCallScreen statusCall='Incoming Call' photoURL={user?.photoURL} sender={recipient} recipient={sender}  chatId={chatRoomId}  onClose={() => setIsOpen(false)} isGroup={isGroup} />
-  //   </VideoCallContainer>
+
 
   return <Provider store={store}>
     <Layout>
       <Component {...props.pageProps} />
-      <ToastContainer />
+      <ToastContainer />   
     </Layout>
   </Provider>
 }

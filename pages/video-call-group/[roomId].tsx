@@ -104,20 +104,6 @@ export default function VideoCall({callVideoStatus}: any) {
                 <ActionBtnActive onClick={handleShowMic}>
                     <MicIcon fontSize="large" />
                 </ActionBtnActive>
-                {/* {
-                    showCam ? <ActionBtnActive onClick={handleShowCam}>
-                        <VideoCameraFrontIcon fontSize="large" />
-                    </ActionBtnActive> : <ActionBtn onClick={handleShowCam}>
-                        <VideoCameraFrontIcon fontSize="large" />
-                    </ActionBtn>
-                }
-                {
-                    showMic ? <ActionBtnActive onClick={handleShowMic}>
-                        <MicIcon fontSize="large" />
-                    </ActionBtnActive> : <ActionBtn onClick={handleShowMic}>
-                        <MicIcon fontSize="large" />
-                    </ActionBtn>
-                } */}
             </div>
             
         </>

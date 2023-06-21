@@ -6,12 +6,19 @@ import { MessageType } from "@/types/MessageType";
 import { UserType } from "@/types/UserType";
 import { FriendType } from "@/types/FriendType";
 import { FriendRequestType } from "@/types/FriendRequestType";
+import { Socket, io } from "socket.io-client";
 
 export enum SidebarType {
   CHAT,
   GROUPS,
   CONTACTS,
   PROFILE,
+}
+
+export enum StatusCallType {
+  INCOMING_CALL,
+  CALLING,
+  CALLED
 }
 // Type for our state
 export interface InitialState {
@@ -21,7 +28,12 @@ export interface InitialState {
     currentMessages: Array<MessageType>,
     userOnline: Array<string>,
     statusSend: number,
-    currentSidebar: SidebarType
+    currentSidebar: SidebarType,
+    statusCall: StatusCallType,
+    showVideoCallScreen: boolean,
+    dataVideoCall: any,
+    socket: Socket,
+    acceptedCall: boolean
   };
 }
 
@@ -33,7 +45,12 @@ const initialState: InitialState = {
     currentMessages: Array<MessageType>(),
     userOnline: Array<string>(),
     statusSend: 0,
-    currentSidebar: SidebarType.CHAT
+    currentSidebar: SidebarType.CHAT,
+    statusCall: StatusCallType.CALLING,
+    showVideoCallScreen: false,
+    dataVideoCall: {},
+    socket: io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!),
+    acceptedCall: false
   },
 };
 
@@ -69,6 +86,22 @@ export const appSlice = createSlice({
 
     setSidebar(state, action) {
       state.data.currentSidebar = action.payload
+    },
+
+    setStatusCall(state, action) {
+      state.data.statusCall = action.payload
+    },
+
+    setShowVideoCallScreen(state, action) {
+      state.data.showVideoCallScreen = action.payload
+    },
+    
+    setDataVideoCall(state, action) {
+      state.data.dataVideoCall = action.payload
+    },
+
+    setAcceptedCall(state, action) {
+      state.data.acceptedCall = action.payload
     }
 
   },
@@ -91,6 +124,10 @@ export const { setUserOnline,
   addNewMessage, 
   setStatusSend, 
   setSidebar,
+  setStatusCall,
+  setShowVideoCallScreen,
+  setDataVideoCall,
+  setAcceptedCall
    } = appSlice.actions;
 
 export const selectAppState = (state: AppState) => state.app.data;

@@ -21,7 +21,6 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
   const [userOnline, setUserOnline] = useState<Array<string>>();
   const appState = useSelector(selectAppState)
   const dispatch = useDispatch()
-  // const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
 
   useEffect(() => {
     

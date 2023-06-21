@@ -7,15 +7,17 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@/firebase";
 import Loading from "@/components/Loading";
 import {useDispatch, useSelector} from 'react-redux'
-import { SidebarType, selectAppState, setUserInfo, setUserOnline } from "@/redux/appSlice";
+import { SidebarType, StatusCallType, selectAppState, setAcceptedCall, setDataVideoCall, setShowVideoCallScreen, setStatusCall, setUserInfo, setUserOnline } from "@/redux/appSlice";
 import { io } from "socket.io-client";
 import ChatScreen from "@/components/ChatPage/ChatScreen/ChatScreen";
-import { MessageType } from "@/types/MessageType";
 import InfoContentScreen from "@/components/ChatPage/InfoContentScreen/InfoContentScreen";
 import SidebarGroups from "@/components/SidebarGroups";
 import SidebarContact from "@/components/SidebarContact";
 import SidebarProfile from "@/components/SidebarProfile";
 import getInitialState from "@/utils/getInitialState";
+import VideoCallScreen from "@/components/VideoCallScreen/VideoCallScreen";
+import { toast } from "react-toastify";
+import { useRouter } from "next/router";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -25,9 +27,8 @@ const Page: NextPageWithLayout = () => {
   const [isLoading, setLoading] = useState(false);
   
   const dispatch = useDispatch();
-  const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
   const appState = useSelector(selectAppState);
-  const [messData, setMessData] = useState<Array<MessageType>>()
+  const router = useRouter();
 
   useEffect(() => {
     setLoading(true)
@@ -39,13 +40,62 @@ const Page: NextPageWithLayout = () => {
   },[])
 
   useEffect(() => {
-    socket.on("get-user-online", (data) => {
+    appState.socket.on("get-user-online", (data) => {
       dispatch(setUserOnline(data))
     });
     return () => {
-      socket.disconnect();
+      appState.socket.disconnect();
     };
   }, []);
+
+  useEffect(() => {
+      appState.socket.on("response-call-video-one-to-one", (res: string) => {
+        let data = JSON.parse(res);
+        if(data.recipient === user?.email) {
+            dispatch(setDataVideoCall({
+              chatId: data.chatId,
+              sender: user?.email,
+              recipient: data.sender,
+              isGroup: data.isGroup,
+            }))
+            dispatch(setShowVideoCallScreen(true))
+            dispatch(setStatusCall(StatusCallType.INCOMING_CALL))
+        }
+      });
+
+      // socket.on("response-call-video", (res: string) => {
+      //   let data = JSON.parse(res);
+      //   if(data.recipient.includes(user?.email)) {
+      //       dispatch(setDataVideoCall({
+      //         chatId: data.chatId,
+      //         sender: data.sender,
+      //         recipient: data.recipient,
+      //         isGroup: data.isGroup,
+      //       }))
+      //       dispatch(setShowVideoCallScreen(true))
+      //   }
+      // });
+
+      appState.socket.on('response-reject-call-one-to-one', (res: string) => {
+        console.log(JSON.parse(res))
+        let data = JSON.parse(res);
+        if(data.recipient === user?.email) {
+          dispatch(setShowVideoCallScreen(false))
+          toast(`${data.name} rejected the call !`, { hideProgressBar: true, autoClose: 5000, type: 'info' })
+        }
+      });
+
+      appState.socket.on("response-accept-call-one-to-one", (res: string) => {
+        let data = JSON.parse(res);
+        if(data.recipient === user?.email) {
+          dispatch(setAcceptedCall(true))
+        }
+      })
+
+      return () => {
+        appState.socket.disconnect();
+      };
+  },[])
 
   return (
     <>
@@ -56,933 +106,36 @@ const Page: NextPageWithLayout = () => {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      {/* <div className="main flex-1 flex flex-col"> */}
-        {/* <div className="hidden lg:block heading flex-2"> */}
-          {/* <h1 className="text-3xl text-gray-700 mb-4"></h1> */}
-        {/* </div> */}
-
-        {/* <div className="flex-1 flex h-full"> */}
-          {/* <button onClick={handleTestMessage}>adada</button> */}
-          {/* <SidebarMessage /> */}
-        {/* </div> */}
-      {/* </div> */}
       <div className="md:pl-16 pt-16">
-<div className="-mt-16 ml-auto xl:-ml-16 mr-auto xl:pl-16 pt-16 xl:h-screen w-auto sm:w-3/5 xl:w-auto grid grid-cols-12 gap-6">
-{/* sidebar profile */}
-{/* <div className="side-content col-span-12 xl:col-span-3 -mt-16 xl:mt-0 pt-20 xl:-mr-6 px-6 xl:pt-6 flex-col overflow-hidden" data-content="profile">
-<div className="intro-y text-xl font-medium">Profile</div>
-<div className="intro-y box relative px-4 py-6 mt-5">
-<a href="javascript:void(0)" className="text-gray-600 tooltip w-8 h-8 block flex items-center justify-center absolute top-0 right-0 mr-1 mt-1"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-edit-2 w-4 h-4"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg> </a>
-<div className="w-20 h-20 mx-auto image-fit">
-<img alt="Topson Messenger Tailwind HTML Admin Template" className="rounded-full" src="https://topson.left4code.com/dist/images/profile-9.jpg"/>
-<div className="bg-green-500 border-white w-3 h-3 absolute right-0 top-0 mt-1 mr-1 rounded-full border-2"></div>
-</div>
-<div className="text-base font-medium text-center mt-3">John Travolta</div>
-<div className="text-gray-600 text-center text-xs uppercase mt-0.5">Software Engineer</div>
-</div>
-<div className="intro-y box p-4 mt-3">
-<div className="border-gray-200 dark:border-dark-5 flex items-center border-b pb-3">
-<div className="">
-<div className="text-gray-600">Country</div>
-<div className="capitalize mt-0.5">New York City, USA</div>
-</div>
-<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-globe w-4 h-4 text-gray-600 ml-auto"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
-</div>
-<div className="border-gray-200 dark:border-dark-5 flex items-center border-b py-3">
-<div className="">
-<div className="text-gray-600">Phone</div>
-<div className="mt-0.5">+32 19 23 62 24 34</div>
-</div>
-<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-mic w-4 h-4 text-gray-600 ml-auto"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
-</div>
-<div className="border-gray-200 dark:border-dark-5 flex items-center border-b py-3">
-<div className="">
-<div className="text-gray-600">Gender</div>
-<div className="capitalize mt-0.5">male</div>
-</div>
-<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-mail w-4 h-4 text-gray-600 ml-auto"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-</div>
-<div className="border-gray-200 dark:border-dark-5 flex items-center py-3">
-<div className="">
-<div className="text-gray-600">Email</div>
-<div className="mt-0.5">johntravolta@left4code.com</div>
-</div>
-<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-mail w-4 h-4 text-gray-600 ml-auto"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-</div>
-</div>
-<div className="intro-y box p-4 mt-3">
-<div className="border-gray-200 dark:border-dark-5 flex items-center border-b pb-3">
-<div className="">
-<div className="text-gray-600">Twitter</div>
-<a className="mt-0.5" href="">@johntravolta</a>
-</div>
-<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-twitter w-4 h-4 text-gray-600 ml-auto"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg>
-</div>
-<div className="border-gray-200 dark:border-dark-5 flex items-center border-b py-3">
-<div className="">
-<div className="text-gray-600">Facebook</div>
-<a className="mt-0.5" href="">johntravolta</a>
-</div>
-<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-facebook w-4 h-4 text-gray-600 ml-auto"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
-</div>
-<div className="border-gray-200 dark:border-dark-5 flex items-center py-3">
-<div className="">
-<div className="text-gray-600">Instagram</div>
-<a className="mt-0.5" href="">@johntravolta</a>
-</div>
-<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-instagram w-4 h-4 text-gray-600 ml-auto"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
-</div>
-</div>
-</div> */}
-{/* sidebar contact */}
-{/* <div className="side-content col-span-12 xl:col-span-3 -mt-16 xl:mt-0 pt-20 xl:-mr-6 px-6 xl:pt-6 flex-col overflow-hidden" data-content="contacts">
-<div className="intro-y text-xl font-medium">Contacts</div>
-<div className="intro-y relative mt-5 mb-6">
-<input type="text" className="form-control box py-3 px-4 border-transparent pr-8" placeholder="Search for contacts..."/>
-<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-search text-gray-600 w-5 h-5 absolute inset-y-0 right-0 my-auto mr-3"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-</div>
-<div className="intro-y overflow-y-auto scrollbar-hidden -mx-5 px-5">
-<div className="user-list">
-<div className="intro-x">
-<div className="intro-x text-gray-500 mb-3">A</div>
-<div className="intro-x block">
-<div className="box dark:bg-dark-3 cursor-pointer relative flex items-center px-4 py-3 zoom-in ">
-<div className="w-10 h-10 flex-none image-fit mr-1">
-<img alt="Topson Messenger Tailwind HTML Admin Template" className="rounded-full" src="https://topson.left4code.com/dist/images/profile-9.jpg"/>
-<div className="bg-green-500 border-white w-3 h-3 absolute right-0 bottom-0 rounded-full border-2"></div>
-</div>
-<div className="ml-2 overflow-hidden">
-<a href="javascript:void(0)" className="font-medium">John Travolta</a>
-<div className="flex items-center text-xs mt-0.5">
-<div className="text-gray-600 dark:text-gray-500 truncate">Last seen 26 seconds ago ago</div>
-</div>
-</div>
-<div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
-<div className="dropdown-menu w-40">
-<div className="dropdown-menu__content box dark:bg-dark-1 p-2">
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share Contact </a>
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-copy w-4 h-4 mr-2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Copy Contact </a>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div className="intro-x block">
-<div className="box dark:bg-dark-3 cursor-pointer relative flex items-center px-4 py-3 zoom-in mt-4">
-<div className="w-10 h-10 flex-none image-fit mr-1">
-<img alt="Topson Messenger Tailwind HTML Admin Template" className="rounded-full" src="https://topson.left4code.com/dist/images/profile-1.jpg"/>
-<div className="bg-green-500 border-white w-3 h-3 absolute right-0 bottom-0 rounded-full border-2"></div>
-</div>
-<div className="ml-2 overflow-hidden">
-<a href="javascript:void(0)" className="font-medium">Brad Pitt</a>
-<div className="flex items-center text-xs mt-0.5">
-<div className="text-gray-600 dark:text-gray-500 truncate">Last seen 59 seconds ago ago</div>
-</div>
-</div>
-<div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
-<div className="dropdown-menu w-40">
-<div className="dropdown-menu__content box dark:bg-dark-1 p-2">
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share Contact </a>
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-copy w-4 h-4 mr-2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Copy Contact </a>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div className="intro-x block">
-<div className="box dark:bg-dark-3 cursor-pointer relative flex items-center px-4 py-3 zoom-in mt-4">
-<div className="w-10 h-10 flex-none image-fit mr-1">
-<img alt="Topson Messenger Tailwind HTML Admin Template" className="rounded-full" src="https://topson.left4code.com/dist/images/profile-7.jpg"/>
-<div className="bg-green-500 border-white w-3 h-3 absolute right-0 bottom-0 rounded-full border-2"></div>
-</div>
-<div className="ml-2 overflow-hidden">
-<a href="javascript:void(0)" className="font-medium">Leonardo DiCaprio</a>
-<div className="flex items-center text-xs mt-0.5">
-<div className="text-gray-600 dark:text-gray-500 truncate">Last seen 29 seconds ago ago</div>
-</div>
-</div>
-<div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
-<div className="dropdown-menu w-40">
-<div className="dropdown-menu__content box dark:bg-dark-1 p-2">
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share Contact </a>
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-copy w-4 h-4 mr-2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Copy Contact </a>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div className="intro-x text-gray-500 mt-6 mb-3">B</div>
-<div className="intro-x block">
-<div className="box dark:bg-dark-3 cursor-pointer relative flex items-center px-4 py-3 zoom-in ">
-<div className="w-10 h-10 flex-none image-fit mr-1">
-<img alt="Topson Messenger Tailwind HTML Admin Template" className="rounded-full" src="https://topson.left4code.com/dist/images/profile-9.jpg"/>
-<div className="bg-green-500 border-white w-3 h-3 absolute right-0 bottom-0 rounded-full border-2"></div>
-</div>
-<div className="ml-2 overflow-hidden">
-<a href="javascript:void(0)" className="font-medium">John Travolta</a>
-<div className="flex items-center text-xs mt-0.5">
-<div className="text-gray-600 dark:text-gray-500 truncate">Last seen 26 seconds ago ago</div>
-</div>
-</div>
-<div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
-<div className="dropdown-menu w-40">
-<div className="dropdown-menu__content box dark:bg-dark-1 p-2">
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share Contact </a>
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-copy w-4 h-4 mr-2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Copy Contact </a>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div className="intro-x block">
-<div className="box dark:bg-dark-3 cursor-pointer relative flex items-center px-4 py-3 zoom-in mt-4">
-<div className="w-10 h-10 flex-none image-fit mr-1">
-<img alt="Topson Messenger Tailwind HTML Admin Template" className="rounded-full" src="https://topson.left4code.com/dist/images/profile-1.jpg"/>
-<div className="bg-green-500 border-white w-3 h-3 absolute right-0 bottom-0 rounded-full border-2"></div>
-</div>
-<div className="ml-2 overflow-hidden">
-<a href="javascript:void(0)" className="font-medium">Brad Pitt</a>
-<div className="flex items-center text-xs mt-0.5">
-<div className="text-gray-600 dark:text-gray-500 truncate">Last seen 59 seconds ago ago</div>
-</div>
-</div>
-<div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
-<div className="dropdown-menu w-40">
-<div className="dropdown-menu__content box dark:bg-dark-1 p-2">
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share Contact </a>
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-copy w-4 h-4 mr-2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Copy Contact </a>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div className="intro-x block">
-<div className="box dark:bg-dark-3 cursor-pointer relative flex items-center px-4 py-3 zoom-in mt-4">
-<div className="w-10 h-10 flex-none image-fit mr-1">
-<img alt="Topson Messenger Tailwind HTML Admin Template" className="rounded-full" src="https://topson.left4code.com/dist/images/profile-7.jpg"/>
-<div className="bg-green-500 border-white w-3 h-3 absolute right-0 bottom-0 rounded-full border-2"></div>
-</div>
-<div className="ml-2 overflow-hidden">
-<a href="javascript:void(0)" className="font-medium">Leonardo DiCaprio</a>
-<div className="flex items-center text-xs mt-0.5">
-<div className="text-gray-600 dark:text-gray-500 truncate">Last seen 29 seconds ago ago</div>
-</div>
-</div>
-<div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
-<div className="dropdown-menu w-40">
-<div className="dropdown-menu__content box dark:bg-dark-1 p-2">
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share Contact </a>
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-copy w-4 h-4 mr-2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Copy Contact </a>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div className="intro-x block">
-<div className="box dark:bg-dark-3 cursor-pointer relative flex items-center px-4 py-3 zoom-in mt-4">
-<div className="w-10 h-10 flex-none image-fit mr-1">
-<img alt="Topson Messenger Tailwind HTML Admin Template" className="rounded-full" src="https://topson.left4code.com/dist/images/profile-4.jpg"/>
-<div className="bg-green-500 border-white w-3 h-3 absolute right-0 bottom-0 rounded-full border-2"></div>
-</div>
-<div className="ml-2 overflow-hidden">
-<a href="javascript:void(0)" className="font-medium">Sylvester Stallone</a>
-<div className="flex items-center text-xs mt-0.5">
-<div className="text-gray-600 dark:text-gray-500 truncate">Last seen 42 minutes ago ago</div>
-</div>
-</div>
-<div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
-<div className="dropdown-menu w-40">
-<div className="dropdown-menu__content box dark:bg-dark-1 p-2">
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share Contact </a>
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-copy w-4 h-4 mr-2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Copy Contact </a>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div className="intro-x text-gray-500 mt-6 mb-3">C</div>
-<div className="intro-x block">
-<div className="box dark:bg-dark-3 cursor-pointer relative flex items-center px-4 py-3 zoom-in ">
-<div className="w-10 h-10 flex-none image-fit mr-1">
-<img alt="Topson Messenger Tailwind HTML Admin Template" className="rounded-full" src="https://topson.left4code.com/dist/images/profile-9.jpg"/>
-<div className="bg-green-500 border-white w-3 h-3 absolute right-0 bottom-0 rounded-full border-2"></div>
-</div>
-<div className="ml-2 overflow-hidden">
-<a href="javascript:void(0)" className="font-medium">John Travolta</a>
-<div className="flex items-center text-xs mt-0.5">
-<div className="text-gray-600 dark:text-gray-500 truncate">Last seen 26 seconds ago ago</div>
-</div>
-</div>
-<div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
-<div className="dropdown-menu w-40">
-<div className="dropdown-menu__content box dark:bg-dark-1 p-2">
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share Contact </a>
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-copy w-4 h-4 mr-2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Copy Contact </a>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div className="intro-x block">
-<div className="box dark:bg-dark-3 cursor-pointer relative flex items-center px-4 py-3 zoom-in mt-4">
-<div className="w-10 h-10 flex-none image-fit mr-1">
-<img alt="Topson Messenger Tailwind HTML Admin Template" className="rounded-full" src="https://topson.left4code.com/dist/images/profile-1.jpg"/>
-<div className="bg-green-500 border-white w-3 h-3 absolute right-0 bottom-0 rounded-full border-2"></div>
-</div>
-<div className="ml-2 overflow-hidden">
-<a href="javascript:void(0)" className="font-medium">Brad Pitt</a>
-<div className="flex items-center text-xs mt-0.5">
-<div className="text-gray-600 dark:text-gray-500 truncate">Last seen 59 seconds ago ago</div>
-</div>
-</div>
-<div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
-<div className="dropdown-menu w-40">
-<div className="dropdown-menu__content box dark:bg-dark-1 p-2">
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share Contact </a>
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-copy w-4 h-4 mr-2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Copy Contact </a>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div> */}
-{/* sidebar chat */}
+        <div className="-mt-16 ml-auto xl:-ml-16 mr-auto xl:pl-16 pt-16 xl:h-screen w-auto sm:w-3/5 xl:w-auto grid grid-cols-12 gap-6">
+        {
+          appState.currentSidebar === SidebarType.CHAT ? <SidebarMessage /> : null
+        }
 
-{/* sidebar create group */}
-{/* <div className="side-content col-span-12 xl:col-span-3 -mt-16 xl:mt-0 pt-20 xl:-mr-6 px-6 xl:pt-6 flex-col overflow-hidden" data-content="groups">
-<div className="intro-y text-xl font-medium">Create Group</div>
-<div className="intro-y box p-2 mt-5 mb-6">
-<div className="boxed-tabs nav nav-tabs justify-center flex" role="tablist"> <a data-toggle="tab" data-target="#group-members" href="javascript:void(0)" className="hover:bg-gray-100 dark:hover:bg-dark-2 flex-1 py-2 rounded-md text-center active" id="group-members-tab" role="tab" aria-controls="group-members" aria-selected="true">Members</a> <a data-toggle="tab" data-target="#group-details" href="javascript:void(0)" className="hover:bg-gray-100 dark:hover:bg-dark-2 flex-1 py-2 rounded-md text-center" id="group-details-tab" role="tab" aria-controls="group-details" aria-selected="false">Details</a> </div>
-</div>
-<div className="intro-y overflow-y-auto scrollbar-hidden -mx-5 px-5">
-<div className="tab-content">
-<div className="tab-pane active" id="group-members" role="tabpanel" aria-labelledby="group-members-tab">
-<div className="user-list">
-<div className="intro-x pb-6">
-<div className="intro-x text-gray-500 mb-3">A</div>
-<div className="intro-x block">
-<div className="box dark:bg-dark-3 cursor-pointer relative flex items-center px-4 py-3 zoom-in ">
-<div className="w-10 h-10 flex-none image-fit mr-1">
-<img alt="Topson Messenger Tailwind HTML Admin Template" className="rounded-full" src="https://topson.left4code.com/dist/images/profile-9.jpg"/>
-<div className="bg-green-500 border-white w-3 h-3 absolute right-0 bottom-0 rounded-full border-2"></div>
-</div>
-<div className="ml-2 overflow-hidden">
-<a href="javascript:void(0)" className="font-medium">John Travolta</a>
-<div className="flex items-center text-xs">
-<div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">Last seen 26 seconds ago ago</div>
-</div>
-</div>
-<input className="form-check-switch ml-auto" type="checkbox" id="user-list-a-0"/>
-</div>
-</div>
-<div className="intro-x block">
-<div className="box dark:bg-dark-3 cursor-pointer relative flex items-center px-4 py-3 zoom-in mt-4">
-<div className="w-10 h-10 flex-none image-fit mr-1">
-<img alt="Topson Messenger Tailwind HTML Admin Template" className="rounded-full" src="https://topson.left4code.com/dist/images/profile-1.jpg"/>
-<div className="bg-green-500 border-white w-3 h-3 absolute right-0 bottom-0 rounded-full border-2"></div>
-</div>
-<div className="ml-2 overflow-hidden">
-<a href="javascript:void(0)" className="font-medium">Brad Pitt</a>
-<div className="flex items-center text-xs">
-<div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">Last seen 59 seconds ago ago</div>
-</div>
-</div>
-<input className="form-check-switch ml-auto" type="checkbox" id="user-list-a-1"/>
-</div>
-</div>
-<div className="intro-x block">
-<div className="box dark:bg-dark-3 cursor-pointer relative flex items-center px-4 py-3 zoom-in mt-4">
-<div className="w-10 h-10 flex-none image-fit mr-1">
-<img alt="Topson Messenger Tailwind HTML Admin Template" className="rounded-full" src="https://topson.left4code.com/dist/images/profile-7.jpg"/>
-<div className="bg-green-500 border-white w-3 h-3 absolute right-0 bottom-0 rounded-full border-2"></div>
-</div>
-<div className="ml-2 overflow-hidden">
-<a href="javascript:void(0)" className="font-medium">Leonardo DiCaprio</a>
-<div className="flex items-center text-xs">
-<div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">Last seen 29 seconds ago ago</div>
-</div>
-</div>
-<input className="form-check-switch ml-auto" type="checkbox" id="user-list-a-2"/>
-</div>
-</div>
-<div className="intro-x text-gray-500 mt-6 mb-3">B</div>
-<div className="intro-x block">
-<div className="box dark:bg-dark-3 cursor-pointer relative flex items-center px-4 py-3 zoom-in ">
-<div className="w-10 h-10 flex-none image-fit mr-1">
-<img alt="Topson Messenger Tailwind HTML Admin Template" className="rounded-full" src="https://topson.left4code.com/dist/images/profile-9.jpg"/>
-<div className="bg-green-500 border-white w-3 h-3 absolute right-0 bottom-0 rounded-full border-2"></div>
-</div>
-<div className="ml-2 overflow-hidden">
-<a href="javascript:void(0)" className="font-medium">John Travolta</a>
-<div className="flex items-center text-xs">
-<div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">Last seen 26 seconds ago ago</div>
-</div>
-</div>
-<input className="form-check-switch ml-auto" type="checkbox" id="user-list-b-0"/>
-</div>
-</div>
-<div className="intro-x block">
-<div className="box dark:bg-dark-3 cursor-pointer relative flex items-center px-4 py-3 zoom-in mt-4">
-<div className="w-10 h-10 flex-none image-fit mr-1">
-<img alt="Topson Messenger Tailwind HTML Admin Template" className="rounded-full" src="https://topson.left4code.com/dist/images/profile-1.jpg"/>
-<div className="bg-green-500 border-white w-3 h-3 absolute right-0 bottom-0 rounded-full border-2"></div>
-</div>
-<div className="ml-2 overflow-hidden">
-<a href="javascript:void(0)" className="font-medium">Brad Pitt</a>
-<div className="flex items-center text-xs">
-<div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">Last seen 59 seconds ago ago</div>
-</div>
-</div>
-<input className="form-check-switch ml-auto" type="checkbox" id="user-list-b-1"/>
-</div>
-</div>
-<div className="intro-x block">
-<div className="box dark:bg-dark-3 cursor-pointer relative flex items-center px-4 py-3 zoom-in mt-4">
-<div className="w-10 h-10 flex-none image-fit mr-1">
-<img alt="Topson Messenger Tailwind HTML Admin Template" className="rounded-full" src="https://topson.left4code.com/dist/images/profile-7.jpg"/>
-<div className="bg-green-500 border-white w-3 h-3 absolute right-0 bottom-0 rounded-full border-2"></div>
-</div>
-<div className="ml-2 overflow-hidden">
-<a href="javascript:void(0)" className="font-medium">Leonardo DiCaprio</a>
-<div className="flex items-center text-xs">
-<div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">Last seen 29 seconds ago ago</div>
-</div>
-</div>
-<input className="form-check-switch ml-auto" type="checkbox" id="user-list-b-2"/>
-</div>
-</div>
-<div className="intro-x block">
-<div className="box dark:bg-dark-3 cursor-pointer relative flex items-center px-4 py-3 zoom-in mt-4">
-<div className="w-10 h-10 flex-none image-fit mr-1">
-<img alt="Topson Messenger Tailwind HTML Admin Template" className="rounded-full" src="https://topson.left4code.com/dist/images/profile-4.jpg"/>
-<div className="bg-green-500 border-white w-3 h-3 absolute right-0 bottom-0 rounded-full border-2"></div>
-</div>
-<div className="ml-2 overflow-hidden">
-<a href="javascript:void(0)" className="font-medium">Sylvester Stallone</a>
-<div className="flex items-center text-xs">
-<div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">Last seen 42 minutes ago ago</div>
-</div>
-</div>
-<input className="form-check-switch ml-auto" type="checkbox" id="user-list-b-3"/>
-</div>
-</div>
-<div className="intro-x text-gray-500 mt-6 mb-3">C</div>
-<div className="intro-x block">
-<div className="box dark:bg-dark-3 cursor-pointer relative flex items-center px-4 py-3 zoom-in ">
-<div className="w-10 h-10 flex-none image-fit mr-1">
-<img alt="Topson Messenger Tailwind HTML Admin Template" className="rounded-full" src="https://topson.left4code.com/dist/images/profile-9.jpg"/>
-<div className="bg-green-500 border-white w-3 h-3 absolute right-0 bottom-0 rounded-full border-2"></div>
-</div>
-<div className="ml-2 overflow-hidden">
-<a href="javascript:void(0)" className="font-medium">John Travolta</a>
-<div className="flex items-center text-xs">
-<div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">Last seen 26 seconds ago ago</div>
-</div>
-</div>
-<input className="form-check-switch ml-auto" type="checkbox" id="user-list-c-0"/>
-</div>
-</div>
-<div className="intro-x block">
-<div className="box dark:bg-dark-3 cursor-pointer relative flex items-center px-4 py-3 zoom-in mt-4">
-<div className="w-10 h-10 flex-none image-fit mr-1">
-<img alt="Topson Messenger Tailwind HTML Admin Template" className="rounded-full" src="https://topson.left4code.com/dist/images/profile-1.jpg"/>
-<div className="bg-green-500 border-white w-3 h-3 absolute right-0 bottom-0 rounded-full border-2"></div>
-</div>
-<div className="ml-2 overflow-hidden">
-<a href="javascript:void(0)" className="font-medium">Brad Pitt</a>
-<div className="flex items-center text-xs">
-<div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">Last seen 59 seconds ago ago</div>
-</div>
-</div>
-<input className="form-check-switch ml-auto" type="checkbox" id="user-list-c-1"/>
-</div>
-</div>
-</div>
-<div className="user-list__action bg-theme-2 dark:bg-dark-6 -mx-5 px-5 pb-6">
-<button className="btn btn-primary text-white w-full">Next</button>
-</div>
-</div>
-</div>
-<div className="tab-pane" id="group-details" role="tabpanel" aria-labelledby="group-details-tab">
-<div className="box p-4 mt-3 mb-6">
-<div>
-<label htmlFor="create-group-form-1" className="form-label">Photo</label>
-<div className="image-upload border shadow-sm relative flex flex-col items-center justify-center rounded-md py-8 mt-3">
-<div className="image-upload__icon w-12 h-12 rounded-full flex items-center justify-center"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-image w-5 h-5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg> </div>
-<div className="image-upload__info mt-2">Choose your group profile photo</div>
-<input type="file" className="w-full h-full top-0 left-0 absolute opacity-0" id="create-group-form-1"/>
-</div>
-</div>
-<div className="mt-3">
-<label htmlFor="create-group-form-2" className="form-label">Group Name</label>
-<input type="text" className="form-control" id="create-group-form-2"/>
-</div>
-<div className="mt-3">
-<label htmlFor="create-group-form-3" className="form-label">Tagline</label>
-<input type="text" className="form-control" id="create-group-form-3"/>
-</div>
-<div className="mt-3">
-<label htmlFor="create-group-form-4" className="form-label">Public</label>
-<div className="form-check">
-<input type="checkbox" className="form-check-switch" id="create-group-form-4"/>
-</div>
-</div>
-<div className="mt-3">
-<label htmlFor="create-group-form-5" className="form-label">Description</label>
-<textarea className="form-control" rows={5} id="create-group-form-5"></textarea>
-</div>
-<button className="btn btn-primary w-full mt-3">Create Group</button>
-</div>
-</div>
-</div>
-</div>
-</div> */}
-{
-  appState.currentSidebar === SidebarType.CHAT ? <SidebarMessage /> : null
-}
+        {
+          appState.currentSidebar === SidebarType.GROUPS ? <SidebarGroups /> : null
+        }
 
-{
-  appState.currentSidebar === SidebarType.GROUPS ? <SidebarGroups /> : null
-}
+        {
+          appState.currentSidebar === SidebarType.CONTACTS ? <SidebarContact /> : null
+        }
 
-{
-  appState.currentSidebar === SidebarType.CONTACTS ? <SidebarContact /> : null
-}
+        {
+          appState.currentSidebar === SidebarType.PROFILE ? <SidebarProfile /> : null
+        }
 
-{
-  appState.currentSidebar === SidebarType.PROFILE ? <SidebarProfile /> : null
-}
+        {
+          Object.keys(appState.currentChat).length > 0 ? <>
+            <ChatScreen chat={appState.currentChat} messages={appState.currentMessages} />
+            <InfoContentScreen />
+          </>  : null
+        }
 
-{
-  Object.keys(appState.currentChat).length > 0 ? <>
-    <ChatScreen chat={appState.currentChat} messages={appState.currentMessages} />
-    <InfoContentScreen />
-  </>  : null
-}
-{/* <div className="info-content col-span-12 xl:col-span-3 flex flex-col overflow-hidden pl-6 xl:pl-0 pr-6">
-<div className="overflow-y-auto scrollbar-hidden py-6">
-<div className="intro-y box relative px-4 py-6">
-<a href="javascript:void(0)" className="text-gray-600 tooltip w-8 h-8 block flex items-center justify-center absolute top-0 right-0 mr-1 mt-1"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-edit-2 w-4 h-4"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg> </a>
-<div className="w-20 h-20 mx-auto image-fit">
-<img alt="Topson Messenger Tailwind HTML Admin Template" className="rounded-full" src="https://topson.left4code.com/dist/images/profile-9.jpg"/>
-<div className="bg-green-500 border-white w-3 h-3 absolute right-0 top-0 mt-1 mr-1 rounded-full border-2"></div>
-</div>
-<div className="text-base font-medium text-center mt-3">John Travolta</div>
-<div className="text-gray-600 text-center text-xs uppercase mt-0.5">Software Engineer</div>
-</div>
-<div className="intro-y box p-4 mt-3">
-<div className="text-base font-medium">Personal Information</div>
-<div className="mt-4">
-<div className="border-gray-200 dark:border-dark-5 flex items-center border-b pb-3">
-<div className="">
-<div className="text-gray-600">Country</div>
-<div className="mt-0.5">New York City, USA</div>
-</div>
-<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-globe w-4 h-4 text-gray-600 ml-auto"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
-</div>
-<div className="border-gray-200 dark:border-dark-5 flex items-center border-b py-3">
-<div className="">
-<div className="text-gray-600">Phone</div>
-<div className="mt-0.5">+32 19 23 62 24 34</div>
-</div>
-<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-mic w-4 h-4 text-gray-600 ml-auto"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
-</div>
-<div className="border-gray-200 dark:border-dark-5 flex items-center py-3">
-<div className="">
-<div className="text-gray-600">Email</div>
-<div className="mt-0.5">johntravolta@left4code.com</div>
-</div>
-<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-mail w-4 h-4 text-gray-600 ml-auto"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-</div>
-</div>
-</div>
-<div className="intro-y h-full box flex flex-col p-4 mt-3">
-<div className="text-base font-medium">Shared Files</div>
-<div className="mt-4 overflow-x-hidden overflow-y-auto scrollbar-hidden">
-<div className="shared-file border-gray-200 dark:border-dark-5 flex items-center p-3 border rounded-md relative ">
-<div className="shared-file__icon text-white w-12 flex-none bg-contain relative bg-no-repeat bg-center block">
-<div className="absolute m-auto top-0 left-0 right-0 bottom-0 flex items-center justify-center">JPG</div>
-</div>
-<div className="w-full ml-3">
-<div className="text-gray-700 dark:text-gray-300 w-4/5 whitespace-nowrap font-medium truncate">preview-8.jpg</div>
-<div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">1.2 MB Image File</div>
-</div>
-<div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
-<div className="dropdown-menu w-40">
-<div className="dropdown-menu__content box dark:bg-dark-1 p-2">
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share </a>
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-download w-4 h-4 mr-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Download </a>
-</div>
-</div>
-</div>
-</div>
-<div className="shared-file border-gray-200 dark:border-dark-5 flex items-center p-3 border rounded-md relative mt-3">
-<div className="shared-file__icon text-white w-12 flex-none bg-contain relative bg-no-repeat bg-center block">
-<div className="absolute m-auto top-0 left-0 right-0 bottom-0 flex items-center justify-center">MP4</div>
-</div>
-<div className="w-full ml-3">
-<div className="text-gray-700 dark:text-gray-300 w-4/5 whitespace-nowrap font-medium truncate">Celine Dion - Ashes.mp4</div>
-<div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">20 MB Audio File</div>
-</div>
-<div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
-<div className="dropdown-menu w-40">
-<div className="dropdown-menu__content box dark:bg-dark-1 p-2">
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share </a>
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-download w-4 h-4 mr-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Download </a>
-</div>
-</div>
-</div>
-</div>
-<div className="shared-file border-gray-200 dark:border-dark-5 flex items-center p-3 border rounded-md relative mt-3">
-<div className="shared-file__icon text-white w-12 flex-none bg-contain relative bg-no-repeat bg-center block">
-<div className="absolute m-auto top-0 left-0 right-0 bottom-0 flex items-center justify-center">PDF</div>
-</div>
-<div className="w-full ml-3">
-<div className="text-gray-700 dark:text-gray-300 w-4/5 whitespace-nowrap font-medium truncate">Laravel 7</div>
-<div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">120 MB Document File</div>
-</div>
-<div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
-<div className="dropdown-menu w-40">
-<div className="dropdown-menu__content box dark:bg-dark-1 p-2">
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share </a>
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-download w-4 h-4 mr-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Download </a>
-</div>
-</div>
-</div>
-</div>
-<div className="shared-file border-gray-200 dark:border-dark-5 flex items-center p-3 border rounded-md relative mt-3">
-<div className="shared-file__icon text-white w-12 flex-none bg-contain relative bg-no-repeat bg-center block">
-<div className="absolute m-auto top-0 left-0 right-0 bottom-0 flex items-center justify-center">ZIP</div>
-</div>
-<div className="w-full ml-3">
-<div className="text-gray-700 dark:text-gray-300 w-4/5 whitespace-nowrap font-medium truncate">Repository</div>
-<div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">20 KB Zipped File</div>
-</div>
-<div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
-<div className="dropdown-menu w-40">
-<div className="dropdown-menu__content box dark:bg-dark-1 p-2">
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share </a>
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-download w-4 h-4 mr-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Download </a>
-</div>
-</div>
-</div>
-</div>
-<div className="shared-file border-gray-200 dark:border-dark-5 flex items-center p-3 border rounded-md relative mt-3">
-<div className="shared-file__icon text-white w-12 flex-none bg-contain relative bg-no-repeat bg-center block">
-<div className="absolute m-auto top-0 left-0 right-0 bottom-0 flex items-center justify-center">JPG</div>
-</div>
-<div className="w-full ml-3">
-<div className="text-gray-700 dark:text-gray-300 w-4/5 whitespace-nowrap font-medium truncate">preview-3.jpg</div>
-<div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">1.2 MB Image File</div>
-</div>
-<div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
-<div className="dropdown-menu w-40">
-<div className="dropdown-menu__content box dark:bg-dark-1 p-2">
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share </a>
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-download w-4 h-4 mr-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Download </a>
-</div>
-</div>
-</div>
-</div>
-<div className="shared-file border-gray-200 dark:border-dark-5 flex items-center p-3 border rounded-md relative mt-3">
-<div className="shared-file__icon text-white w-12 flex-none bg-contain relative bg-no-repeat bg-center block">
-<div className="absolute m-auto top-0 left-0 right-0 bottom-0 flex items-center justify-center">JPG</div>
-</div>
-<div className="w-full ml-3">
-<div className="text-gray-700 dark:text-gray-300 w-4/5 whitespace-nowrap font-medium truncate">preview-10.jpg</div>
-<div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">1.2 MB Image File</div>
-</div>
-<div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
-<div className="dropdown-menu w-40">
-<div className="dropdown-menu__content box dark:bg-dark-1 p-2">
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share </a>
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-download w-4 h-4 mr-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Download </a>
-</div>
-</div>
-</div>
-</div>
-<div className="shared-file border-gray-200 dark:border-dark-5 flex items-center p-3 border rounded-md relative mt-3">
-<div className="shared-file__icon text-white w-12 flex-none bg-contain relative bg-no-repeat bg-center block">
-<div className="absolute m-auto top-0 left-0 right-0 bottom-0 flex items-center justify-center">JPG</div>
-</div>
-<div className="w-full ml-3">
-<div className="text-gray-700 dark:text-gray-300 w-4/5 whitespace-nowrap font-medium truncate">preview-11.jpg</div>
-<div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">1.2 MB Image File</div>
-</div>
-<div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
-<div className="dropdown-menu w-40">
-<div className="dropdown-menu__content box dark:bg-dark-1 p-2">
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share </a>
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-download w-4 h-4 mr-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Download </a>
-</div>
-</div>
-</div>
-</div>
-<div className="shared-file border-gray-200 dark:border-dark-5 flex items-center p-3 border rounded-md relative mt-3">
-<div className="shared-file__icon text-white w-12 flex-none bg-contain relative bg-no-repeat bg-center block">
-<div className="absolute m-auto top-0 left-0 right-0 bottom-0 flex items-center justify-center">JPG</div>
-</div>
-<div className="w-full ml-3">
-<div className="text-gray-700 dark:text-gray-300 w-4/5 whitespace-nowrap font-medium truncate">preview-6.jpg</div>
-<div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">1 MB Image File</div>
-</div>
-<div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
-<div className="dropdown-menu w-40">
-<div className="dropdown-menu__content box dark:bg-dark-1 p-2">
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share </a>
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-download w-4 h-4 mr-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Download </a>
-</div>
-</div>
-</div>
-</div>
-<div className="shared-file border-gray-200 dark:border-dark-5 flex items-center p-3 border rounded-md relative mt-3">
-<div className="shared-file__icon text-white w-12 flex-none bg-contain relative bg-no-repeat bg-center block">
-<div className="absolute m-auto top-0 left-0 right-0 bottom-0 flex items-center justify-center">TXT</div>
-</div>
-<div className="w-full ml-3">
-<div className="text-gray-700 dark:text-gray-300 w-4/5 whitespace-nowrap font-medium truncate">Resources.txt</div>
-<div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">2.2 MB Text File</div>
-</div>
-<div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
-<div className="dropdown-menu w-40">
-<div className="dropdown-menu__content box dark:bg-dark-1 p-2">
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share </a>
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-download w-4 h-4 mr-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Download </a>
-</div>
-</div>
-</div>
-</div>
-<div className="shared-file border-gray-200 dark:border-dark-5 flex items-center p-3 border rounded-md relative mt-3">
-<div className="shared-file__icon text-white w-12 flex-none bg-contain relative bg-no-repeat bg-center block">
-<div className="absolute m-auto top-0 left-0 right-0 bottom-0 flex items-center justify-center">PDF</div>
-</div>
-<div className="w-full ml-3">
-<div className="text-gray-700 dark:text-gray-300 w-4/5 whitespace-nowrap font-medium truncate">Documentation</div>
-<div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">4 MB Document File</div>
-</div>
-<div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
-<div className="dropdown-menu w-40">
-<div className="dropdown-menu__content box dark:bg-dark-1 p-2">
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share </a>
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-download w-4 h-4 mr-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Download </a>
-</div>
-</div>
-</div>
-</div>
-<div className="shared-file border-gray-200 dark:border-dark-5 flex items-center p-3 border rounded-md relative mt-3">
-<div className="shared-file__icon text-white w-12 flex-none bg-contain relative bg-no-repeat bg-center block">
-<div className="absolute m-auto top-0 left-0 right-0 bottom-0 flex items-center justify-center">MP4</div>
-</div>
-<div className="w-full ml-3">
-<div className="text-gray-700 dark:text-gray-300 w-4/5 whitespace-nowrap font-medium truncate">Celine Dion - Ashes.mp4</div>
-<div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">20 MB Audio File</div>
-</div>
-<div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
-<div className="dropdown-menu w-40">
-<div className="dropdown-menu__content box dark:bg-dark-1 p-2">
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share </a>
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-download w-4 h-4 mr-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Download </a>
-</div>
-</div>
-</div>
-</div>
-<div className="shared-file border-gray-200 dark:border-dark-5 flex items-center p-3 border rounded-md relative mt-3">
-<div className="shared-file__icon text-white w-12 flex-none bg-contain relative bg-no-repeat bg-center block">
-<div className="absolute m-auto top-0 left-0 right-0 bottom-0 flex items-center justify-center">PDF</div>
-</div>
-<div className="w-full ml-3">
-<div className="text-gray-700 dark:text-gray-300 w-4/5 whitespace-nowrap font-medium truncate">Documentation</div>
-<div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">4 MB Document File</div>
-</div>
-<div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
-<div className="dropdown-menu w-40">
-<div className="dropdown-menu__content box dark:bg-dark-1 p-2">
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share </a>
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-download w-4 h-4 mr-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Download </a>
-</div>
-</div>
-</div>
-</div>
-<div className="shared-file border-gray-200 dark:border-dark-5 flex items-center p-3 border rounded-md relative mt-3">
-<div className="shared-file__icon text-white w-12 flex-none bg-contain relative bg-no-repeat bg-center block">
-<div className="absolute m-auto top-0 left-0 right-0 bottom-0 flex items-center justify-center">TXT</div>
-</div>
-<div className="w-full ml-3">
-<div className="text-gray-700 dark:text-gray-300 w-4/5 whitespace-nowrap font-medium truncate">Resources.txt</div>
-<div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">2.2 MB Text File</div>
-</div>
-<div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
-<div className="dropdown-menu w-40">
-<div className="dropdown-menu__content box dark:bg-dark-1 p-2">
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share </a>
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-download w-4 h-4 mr-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Download </a>
-</div>
-</div>
-</div>
-</div>
-<div className="shared-file border-gray-200 dark:border-dark-5 flex items-center p-3 border rounded-md relative mt-3">
-<div className="shared-file__icon text-white w-12 flex-none bg-contain relative bg-no-repeat bg-center block">
-<div className="absolute m-auto top-0 left-0 right-0 bottom-0 flex items-center justify-center">JPG</div>
-</div>
-<div className="w-full ml-3">
-<div className="text-gray-700 dark:text-gray-300 w-4/5 whitespace-nowrap font-medium truncate">preview-11.jpg</div>
-<div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">1.2 MB Image File</div>
-</div>
-<div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
-<div className="dropdown-menu w-40">
-<div className="dropdown-menu__content box dark:bg-dark-1 p-2">
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share </a>
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-download w-4 h-4 mr-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Download </a>
-</div>
-</div>
-</div>
-</div>
-<div className="shared-file border-gray-200 dark:border-dark-5 flex items-center p-3 border rounded-md relative mt-3">
-<div className="shared-file__icon text-white w-12 flex-none bg-contain relative bg-no-repeat bg-center block">
-<div className="absolute m-auto top-0 left-0 right-0 bottom-0 flex items-center justify-center">PDF</div>
-</div>
-<div className="w-full ml-3">
-<div className="text-gray-700 dark:text-gray-300 w-4/5 whitespace-nowrap font-medium truncate">Laravel 7</div>
-<div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">120 MB Document File</div>
-</div>
-<div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
-<div className="dropdown-menu w-40">
-<div className="dropdown-menu__content box dark:bg-dark-1 p-2">
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share </a>
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-download w-4 h-4 mr-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Download </a>
-</div>
-</div>
-</div>
-</div>
-<div className="shared-file border-gray-200 dark:border-dark-5 flex items-center p-3 border rounded-md relative mt-3">
-<div className="shared-file__icon text-white w-12 flex-none bg-contain relative bg-no-repeat bg-center block">
-<div className="absolute m-auto top-0 left-0 right-0 bottom-0 flex items-center justify-center">JPG</div>
-</div>
-<div className="w-full ml-3">
-<div className="text-gray-700 dark:text-gray-300 w-4/5 whitespace-nowrap font-medium truncate">preview-13.jpg</div>
-<div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">1.2 MB Image File</div>
-</div>
-<div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
-<div className="dropdown-menu w-40">
-<div className="dropdown-menu__content box dark:bg-dark-1 p-2">
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share </a>
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-download w-4 h-4 mr-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Download </a>
-</div>
-</div>
-</div>
-</div>
-<div className="shared-file border-gray-200 dark:border-dark-5 flex items-center p-3 border rounded-md relative mt-3">
-<div className="shared-file__icon text-white w-12 flex-none bg-contain relative bg-no-repeat bg-center block">
-<div className="absolute m-auto top-0 left-0 right-0 bottom-0 flex items-center justify-center">JPG</div>
-</div>
-<div className="w-full ml-3">
-<div className="text-gray-700 dark:text-gray-300 w-4/5 whitespace-nowrap font-medium truncate">preview-8.jpg</div>
-<div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">1.2 MB Image File</div>
-</div>
-<div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
-<div className="dropdown-menu w-40">
-<div className="dropdown-menu__content box dark:bg-dark-1 p-2">
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share </a>
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-download w-4 h-4 mr-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Download </a>
-</div>
-</div>
-</div>
-</div>
-<div className="shared-file border-gray-200 dark:border-dark-5 flex items-center p-3 border rounded-md relative mt-3">
-<div className="shared-file__icon text-white w-12 flex-none bg-contain relative bg-no-repeat bg-center block">
-<div className="absolute m-auto top-0 left-0 right-0 bottom-0 flex items-center justify-center">JPG</div>
-</div>
-<div className="w-full ml-3">
-<div className="text-gray-700 dark:text-gray-300 w-4/5 whitespace-nowrap font-medium truncate">preview-5.jpg</div>
-<div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">1 MB Image File</div>
-</div>
-<div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
-<div className="dropdown-menu w-40">
-<div className="dropdown-menu__content box dark:bg-dark-1 p-2">
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share </a>
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-download w-4 h-4 mr-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Download </a>
-</div>
-</div>
-</div>
-</div>
-<div className="shared-file border-gray-200 dark:border-dark-5 flex items-center p-3 border rounded-md relative mt-3">
-<div className="shared-file__icon text-white w-12 flex-none bg-contain relative bg-no-repeat bg-center block">
-<div className="absolute m-auto top-0 left-0 right-0 bottom-0 flex items-center justify-center">PHP</div>
-</div>
-<div className="w-full ml-3">
-<div className="text-gray-700 dark:text-gray-300 w-4/5 whitespace-nowrap font-medium truncate">Routes.php</div>
-<div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">1 KB Script File</div>
-</div>
-<div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
-<div className="dropdown-menu w-40">
-<div className="dropdown-menu__content box dark:bg-dark-1 p-2">
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share </a>
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-download w-4 h-4 mr-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Download </a>
-</div>
-</div>
-</div>
-</div>
-<div className="shared-file border-gray-200 dark:border-dark-5 flex items-center p-3 border rounded-md relative mt-3">
-<div className="shared-file__icon text-white w-12 flex-none bg-contain relative bg-no-repeat bg-center block">
-<div className="absolute m-auto top-0 left-0 right-0 bottom-0 flex items-center justify-center">PHP</div>
-</div>
-<div className="w-full ml-3">
-<div className="text-gray-700 dark:text-gray-300 w-4/5 whitespace-nowrap font-medium truncate">Routes.php</div>
-<div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">1 KB Script File</div>
-</div>
-<div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
-<a className="dropdown-toggle w-4 h-4" href="javascript:void(0)" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
-<div className="dropdown-menu w-40">
-<div className="dropdown-menu__content box dark:bg-dark-1 p-2">
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share </a>
-<a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-download w-4 h-4 mr-2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Download </a>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div> */}
-</div>
-</div>
+        { appState.showVideoCallScreen ? <VideoCallScreen open={appState.showVideoCallScreen} /> : null }
+        </div>
+      </div>
     </>
   );
 };
-
-// Page.getLayout = function getLayout(page: ReactElement) {
-//   return <Layout>{page}</Layout>;
-// };
 
 export default Page;
