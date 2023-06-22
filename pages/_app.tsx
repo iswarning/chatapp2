@@ -3,7 +3,7 @@ import type { AppProps } from "next/app";
 import { useAuthState } from "react-firebase-hooks/auth";
 import Login from "./login";
 import { ReactElement, ReactNode, useEffect } from "react";
-import createNewUser from "@/services/users/createNewUser";
+import createNewUser from "@/utils/createNewUser";
 // import "bootstrap/dist/css/bootstrap.css";
 import { auth, getMessagingToken, onMessageListener } from "@/firebase";
 import Loading from "@/components/Loading";
@@ -16,8 +16,7 @@ import requestPermission from "@/utils/requestPermission";
 import { io } from "socket.io-client";
 import { wrapper } from "../redux/store";
 import { Provider } from "react-redux";
-import Layout from "@/components/Layout";
-import VideoCallScreen from "@/components/VideoCallScreen/VideoCallScreen";
+import Layout from "@/components/Layout/Layout";
 config.autoAddCss = false;
 
 export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
@@ -31,79 +30,32 @@ type AppPropsWithLayout = AppProps & {
 export default function App({ Component, ...rest }: AppPropsWithLayout) {
   const { store, props } = wrapper.useWrappedStore(rest);
   const [user, loading] = useAuthState(auth);
-  // const [isOpen, setIsOpen] = useState(false);
-  // const [chatRoomId, setChatRoomId] = useState("");
-  // const [sender, setSender] = useState("");
-  // const [recipient, setRecipient] = useState([]);
-  // const [isGroup, setIsGroup] = useState(false);
-  // const router = useRouter();
-
-  // const [queryClient] = useState(() => new QueryClient());
 
   useEffect(() => {
     if (user) {
       requestPermission();
 
       getMessagingToken()
-        .then((token) => {
-          createNewUser(user, token).catch((err) => console.log(err));
-        })
-        .catch((err) => console.log(err));
+      .then((token) => {
+        createNewUser(user, token).catch((err) => console.log(err));
+      })
+      .catch((err) => console.log(err));
 
-        const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
-        socket.emit("login", { userId: user?.email });
+      const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
+      socket.emit("login", { userId: user?.email });
 
-      // getNotification(user?.email)
-      // const channel = new BroadcastChannel("notifications");
-      // channel.addEventListener("message", (event) => {
-      //   console.log(event.data);
-      // });
-      // socket.on("response-call-video-one-to-one", (res: string) => {
-      //   let data = JSON.parse(res);
-      //   if(data.recipient === user?.email) {
-      //       setChatRoomId(data.chatId);
-      //       setSender(data.sender);
-      //       setRecipient(data.recipient);
-      //       setIsGroup(data.isGroup);
-      //       setIsOpen(true);
-      //   }
-      // });
-
-      // socket.on("response-call-video", (res: string) => {
-      //   let data = JSON.parse(res);
-      //   if(data.recipient.includes(user?.email)) {
-      //       setChatRoomId(data.chatId);
-      //       setSender(data.sender);
-      //       setRecipient(data.recipient);
-      //       setIsGroup(data.isGroup);
-      //       if(!isOpen) {
-      //         setIsOpen(true);
-      //       }
-      //   }
-      // });
-
-      // socket.on('response-reject-call-one-to-one', (res: string) => {
-      //   let data = JSON.parse(res);
-      //   if(data.recipient === user?.email) {
-      //     setIsOpen(false);
-      //     toast(`${data.name} rejected the call !`, { hideProgressBar: true, autoClose: 5000, type: 'info' })
-      //   }
-      // });
-
-      // socket.on("response-accept-call-one-to-one", (res: string) => {
-      //   let data = JSON.parse(res);
-      //   if(data.recipient === user?.email) {
-      //     // window.open(router.basePath + "/video-call/" + data.chatId);
-      //   }
-      // })
-      // socketRef.current.on("disconnect", () => {
-      //   console.log(socketRef.current.disconnected); // true
-      // });
       return () => {
         socket.disconnect();
       };
     }
   }, [user]);
+
+  // useEffect(() => {
+  //     const channel = new BroadcastChannel("notifications");
+  //     channel.addEventListener("message", (event) => {
+  //       console.log(event.data);
+  //     });
+  // },[])
 
   useEffect(() => {
     onMessageListener()
@@ -120,8 +72,6 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
   if (!user) return <Login />;
 
   if (loading) return <Loading />;
-
-
 
   return <Provider store={store}>
     <Layout>

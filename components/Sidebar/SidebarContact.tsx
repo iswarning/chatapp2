@@ -3,7 +3,7 @@ import { selectAppState } from '@/redux/appSlice'
 import React from 'react'
 import { useCollection } from 'react-firebase-hooks/firestore';
 import {useSelector} from 'react-redux'
-import FriendElement from './FriendElement';
+import FriendElement from '../FriendElement';
 import getRecipientEmail from '@/utils/getRecipientEmail';
 
 export default function SidebarContact() {

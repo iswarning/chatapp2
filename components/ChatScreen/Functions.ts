@@ -196,28 +196,8 @@ export const processAttachFile = async (
       });
       return;
     }
-    if (fileSize > 100) {
-      toast("Size file no larger than 100 MB !", {
-        hideProgressBar: true,
-        type: "error",
-        autoClose: 5000,
-      });
-      return;
-    }
-    let chunkSize = 5 * 1024 * 1024; // 5 MB chunk size
-    let chunks = [];
-    let start = 0;
-    let end = chunkSize;
-    while (start < file.size) {
-      chunks.push(file.slice(start, end));
-      start = end;
-      end = start + chunkSize;
-    }
-    
-    const { messageDoc } = await addMessageToFirebase("", "file", userEmail, chat.id);
-
-    if (!messageDoc) {
-      toast("Error while send message !", {
+    if (fileSize > 1000) {
+      toast("Size file no larger than 1 GB !", {
         hideProgressBar: true,
         type: "error",
         autoClose: 5000,
@@ -225,72 +205,66 @@ export const processAttachFile = async (
       return;
     }
 
-    const fileDoc = await db
-      .collection("chats")
-      .doc(chat.id)
-      .collection("messages")
-      .doc(messageDoc.id)
-      .collection("fileInMessage")
-      .add({
-        size: fileSize,
-        name: file.name,
-        type: fileType
-    });
+    let key = uuidv4();
 
-    if (fileDoc) {
-      await Promise.all(
-        Array.prototype.map.call(chunks, async (chunk: Blob, index) => {
-          let key = uuidv4();
-          let path = `public/chat-room/${chat.id}/files/${fileDoc.id}/chunks/${key}`
-          storage
-            .ref(path)
-            .put(chunk)
-            .on(
-              "state_changed",
-              (snapshot) => {
-                const prog = Math.round(
-                  (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-                );
-                console.log(prog)
-              },
-              (err) => console.log(err),
-              () => {
-                addFileChunkToStorage(
-                  messageDoc.id,
-                  chat.id,
-                  scrollToBottom,
-                  key,
-                  chunk.size / 1024 / 1024,
-                  path,
-                  fileDoc.id
-                );
-              }
-            );
-        })
+    // const { messageDoc } = await db
+    // .collection("chats")
+    // .doc(chat.id)
+    // .collection("messages")
+    // .add({
+    //   timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+    //   message: "",
+    //   user: userEmail,
+    //   type: "file",
+    //   photoURL: "",
+    //   seen: [],
+    //   key: key,
+    //   url: url,
+    // })
+
+    // if (!messageDoc) {
+    //   toast("Error while send message !", {
+    //     hideProgressBar: true,
+    //     type: "error",
+    //     autoClose: 5000,
+    //   });
+    //   return;
+    // }
+
+    let path = `public/chat-room/${chat.id}/files/${key}`
+    storage
+      .ref(path)
+      .put(file)
+      .on(
+        "state_changed",
+        (snapshot) => {
+          const prog = Math.round(
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+          );
+          console.log(prog)
+        },
+        (err) => console.log(err),
+        () => {
+          db
+          .collection("chats")
+          .doc(chat.id)
+          .collection("messages")
+          .add({
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+            message: "",
+            user: userEmail,
+            type: "file",
+            photoURL: "",
+            seen: [],
+            key: key,
+            url: url,
+          })
+        }
       );
 
     const messageExport = MapMessageData(await messageDoc.get())
 
     return messageExport
 
-    // let bodyNotify;
-
-    // if (messageSnap?.data()?.type === "text-image") {
-    //     bodyNotify = chat.name + " sent you a message ";
-    //   } else {
-    //     bodyNotify = chat.name + " : " + messageSnap?.data()?.message;
-    //   }
-    // } else {
-    //   if (messageSnap?.data()?.type === "text-image") {
-    //     bodyNotify = userEmail + " sent a message ";
-    //   } else {
-    //     bodyNotify = userEmail + " : " + messageSnap?.data()?.message;
-    //   }
-    // }
-
-    // sendNotificationFCM("New message !", "Send file success", recipientFcmToken).catch(
-    //   (err) => console.log(err)
-    // );
-    }
   }
 };

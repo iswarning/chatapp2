@@ -1,18 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { io } from 'socket.io-client';
-import { Video } from '../VideoCallScreen/VideoCallScreenStyled';
 import { useRouter } from 'next/router';
 import styled from 'styled-components';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '@/firebase';
-import getChatById from '@/services/chats/getChatById';
 import { toast } from 'react-toastify';
 import { selectAppState } from '@/redux/appSlice';
 import {useSelector} from 'react-redux';
 import Peer from 'peerjs';
 export default function OneToOneScreen({chatRoomId}: {chatRoomId: string}) {
-
-    const socketRef: any = useRef();
     
     const videoRef: any = useRef(null);
     const router = useRouter();
@@ -21,7 +17,7 @@ export default function OneToOneScreen({chatRoomId}: {chatRoomId: string}) {
     const [user] = useAuthState(auth);
 
     useEffect(() => {
-        getVideoStream()
+        // getVideoStream()
     },[])
 
     function getVideoStream() {
@@ -73,7 +69,7 @@ export default function OneToOneScreen({chatRoomId}: {chatRoomId: string}) {
         myPeer.on('open', id => {
             let data = {
                 clientId: id,
-                chatRoomId: chatRoomId,
+                chatRoomId: appState.dataVideoCall.chatId,
                 sender: user?.email,
                 name: user?.displayName
             }
@@ -93,19 +89,25 @@ export default function OneToOneScreen({chatRoomId}: {chatRoomId: string}) {
         }
 
     }).catch((err) => console.log(err));
-    }
-
-    
+    }    
 
     return (
         <>
             <VideoContainer>
-                <Video ref={videoRef} autoPlay />
+                {/* <Video ref={videoRef} autoPlay /> */}
+                <Video src='https://www.w3schools.com/tags/movie.mp4' />
             </VideoContainer>
         </>    
     )
 }
 
 const VideoContainer = styled.div`
-    text-align: center;
+    
 `
+
+export const Video = styled.video`
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 10px;
+`;

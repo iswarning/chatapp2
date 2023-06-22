@@ -1,14 +1,12 @@
-import { auth, db } from "../../../firebase";
+import { auth, db } from "../../firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { useEffect, useState } from "react";
 import { useCollection } from "react-firebase-hooks/firestore";
-import ChatScreen from "../ChatScreen/ChatScreen";
 import UserOnlineComponent from "@/components/UserOnlineComponent";
 import { MapChatData } from "@/types/ChatType";
-import ChatComponent from "../ChatComponent";
 import { useSelector } from 'react-redux'
 import { selectAppState } from "@/redux/appSlice";
 import { v4 as uuidv4 } from 'uuid';
+import ChatComponent from "../ChatScreen/ChatComponent";
 
 export default function SidebarMessage() {
   const [user] = useAuthState(auth);

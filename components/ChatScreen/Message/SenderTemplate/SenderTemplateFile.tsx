@@ -2,12 +2,14 @@ import { db } from '@/firebase';
 import { ChunkFileType } from '@/types/ChunkFileType';
 import { FileInMessageType } from '@/types/FileInMessageType'
 import { MessageType } from '@/types/MessageType';
-import { CircularProgress } from '@mui/material';
+import { CircularProgress, Modal } from '@mui/material';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react'
 import { useCollection } from 'react-firebase-hooks/firestore';
 
 export default function SenderTemplateFile({ file, message, chatId, timestamp, lastIndex }: { file: FileInMessageType | undefined, message: MessageType, chatId: string, timestamp: any, lastIndex: boolean }) {
+
+    const [open, setOpen] = useState(false)
 
     const [chunks] = useCollection(
         db
@@ -96,14 +98,29 @@ export default function SenderTemplateFile({ file, message, chatId, timestamp, l
                                         <line x1="12" y1="15" x2="12" y2="3"></line>
                                     </svg> 
                                 </button>
-                                <a href="javascript:void(0)" className="tooltip w-8 h-8 block border rounded-full flex-none flex items-center justify-center ml-2"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share w-4 h-4"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg> </a>
-                                <a href="javascript:void(0)" className="tooltip w-8 h-8 block border rounded-full flex-none flex items-center justify-center ml-2"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-horizontal w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg> </a>
+                                <a href="javascript:void(0)" className="tooltip w-8 h-8 block border rounded-full flex-none flex items-center justify-center ml-2"> 
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share w-4 h-4">
+                                        <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+                                        <polyline points="16 6 12 2 8 6"></polyline>
+                                        <line x1="12" y1="2" x2="12" y2="15"></line>
+                                    </svg> 
+                                </a>
+                                <a href="javascript:void(0)" className="tooltip w-8 h-8 block border rounded-full flex-none flex items-center justify-center ml-2"> 
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-horizontal w-4 h-4">
+                                        <circle cx="12" cy="12" r="1"></circle>
+                                        <circle cx="19" cy="12" r="1"></circle>
+                                        <circle cx="5" cy="12" r="1"></circle>
+                                    </svg> 
+                                </a>
                             </div>
+
                         </div>
+                        
                     </div>
                 </div>
+                
             </div>
-
+            
         </div> : <>
             <div className="-intro-x chat-text-box flex items-end float-right mb-4">
                 <div className="mr-4">
@@ -121,6 +138,12 @@ export default function SenderTemplateFile({ file, message, chatId, timestamp, l
         </>
     }
     <div className="clear-both"></div>
+
+    <Modal open={open} onClose={() => setOpen(false)}>
+        <div className="w-full bg-gray-200 rounded-full dark:bg-gray-700">
+            <div className="text-xs font-medium text-center p-0.5 leading-none rounded-full" style={{width: '45%', background: '#6775F5', color: 'white', height: '5px'}}> 45%</div>
+        </div>
+    </Modal>
     </>
   )
 }

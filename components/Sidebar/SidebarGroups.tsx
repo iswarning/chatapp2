@@ -10,7 +10,7 @@ import { MapChatData } from '@/types/ChatType'
 import { v4 as uuidv4 } from 'uuid'
 import { useCollection } from 'react-firebase-hooks/firestore'
 import { useQuery } from '@tanstack/react-query'
-import MemberElement from './MemberElement'
+import MemberElement from '../MemberElement'
 import getRecipientEmail from '@/utils/getRecipientEmail'
 
 export default function SidebarGroups() {

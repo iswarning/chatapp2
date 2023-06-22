@@ -1,7 +1,7 @@
 import { auth, db, storage } from "@/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useCollection } from "react-firebase-hooks/firestore";
-import Message from "../Message/Message";
+import Message from "./Message/Message";
 import { useEffect, useRef, useState } from "react";
 import getRecipientEmail from "@/utils/getRecipientEmail";
 import { useRouter } from "next/router";
@@ -16,15 +16,15 @@ import {
   pushUrlImageToFirestore,
   sendNotification,
   setSeenMessage,
-} from "../Functions";
+} from "./Functions";
 import { useSelector, useDispatch } from 'react-redux';
 import { StatusCallType, selectAppState, setAcceptedCall, setDataVideoCall, setShowVideoCallScreen, setStatusCall, setStatusSend } from "@/redux/appSlice";
 import { ChatType } from "@/types/ChatType";
 import { MapMessageData, MessageType } from "@/types/MessageType";
 import Image from "next/image";
-import EmojiContainerComponent from "@/components/EmojiContainerComponent";
+import EmojiContainerComponent from "@/components/ChatScreen/EmojiContainerComponent";
 import styled from "styled-components";
-import DropdownAttach from "@/components/DropdownAttach";
+import DropdownAttach from "@/components/ChatScreen/DropdownAttach";
 import CallIcon from '@mui/icons-material/Call';
 import { io } from "socket.io-client";
 import getUserBusy from "@/utils/getUserBusy";
@@ -256,7 +256,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
 
       if(!appState.showVideoCallScreen) {
 
-          if(userBusy.includes(recipientSnapshot?.docs?.[0].data().email)) {
+          if(userBusy.includes(recipientSnapshot?.docs?.[0].data().email) || !appState.userOnline.find((userOn) => recipientSnapshot?.docs?.[0].data().email === userOn)) {
 
               toast(`${recipientSnapshot?.docs?.[0].data().fullName} is busy`, { hideProgressBar: true, autoClose: 5000, type: 'info' })
               return;

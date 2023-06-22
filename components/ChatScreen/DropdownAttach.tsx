@@ -1,14 +1,14 @@
 import InsertPhotoIcon from "@mui/icons-material/InsertPhoto";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import { useState } from "react";
-import { addMessageToFirebase, processAttachFile } from "./ChatPage/Functions";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { auth, db, storage } from "../firebase";
+import { auth, db, storage } from "../../firebase";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from 'react-redux'
 import { selectAppState } from "@/redux/appSlice";
 import { v4 as uuidv4 } from 'uuid'
 import sendNotificationFCM from "@/utils/sendNotificationFCM";
+import { addMessageToFirebase, processAttachFile } from "./Functions";
 
 export default function DropdownAttach({ chatId, scrollToBottom, recipient }: { chatId: string, scrollToBottom: any, recipient: any }) {
 

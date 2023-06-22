@@ -1,6 +1,6 @@
 import Head from "next/head";
 import { Inter } from "next/font/google";
-import SidebarMessage from "@/components/ChatPage/SidebarMessage/SidebarMessage";
+import SidebarMessage from "@/components/Sidebar/SidebarMessage";
 import { useEffect, useState } from "react";
 import { NextPageWithLayout } from "./_app";
 import { useAuthState } from "react-firebase-hooks/auth";
@@ -8,16 +8,15 @@ import { auth } from "@/firebase";
 import Loading from "@/components/Loading";
 import {useDispatch, useSelector} from 'react-redux'
 import { SidebarType, StatusCallType, selectAppState, setAcceptedCall, setDataVideoCall, setShowVideoCallScreen, setStatusCall, setUserInfo, setUserOnline } from "@/redux/appSlice";
-import { io } from "socket.io-client";
-import ChatScreen from "@/components/ChatPage/ChatScreen/ChatScreen";
-import InfoContentScreen from "@/components/ChatPage/InfoContentScreen/InfoContentScreen";
-import SidebarGroups from "@/components/SidebarGroups";
-import SidebarContact from "@/components/SidebarContact";
-import SidebarProfile from "@/components/SidebarProfile";
+import SidebarGroups from "@/components/Sidebar/SidebarGroups";
+import SidebarContact from "@/components/Sidebar/SidebarContact";
+import SidebarProfile from "@/components/Sidebar/SidebarProfile";
 import getInitialState from "@/utils/getInitialState";
 import VideoCallScreen from "@/components/VideoCallScreen/VideoCallScreen";
 import { toast } from "react-toastify";
 import { useRouter } from "next/router";
+import InfoContentScreen from "@/components/ChatScreen/InfoContentScreen";
+import ChatScreen from "@/components/ChatScreen/ChatScreen";
 
 const inter = Inter({ subsets: ["latin"] });
 

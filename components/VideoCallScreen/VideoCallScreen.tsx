@@ -1,18 +1,13 @@
-import { useEffect, useRef, useState } from "react"
 import { BtnAcceptCall, BtnContainer, BtnRejectCall, ContentCenter, Pulse, StatusCalling, UserAvatar, UserContainer, VideoCalling } from "./VideoCallScreenStyled";
 import CallIcon from '@mui/icons-material/Call';
 import CallEndIcon from '@mui/icons-material/CallEnd';
-import { io } from "socket.io-client";
-import { useRouter } from "next/router";
-import getUserByEmail from "@/services/users/getUserByEmail";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { auth } from "@/firebase";
-import getRecipientEmail from "@/utils/getRecipientEmail";
+import { auth, db } from "@/firebase";
 import { Modal } from "@mui/material";
 import {useSelector,useDispatch} from 'react-redux'
 import { StatusCallType, selectAppState, setAcceptedCall, setShowVideoCallScreen } from "@/redux/appSlice";
 import styled from "styled-components";
-import ShowVideoCallScreen from "../ShowVideoCallScreen";
+import ShowVideoCallScreen from "./ShowVideoCallScreen";
 
 export default function VideoCallScreen({open}: any) {
 
@@ -21,9 +16,9 @@ export default function VideoCallScreen({open}: any) {
     const dispatch = useDispatch()
 
     const getUserInfo = async(email: string) => {
-        const data = await getUserByEmail(email);
+        const data = await db.collection("users").where("email",'==',email).get()
         if(data) {
-            return data.data();
+            return data.docs?.[0].data();
         }
         return null;
     }
