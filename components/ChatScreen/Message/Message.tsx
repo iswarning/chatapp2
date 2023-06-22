@@ -1,19 +1,10 @@
-import { auth, db, storage } from "@/firebase";
+import { auth, db } from "@/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { CustomAvatar } from "../ChatComponent";
 import styled from "styled-components";
-import { lazy, useEffect, useState } from "react";
-import {getEmojiData, getEmojiIcon} from "@/utils/getEmojiData";
+import { useState } from "react";
 import { useCollection } from "react-firebase-hooks/firestore";
 import sendNotificationFCM from "@/utils/sendNotificationFCM";
-import getRecipientEmail from "@/utils/getRecipientEmail";
 import { MessageType } from "@/types/MessageType";
-import { useSelector } from "react-redux";
-import { selectAppState } from "@/redux/appSlice";
-import UploadFileIcon from "@mui/icons-material/UploadFile";
-import FileDownloadIcon from "@mui/icons-material/FileDownload";
-import Image from "next/image";
-import TimeAgo from "timeago-react";
 import firebase from "firebase";
 import SenderTemplateText from "./SenderTemplate/SenderTemplateText";
 import { MapImageAttachData } from "@/types/ImageAttachType";
@@ -26,7 +17,6 @@ import RecieverTemplateTextImage from "./RecieverTemplate/RecieverTemplateTextIm
 import { MapImageInMessageData } from "@/types/ImageInMessageType";
 import SenderTemplateFile from "./SenderTemplate/SenderTemplateFile";
 import { MapFileInMessageData } from "@/types/FileInMessageType";
-import { MapChunkFileData } from "@/types/ChunkFileType";
 import RecieverTemplateFile from "./RecieverTemplate/RecieverTemplateFile";
 
 export default function Message({
@@ -106,6 +96,7 @@ export default function Message({
       .collection("messages")
       .doc(message.id)
       .collection("fileInMessage")
+      .limit(1)
   );
 
   const [imageAttachSnap] = useCollection(

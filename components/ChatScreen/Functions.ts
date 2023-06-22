@@ -181,7 +181,7 @@ export const processAttachFile = async (
   event: any,
   userEmail: string | null | undefined,
   chat: ChatType,
-  scrollToBottom: any) => {
+  setProgress: any) => {
   event.preventDefault()
   if (event.target.files && event.target.files[0]) {
     let file: Blob = event.target.files[0];
@@ -205,66 +205,55 @@ export const processAttachFile = async (
       return;
     }
 
-    let key = uuidv4();
+    const { messageDoc } = await addMessageToFirebase("", "file", userEmail, chat.id)
 
-    // const { messageDoc } = await db
-    // .collection("chats")
-    // .doc(chat.id)
-    // .collection("messages")
-    // .add({
-    //   timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-    //   message: "",
-    //   user: userEmail,
-    //   type: "file",
-    //   photoURL: "",
-    //   seen: [],
-    //   key: key,
-    //   url: url,
-    // })
-
-    // if (!messageDoc) {
-    //   toast("Error while send message !", {
-    //     hideProgressBar: true,
-    //     type: "error",
-    //     autoClose: 5000,
-    //   });
-    //   return;
-    // }
-
-    let path = `public/chat-room/${chat.id}/files/${key}`
-    storage
-      .ref(path)
-      .put(file)
-      .on(
-        "state_changed",
-        (snapshot) => {
-          const prog = Math.round(
-            (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-          );
-          console.log(prog)
-        },
-        (err) => console.log(err),
-        () => {
-          db
-          .collection("chats")
-          .doc(chat.id)
-          .collection("messages")
-          .add({
-            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-            message: "",
-            user: userEmail,
-            type: "file",
-            photoURL: "",
-            seen: [],
-            key: key,
-            url: url,
-          })
-        }
+    if (messageDoc) {
+      let key = uuidv4();
+      let path = `public/chat-room/${chat.id}/files/${key}`
+      storage
+        .ref(path)
+        .put(file)
+        .on(
+          "state_changed",
+          (snapshot) => {
+            const prog = Math.round(
+              (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+            );
+            setProgress(prog)
+          },
+          (err) => console.log(err),
+          async() => {
+            storage
+            .ref(path)
+            .getDownloadURL()
+            .then((url) => {
+              db
+              .collection("chats")
+              .doc(chat.id)
+              .collection("messages")
+              .doc(messageDoc.id)
+              .collection("fileInMessage")
+              .add({
+                name: file.name,
+                type: fileType,
+                key: key,
+                url: url,
+                size: fileSize
+              })
+            })
+            return MapMessageData(await messageDoc.get())
+          }
       );
-
-    const messageExport = MapMessageData(await messageDoc.get())
-
-    return messageExport
+    } else {
+      toast("Error while send message !", {
+        hideProgressBar: true,
+        type: "error",
+        autoClose: 5000,
+      });
+      return;
+    }
 
   }
+
+  return null
 };

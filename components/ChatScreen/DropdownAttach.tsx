@@ -10,7 +10,7 @@ import { v4 as uuidv4 } from 'uuid'
 import sendNotificationFCM from "@/utils/sendNotificationFCM";
 import { addMessageToFirebase, processAttachFile } from "./Functions";
 
-export default function DropdownAttach({ chatId, scrollToBottom, recipient }: { chatId: string, scrollToBottom: any, recipient: any }) {
+export default function DropdownAttach({ chatId, scrollToBottom, recipient, setProgress }: { chatId: string, scrollToBottom: any, recipient: any, setProgress: any }) {
 
   const [showDropdownAttach, setShowDropdownAttach] = useState(false);
   const [user] = useAuthState(auth);
@@ -95,7 +95,7 @@ export default function DropdownAttach({ chatId, scrollToBottom, recipient }: { 
   }
 
   const handleAttachFile = (event: any) => {
-    processAttachFile(event, user?.email, appState.currentChat, scrollToBottom).then((messageExport) => {
+    processAttachFile(event, user?.email, appState.currentChat, setProgress).then((messageExport) => {
 
       if (messageExport) {
 

@@ -11,31 +11,10 @@ export default function SenderTemplateFile({ file, message, chatId, timestamp, l
 
     const [open, setOpen] = useState(false)
 
-    const [chunks] = useCollection(
-        db
-          .collection("chats")
-          .doc(chatId)
-          .collection("messages")
-          .doc(message.id)
-          .collection("fileInMessage")
-          .doc(file?.id).collection("chunks")
-    );
-
     const handleChunksFile = async() => {
-
-        let blobParts: Blob[] = [];
-
-        await Promise.all(
-            Array.prototype.map.call(chunks?.docs, async(chunk) => {
-                const response = await fetch(chunk.data().url);
-                const blob = await response.blob();
-                blobParts.push(blob)
-            })
-        )
-
-        let blob = new Blob(blobParts, { type: file?.type })
+        const response = await fetch(file?.url!);
+        const blob = await response.blob();
         downloadBlob(blob, file?.name!)
-
     }
 
     function downloadBlob(blob: Blob, name: string) {
@@ -69,7 +48,7 @@ export default function SenderTemplateFile({ file, message, chatId, timestamp, l
     return (
     <>
     {
-        file?.id !== undefined && chunks ? <div className="intro-x chat-text-box flex items-end float-right mb-4">
+        file?.id ? <div className="intro-x chat-text-box flex items-end float-right mb-4">
             <div className="w-full">
                 <div>
                     <div className="chat-text-box__content flex items-center float-right">
@@ -84,7 +63,7 @@ export default function SenderTemplateFile({ file, message, chatId, timestamp, l
                         </div> */}
                         <div className="box leading-relaxed text-gray-700 dark:text-gray-300 flex flex-col sm:flex-row items-center mt-3 p-3">
                             <div className="chat-text-box__content__icon text-white w-12 flex-none bg-contain relative bg-no-repeat bg-center block">
-                                <div className="absolute m-auto top-0 left-0 right-0 bottom-0 flex items-center justify-center">{file?.type?.toUpperCase()}</div>
+                                <div className="absolute m-auto top-0 left-0 right-0 bottom-0 flex items-center justify-center">{file?.type.toUpperCase()}</div>
                             </div>
                             <div className="sm:ml-3 mt-3 sm:mt-0 text-center sm:text-left">
                                 <div className="text-gray-700 dark:text-gray-300 whitespace-nowrap font-medium truncate">{file?.name.length >= 20 ? file.name.substring(0, 20) + "..." : file?.name}</div>
@@ -138,12 +117,6 @@ export default function SenderTemplateFile({ file, message, chatId, timestamp, l
         </>
     }
     <div className="clear-both"></div>
-
-    <Modal open={open} onClose={() => setOpen(false)}>
-        <div className="w-full bg-gray-200 rounded-full dark:bg-gray-700">
-            <div className="text-xs font-medium text-center p-0.5 leading-none rounded-full" style={{width: '45%', background: '#6775F5', color: 'white', height: '5px'}}> 45%</div>
-        </div>
-    </Modal>
     </>
   )
 }

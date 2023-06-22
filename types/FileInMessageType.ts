@@ -6,7 +6,8 @@ export interface FileInMessageType {
     size: number,
     name: string,
     type: string,
-    chunksFile?: Array<ChunkFileType>
+    key: string,
+    url: string,
 }
 
 export const MapFileInMessageData = (fileInMessage: firebase.firestore.QueryDocumentSnapshot<firebase.firestore.DocumentData>): FileInMessageType => {
@@ -15,5 +16,7 @@ export const MapFileInMessageData = (fileInMessage: firebase.firestore.QueryDocu
     data.size = fileInMessage?.data()?.size;
     data.name = fileInMessage?.data()?.name;
     data.type = fileInMessage?.data()?.type;
+    data.key = fileInMessage?.data()?.key;
+    data.url = fileInMessage?.data()?.url;
     return data;
 }

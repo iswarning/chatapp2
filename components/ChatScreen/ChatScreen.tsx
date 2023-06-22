@@ -320,7 +320,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
         </ScrollBarCustom>
 
         <div className="intro-y chat-input box border-theme-3 dark:bg-dark-2 dark:border-dark-2 border flex items-center px-5 py-4">
-        <DropdownAttach chatId={chat.id} scrollToBottom={scrollToBottom} recipient={recipientSnapshot?.docs?.[0]} />
+        <DropdownAttach chatId={chat.id} scrollToBottom={scrollToBottom} recipient={recipientSnapshot?.docs?.[0]} setProgress={(prog: any) => setProgress(prog)} />
         <InputMessage
           contentEditable="true"
           className="w-full block outline-none py-4 px-4 bg-transparent"
@@ -352,6 +352,11 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
           </svg> 
         </a>
         </div>
+        {
+          progress > 0 && progress < 100 ? <div className="w-full bg-gray-200 rounded-full dark:bg-gray-700">
+            <div className="text-xs font-medium text-center p-0.5 leading-none rounded-full" style={{width: `${progress}%`, background: '#6775F5', color: 'white', height: '15px'}}>{progress}%</div>
+          </div> : null
+        }
       </div>
     </>
   );
