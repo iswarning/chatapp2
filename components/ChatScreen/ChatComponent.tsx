@@ -8,12 +8,15 @@ import Image from "next/image";
 import TimeAgo from "timeago-react";
 import { useEffect, useState } from "react";
 import {useSelector} from 'react-redux'
-import { selectAppState, setCurrentChat, setCurrentMessages } from "@/redux/appSlice";
+import { selectAppState, setCurrentChat, setCurrentMessages, setListChat } from "@/redux/appSlice";
 import { useDispatch } from 'react-redux'
 import { ChatType } from "@/types/ChatType";
 import { MapMessageData } from "@/types/MessageType";
 import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined';
 import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutlined';
+import { MapImageInMessageData } from "@/types/ImageInMessageType";
+import { MapImageAttachData } from "@/types/ImageAttachType";
+import { MapFileInMessageData } from "@/types/FileInMessageType";
 
 export default function ChatComponent({ chat, active }: { chat: ChatType, active: boolean}) {
   const [user] = useAuthState(auth);
@@ -48,10 +51,25 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
   );
 
   const handleShowChatScreen = async() => {
-    const messData = await getMessage(chat.id);
-    const currentMessages = messData.docs.map((m) => MapMessageData(m));
-    dispatch(setCurrentChat(chat))
-    dispatch(setCurrentMessages(currentMessages))
+    const chatExist = appState.listChat.find((c) => c.id === chat.id);
+    if (chatExist) {
+      dispatch(setCurrentChat(chatExist))
+      dispatch(setCurrentMessages(chatExist.messages))
+    } else {    
+      const messData = await getMessage(chat.id);
+      const currentMessages = await Promise.all(messData.docs.map(async(m) => {
+        let msg = MapMessageData(m)
+        const imgRef = await db.collection("chats").doc(chat.id).collection("messages").doc(msg.id).collection("imageInMessage").get()
+        msg.imageInMessage = imgRef.docs.map((img) => MapImageInMessageData(img))
+        const imgAttachRef = await db.collection("chats").doc(chat.id).collection("messages").doc(msg.id).collection("imageAttach").get()
+        msg.imageAttach = imgAttachRef.docs.map((img) => MapImageAttachData(img))
+        const fileAttachRef = await db.collection("chats").doc(chat.id).collection("messages").doc(msg.id).collection("fileInMessage").limit(1).get()
+        msg.fileAttach = MapFileInMessageData(fileAttachRef.docs?.[0])
+        return msg
+      }));
+      dispatch(setCurrentChat(chat))
+      dispatch(setCurrentMessages(currentMessages))
+    }
     // setSeenMessage().catch(err => console.log(err));
   };
 
@@ -210,116 +228,6 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
   }
 
   return (
-    // <div
-    //   className={
-    //     "entry cursor-pointer transform hover:scale-105 duration-300 transition-transform bg-white mb-4 rounded p-4 flex shadow-md" +
-    //     (active ? " border-l-4 border-red-500" : "")
-    //   }
-    //   onClick={handleShowChatScreen}
-    // >
-    //   <div className="flex-2">
-    //     <div className="w-12 h-12 relative">
-    //       <CustomAvatar
-    //         src={getRecipientAvatar()}
-    //         width={50}
-    //         height={50}
-    //         alt="User Avatar"
-    //       />
-    //       {!chat.isGroup ? (
-    //         appState.userOnline?.find((u: any) => u === recipientSnapshot?.docs?.[0]?.data().email) ? (
-    //           <span className="absolute w-4 h-4 bg-green-400 rounded-full right-0 bottom-0 border-2 border-white"></span>
-    //         ) : (
-    //           <span className="absolute w-4 h-4 bg-gray-400 rounded-full right-0 bottom-0 border-2 border-white"></span>
-    //         )
-    //       ) : handleGroupOnline() ? (
-    //         <span className="absolute w-4 h-4 bg-green-400 rounded-full right-0 bottom-0 border-2 border-white"></span>
-    //       ) : (
-    //         <span className="absolute w-4 h-4 bg-gray-400 rounded-full right-0 bottom-0 border-2 border-white"></span>
-    //       )}
-    //     </div>
-    //   </div>
-    //   <div className="flex-1 px-2">
-    //     <div className="truncate w-40">
-    //       <span className="text-gray-800">
-    //         {chat.isGroup
-    //           ? "Group: " + chat.name
-    //           : recipientSnapshot?.docs?.[0].data().fullName}
-    //       </span>
-    //     </div>
-    //     <div className="truncate w-40">
-    //       <small className="text-gray-600 ">
-    //         {lastMessageSnapshot?.docs.length! > 0
-    //           ? handleShowLastMessage()
-    //           : ""}
-    //       </small>
-    //     </div>
-    //   </div>
-    //   <div className="flex-2 text-right">
-    //     <div>
-    //       <small className="text-gray-500">
-    //         <div className="pb-2">
-    //           {lastMessageSnapshot?.docs.length! > 0 ? (
-    //             lastMessage?.timestamp?.toDate() ? (
-    //               <TimeAgo datetime={lastMessage?.timestamp?.toDate()} />
-    //             ) : (
-    //               "Unavailable"
-    //             )
-    //           ) : null}
-    //         </div>
-    //       </small>
-    //     </div>
-    //     <div>
-    //       {lastMessage?.message?.length > 0 &&
-    //       lastMessage?.user !== user?.email ? (
-    //         lastMessage?.seen.find(
-    //           (userSeen: string) => userSeen === user?.email
-    //         ) ? null : (
-    //           <small className="text-sm bg-blue-500 mb-1 rounded-full h-3 w-3 leading-4 text-center inline-block"></small>
-    //         )
-    //       ) : null}
-    //     </div>
-    //   </div>
-    // </div>
-//     <div className="intro-x">
-// <div className="zoom-in">
-//   {/* active bg-theme-1 dark:bg-theme-1 */}
-// <div className="chat-list box cursor-pointer relative flex items-center px-4 py-3 mt-4 ">
-// <div className="w-12 h-12 flex-none image-fit mr-1">
-// <img alt="Topson Messenger Tailwind HTML Admin Template" className="rounded-full" src="https://topson.left4code.com/dist/images/profile-9.jpg"/>
-// <div className="bg-green-500 border-white w-3 h-3 absolute right-0 bottom-0 rounded-full border-2"></div>
-// </div>
-// <div className="ml-2 overflow-hidden">
-// <a href="javascript:void(0)" className="font-medium text-white">{recipientSnapshot?.docs?.[0]?.data().fullName}</a>
-// <div className="text-opacity-80 truncate mt-0.5 text-white">
-// {lastMessageSnapshot?.docs.length! > 0
-//     ? handleShowLastMessage()
-// : ""}
-// </div>
-// </div>
-// <div className="flex flex-col">
-// <div className="whitespace-nowrap text-opacity-80 text-xs text-white">
-// {lastMessageSnapshot?.docs.length! > 0 ? (
-//       lastMessage?.timestamp?.toDate() ? (
-//         <TimeAgo datetime={lastMessage?.timestamp?.toDate()} />
-//       ) : (
-//         "Unavailable"
-//       )
-//     ) : null}
-// </div>
-// <div className="chat-list__action dropdown transition duration-200 opacity-0 mt-1 -mb-1 -mr-1 ml-auto">
-// <a className="dropdown-toggle block text-opacity-70 text-white" href="javascript:void(0)"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-chevron-down w-6 h-6"><polyline points="6 9 12 15 18 9"></polyline></svg> </a>
-// <div className="dropdown-menu w-40">
-// <div className="dropdown-menu__content box dark:bg-dark-1 p-2">
-// <a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share-2 w-4 h-4 mr-2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> Share Contact </a>
-// <a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-copy w-4 h-4 mr-2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> Copy Contact </a>
-// </div>
-// </div>
-// </div>
-// </div>
-// <div className="bg-theme-1 flex items-center justify-center absolute top-0 right-0 text-xs rounded-full font-medium mr-4"></div>
-// </div>
-// </div>
-// </div>
 <div className="intro-x" onClick={() => handleShowChatScreen()}>
 <div className="zoom-in">
 <div className={ active ? "chat-list box cursor-pointer relative flex items-center px-4 py-3 mt-4 bg-theme-1 dark:bg-theme-1" : "chat-list box cursor-pointer relative flex items-center px-4 py-3 mt-4"}>

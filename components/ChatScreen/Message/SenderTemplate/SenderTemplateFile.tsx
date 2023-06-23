@@ -11,7 +11,7 @@ export default function SenderTemplateFile({ file, message, chatId, timestamp, l
 
     const [open, setOpen] = useState(false)
 
-    const handleChunksFile = async() => {
+    const handleDownloadFile = async() => {
         const response = await fetch(file?.url!);
         const blob = await response.blob();
         downloadBlob(blob, file?.name!)
@@ -70,13 +70,13 @@ export default function SenderTemplateFile({ file, message, chatId, timestamp, l
                                 <div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">Size: { Number((file?.size!).toFixed(1)) } MB</div>
                             </div>
                             <div className="sm:ml-20 mt-3 sm:mt-0 flex">
-                                <button className="tooltip w-8 h-8 block border rounded-full flex-none flex items-center justify-center ml-2 outline-none" onClick={() => handleChunksFile()}> 
+                                <a href="javascript:void(0)" className="tooltip w-8 h-8 block border rounded-full flex-none flex items-center justify-center ml-2 outline-none" onClick={() => handleDownloadFile()}> 
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-download w-4 h-4">
                                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                                         <polyline points="7 10 12 15 17 10"></polyline>
                                         <line x1="12" y1="15" x2="12" y2="3"></line>
                                     </svg> 
-                                </button>
+                                </a>
                                 <a href="javascript:void(0)" className="tooltip w-8 h-8 block border rounded-full flex-none flex items-center justify-center ml-2"> 
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share w-4 h-4">
                                         <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>

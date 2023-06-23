@@ -26,8 +26,8 @@ export interface InitialState {
     userInfo:  UserType,
     currentChat: ChatType,
     currentMessages: Array<MessageType>,
+    listChat: ChatType[],
     userOnline: Array<string>,
-    statusSend: number,
     currentSidebar: SidebarType,
     statusCall: StatusCallType,
     showVideoCallScreen: boolean,
@@ -43,8 +43,8 @@ const initialState: InitialState = {
     userInfo:  {} as UserType,
     currentChat: {} as ChatType,
     currentMessages: Array<MessageType>(),
+    listChat: Array<ChatType>(),
     userOnline: Array<string>(),
-    statusSend: 0,
     currentSidebar: SidebarType.CHAT,
     statusCall: StatusCallType.CALLING,
     showVideoCallScreen: false,
@@ -80,10 +80,6 @@ export const appSlice = createSlice({
       state.data.currentMessages = [...state.data.currentMessages, action.payload]
     },
 
-    setStatusSend(state, action) {
-      state.data.statusSend = action.payload
-    },
-
     setSidebar(state, action) {
       state.data.currentSidebar = action.payload
     },
@@ -102,6 +98,15 @@ export const appSlice = createSlice({
 
     setAcceptedCall(state, action) {
       state.data.acceptedCall = action.payload
+    },
+
+    setListChat(state, action) {
+      state.data.listChat = action.payload
+    },
+
+    pushMessageToListChat(state, action) {
+      // let chatE
+      state.data.listChat = action.payload
     }
 
   },
@@ -121,13 +126,12 @@ export const { setUserOnline,
   setUserInfo, 
   setCurrentChat, 
   setCurrentMessages, 
-  addNewMessage, 
-  setStatusSend, 
+  addNewMessage,
   setSidebar,
   setStatusCall,
   setShowVideoCallScreen,
   setDataVideoCall,
-  setAcceptedCall
+  setAcceptedCall,setListChat
    } = appSlice.actions;
 
 export const selectAppState = (state: AppState) => state.app.data;

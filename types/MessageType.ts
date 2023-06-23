@@ -2,6 +2,8 @@ import firebase from "firebase";
 import { ReactionType } from "./ReactionType";
 import { ImageInMessageType } from "./ImageInMessageType";
 import { UserType } from "./UserType";
+import { ImageAttachType } from "./ImageAttachType";
+import { FileInMessageType } from "./FileInMessageType";
 
 export interface MessageType {
     id: string
@@ -11,6 +13,8 @@ export interface MessageType {
     seen: Array<string>
     reaction?: Array<ReactionType>
     imageInMessage?: Array<ImageInMessageType>
+    imageAttach?: Array<ImageAttachType>
+    fileAttach?: FileInMessageType
     timestamp: any
     userInfo?: UserType
 }

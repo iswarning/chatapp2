@@ -18,7 +18,7 @@ import {
   setSeenMessage,
 } from "./Functions";
 import { useSelector, useDispatch } from 'react-redux';
-import { StatusCallType, selectAppState, setAcceptedCall, setDataVideoCall, setShowVideoCallScreen, setStatusCall, setStatusSend } from "@/redux/appSlice";
+import { StatusCallType, selectAppState, setAcceptedCall, setDataVideoCall, setShowVideoCallScreen, setStatusCall } from "@/redux/appSlice";
 import { ChatType } from "@/types/ChatType";
 import { MapMessageData, MessageType } from "@/types/MessageType";
 import Image from "next/image";
@@ -130,7 +130,6 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
   };
 
   const sendMessage = async (e: any): Promise<any> => {
-    dispatch(setStatusSend(1))
     e.preventDefault();
 
     let { listElementImg, message } = handleImageInMessage();
@@ -196,7 +195,6 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
     if (element) element.innerHTML = "";
 
     scrollToBottom();
-    dispatch(setStatusSend(2))
   };
 
   const addEmoji = (e: number) => {

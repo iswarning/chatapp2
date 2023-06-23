@@ -7345,3 +7345,13 @@ button:focus,
 input[type=button]:focus {
   /* your custom focused styles here */
 } 
+
+ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+li {
+display: inline;
+}
