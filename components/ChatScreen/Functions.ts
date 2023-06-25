@@ -28,30 +28,30 @@ export function setSeenMessage(
   });
 }
 
-export function sendNotification(
-  snap: firebase.firestore.DocumentSnapshot<firebase.firestore.DocumentData>,
-  chat: ChatType,
-  userFullName: string | null | undefined,
-  recipientFcmToken: string
-) {
-  let bodyNotify = "";
-  if (chat.isGroup) {
-    if (snap?.data()?.type === "text-image") {
-      bodyNotify = chat.name + " sent you a message ";
-    } else {
-      bodyNotify = chat.name + " : " + snap?.data()?.message;
-    }
-  } else {
-    if (snap?.data()?.type === "text-image") {
-      bodyNotify = userFullName + " sent a message ";
-    } else {
-      bodyNotify = userFullName + " : " + snap?.data()?.message;
-    }
-  }
-  sendNotificationFCM("New message !", bodyNotify, recipientFcmToken).catch(
-    (err) => console.log(err)
-  );
-}
+// export function sendNotification(
+//   snap: firebase.firestore.DocumentSnapshot<firebase.firestore.DocumentData>,
+//   chat: ChatType,
+//   userFullName: string | null | undefined,
+//   recipientFcmToken: string
+// ) {
+//   let bodyNotify = "";
+//   if (chat.isGroup) {
+//     if (snap?.data()?.type === "text-image") {
+//       bodyNotify = chat.name + " sent you a message ";
+//     } else {
+//       bodyNotify = chat.name + " : " + snap?.data()?.message;
+//     }
+//   } else {
+//     if (snap?.data()?.type === "text-image") {
+//       bodyNotify = userFullName + " sent a message ";
+//     } else {
+//       bodyNotify = userFullName + " : " + snap?.data()?.message;
+//     }
+//   }
+//   sendNotificationFCM("New message !", bodyNotify, recipientFcmToken).catch(
+//     (err) => console.log(err)
+//   );
+// }
 
 export function pushUrlImageToFirestore(
   messId: string,
@@ -181,7 +181,7 @@ export const processAttachFile = async (
   event: any,
   userEmail: string | null | undefined,
   chat: ChatType,
-  setProgress: any) => {
+  setProgress: any): Promise<MessageType | null | undefined> => {
   event.preventDefault()
   if (event.target.files && event.target.files[0]) {
     let file: Blob = event.target.files[0];
@@ -250,7 +250,7 @@ export const processAttachFile = async (
         type: "error",
         autoClose: 5000,
       });
-      return;
+      return null;
     }
 
   }

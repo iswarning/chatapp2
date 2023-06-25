@@ -10,7 +10,8 @@ export interface ChatType {
     name: string;
     admin: string;
     messages?: Array<MessageType>;
-    recipientInfo?: UserType
+    recipientInfo?: UserType;
+    sizeMessage?: number
 }
 
 export const MapChatData = (chat: firebase.firestore.DocumentSnapshot<firebase.firestore.DocumentData>): ChatType => {

@@ -2,19 +2,21 @@ import Axios from "axios";
 
 export default async function sendNotificationFCM(
   title: string,
-  body: string,
+  message: string,
+  data: any,
   fcm_token: string | undefined
 ) {
-  const data = {
+  const body = {
     to: fcm_token,
     notification: {
-      body: body,
-      title: title,
+      body: message,
+      title: title
     },
+    data: data
   };
   const response = await Axios.post(
     `https://fcm.googleapis.com/fcm/send`,
-    data,
+    body,
     {
       headers: {
         "Content-Type": "application/json",

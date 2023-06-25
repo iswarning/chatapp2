@@ -4,10 +4,10 @@ import SidebarMessage from "@/components/Sidebar/SidebarMessage";
 import { useEffect, useState } from "react";
 import { NextPageWithLayout } from "./_app";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { auth } from "@/firebase";
+import { auth, db, onMessageListener } from "@/firebase";
 import Loading from "@/components/Loading";
 import {useDispatch, useSelector} from 'react-redux'
-import { SidebarType, StatusCallType, selectAppState, setAcceptedCall, setDataVideoCall, setShowVideoCallScreen, setStatusCall, setUserInfo, setUserOnline } from "@/redux/appSlice";
+import { SidebarType, StatusCallType, pushMessageToListChat, selectAppState, setAcceptedCall, setCurrentMessages, setDataVideoCall, setListChat, setShowVideoCallScreen, setStatusCall, setUserInfo, setUserOnline } from "@/redux/appSlice";
 import SidebarGroups from "@/components/Sidebar/SidebarGroups";
 import SidebarContact from "@/components/Sidebar/SidebarContact";
 import SidebarProfile from "@/components/Sidebar/SidebarProfile";
@@ -17,6 +17,7 @@ import { toast } from "react-toastify";
 import { useRouter } from "next/router";
 import InfoContentScreen from "@/components/ChatScreen/InfoContentScreen";
 import ChatScreen from "@/components/ChatScreen/ChatScreen";
+import { MapMessageData } from "@/types/MessageType";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -33,6 +34,7 @@ const Page: NextPageWithLayout = () => {
     setLoading(true)
     getInitialState(user?.uid).then((data) => {
       dispatch(setUserInfo(data.userInfo))
+      dispatch(setListChat(data.listChat))
     })
     .catch(err => console.log(err))
     .finally(() => setLoading(false))
@@ -95,6 +97,41 @@ const Page: NextPageWithLayout = () => {
         appState.socket.disconnect();
       };
   },[])
+
+  useEffect(() => {
+    onMessageListener()
+      .then((body: any) => {
+        toast(`${body.notification.body}`, {
+          hideProgressBar: true,
+          autoClose: 5000,
+          type: "info",
+        });
+        recieveMessageAndAdd(body.data.chatId, body.data.messageId)
+      })
+      .catch((err) => console.log(err));
+  },[]);
+
+  useEffect(() => {
+      const channel = new BroadcastChannel("notifications");
+      channel.addEventListener("message", (event) => {
+        recieveMessageAndAdd(event.data.chatId, event.data.messageId)
+      });
+  },[])
+
+  const recieveMessageAndAdd = async(chatId: string, messageId: string) => {
+      const chatExist = appState.listChat.find((c) => c.id === chatId)
+      if (!chatExist) return;
+      const messExist = chatExist?.messages?.find((mess) => mess.id === messageId)
+      if (messExist) {
+        return;
+      } else {
+        const newMessage = await db.collection("chats").doc(chatId).collection("messages").doc(messageId).get()
+        dispatch(pushMessageToListChat({ chatId: chatId, newMessage: MapMessageData(newMessage) }))
+        if (appState.currentChat.id === chatId) {
+          dispatch(setCurrentMessages([ ...appState.currentMessages, MapMessageData(newMessage) ]))
+        }
+      }
+  }
 
   return (
     <>

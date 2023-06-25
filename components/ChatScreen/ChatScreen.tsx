@@ -13,12 +13,10 @@ import { toast } from "react-toastify";
 import {
   addMessageToFirebase,
   handleImageInMessage,
-  pushUrlImageToFirestore,
-  sendNotification,
-  setSeenMessage,
+  pushUrlImageToFirestore
 } from "./Functions";
 import { useSelector, useDispatch } from 'react-redux';
-import { StatusCallType, selectAppState, setAcceptedCall, setDataVideoCall, setShowVideoCallScreen, setStatusCall } from "@/redux/appSlice";
+import { StatusCallType, pushMessageToListChat, selectAppState, setAcceptedCall, setCurrentMessages, setDataVideoCall, setShowVideoCallScreen, setStatusCall } from "@/redux/appSlice";
 import { ChatType } from "@/types/ChatType";
 import { MapMessageData, MessageType } from "@/types/MessageType";
 import Image from "next/image";
@@ -28,6 +26,7 @@ import DropdownAttach from "@/components/ChatScreen/DropdownAttach";
 import CallIcon from '@mui/icons-material/Call';
 import { io } from "socket.io-client";
 import getUserBusy from "@/utils/getUserBusy";
+import sendNotificationFCM from "@/utils/sendNotificationFCM";
 
 const getMessage = async (id: string) => {
   const snap = await db
@@ -47,14 +46,15 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
   const router = useRouter();
   const dispatch = useDispatch()
   const appState = useSelector(selectAppState)
+  const [totalMessage, setTotalMessage] = useState(messages.length)
 
-  const [messageSnapshot] = useCollection(
-    db
-    .collection("chats")
-    .doc(chat.id)
-    .collection("messages")
-    .orderBy("timestamp")
-  )
+  // const [messageSnapshot] = useCollection(
+  //   db
+  //   .collection("chats")
+  //   .doc(chat.id)
+  //   .collection("messages")
+  //   .orderBy("timestamp")
+  // )
 
   const [recipientSnapshot] = useCollection(
     db
@@ -64,7 +64,8 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
 
   useEffect(() => {
     scrollToBottom();
-  }, [messageSnapshot]);
+    
+  }, [messages]);
 
   useEffect(() => {
     appState.socket.on('response-reject-call-one-to-one', (res: string) => {
@@ -103,18 +104,18 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
   };
 
   const showMessage = () => {
-    if (messageSnapshot) {
-      return messageSnapshot.docs?.map((message, index) => (
-        <Message
-          key={message.id}
-          message={MapMessageData(message)}
-          timestamp={message.data().timestamp}
-          chatId={chat.id}
-          lastIndex={messages[index] === messages[messages.length - 1]}
-          scrollToBottom={() => scrollToBottom()}
-        />
-      ));
-    } else {
+    // if (messageSnapshot) {
+    //   return messageSnapshot.docs?.map((message, index) => (
+    //     <Message
+    //       key={message.id}
+    //       message={MapMessageData(message)}
+    //       timestamp={message.data().timestamp}
+    //       chatId={chat.id}
+    //       lastIndex={messages[index] === messages[messages.length - 1]}
+    //       scrollToBottom={() => scrollToBottom()}
+    //     />
+    //   ));
+    // } else {
       return messages?.map((message: MessageType, index) => (
         <Message
           key={message.id}
@@ -125,7 +126,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
           scrollToBottom={() => scrollToBottom()}
         />
       ));
-    }
+    // }
 
   };
 
@@ -134,7 +135,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
 
     let { listElementImg, message } = handleImageInMessage();
 
-    setSeenMessage(messages, user?.email, chat.id);
+    // setSeenMessage(messages, user?.email, chat.id);
 
     const { messageDoc } = await addMessageToFirebase(
       message,
@@ -174,12 +175,14 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
               );
         }
       }
-      sendNotification(
-        snap,
-        chat,
-        user?.displayName,
-        recipientSnapshot?.docs?.[0]?.data().fcm_token
-      );
+      sendNotificationFCM(
+        "New message !", 
+        "New message from " + user?.displayName, 
+        { messageId: snap.id, chatId: chat.id }, 
+        recipientSnapshot?.docs?.[0].data().fcm_token
+      )
+      dispatch(setCurrentMessages([...appState.currentMessages, MapMessageData(snap)]))
+      dispatch(pushMessageToListChat({ chatId: chat.id, newMessage: MapMessageData(snap) }))
     } else {
       toast("Error when send message !", {
         hideProgressBar: true,
@@ -204,7 +207,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
     setShowEmoji(false);
   };
 
-  setSeenMessage(messages, user?.email, chat.id);
+  // setSeenMessage(messages, user?.email, chat.id);
   
   const handleGroupOnline = (): boolean => {
     let amountUserOnline = 0;
@@ -280,6 +283,15 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
           }
       }
   }
+ 
+  // const handleOnScrollTop = async(scrollTop: number) => {
+  //   if (scrollTop === 0) {
+  //     if (chat?.sizeMessage && chat.sizeMessage > 0) {
+  //       const messData = await db.collection("chats").doc(chat.id).collection("messages").orderBy("timestamp").endAt("timestamp","")
+  //     }
+  //   }
+  // }
+
   return (
     //     <VideoCallContainer isOpen={isOpen} >
     //         <VideoCallScreen statusCall='Calling' photoURL={chat.isGroup ? chat.photoURL : recipientUser.photoURL} sender={user?.email} recipient={getRecipientEmail(chat.users, user)} chat.id={chat.id} onClose={() => setIsOpen(false)} isGroup={chat.isGroup} />
@@ -322,7 +334,6 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
         <InputMessage
           contentEditable="true"
           className="w-full block outline-none py-4 px-4 bg-transparent"
-          onClick={() => setSeenMessage}
           style={{overflowY: 'auto'}}
           id="input-message"
         />

@@ -8,7 +8,10 @@ const makeStore = () =>
       [appSlice.name]: appSlice.reducer,
     },
     devTools: true,
-    middleware: (getDefaultMiddleware) => getDefaultMiddleware(),
+    middleware: getDefaultMiddleware =>
+    getDefaultMiddleware({
+      serializableCheck: false,
+    }),
   });
 
 export type AppStore = ReturnType<typeof makeStore>;

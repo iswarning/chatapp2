@@ -37,52 +37,48 @@ export default function Message({
   const [isShowImageFullscreen, setShowImageFullscreen] = useState(false);
   const [urlImage, setUrlImage] = useState("");
 
-  useEffect(() => {
-    console.log(message)
-  },[])
+  // const [reactionSnapshot] = useCollection(
+  //   db
+  //     .collection("chats")
+  //     .doc(chatId)
+  //     .collection("messages")
+  //     .doc(message.id)
+  //     .collection("reaction")
+  //     .orderBy("timestamp")
+  //     .limitToLast(1)
+  // );
 
-  const [reactionSnapshot] = useCollection(
-    db
-      .collection("chats")
-      .doc(chatId)
-      .collection("messages")
-      .doc(message.id)
-      .collection("reaction")
-      .orderBy("timestamp")
-      .limitToLast(1)
-  );
+  // const [recipientSnapshot] = useCollection(
+  //   db.collection("users").where("email", "==", message.user)
+  // );
 
-  const [recipientSnapshot] = useCollection(
-    db.collection("users").where("email", "==", message.user)
-  );
-
-  const handleReaction = async (event: any, emoji: number) => {
-    event.preventDefault();
-    try {
-      await db
-        .collection("chats")
-        .doc(chatId)
-        .collection("messages")
-        .doc(message.id)
-        .collection("reaction")
-        .add({
-          senderEmail: userLoggedIn?.email,
-          emoji: String.fromCodePoint(emoji),
-          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-        });
-      await sendNotificationFCM(
-        "Notification",
-        userLoggedIn?.displayName +
-          " dropped an emotion " +
-          String.fromCodePoint(emoji) +
-          " into your message",
-        recipientSnapshot?.docs?.[0]?.data().fcm_token
-      );
-    } catch (error) {
-      console.log(error);
-    }
-    setIsShown(false);
-  };
+  // const handleReaction = async (event: any, emoji: number) => {
+  //   event.preventDefault();
+  //   try {
+  //     await db
+  //       .collection("chats")
+  //       .doc(chatId)
+  //       .collection("messages")
+  //       .doc(message.id)
+  //       .collection("reaction")
+  //       .add({
+  //         senderEmail: userLoggedIn?.email,
+  //         emoji: String.fromCodePoint(emoji),
+  //         timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+  //       });
+  //     await sendNotificationFCM(
+  //       "Notification",
+  //       userLoggedIn?.displayName +
+  //         " dropped an emotion " +
+  //         String.fromCodePoint(emoji) +
+  //         " into your message",
+  //       recipientSnapshot?.docs?.[0]?.data().fcm_token
+  //     );
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  //   setIsShown(false);
+  // };
 
   // const [imageInMessageSnap] = useCollection(
   //   db

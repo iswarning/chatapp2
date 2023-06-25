@@ -8,7 +8,7 @@ import Image from "next/image";
 import TimeAgo from "timeago-react";
 import { useEffect, useState } from "react";
 import {useSelector} from 'react-redux'
-import { selectAppState, setCurrentChat, setCurrentMessages, setListChat } from "@/redux/appSlice";
+import { pushMessageToListChat, selectAppState, setCurrentChat, setCurrentMessages, setListChat } from "@/redux/appSlice";
 import { useDispatch } from 'react-redux'
 import { ChatType } from "@/types/ChatType";
 import { MapMessageData } from "@/types/MessageType";
@@ -29,11 +29,11 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
     
   }, []);
 
-  const [recipientSnapshot] = useCollection(
-    db
-      .collection("users")
-      .where("email", "==", getRecipientEmail(chat.users, user))
-  );
+  // const [recipientSnapshot] = useCollection(
+  //   db
+  //     .collection("users")
+  //     .where("email", "==", getRecipientEmail(chat.users, user))
+  // );
 
   const [lastMessageSnapshot] = useCollection(
     db
@@ -51,36 +51,48 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
   );
 
   const handleShowChatScreen = async() => {
-    const chatExist = appState.listChat.find((c) => c.id === chat.id);
+    let chatExist = appState.listChat.find((c) => c.id === chat.id);
+
     if (chatExist) {
-      dispatch(setCurrentChat(chatExist))
-      dispatch(setCurrentMessages(chatExist.messages))
-    } else {    
-      const messData = await getMessage(chat.id);
-      const currentMessages = await Promise.all(messData.docs.map(async(m) => {
-        let msg = MapMessageData(m)
-        const imgRef = await db.collection("chats").doc(chat.id).collection("messages").doc(msg.id).collection("imageInMessage").get()
-        msg.imageInMessage = imgRef.docs.map((img) => MapImageInMessageData(img))
-        const imgAttachRef = await db.collection("chats").doc(chat.id).collection("messages").doc(msg.id).collection("imageAttach").get()
-        msg.imageAttach = imgAttachRef.docs.map((img) => MapImageAttachData(img))
-        const fileAttachRef = await db.collection("chats").doc(chat.id).collection("messages").doc(msg.id).collection("fileInMessage").limit(1).get()
-        msg.fileAttach = MapFileInMessageData(fileAttachRef.docs?.[0])
-        return msg
-      }));
-      dispatch(setCurrentChat(chat))
-      dispatch(setCurrentMessages(currentMessages))
+
+      if (chatExist?.messages?.length! > 0) {
+
+        dispatch(setCurrentChat(chatExist))
+        dispatch(setCurrentMessages(chatExist?.messages))
+
+      } else {    
+
+        const { data, size } = await getMessage(chat.id);
+        const currentMessages = await Promise.all(data.docs.map(async(m) => {
+          return await getFileInMsg(m)
+        }));
+        chatExist = { ...chatExist, messages: currentMessages, sizeMessage: size }
+        dispatch(setCurrentChat(chatExist))
+        dispatch(setCurrentMessages(currentMessages))
+
+      }
     }
-    // setSeenMessage().catch(err => console.log(err));
   };
 
+  const getFileInMsg = async(m: any) => {
+    let msg = MapMessageData(m)
+    const imgRef = await db.collection("chats").doc(chat.id).collection("messages").doc(msg.id).collection("imageInMessage").get()
+    msg.imageInMessage = imgRef.docs.map((img) => MapImageInMessageData(img))
+    const imgAttachRef = await db.collection("chats").doc(chat.id).collection("messages").doc(msg.id).collection("imageAttach").get()
+    msg.imageAttach = imgAttachRef.docs.map((img) => MapImageAttachData(img))
+    const fileAttachRef = await db.collection("chats").doc(chat.id).collection("messages").doc(msg.id).collection("fileInMessage").limit(1).get()
+    msg.fileAttach = MapFileInMessageData(fileAttachRef.docs?.[0])
+    return msg
+  }
+
   const getMessage = async (id: string) => {
-    const snap = await db
+    const ref = db
       .collection("chats")
       .doc(id)
       .collection("messages")
       .orderBy("timestamp")
-      .get();
-    return snap;
+    const snap = await ref.get();
+    return { data: snap, size: snap.size }; 
   };
 
   const getRecipientAvatar = () => {
@@ -88,8 +100,8 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
       if (chat?.photoURL.length > 0) return chat?.photoURL;
       else return "/images/group-default.jpg";
     } else {
-      let photoUrl = recipientSnapshot?.docs?.[0].data().photoURL;
-      if (photoUrl?.length > 0) return photoUrl;
+      let photoUrl = chat.recipientInfo?.photoURL;
+      if (photoUrl?.length! > 0) return photoUrl;
       else return "/images/avatar-default.png";
     }
   };
@@ -156,7 +168,7 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
             You: <ImageOutlinedIcon style={StyleIcon} /> Image</div>
         } else
           return <div className={active ? "text-opacity-80 truncate mt-0.5 text-white" : "text-opacity-80 truncate mt-0.5 text-gray-800 dark:text-gray-500"}>
-              {recipientSnapshot?.docs?.[0]?.data()?.fullName}
+              {chat.recipientInfo?.fullName}
               : <ImageOutlinedIcon style={StyleIcon} /> Image</div>
       }
 
@@ -166,7 +178,7 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
         } else
           return (
             <div className={active ? "text-opacity-80 truncate mt-0.5 text-white" : "text-opacity-80 truncate mt-0.5 text-gray-800 dark:text-gray-500"}>
-              {recipientSnapshot?.docs?.[0].data().fullName} sent a message
+              {chat.recipientInfo?.fullName} sent a message
             </div>
           );
       }
@@ -186,7 +198,7 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
           </div>;
         } else
           return <div className={active ? "text-opacity-80 truncate mt-0.5 text-white" : "text-opacity-80 truncate mt-0.5 text-gray-800 dark:text-gray-500"}>
-          {recipientSnapshot?.docs?.[0]?.data()?.fullName}
+          {chat.recipientInfo?.fullName}
           : <InsertDriveFileOutlinedIcon style={StyleIcon} /> File</div>
       }
     }
@@ -234,7 +246,7 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
 <div className="w-12 h-12 flex-none image-fit mr-1">
 {
   getRecipientAvatar() ? <Image
-    src={getRecipientAvatar()}
+    src={getRecipientAvatar()!}
     width={48}
     height={48}
     alt="Avatar"
@@ -242,7 +254,7 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
   /> : null
 }
 {!chat.isGroup ? (
-  appState.userOnline?.find((u: any) => u === recipientSnapshot?.docs?.[0]?.data().email) ? (
+  appState.userOnline?.find((u: any) => u === chat.recipientInfo?.email) ? (
     <div className="border-white w-3 h-3 absolute right-0 bottom-0 rounded-full border-2" style={{background: 'green'}}></div>
   ) : (
     <span className="border-white w-3 h-3 absolute right-0 bottom-0 rounded-full border-2" style={{background: 'gray'}}></span>
@@ -254,7 +266,7 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
 )}
 </div>
 <div className="ml-2 overflow-hidden">
-<a href="javascript:void(0)" className={active ? "font-medium text-white" :"font-medium text-gray-800 dark:text-white"}>{ chat.isGroup ? "Group: " + chat.name : recipientSnapshot?.docs?.[0]?.data().fullName}</a>
+<a href="javascript:void(0)" className={active ? "font-medium text-white" :"font-medium text-gray-800 dark:text-white"}>{ chat.isGroup ? "Group: " + chat.name : chat.recipientInfo?.fullName}</a>
 {lastMessageSnapshot?.docs.length! > 0
     ? handleShowLastMessage()
 : ""}

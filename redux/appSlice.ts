@@ -105,10 +105,16 @@ export const appSlice = createSlice({
     },
 
     pushMessageToListChat(state, action) {
-      // let chatE
-      state.data.listChat = action.payload
+      let chatExist = state.data.listChat.find((chat) => chat.id === action.payload.chatId)
+      if (chatExist && chatExist?.messages?.length! > 0) {
+        state.data.listChat = [
+          ...state.data.listChat, { 
+            ...chatExist, messages: [ 
+              ...chatExist.messages!, action.payload.newMessage ] }]
+      }
+      // let chatExist = state.data.listChat.find((chat) => chat.id === action.payload.chatId)
+      // state.data.listChat = [ ...state.data.listChat, { ...chatExist, messages: [...chatExist?.messages!, action.payload.newMessage] } ]
     }
-
   },
 
   // Special reducer for hydrating the state. Special case for next-redux-wrapper
@@ -131,7 +137,7 @@ export const { setUserOnline,
   setStatusCall,
   setShowVideoCallScreen,
   setDataVideoCall,
-  setAcceptedCall,setListChat
+  setAcceptedCall,setListChat,pushMessageToListChat
    } = appSlice.actions;
 
 export const selectAppState = (state: AppState) => state.app.data;

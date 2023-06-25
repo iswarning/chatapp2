@@ -9,6 +9,7 @@ import { selectAppState } from "@/redux/appSlice";
 import { v4 as uuidv4 } from 'uuid'
 import sendNotificationFCM from "@/utils/sendNotificationFCM";
 import { addMessageToFirebase, processAttachFile } from "./Functions";
+import { MessageType } from "@/types/MessageType";
 
 export default function DropdownAttach({ chatId, scrollToBottom, recipient, setProgress }: { chatId: string, scrollToBottom: any, recipient: any, setProgress: any }) {
 
@@ -107,7 +108,7 @@ export default function DropdownAttach({ chatId, scrollToBottom, recipient, setP
           bodyNotify = recipient.data().fullName + " sent a file "
         }
 
-        sendNotificationFCM("New message !", bodyNotify, recipient?.data()?.fcm_token).catch(
+        sendNotificationFCM("New message !", bodyNotify, { messageId: messageExport?.id, chatId: chatId } , recipient?.data()?.fcm_token).catch(
           (err) => console.log(err)
         );
 

@@ -1,6 +1,6 @@
 import { auth } from '@/firebase'
 import { selectAppState } from '@/redux/appSlice'
-import React, { useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import { useAuthState } from 'react-firebase-hooks/auth'
 import { useSelector } from 'react-redux'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
@@ -55,7 +55,7 @@ export default function InfoContentScreen() {
                 <div className="text-base font-medium cursor-pointer" onClick={() => setShowSharedFile(!showSharedFile)}>Shared Files { showSharedFile ? <ArrowDropDownIcon fontSize='small' /> : <ArrowDropUpIcon fontSize='small' />}</div>
                 
                 {
-                        showSharedFile ? <SharedFile /> : null
+                        showSharedFile ? <SharedFile messages={appState?.currentMessages} /> : null
                 }
                 
             </div>

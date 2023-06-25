@@ -7,9 +7,19 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react'
 import { useCollection } from 'react-firebase-hooks/firestore';
 
-export default function SenderTemplateFile({ file, message, chatId, timestamp, lastIndex }: { file: FileInMessageType | undefined, message: MessageType, chatId: string, timestamp: any, lastIndex: boolean }) {
-
-    const [open, setOpen] = useState(false)
+export default function SenderTemplateFile({ 
+    file, 
+    message, 
+    chatId, 
+    timestamp, 
+    lastIndex 
+}: { 
+    file: FileInMessageType | undefined, 
+    message: MessageType, 
+    chatId: string, 
+    timestamp: any, 
+    lastIndex: boolean 
+}) {
 
     const handleDownloadFile = async() => {
         const response = await fetch(file?.url!);

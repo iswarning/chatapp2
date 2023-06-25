@@ -5,7 +5,7 @@ import Login from "./login";
 import { ReactElement, ReactNode, useEffect } from "react";
 import createNewUser from "@/utils/createNewUser";
 // import "bootstrap/dist/css/bootstrap.css";
-import { auth, getMessagingToken, onMessageListener } from "@/firebase";
+import { auth, db, getMessagingToken, onMessageListener } from "@/firebase";
 import Loading from "@/components/Loading";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer, toast } from "react-toastify";
@@ -50,24 +50,7 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
     }
   }, [user]);
 
-  // useEffect(() => {
-  //     const channel = new BroadcastChannel("notifications");
-  //     channel.addEventListener("message", (event) => {
-  //       console.log(event.data);
-  //     });
-  // },[])
 
-  useEffect(() => {
-    onMessageListener()
-      .then((data: any) => {
-        toast(`${data.notification.body}`, {
-          hideProgressBar: true,
-          autoClose: 5000,
-          type: "info",
-        });
-      })
-      .catch((err) => console.log(err));
-  });
 
   if (!user) return <Login />;
 
