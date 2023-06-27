@@ -19,6 +19,7 @@ function SharedFile({ messages }: { messages: MessageType[] }) {
 
     useEffect(() => {
         getAllFile()
+        console.log(1111111111111)
     },[])
 
     function getAllFile() {

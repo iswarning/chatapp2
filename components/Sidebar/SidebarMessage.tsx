@@ -12,9 +12,9 @@ export default function SidebarMessage() {
   const [user] = useAuthState(auth);
   const appState = useSelector(selectAppState)
 
-  // const [chatSnapshot] = useCollection(
-  //   db.collection("chats").where("users", "array-contains", user?.email)
-  // );
+  const [chatSnapshot] = useCollection(
+    db.collection("chats").where("users", "array-contains", user?.email)
+  );
 
   return (
     <>
@@ -39,11 +39,11 @@ export default function SidebarMessage() {
         </div>
         <div className="intro-y text-base font-medium leading-tight mt-3">Recent Chats</div>
         <div className="intro-y overflow-y-auto scrollbar-hidden pt-2 mt-3 -mx-5 px-5">
-        {appState.listChat?.length! > 0
-          ? appState.listChat.map((chat) => (
+        {chatSnapshot?.docs?.length! > 0
+          ? chatSnapshot?.docs?.map((chat) => (
               <ChatComponent
                 key={chat.id}
-                chat={chat}
+                chat={MapChatData(chat)}
                 active={appState.currentChat?.id === chat.id}
               />
             ))

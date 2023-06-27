@@ -27,6 +27,7 @@ import CallIcon from '@mui/icons-material/Call';
 import { io } from "socket.io-client";
 import getUserBusy from "@/utils/getUserBusy";
 import sendNotificationFCM from "@/utils/sendNotificationFCM";
+import { MapUserData } from "@/types/UserType";
 
 const getMessage = async (id: string) => {
   const snap = await db
@@ -48,13 +49,13 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
   const appState = useSelector(selectAppState)
   const [totalMessage, setTotalMessage] = useState(messages.length)
 
-  // const [messageSnapshot] = useCollection(
-  //   db
-  //   .collection("chats")
-  //   .doc(chat.id)
-  //   .collection("messages")
-  //   .orderBy("timestamp")
-  // )
+  const [messageSnapshot] = useCollection(
+    db
+    .collection("chats")
+    .doc(chat.id)
+    .collection("messages")
+    .orderBy("timestamp")
+  )
 
   const [recipientSnapshot] = useCollection(
     db
@@ -62,10 +63,11 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
       .where("email", "==", getRecipientEmail(chat.users, user))
   );
 
+  const recipientInfo = MapUserData(recipientSnapshot?.docs?.[0]!)
+
   useEffect(() => {
     scrollToBottom();
-    
-  }, [messages]);
+  }, [messageSnapshot, messages]);
 
   useEffect(() => {
     appState.socket.on('response-reject-call-one-to-one', (res: string) => {
@@ -97,25 +99,25 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
       if (chat?.photoURL.length > 0) return chat?.photoURL;
       else return "/images/group-default.jpg";
     } else {
-      let photoUrl = recipientSnapshot?.docs?.[0].data().photoURL;
+      let photoUrl = recipientInfo.photoURL;
       if (photoUrl?.length > 0) return photoUrl;
       else return "/images/avatar-default.png";
     }
   };
 
   const showMessage = () => {
-    // if (messageSnapshot) {
-    //   return messageSnapshot.docs?.map((message, index) => (
-    //     <Message
-    //       key={message.id}
-    //       message={MapMessageData(message)}
-    //       timestamp={message.data().timestamp}
-    //       chatId={chat.id}
-    //       lastIndex={messages[index] === messages[messages.length - 1]}
-    //       scrollToBottom={() => scrollToBottom()}
-    //     />
-    //   ));
-    // } else {
+    if (messageSnapshot) {
+      return messageSnapshot.docs?.map((message, index) => (
+        <Message
+          key={message.id}
+          message={MapMessageData(message)}
+          timestamp={message.data().timestamp}
+          chatId={chat.id}
+          lastIndex={messages[index] === messages[messages.length - 1]}
+          scrollToBottom={() => scrollToBottom()}
+        />
+      ));
+    } else {
       return messages?.map((message: MessageType, index) => (
         <Message
           key={message.id}
@@ -126,7 +128,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
           scrollToBottom={() => scrollToBottom()}
         />
       ));
-    // }
+    }
 
   };
 
@@ -134,8 +136,6 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
     e.preventDefault();
 
     let { listElementImg, message } = handleImageInMessage();
-
-    // setSeenMessage(messages, user?.email, chat.id);
 
     const { messageDoc } = await addMessageToFirebase(
       message,
@@ -179,10 +179,8 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
         "New message !", 
         "New message from " + user?.displayName, 
         { messageId: snap.id, chatId: chat.id }, 
-        recipientSnapshot?.docs?.[0].data().fcm_token
+        recipientInfo.fcm_token
       )
-      dispatch(setCurrentMessages([...appState.currentMessages, MapMessageData(snap)]))
-      dispatch(pushMessageToListChat({ chatId: chat.id, newMessage: MapMessageData(snap) }))
     } else {
       toast("Error when send message !", {
         hideProgressBar: true,
@@ -207,59 +205,15 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
     setShowEmoji(false);
   };
 
-  // setSeenMessage(messages, user?.email, chat.id);
-  
-  const handleGroupOnline = (): boolean => {
-    let amountUserOnline = 0;
-    chat.users.forEach((userChat: string) => {
-      if(appState.userOnline?.find((u: string) => u === userChat && u !== user?.email)?.length! > 0 && user !== user?.email) {
-        amountUserOnline++
-      }
-    })
-    return amountUserOnline > 0;
-  }
-
-  const handleShowAvatarOnline = () => {
-    if (chat.isGroup) {
-      if (handleGroupOnline()) {
-        return <div className="border-white w-3 h-3 absolute right-0 top-0 rounded-full border-2" style={{background: 'green'}}></div>
-      } else {
-        return <div className="border-white w-3 h-3 absolute right-0 top-0 rounded-full border-2" style={{background: 'gray'}}></div>
-      }
-    } else {
-      if (appState.userOnline?.find((u: any) => u === recipientSnapshot?.docs?.[0]?.data().email)) {
-        return <div className="border-white w-3 h-3 absolute right-0 top-0 rounded-full border-2" style={{background: 'green'}}></div>
-      } else {
-        return <div className="border-white w-3 h-3 absolute right-0 top-0 rounded-full border-2" style={{background: 'gray'}}></div>
-      }
-    }
-  }
-
-  const handleShowTextOnline = () => {
-    if (chat.isGroup) {
-      if (handleGroupOnline()) {
-        return "Online"
-      } else {
-        return "Offline"
-      }
-    } else {
-      if (appState.userOnline?.find((u: any) => u === recipientSnapshot?.docs?.[0]?.data().email)) {
-        return "Online"
-      } else {
-        return "Offline"
-      }
-    }
-  }
-
   const handleCalling = async() => {
     
     let userBusy = await getUserBusy();
 
       if(!appState.showVideoCallScreen) {
 
-          if(userBusy.includes(recipientSnapshot?.docs?.[0].data().email) || !appState.userOnline.find((userOn) => recipientSnapshot?.docs?.[0].data().email === userOn)) {
+          if(userBusy.includes(recipientInfo.email) || !appState.userOnline.find((userOn) => recipientInfo.email === userOn)) {
 
-              toast(`${recipientSnapshot?.docs?.[0].data().fullName} is busy`, { hideProgressBar: true, autoClose: 5000, type: 'info' })
+              toast(`${recipientInfo.fullName} is busy`, { hideProgressBar: true, autoClose: 5000, type: 'info' })
               return;
 
           } else {
@@ -267,15 +221,15 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
               dispatch(setShowVideoCallScreen(true))
               dispatch(setStatusCall(StatusCallType.CALLING));
               dispatch(setDataVideoCall({
-                photoURL: recipientSnapshot?.docs?.[0].data().photoURL,
+                photoURL: recipientInfo.photoURL,
                 sender: user?.email,
-                recipient: recipientSnapshot?.docs?.[0].data().email,
+                recipient: recipientInfo.email,
                 chatId: chat.id,
                 isGroup: chat.isGroup
               }))
               let data = {
                   sender: user?.email,
-                  recipient: recipientSnapshot?.docs?.[0].data().email,
+                  recipient: recipientInfo.email,
                   chatId: chat.id,
                   isGroup: chat.isGroup
               }
@@ -283,19 +237,8 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
           }
       }
   }
- 
-  // const handleOnScrollTop = async(scrollTop: number) => {
-  //   if (scrollTop === 0) {
-  //     if (chat?.sizeMessage && chat.sizeMessage > 0) {
-  //       const messData = await db.collection("chats").doc(chat.id).collection("messages").orderBy("timestamp").endAt("timestamp","")
-  //     }
-  //   }
-  // }
 
   return (
-    //     <VideoCallContainer isOpen={isOpen} >
-    //         <VideoCallScreen statusCall='Calling' photoURL={chat.isGroup ? chat.photoURL : recipientUser.photoURL} sender={user?.email} recipient={getRecipientEmail(chat.users, user)} chat.id={chat.id} onClose={() => setIsOpen(false)} isGroup={chat.isGroup} />
-    //     </VideoCallContainer>
     <>
       <div className="chat-box border-theme-5 col-span-12 xl:col-span-6 flex flex-col overflow-hidden xl:border-l xl:border-r p-6">
         <div className="intro-y box border border-theme-3 dark:bg-dark-2 dark:border-dark-2 flex items-center px-5 py-4">
@@ -308,13 +251,9 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
                 alt=""
                 className="rounded-full"
               />
-              {handleShowAvatarOnline()}
             </div>
             <div className="ml-2 overflow-hidden">
-              <a href="javascript:void(0)" className="text-base font-medium">{ chat.isGroup ? "Group: " + chat.name : recipientSnapshot?.docs?.[0].data().fullName}</a>
-              <div className="text-gray-600">
-              {handleShowTextOnline()}
-              </div>
+              <a href="javascript:void(0)" className="text-base font-medium">{ chat.isGroup ? "Group: " + chat.name : recipientInfo.fullName}</a>
             </div>
           </div>
           <a className="text-gray-600 hover:text-theme-1" href="javascript:void(0)" onClick={handleCalling}> 
@@ -374,17 +313,18 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
 
 
 const ScrollBarCustom = styled.div`
-  &::-webkit-scrollbar {
-    width: 10px;
+  &::-webkit-scrollbar-thumb {
+    background-color: #d6dee1;
+    border-radius: 20px;
+    border: 6px solid transparent;
+    background-clip: content-box;
   }
 
   &::-webkit-scrollbar-track {
-    border-radius: 8px;
-    background-color: #e7e7e7;
-    border: 1px solid #cacaca;
+    background-color: transparent;
   }
-  &::-webkit-scrollbar-thumb {
-    border-radius: 8px;
-    background-color: rgb(197,197,197);
+
+  &::-webkit-scrollbar {
+    width: 20px;
   }
 `

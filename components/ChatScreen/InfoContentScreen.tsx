@@ -1,6 +1,6 @@
 import { auth } from '@/firebase'
 import { selectAppState } from '@/redux/appSlice'
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import { useAuthState } from 'react-firebase-hooks/auth'
 import { useSelector } from 'react-redux'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
@@ -12,6 +12,8 @@ export default function InfoContentScreen() {
     const appState = useSelector(selectAppState)
     const [showSharedFile, setShowSharedFile] = useState(false)
     // const photoURL = appState.currentChat.isGroup ? appState.currentChat.photoURL.length > 0 ? appState.currentChat.photoURL : "/images/group-default.png" : ap
+
+    const toggleClicked = useCallback(() => setShowSharedFile(!showSharedFile),[appState?.currentMessages])
 
   return (
     <div className="info-content col-span-12 xl:col-span-3 flex flex-col pl-6 xl:pl-0 pr-6">
@@ -52,7 +54,7 @@ export default function InfoContentScreen() {
                 </div>
             </div> */}
             <div className="intro-y h-full box p-4">
-                <div className="text-base font-medium cursor-pointer" onClick={() => setShowSharedFile(!showSharedFile)}>Shared Files { showSharedFile ? <ArrowDropDownIcon fontSize='small' /> : <ArrowDropUpIcon fontSize='small' />}</div>
+                <div className="text-base font-medium cursor-pointer" onClick={toggleClicked}>Shared Files { showSharedFile ? <ArrowDropDownIcon fontSize='small' /> : <ArrowDropUpIcon fontSize='small' />}</div>
                 
                 {
                         showSharedFile ? <SharedFile messages={appState?.currentMessages} /> : null

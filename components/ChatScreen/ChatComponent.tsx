@@ -17,6 +17,7 @@ import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutl
 import { MapImageInMessageData } from "@/types/ImageInMessageType";
 import { MapImageAttachData } from "@/types/ImageAttachType";
 import { MapFileInMessageData } from "@/types/FileInMessageType";
+import { MapUserData } from "@/types/UserType";
 
 export default function ChatComponent({ chat, active }: { chat: ChatType, active: boolean}) {
   const [user] = useAuthState(auth);
@@ -29,11 +30,13 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
     
   }, []);
 
-  // const [recipientSnapshot] = useCollection(
-  //   db
-  //     .collection("users")
-  //     .where("email", "==", getRecipientEmail(chat.users, user))
-  // );
+  const [recipientSnapshot] = useCollection(
+    db
+      .collection("users")
+      .where("email", "==", getRecipientEmail(chat.users, user))
+  );
+
+  const recipientInfo = MapUserData(recipientSnapshot?.docs?.[0]!)
 
   const [lastMessageSnapshot] = useCollection(
     db
@@ -51,27 +54,8 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
   );
 
   const handleShowChatScreen = async() => {
-    let chatExist = appState.listChat.find((c) => c.id === chat.id);
-
-    if (chatExist) {
-
-      if (chatExist?.messages?.length! > 0) {
-
-        dispatch(setCurrentChat(chatExist))
-        dispatch(setCurrentMessages(chatExist?.messages))
-
-      } else {    
-
-        const { data, size } = await getMessage(chat.id);
-        const currentMessages = await Promise.all(data.docs.map(async(m) => {
-          return await getFileInMsg(m)
-        }));
-        chatExist = { ...chatExist, messages: currentMessages, sizeMessage: size }
-        dispatch(setCurrentChat(chatExist))
-        dispatch(setCurrentMessages(currentMessages))
-
-      }
-    }
+    dispatch(setCurrentChat(chat))
+    dispatch(setCurrentMessages(await getMessage(chat.id)))
   };
 
   const getFileInMsg = async(m: any) => {
@@ -92,7 +76,7 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
       .collection("messages")
       .orderBy("timestamp")
     const snap = await ref.get();
-    return { data: snap, size: snap.size }; 
+    return snap.docs.map((msg) => MapMessageData(msg)); 
   };
 
   const getRecipientAvatar = () => {
@@ -100,7 +84,7 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
       if (chat?.photoURL.length > 0) return chat?.photoURL;
       else return "/images/group-default.jpg";
     } else {
-      let photoUrl = chat.recipientInfo?.photoURL;
+      let photoUrl = recipientInfo?.photoURL;
       if (photoUrl?.length! > 0) return photoUrl;
       else return "/images/avatar-default.png";
     }
@@ -168,7 +152,7 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
             You: <ImageOutlinedIcon style={StyleIcon} /> Image</div>
         } else
           return <div className={active ? "text-opacity-80 truncate mt-0.5 text-white" : "text-opacity-80 truncate mt-0.5 text-gray-800 dark:text-gray-500"}>
-              {chat.recipientInfo?.fullName}
+              {recipientInfo?.fullName}
               : <ImageOutlinedIcon style={StyleIcon} /> Image</div>
       }
 
@@ -178,7 +162,7 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
         } else
           return (
             <div className={active ? "text-opacity-80 truncate mt-0.5 text-white" : "text-opacity-80 truncate mt-0.5 text-gray-800 dark:text-gray-500"}>
-              {chat.recipientInfo?.fullName} sent a message
+              {recipientInfo?.fullName} sent a message
             </div>
           );
       }
@@ -198,7 +182,7 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
           </div>;
         } else
           return <div className={active ? "text-opacity-80 truncate mt-0.5 text-white" : "text-opacity-80 truncate mt-0.5 text-gray-800 dark:text-gray-500"}>
-          {chat.recipientInfo?.fullName}
+          {recipientInfo?.fullName}
           : <InsertDriveFileOutlinedIcon style={StyleIcon} /> File</div>
       }
     }
@@ -254,7 +238,7 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
   /> : null
 }
 {!chat.isGroup ? (
-  appState.userOnline?.find((u: any) => u === chat.recipientInfo?.email) ? (
+  appState.userOnline?.find((u: any) => u === recipientInfo.email) ? (
     <div className="border-white w-3 h-3 absolute right-0 bottom-0 rounded-full border-2" style={{background: 'green'}}></div>
   ) : (
     <span className="border-white w-3 h-3 absolute right-0 bottom-0 rounded-full border-2" style={{background: 'gray'}}></span>
@@ -266,7 +250,7 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
 )}
 </div>
 <div className="ml-2 overflow-hidden">
-<a href="javascript:void(0)" className={active ? "font-medium text-white" :"font-medium text-gray-800 dark:text-white"}>{ chat.isGroup ? "Group: " + chat.name : chat.recipientInfo?.fullName}</a>
+<a href="javascript:void(0)" className={active ? "font-medium text-white" :"font-medium text-gray-800 dark:text-white"}>{ chat.isGroup ? "Group: " + chat.name : recipientInfo.fullName}</a>
 {lastMessageSnapshot?.docs.length! > 0
     ? handleShowLastMessage()
 : ""}

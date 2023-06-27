@@ -1,12 +1,8 @@
 import { db } from "@/firebase";
-import getRecipientEmail from "./getRecipientEmail";
 import { MapUserData, UserType } from "@/types/UserType";
-import { FriendType, MapFriendData } from "@/types/FriendType";
-import { FriendRequestType, MapFriendRequestData } from "@/types/FriendRequestType";
-import { ChatType, MapChatData } from "@/types/ChatType";
-import { MapMessageData, MessageType } from "@/types/MessageType";
-import { MapReactionData, ReactionType } from "@/types/ReactionType";
-import { ImageInMessageType, MapImageInMessageData } from "@/types/ImageInMessageType";
+import { FriendType } from "@/types/FriendType";
+import { FriendRequestType } from "@/types/FriendRequestType";
+import { ChatType } from "@/types/ChatType";
 
 export default async function getInitialState(userId: string | undefined) {
   let data = {
@@ -20,59 +16,59 @@ export default async function getInitialState(userId: string | undefined) {
 
   data.userInfo = MapUserData(userInfo);
 
-  const listFriend = await db
-    .collection("friends")
-    .where("users", "array-contains", userInfo?.data()?.email)
-    .get();
+  // const listFriend = await db
+  //   .collection("friends")
+  //   .where("users", "array-contains", userInfo?.data()?.email)
+  //   .get();
 
-  for (const friend of listFriend?.docs || []) {
-    let info = await db
-      .collection("users")
-      .where(
-        "email",
-        "==",
-        getRecipientEmail(friend.data().users, data.userInfo)
-      )
-      .get();
+  // for (const friend of listFriend?.docs || []) {
+  //   let info = await db
+  //     .collection("users")
+  //     .where(
+  //       "email",
+  //       "==",
+  //       getRecipientEmail(friend.data().users, data.userInfo)
+  //     )
+  //     .get();
 
-    let itemToPush: FriendType = MapFriendData(friend, info?.docs?.[0])
+  //   let itemToPush: FriendType = MapFriendData(friend, info?.docs?.[0])
 
-    data.listFriend.push(itemToPush);
-  }
+  //   data.listFriend.push(itemToPush);
+  // }
 
-  const listFriendRequest = await db
-    .collection("friend_requests")
-    .where("recipientEmail", "==", data.userInfo.email)
-    .get();
+  // const listFriendRequest = await db
+  //   .collection("friend_requests")
+  //   .where("recipientEmail", "==", data.userInfo.email)
+  //   .get();
 
-  for (const fR of listFriendRequest?.docs || []) {
-    let info = await db
-      .collection("users")
-      .where("email", "==", fR?.data().senderEmail)
-      .get();
+  // for (const fR of listFriendRequest?.docs || []) {
+  //   let info = await db
+  //     .collection("users")
+  //     .where("email", "==", fR?.data().senderEmail)
+  //     .get();
 
-    let itemToPush: FriendRequestType = MapFriendRequestData(fR, info?.docs?.[0])
+  //   let itemToPush: FriendRequestType = MapFriendRequestData(fR, info?.docs?.[0])
 
-    data.listFriendRequest.push(itemToPush);
-  }
+  //   data.listFriendRequest.push(itemToPush);
+  // }
 
-  const listChat = await db
-    .collection("chats")
-    .where("users", 'array-contains', data.userInfo.email)
-    .get();
+  // const listChat = await db
+  //   .collection("chats")
+  //   .where("users", 'array-contains', data.userInfo.email)
+  //   .get();
 
-  for (const chat of listChat?.docs || []) {
-    let info = await db
-      .collection("users")
-      .where("email", "==", getRecipientEmail(chat.data().users, userInfo.data()))
-      .get();
+  // for (const chat of listChat?.docs || []) {
+  //   let info = await db
+  //     .collection("users")
+  //     .where("email", "==", getRecipientEmail(chat.data().users, userInfo.data()))
+  //     .get();
     
-    let item = MapChatData(chat);
+  //   let item = MapChatData(chat);
     
-    item.recipientInfo = MapUserData(info?.docs?.[0])
+  //   item.recipientInfo = MapUserData(info?.docs?.[0])
 
-    data.listChat.push(item)
-  }
+  //   data.listChat.push(item)
+  // }
 
   return data;
 }
