@@ -8,7 +8,7 @@ import Image from "next/image";
 import TimeAgo from "timeago-react";
 import { useEffect, useState } from "react";
 import {useSelector} from 'react-redux'
-import { pushMessageToListChat, selectAppState, setCurrentChat, setCurrentMessages, setListChat } from "@/redux/appSlice";
+import { selectAppState, setCurrentChat, setCurrentMessages } from "@/redux/appSlice";
 import { useDispatch } from 'react-redux'
 import { ChatType } from "@/types/ChatType";
 import { MapMessageData } from "@/types/MessageType";

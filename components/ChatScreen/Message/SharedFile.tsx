@@ -7,8 +7,10 @@ import { storage } from '@/firebase'
 import { FileInMessageType } from '@/types/FileInMessageType'
 import { ImageInMessageType } from '@/types/ImageInMessageType'
 import { MessageType } from '@/types/MessageType'
+import mime from 'mime-types'
+import {v4 as uuidv4} from 'uuid'
 
-function SharedFile({ messages }: { messages: MessageType[] }) {
+function SharedFile({ messages, chatRoomId }: { messages: MessageType[], chatRoomId: string }) {
 
     const [active, setActive] = useState("Image")
 
@@ -19,51 +21,65 @@ function SharedFile({ messages }: { messages: MessageType[] }) {
 
     useEffect(() => {
         getAllFile()
-        console.log(1111111111111)
     },[])
 
     function getAllFile() {
-        messages?.forEach((message) => {
-            switch(message.type){
-                case 'text-image':
-                    if (message.imageInMessage?.length! > 0) {
-                        message.imageInMessage?.forEach((img) => {
-                            setImages((old: any) => [...old!, img])
-                        })
+        let pathFile = `public/chat-room/${chatRoomId}/files`;
+        let pathPhoto = `public/chat-room/${chatRoomId}/photos`
+        storage.ref(pathFile).listAll().then((results) => {
+            results.items.forEach((result) => {
+                result.getMetadata().then((meta) => {
+                    let fileExtension = mime.extension(meta.contentType);
+                    let data = {
+                        size: meta.size / 1024 / 1024,
+                        key:  uuidv4(),
+                        name: meta.name, 
+                        type: fileExtension,
+                        path: result.fullPath
+                    };
+                    switch(fileExtension) {
+
+                        case 'jpeg':
+                            setImages((old) => [ ...old, data ])
+                            break;
+
+                        case 'png':
+                            setImages((old) => [ ...old, data ])
+                            break;
+                            
+                        case 'mp4':
+                            setVideos((old) => [ ...old, data ])
+                            break;
+                              
+                        case 'mp3':
+                            setMedias((old) => [ ...old, data ])
+                            break; 
+
+                        default:
+                            setFiles((old) => [ ...old, data ])
+                            break; 
+                        
                     }
-                    break;
-                case 'image':
-                    if (message.imageAttach?.length! > 0) {
-                        message.imageAttach?.forEach((img) => {
-                            setImages((old: any) => [...old!, img])
-                        })
-                    }
-                    break;
-                case 'file':
-                    if (Object.keys(message?.fileAttach!).length > 0) {
-                        switch(message?.fileAttach?.type){
-                            case 'mp4':
-                                setVideos((old : any) => [ ...old, message?.fileAttach ])
-                                break;
-                            case 'mp3':
-                                setMedias((old: any) => [ ...old, message?.fileAttach ])
-                                break;
-                            case 'jpg':
-                                setImages((old: any) => [ ...old, message.fileAttach ])
-                                break;
-                            case 'png':
-                                setImages((old: any) => [ ...old, message?.fileAttach ])
-                                break;
-                            default:
-                                setFiles((old: any) => [ ...old, message?.fileAttach ])
-                                break;
-                        }
-                    }
-                    break;
-            }
+                })
+            })
+        })
+
+        storage.ref(pathPhoto).listAll().then((results) => {
+            results.items.forEach((result) => {
+                result.getMetadata().then((meta) => {
+                    let fileExtension = mime.extension(meta.contentType);
+                    let data = {
+                        size: meta.size / 1024 / 1024,
+                        key:  uuidv4(),
+                        name: meta.name, 
+                        type: fileExtension,
+                        path: result.fullPath
+                    };
+                    setImages((old) => [...old, data ])
+                })
+            })
         })
     }
-    // const imageInMessage = appState.currentMessages.filter((message) => message.imageInMessage?.length! > 0).map((message) => message.imageInMessage)
 
   return (
     <>
@@ -83,16 +99,16 @@ function SharedFile({ messages }: { messages: MessageType[] }) {
                     }
                 </div>
                 {
-                    active === "Image" && images.length > 0 ? images.map((image) => <FileElement key={image.key} file={image} />) : null
+                    active === "Image" && images.length > 0 ? images.map((image) => <FileElement key={image.key} file={image} chatRoomId={chatRoomId} />) : null
                 }
                 {
-                    active === "File" && files.length > 0 ? files.map((file) => <FileElement key={file.key} file={file} />) : null
+                    active === "File" && files.length > 0 ? files.map((file) => <FileElement key={file.key} file={file} chatRoomId={chatRoomId} />) : null
                 }
                 {
-                    active === "Video" && videos.length > 0 ? videos.map((file) => <FileElement key={file.key} file={file} />) : null
+                    active === "Video" && videos.length > 0 ? videos.map((file) => <FileElement key={file.key} file={file} chatRoomId={chatRoomId} />) : null
                 }
                 {
-                    active === "Media" && medias.length > 0 ? medias.map((file) => <FileElement key={file.key} file={file} />) : null
+                    active === "Media" && medias.length > 0 ? medias.map((file) => <FileElement key={file.key} file={file} chatRoomId={chatRoomId} />) : null
                 }
         </div>
     </>

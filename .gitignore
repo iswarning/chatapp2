@@ -4,6 +4,7 @@
 /node_modules
 /firebase.ts
 /.pnp
+/cors.json
 .pnp.js
 
 # testing

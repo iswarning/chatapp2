@@ -33,7 +33,8 @@ export interface InitialState {
     showVideoCallScreen: boolean,
     dataVideoCall: any,
     socket: Socket,
-    acceptedCall: boolean
+    acceptedCall: boolean,
+    darkMode: boolean
   };
 }
 
@@ -50,7 +51,8 @@ const initialState: InitialState = {
     showVideoCallScreen: false,
     dataVideoCall: {},
     socket: io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!),
-    acceptedCall: false
+    acceptedCall: false,
+    darkMode: false
   },
 };
 
@@ -76,10 +78,6 @@ export const appSlice = createSlice({
       state.data.currentMessages = action.payload
     },
 
-    addNewMessage(state, action) {
-      state.data.currentMessages = [...state.data.currentMessages, action.payload]
-    },
-
     setSidebar(state, action) {
       state.data.currentSidebar = action.payload
     },
@@ -100,21 +98,10 @@ export const appSlice = createSlice({
       state.data.acceptedCall = action.payload
     },
 
-    setListChat(state, action) {
-      state.data.listChat = action.payload
-    },
-
-    pushMessageToListChat(state, action) {
-      let chatExist = state.data.listChat.find((chat) => chat.id === action.payload.chatId)
-      if (chatExist && chatExist?.messages?.length! > 0) {
-        state.data.listChat = [
-          ...state.data.listChat, { 
-            ...chatExist, messages: [ 
-              ...chatExist.messages!, action.payload.newMessage ] }]
-      }
-      // let chatExist = state.data.listChat.find((chat) => chat.id === action.payload.chatId)
-      // state.data.listChat = [ ...state.data.listChat, { ...chatExist, messages: [...chatExist?.messages!, action.payload.newMessage] } ]
+    setDarkMode(state, action) {
+      state.data.darkMode = action.payload
     }
+    
   },
 
   // Special reducer for hydrating the state. Special case for next-redux-wrapper
@@ -131,13 +118,13 @@ export const appSlice = createSlice({
 export const { setUserOnline,
   setUserInfo, 
   setCurrentChat, 
-  setCurrentMessages, 
-  addNewMessage,
+  setCurrentMessages,
   setSidebar,
   setStatusCall,
   setShowVideoCallScreen,
   setDataVideoCall,
-  setAcceptedCall,setListChat,pushMessageToListChat
+  setAcceptedCall,
+  setDarkMode
    } = appSlice.actions;
 
 export const selectAppState = (state: AppState) => state.app.data;

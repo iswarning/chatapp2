@@ -57,7 +57,7 @@ export default function InfoContentScreen() {
                 <div className="text-base font-medium cursor-pointer" onClick={toggleClicked}>Shared Files { showSharedFile ? <ArrowDropDownIcon fontSize='small' /> : <ArrowDropUpIcon fontSize='small' />}</div>
                 
                 {
-                        showSharedFile ? <SharedFile messages={appState?.currentMessages} /> : null
+                        showSharedFile ? <SharedFile messages={appState?.currentMessages} chatRoomId={appState.currentChat.id} /> : null
                 }
                 
             </div>

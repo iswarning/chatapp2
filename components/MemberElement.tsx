@@ -20,7 +20,7 @@ export default function MemberElement({ email, handleAddMemberToGroup, listMembe
   return (
     <>
     {
-        userInfo ? <div key={userInfo.docs?.[0].id} className="intro-x block">
+        userInfo ? <div className="intro-x block mt-2">
             <div className="box dark:bg-dark-3 cursor-pointer relative flex items-center px-4 py-3 zoom-in ">
                 <div className="w-10 h-10 flex-none image-fit mr-1">
                     {

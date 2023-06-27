@@ -1,14 +1,27 @@
+import { storage } from '@/firebase';
+import { CircularProgress } from '@mui/material';
+import Image from 'next/image'
 import React from 'react'
+import { useDownloadURL } from 'react-firebase-hooks/storage';
 
-export default function FileElement({file}: any) {
+export default function FileElement({ file, chatRoomId }: any) {
+
+    const isFile = file.type !== 'jpeg' && file.type !== "png"
+
+const [value, loading, error] = useDownloadURL(
+    storage
+    .ref(file.path));
+
   return (
     <div className="shared-file border-gray-200 dark:border-dark-5 flex items-center p-3 border rounded-md relative mt-3">
-        <div className="shared-file__icon text-white w-12 flex-none bg-contain relative bg-no-repeat bg-center block">
-            <div className="absolute m-auto top-0 left-0 right-0 bottom-0 flex items-center justify-center">{file.type}</div>
-        </div>
+        {
+            isFile ? <div className="shared-file__icon text-white w-12 flex-none bg-contain relative bg-no-repeat bg-center block">
+                <div className="absolute m-auto top-0 left-0 right-0 bottom-0 flex items-center justify-center">{file.type.toUpperCase()}</div>
+            </div> : value ? loading ? <div className='text-center'><CircularProgress size={30} /></div> :<Image src={value!} width={0} height={0} alt='' className='rounded-md' style={{height: '50px', width: '50px'}} /> : null
+        }
         <div className="w-full ml-3">
-            <div className="text-gray-700 dark:text-gray-300 w-4/5 whitespace-nowrap font-medium truncate">{file.name}</div>
-            <div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">{file.size ?? "None"} MB Image File</div>
+            <div className="text-gray-700 dark:text-gray-300 w-4/5 whitespace-nowrap font-medium truncate">{file.name + file.fileExtension}</div>
+            <div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">{Number((file?.size!).toFixed(1)) ?? "None"} MB</div>
         </div>
         <div className="dropdown absolute flex items-center top-0 bottom-0 right-0 mr-4 ml-auto">
             <a className="dropdown-toggle w-4 h-4" href="javascript:;" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
