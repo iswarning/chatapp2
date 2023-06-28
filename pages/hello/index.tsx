@@ -1637,6 +1637,7 @@
 // <textarea className="form-control h-12 shadow-none resize-none border-transparent px-5 py-3 focus:shadow-none truncate mr-3 sm:mr-0" rows={1} placeholder="Type your message..."></textarea>
 // <div className="dropdown relative mr-3 sm:mr-5" data-placement="top-end">
 // <a href="javascript:;" className="text-gray-600 hover:text-theme-1 dropdown-toggle w-4 h-4 sm:w-5 sm:h-5 block"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-smile w-full h-full"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg> </a>
+
 // <div className="chat-input__smiley dropdown-menu">
 // <div className="dropdown-menu__content box dark:text-gray-300 dark:bg-dark-3 shadow-md">
 // <div className="chat-input__smiley__box flex flex-col pb-3 -mt-2">

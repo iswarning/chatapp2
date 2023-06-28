@@ -87,7 +87,7 @@ const Page: NextPageWithLayout = () => {
       appState.socket.on("response-accept-call-one-to-one", (res: string) => {
         let data = JSON.parse(res);
         if(data.recipient === user?.email) {
-          dispatch(setAcceptedCall(true))
+          dispatch(setStatusCall(StatusCallType.CALLED))
         }
       })
 

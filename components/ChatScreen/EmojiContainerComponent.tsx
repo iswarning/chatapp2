@@ -1,12 +1,13 @@
+import styled from "styled-components"
 import {getEmojiData} from "../../utils/getEmojiData"
 import { v4 as uuidv4 } from 'uuid'
 
 export default function EmojiContainerComponent({onAddEmoji}: any) {
 
     return (
-        <div className="chat-input__smiley">
+        <Container className="chat-input__smiley dropdown-menu show">
             <div className="dropdown-menu__content box dark:text-gray-300 dark:bg-dark-3 shadow-md">
-                <div className="flex flex-col pb-3 -mt-2" style={{maxHeight: '320px'}}>
+                <div className="flex flex-col pb-3 -mt-2">
                     <div className="px-3 pt-5">
                         <div className="relative">
                             <input type="text" className="form-control bg-gray-200 border-transparent pr-10" placeholder="Search emojis..."/>
@@ -35,6 +36,14 @@ export default function EmojiContainerComponent({onAddEmoji}: any) {
                     </div>
                 </div>
             </div>
-        </div>
+        </Container>
     )
 }
+
+const Container = styled.div`
+    width: 320px;
+    position: absolute;
+    inset: auto auto 0px 0px;
+    margin: 0px;
+    transform: translate(736.8px, -75.6px);
+`

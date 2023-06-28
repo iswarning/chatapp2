@@ -13,7 +13,7 @@ export default function InfoContentScreen() {
     const [showSharedFile, setShowSharedFile] = useState(false)
     // const photoURL = appState.currentChat.isGroup ? appState.currentChat.photoURL.length > 0 ? appState.currentChat.photoURL : "/images/group-default.png" : ap
 
-    const toggleClicked = useCallback(() => setShowSharedFile(!showSharedFile),[appState?.currentMessages])
+    const toggleClicked = () => setShowSharedFile(!showSharedFile)
 
   return (
     <div className="info-content col-span-12 xl:col-span-3 flex flex-col pl-6 xl:pl-0 pr-6">

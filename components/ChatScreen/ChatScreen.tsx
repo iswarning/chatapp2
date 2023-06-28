@@ -16,7 +16,7 @@ import {
   pushUrlImageToFirestore
 } from "./Functions";
 import { useSelector, useDispatch } from 'react-redux';
-import { StatusCallType, pushMessageToListChat, selectAppState, setAcceptedCall, setCurrentMessages, setDataVideoCall, setShowVideoCallScreen, setStatusCall } from "@/redux/appSlice";
+import { StatusCallType, selectAppState, setDataVideoCall, setShowVideoCallScreen, setStatusCall } from "@/redux/appSlice";
 import { ChatType } from "@/types/ChatType";
 import { MapMessageData, MessageType } from "@/types/MessageType";
 import Image from "next/image";
@@ -81,7 +81,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
         let data = JSON.parse(res);
         console.log(data.sender === user?.email)
         if(data.sender === user?.email) {
-            dispatch(setAcceptedCall(true))
+            dispatch(setStatusCall(StatusCallType.CALLED))
         }
     })
 
@@ -175,12 +175,24 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
               );
         }
       }
-      sendNotificationFCM(
-        "New message !", 
-        "New message from " + user?.displayName, 
-        { messageId: snap.id, chatId: chat.id }, 
-        recipientInfo.fcm_token
-      )
+      if (chat.isGroup) {
+        for(const email of chat.users.filter((email) => email !== user?.email)) {
+          let userInfo = await db.collection("users").where("email",'==',email).limit(1).get()
+          sendNotificationFCM(
+            "New message !", 
+            "New message from " + chat.name, 
+            { messageId: snap.id, chatId: chat.id }, 
+            userInfo?.docs?.[0].data().fcm_token
+          )
+        }
+      } else {
+        sendNotificationFCM(
+          "New message !", 
+          "New message from " + user?.displayName, 
+          { messageId: snap.id, chatId: chat.id }, 
+          recipientInfo.fcm_token
+        )
+      }
     } else {
       toast("Error when send message !", {
         hideProgressBar: true,
@@ -286,9 +298,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
             <line x1="15" y1="9" x2="15.01" y2="9"></line>
           </svg> 
         </a>
-        {
-          showEmoji ?  <EmojiContainerComponent onAddEmoji={(emoji: number) => addEmoji(emoji)} /> : null
-        }
+        
         </div>
         <a 
         href="javascript:void(0)" 
@@ -306,6 +316,9 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
           </div> : null
         }
       </div>
+      {
+        showEmoji ?  <EmojiContainerComponent onAddEmoji={(emoji: number) => addEmoji(emoji)} /> : null
+      }
     </>
   );
 }

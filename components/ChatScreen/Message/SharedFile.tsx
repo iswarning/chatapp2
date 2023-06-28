@@ -115,7 +115,7 @@ function SharedFile({ messages, chatRoomId }: { messages: MessageType[], chatRoo
   )
 }
 
-export default React.memo(SharedFile)
+export default SharedFile
 
 const BtnCutom = styled.button`
     margin-right: 20px;

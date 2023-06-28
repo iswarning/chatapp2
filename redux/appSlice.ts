@@ -18,7 +18,8 @@ export enum SidebarType {
 export enum StatusCallType {
   INCOMING_CALL,
   CALLING,
-  CALLED
+  CALLED,
+  DISCONNECT_CALL
 }
 // Type for our state
 export interface InitialState {
@@ -26,7 +27,6 @@ export interface InitialState {
     userInfo:  UserType,
     currentChat: ChatType,
     currentMessages: Array<MessageType>,
-    listChat: ChatType[],
     userOnline: Array<string>,
     currentSidebar: SidebarType,
     statusCall: StatusCallType,
@@ -34,7 +34,8 @@ export interface InitialState {
     dataVideoCall: any,
     socket: Socket,
     acceptedCall: boolean,
-    darkMode: boolean
+    darkMode: boolean,
+    stream: MediaStream | null
   };
 }
 
@@ -44,7 +45,6 @@ const initialState: InitialState = {
     userInfo:  {} as UserType,
     currentChat: {} as ChatType,
     currentMessages: Array<MessageType>(),
-    listChat: Array<ChatType>(),
     userOnline: Array<string>(),
     currentSidebar: SidebarType.CHAT,
     statusCall: StatusCallType.CALLING,
@@ -52,7 +52,8 @@ const initialState: InitialState = {
     dataVideoCall: {},
     socket: io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!),
     acceptedCall: false,
-    darkMode: false
+    darkMode: false,
+    stream: null
   },
 };
 
@@ -100,6 +101,10 @@ export const appSlice = createSlice({
 
     setDarkMode(state, action) {
       state.data.darkMode = action.payload
+    },
+
+    setStream(state, action) {
+      state.data.stream = action.payload
     }
     
   },
@@ -124,7 +129,8 @@ export const { setUserOnline,
   setShowVideoCallScreen,
   setDataVideoCall,
   setAcceptedCall,
-  setDarkMode
+  setDarkMode,
+  setStream
    } = appSlice.actions;
 
 export const selectAppState = (state: AppState) => state.app.data;

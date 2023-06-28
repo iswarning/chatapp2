@@ -1,11 +1,11 @@
-import { BtnAcceptCall, BtnContainer, BtnRejectCall, ContentCenter, Pulse, StatusCalling, UserAvatar, UserContainer, VideoCalling } from "./VideoCallScreenStyled";
+import { BtnAcceptCall, BtnContainer, BtnRejectCall, ContentCenter, Pulse, UserAvatar, UserContainer, VideoCalling } from "./VideoCallScreenStyled";
 import CallIcon from '@mui/icons-material/Call';
 import CallEndIcon from '@mui/icons-material/CallEnd';
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth, db } from "@/firebase";
 import { Modal } from "@mui/material";
 import {useSelector,useDispatch} from 'react-redux'
-import { StatusCallType, selectAppState, setAcceptedCall, setShowVideoCallScreen } from "@/redux/appSlice";
+import { StatusCallType, selectAppState, setShowVideoCallScreen, setStatusCall } from "@/redux/appSlice";
 import styled from "styled-components";
 import ShowVideoCallScreen from "./ShowVideoCallScreen";
 
@@ -24,7 +24,7 @@ export default function VideoCallScreen({open}: any) {
     }
     
     const handleAcceptCall = () => {
-        dispatch(setAcceptedCall(true))
+        dispatch(setStatusCall(StatusCallType.CALLED))
         let data: any = {
             sender: appState.dataVideoCall.recipient,
             recipient: appState.dataVideoCall.sender,
@@ -89,7 +89,7 @@ export default function VideoCallScreen({open}: any) {
         <>
         <ModalContainer open={open}>
             {
-                appState.acceptedCall ? <ShowVideoCallScreen  /> : <VideoCalling>
+                appState.statusCall === StatusCallType.CALLED ? <ShowVideoCallScreen  /> : <VideoCalling>
                 <UserContainer>
 
                     <ContentCenter>
