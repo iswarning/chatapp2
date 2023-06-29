@@ -8,13 +8,14 @@ import {useSelector,useDispatch} from 'react-redux'
 import { StatusCallType, selectAppState, setShowVideoCallScreen, setStatusCall } from "@/redux/appSlice";
 import styled from "styled-components";
 import ShowVideoCallScreen from "./ShowVideoCallScreen";
+import { useState } from "react";
 
 export default function VideoCallScreen({open}: any) {
 
     const [user] = useAuthState(auth);
     const appState = useSelector(selectAppState)
     const dispatch = useDispatch()
-
+    const [stream, setStream] = useState()
     const getUserInfo = async(email: string) => {
         const data = await db.collection("users").where("email",'==',email).get()
         if(data) {
@@ -31,6 +32,7 @@ export default function VideoCallScreen({open}: any) {
             chatId: appState.dataVideoCall.chatId
         }
         appState.socket.emit("accept-call-one-to-one", JSON.stringify(data))
+        
     }
 
     const handleRejectCall = () => {
@@ -89,7 +91,7 @@ export default function VideoCallScreen({open}: any) {
         <>
         <ModalContainer open={open}>
             {
-                appState.statusCall === StatusCallType.CALLED ? <ShowVideoCallScreen  /> : <VideoCalling>
+                appState.statusCall === StatusCallType.CALLED ? <ShowVideoCallScreen stream={stream}  /> : <VideoCalling>
                 <UserContainer>
 
                     <ContentCenter>

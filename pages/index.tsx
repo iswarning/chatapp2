@@ -61,39 +61,33 @@ const Page: NextPageWithLayout = () => {
             dispatch(setStatusCall(StatusCallType.INCOMING_CALL))
         }
       });
-
-      // socket.on("response-call-video", (res: string) => {
-      //   let data = JSON.parse(res);
-      //   if(data.recipient.includes(user?.email)) {
-      //       dispatch(setDataVideoCall({
-      //         chatId: data.chatId,
-      //         sender: data.sender,
-      //         recipient: data.recipient,
-      //         isGroup: data.isGroup,
-      //       }))
-      //       dispatch(setShowVideoCallScreen(true))
-      //   }
-      // });
-
-      appState.socket.on('response-reject-call-one-to-one', (res: string) => {
-        console.log(JSON.parse(res))
-        let data = JSON.parse(res);
-        if(data.recipient === user?.email) {
-          dispatch(setShowVideoCallScreen(false))
-          toast(`${data.name} rejected the call !`, { hideProgressBar: true, autoClose: 5000, type: 'info' })
-        }
-      });
-
-      appState.socket.on("response-accept-call-one-to-one", (res: string) => {
-        let data = JSON.parse(res);
-        if(data.recipient === user?.email) {
-          dispatch(setStatusCall(StatusCallType.CALLED))
-        }
-      })
-
       return () => {
         appState.socket.disconnect();
       };
+  },[])
+
+  useEffect(() => {
+    appState.socket.on("response-accept-call-one-to-one", (res: string) => {
+      let data = JSON.parse(res);
+      if(data.sender === user?.email) {
+          dispatch(setStatusCall(StatusCallType.CALLED))
+      }
+    })
+    return () => {
+      appState.socket.disconnect();
+    };
+  },[])
+
+  useEffect(() => {
+    appState.socket.on('response-reject-call-one-to-one', (res: string) => {
+      let data = JSON.parse(res);
+      if(data.recipient === user?.email) {
+          dispatch(setShowVideoCallScreen(false))
+      }
+    });
+    return () => {
+      appState.socket.disconnect();
+    };
   },[])
 
   return (

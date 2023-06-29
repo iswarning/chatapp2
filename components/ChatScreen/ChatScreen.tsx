@@ -28,26 +28,15 @@ import { io } from "socket.io-client";
 import getUserBusy from "@/utils/getUserBusy";
 import sendNotificationFCM from "@/utils/sendNotificationFCM";
 import { MapUserData } from "@/types/UserType";
-
-const getMessage = async (id: string) => {
-  const snap = await db
-    .collection("chats")
-    .doc(id)
-    .collection("messages")
-    .orderBy("timestamp")
-    .get();
-  return snap;
-};
+import { requestMedia } from "@/utils/requestPermission";
 
 export default function ChatScreen({ chat, messages }: { chat: ChatType, messages: Array<MessageType> }) {
   const [user] = useAuthState(auth);
   const endOfMessageRef: any = useRef(null);
   const [showEmoji, setShowEmoji] = useState(false);
   const [progress, setProgress] = useState(0);
-  const router = useRouter();
   const dispatch = useDispatch()
   const appState = useSelector(selectAppState)
-  const [totalMessage, setTotalMessage] = useState(messages.length)
 
   const [messageSnapshot] = useCollection(
     db
@@ -68,27 +57,6 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
   useEffect(() => {
     scrollToBottom();
   }, [messageSnapshot, messages]);
-
-  useEffect(() => {
-    appState.socket.on('response-reject-call-one-to-one', (res: string) => {
-        let data = JSON.parse(res);
-        if(data.recipient === user?.email) {
-            dispatch(setShowVideoCallScreen(false))
-        }
-    });
-
-    appState.socket.on("response-accept-call-one-to-one", (res: string) => {
-        let data = JSON.parse(res);
-        console.log(data.sender === user?.email)
-        if(data.sender === user?.email) {
-            dispatch(setStatusCall(StatusCallType.CALLED))
-        }
-    })
-
-    return () => {
-      appState.socket.disconnect()
-    }
-  },[])
 
   const scrollToBottom = () => {
     endOfMessageRef.current.scrollIntoView({ behavior: "smooth" });
@@ -217,37 +185,41 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
     setShowEmoji(false);
   };
 
-  const handleCalling = async() => {
+  const handleCalling = async(chatInfo: any = chat ,  userInfo: any = recipientInfo) => {
     
+    
+
     let userBusy = await getUserBusy();
 
-      if(!appState.showVideoCallScreen) {
+    if(!appState.showVideoCallScreen) {
 
-          if(userBusy.includes(recipientInfo.email) || !appState.userOnline.find((userOn) => recipientInfo.email === userOn)) {
+        if(userBusy.includes(userInfo.email) || !appState.userOnline.find((userOn) => userInfo.email === userOn)) {
 
-              toast(`${recipientInfo.fullName} is busy`, { hideProgressBar: true, autoClose: 5000, type: 'info' })
+            toast(`${userInfo.fullName} is busy`, { hideProgressBar: true, autoClose: 5000, type: 'info' })
+            return;
+
+        } else {
+
+            const checkPermission = await requestMedia()
+
+            if (!checkPermission) {
+              toast(`Please allow using camera and microphone`, { hideProgressBar: true, autoClose: 5000, type: 'info' })
               return;
+            }
 
-          } else {
-
-              dispatch(setShowVideoCallScreen(true))
-              dispatch(setStatusCall(StatusCallType.CALLING));
-              dispatch(setDataVideoCall({
-                photoURL: recipientInfo.photoURL,
+            dispatch(setShowVideoCallScreen(true))
+            dispatch(setStatusCall(StatusCallType.CALLING));
+            let data = {
                 sender: user?.email,
-                recipient: recipientInfo.email,
-                chatId: chat.id,
-                isGroup: chat.isGroup
-              }))
-              let data = {
-                  sender: user?.email,
-                  recipient: recipientInfo.email,
-                  chatId: chat.id,
-                  isGroup: chat.isGroup
-              }
-              appState.socket.emit("call-video-one-to-one", JSON.stringify(data));
-          }
-      }
+                recipient: userInfo.email,
+                chatId: chatInfo.id,
+                isGroup: chatInfo.isGroup,
+                photoURL: userInfo.photoURL,
+            }
+            dispatch(setDataVideoCall(data))
+            appState.socket.emit("call-video-one-to-one", JSON.stringify(data));
+        }
+    }
   }
 
   return (

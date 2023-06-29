@@ -10,11 +10,11 @@ import { StatusCallType, selectAppState, setShowVideoCallScreen, setStatusCall }
 import {useSelector,useDispatch} from 'react-redux'
 import { toast } from 'react-toastify'
 import VideocamIcon from '@mui/icons-material/Videocam';
-export default function ShowVideoCallScreen() {
+export default function ShowVideoCallScreen({stream}: any) {
 
     const [showCam, setShowCam] = useState(true);
     const [showMic, setShowMic] = useState(true);
-    const [stream, setStream] = useState<MediaStream>()
+    // const [stream, setStream] = useState<MediaStream>()
     const appState = useSelector(selectAppState)
     const dispatch = useDispatch()
 
@@ -33,22 +33,11 @@ export default function ShowVideoCallScreen() {
 
     const handleShowCam = () => {
         setShowCam(!showCam);
-        navigator.mediaDevices.getUserMedia({
-            video: showCam,
-            audio: showMic
-        }).then((stream) => setStream(stream))
     }
 
     const handleShowMic = () => {
         setShowMic(!showMic);
     }
-
-    // async function getStream() {
-    //     return await navigator.mediaDevices.getUserMedia({
-    //         video: showCam,
-    //         audio: showMic
-    //     })
-    // }
 
     const handleRejectCall = () => {
         dispatch(setShowVideoCallScreen(false))
@@ -60,6 +49,7 @@ export default function ShowVideoCallScreen() {
         }
         appState.socket.emit("disconnect-call", JSON.stringify(data))
         dispatch(setStatusCall(StatusCallType.DISCONNECT_CALL))
+        dispatch(setShowVideoCallScreen(false))
     }
 
   return (
@@ -68,7 +58,7 @@ export default function ShowVideoCallScreen() {
             
             <ActionContainer>
                 {
-                    showCam ? <ActionBtnActive onClick={() => setShowCam(true)}>
+                    showCam ? <ActionBtnActive onClick={handleShowCam}>
                         <VideocamIcon fontSize="large" />
                     </ActionBtnActive> : <ActionBtn onClick={handleShowCam}>
                         <VideocamIcon fontSize="large" />

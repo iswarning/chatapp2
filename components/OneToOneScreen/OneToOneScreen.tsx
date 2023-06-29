@@ -3,14 +3,18 @@ import { io } from 'socket.io-client';
 import { useRouter } from 'next/router';
 import styled from 'styled-components';
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { auth } from '@/firebase';
+import { auth, db } from '@/firebase';
 import { toast } from 'react-toastify';
-import { selectAppState, setStream } from '@/redux/appSlice';
+import { selectAppState } from '@/redux/appSlice';
 import {useSelector,useDispatch} from 'react-redux';
 import MicOffIcon from '@mui/icons-material/MicOff';
 import VideocamIcon from '@mui/icons-material/Videocam';
 import MicIcon from '@mui/icons-material/Mic';
 import VideocamOffIcon from '@mui/icons-material/VideocamOff';
+import dynamic from 'next/dynamic';
+import Image from 'next/image';
+import Peer from 'peerjs';
+
 
 export default function OneToOneScreen({ chatRoomId, showCam, showMic, disconnectCall }: { chatRoomId: string,showCam: boolean, showMic: boolean, disconnectCall: any }) {
     
@@ -18,98 +22,100 @@ export default function OneToOneScreen({ chatRoomId, showCam, showMic, disconnec
     const appState = useSelector(selectAppState)
     const [user] = useAuthState(auth);
     const myVideoRef: any = useRef(null)
-    const dispatch = useDispatch()
+    const [userCam, setUserCam] = useState(false)
+    const [userMic, setUserMic] = useState(false)
 
-    useEffect(() => {
-        console.log(showCam, showMic )
-        getVideoStream()
-    },[])
+    const getMediaStream = useCallback((myPeer: Peer, connectToNewUser: any) => navigator.mediaDevices.getUserMedia({
+        video: showCam,
+        audio: showMic
+    }).then((stream) => {
+        myPeer.on('call', call => {
+            if (showCam) {
+                myVideoRef.current.srcObject = stream;
+            } else {
+                stream.getTracks()[0].stop()
+            }
 
-    const getVideoStream = useCallback(() => {
+            call.answer(stream)
+
+            videoRef.current.muted = true;
+            
+            call.on('stream', userVideoStream => {
+                videoRef.current.srcObject = userVideoStream;
+                console.log(userVideoStream.getTracks()[0].muted)
+            })
+        })
+
+        appState.socket.on('user-connected', (response: any) => {
+            let data = JSON.parse(response);
+            connectToNewUser(data.clientId, stream);
+        })
+    }) ,[showCam, showMic]) 
+
+    import('peerjs').then(({ default: Peer }) => {
+            
+        const peers: any = {};
+        const myPeer = new Peer();
+
+        getMediaStream(myPeer, connectToNewUser(data.clientId, stream))
         
-        import('peerjs').then(({ default: Peer }) => {
-            
-            const peers: any = {};
-            const myPeer = new Peer();
-
-            navigator.mediaDevices.getUserMedia({
-                video: showCam,
-                audio: showMic
-            }).then((stream) => {
-                myPeer.on('call', call => {
-                    myVideoRef.current.srcObject = stream;
-                    myVideoRef.current.muted = true
-                    call.answer(stream)
-
-                    videoRef.current.muted = true;
-                    
-                    call.on('stream', userVideoStream => {
-                        videoRef.current.srcObject = userVideoStream;
-                    })
-                })
-
-                appState.socket.on('user-connected', (response: any) => {
-                    let data = JSON.parse(response);
-                    connectToNewUser(data.clientId, stream);
-                })
-            }) 
-            
-            appState.socket.on('user-disconnected', (response: any) => {
-                let dataRes: any = JSON.parse(response);
-                if(peers[dataRes.clientId]) { 
-                    
-                    // getChatById(dataRes.chatRoomId).then((chat) => {
-                    //     let dataSend: any = {
-                    //         sender: dataRes.sender,
-                    //         name: dataRes.name,
-                    //         chatId: dataRes.chatRoomId,
-                    //         recipient: chat?.data()?.users.filter((user: any) => user === user?.email),
-                    //         isGroup: false
-                    //     }
-                    //     socket.emit("disconnect-call", JSON.stringify(dataSend))
-                    //     peers[dataRes.clientId].close();
-                    // }).catch((err) => console.log(err));
+        appState.socket.on('user-disconnected', (response: any) => {
+            let dataRes: any = JSON.parse(response);
+            if(peers[dataRes.clientId]) { 
+                
+                db.collection("chats").doc(dataRes.chatRoomId).get().then((chat) => {
+                    let dataSend: any = {
+                        sender: dataRes.sender,
+                        name: dataRes.name,
+                        chatId: dataRes.chatRoomId,
+                        recipient: chat?.data()?.users.filter((user: any) => user === user?.email),
+                        isGroup: false
+                    }
+                    appState.socket.emit("disconnect-call", JSON.stringify(dataSend))
                     peers[dataRes.clientId].close();
-                    disconnectCall()
-                }
-            })
-
-            myPeer.on('open', id => {
-                let data = {
-                    clientId: id,
-                    chatRoomId: appState.dataVideoCall.chatId,
-                    sender: user?.email,
-                    name: user?.displayName
-                }
-                appState.socket.emit('join-room', JSON.stringify(data));
-            })
-
-            const connectToNewUser = (userId: any, stream: any) => {
-                const call = myPeer.call(userId, stream);
-                call.on('stream', userVideoStream => {
-                    videoRef.current.srcObject = userVideoStream;
-                })
-                peers[userId] = call
+                }).catch((err) => console.log(err));
+                peers[dataRes.clientId].close();
+                disconnectCall()
             }
+        })
 
-            return () => {
-                appState.socket.disconnect();
+        myPeer.on('open', id => {
+            let data = {
+                clientId: id,
+                chatRoomId: appState.dataVideoCall.chatId,
+                sender: user?.email,
+                name: user?.displayName
             }
+            appState.socket.emit('join-room', JSON.stringify(data));
+        })
 
-        }).catch((err) => console.log(err));
-    },[showCam, showMic])    
+        const connectToNewUser = (userId: any, stream: any) => {
+            const call = myPeer.call(userId, stream);
+            call.on('stream', userVideoStream => {
+                videoRef.current.srcObject = userVideoStream;
+            })
+            peers[userId] = call
+        }
+
+        return () => {
+            appState.socket.disconnect();
+        }
+
+    }).catch((err) => console.log(err)); 
 
     return (
         <>
             <VideoContainer>
                 <Video ref={videoRef} autoPlay />
-                <MyVideo ref={myVideoRef} autoPlay />
+                {
+                    showCam ? <MyVideo ref={myVideoRef} muted autoPlay /> : <MyAvatar src={user?.photoURL!} width={0} height={0} alt='' />
+                }
                 <ActionContainer className='flex'>
                     {
-                        showMic ? <MicIcon fontSize="large" className='cursor-pointer' /> : <MicOffIcon fontSize="large" className='cursor-pointer' />
+                        userMic ? <MicIcon fontSize="large" className='cursor-pointer' /> : <MicOffIcon fontSize="large" className='cursor-pointer' />
                     }
                     {
-                        showCam ? <VideocamIcon fontSize="large" className='cursor-pointer' /> : <VideocamOffIcon fontSize="large" className='cursor-pointer' />
+                        userCam ? <VideocamIcon fontSize="large" className='cursor-pointer' /> : <VideocamOffIcon fontSize="large" className='cursor-pointer' />
                     }
                 </ActionContainer>
             </VideoContainer>
@@ -137,6 +143,15 @@ export const Video = styled.video`
 `;
 
 const MyVideo = styled.video`
+    width: 30%;
+    height: 30%;
+    object-fit: cover;
+    border-radius: 10px;
+    position: absolute;
+    margin-top: -22%;
+`
+
+const MyAvatar = styled(Image)`
     width: 30%;
     height: 30%;
     object-fit: cover;
