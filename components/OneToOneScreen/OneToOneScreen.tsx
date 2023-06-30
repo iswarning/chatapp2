@@ -18,46 +18,38 @@ import Peer from 'peerjs';
 
 export default function OneToOneScreen({ chatRoomId, showCam, showMic, disconnectCall }: { chatRoomId: string,showCam: boolean, showMic: boolean, disconnectCall: any }) {
     
-    const videoRef: any = useRef(null);
+    const remoteVideoRef: any = useRef(null);
     const appState = useSelector(selectAppState)
     const [user] = useAuthState(auth);
-    const myVideoRef: any = useRef(null)
+    const localVideoRef: any = useRef(null)
     const [userCam, setUserCam] = useState(false)
     const [userMic, setUserMic] = useState(false)
-
-    const getMediaStream = useCallback((myPeer: Peer, connectToNewUser: any) => navigator.mediaDevices.getUserMedia({
-        video: showCam,
-        audio: showMic
-    }).then((stream) => {
-        myPeer.on('call', call => {
-            if (showCam) {
-                myVideoRef.current.srcObject = stream;
-            } else {
-                stream.getTracks()[0].stop()
-            }
-
-            call.answer(stream)
-
-            videoRef.current.muted = true;
-            
-            call.on('stream', userVideoStream => {
-                videoRef.current.srcObject = userVideoStream;
-                console.log(userVideoStream.getTracks()[0].muted)
-            })
-        })
-
-        appState.socket.on('user-connected', (response: any) => {
-            let data = JSON.parse(response);
-            connectToNewUser(data.clientId, stream);
-        })
-    }) ,[showCam, showMic]) 
 
     import('peerjs').then(({ default: Peer }) => {
             
         const peers: any = {};
         const myPeer = new Peer();
 
-        getMediaStream(myPeer, connectToNewUser(data.clientId, stream))
+        navigator.mediaDevices.getUserMedia({
+            video: true,
+            audio: true
+        }).then((stream) => {
+            myPeer.on('call', call => {
+
+                stream.getVideoTracks()[0].enabled = showCam
+    
+                call.answer(stream)    
+                
+                call.on('stream', userVideoStream => {
+                    remoteVideoRef.current.srcObject = userVideoStream;
+                })
+            })
+    
+            appState.socket.on('user-connected', (response: any) => {
+                let data = JSON.parse(response);
+                connectToNewUser(data.clientId, stream);
+            })
+        })
         
         appState.socket.on('user-disconnected', (response: any) => {
             let dataRes: any = JSON.parse(response);
@@ -92,7 +84,7 @@ export default function OneToOneScreen({ chatRoomId, showCam, showMic, disconnec
         const connectToNewUser = (userId: any, stream: any) => {
             const call = myPeer.call(userId, stream);
             call.on('stream', userVideoStream => {
-                videoRef.current.srcObject = userVideoStream;
+                remoteVideoRef.current.srcObject = userVideoStream;
             })
             peers[userId] = call
         }
@@ -106,9 +98,9 @@ export default function OneToOneScreen({ chatRoomId, showCam, showMic, disconnec
     return (
         <>
             <VideoContainer>
-                <Video ref={videoRef} autoPlay />
+                <Video ref={remoteVideoRef} autoPlay />
                 {
-                    showCam ? <MyVideo ref={myVideoRef} muted autoPlay /> : <MyAvatar src={user?.photoURL!} width={0} height={0} alt='' />
+                    <MyVideo ref={localVideoRef} muted autoPlay />
                 }
                 <ActionContainer className='flex'>
                     {

@@ -2,6 +2,7 @@ import { MessageType } from "@/types/MessageType";
 import { getEmojiIcon } from "@/utils/getEmojiData";
 import DropdownActionMessage from "../DropdownActionMessage";
 import TimeAgo from "timeago-react";
+import MoreVertIcon from '@mui/icons-material/MoreVert'
 
 export default function RecieverTemplateText({ message, timestamp, lastIndex }: { message: MessageType, timestamp: any, lastIndex: boolean }) {
 
@@ -23,7 +24,9 @@ export default function RecieverTemplateText({ message, timestamp, lastIndex }: 
                         <div className="chat-text-box__content flex items-center float-left" title={timestamp}>
                             
                             <div className="box leading-relaxed dark:text-gray-300 text-gray-700 px-4 py-3 mt-3">{handleMessage()}</div>
-                            <DropdownActionMessage />
+                            <div className="hidden sm:block dropdown relative mr-3 mt-3">
+                                <MoreVertIcon fontSize='small'/>
+                            </div>
                         </div>
                     </div>
                 </div>

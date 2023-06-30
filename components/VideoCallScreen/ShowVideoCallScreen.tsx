@@ -10,6 +10,7 @@ import { StatusCallType, selectAppState, setShowVideoCallScreen, setStatusCall }
 import {useSelector,useDispatch} from 'react-redux'
 import { toast } from 'react-toastify'
 import VideocamIcon from '@mui/icons-material/Videocam';
+import getRecipientEmail from '@/utils/getRecipientEmail'
 export default function ShowVideoCallScreen({stream}: any) {
 
     const [showCam, setShowCam] = useState(true);
@@ -33,10 +34,24 @@ export default function ShowVideoCallScreen({stream}: any) {
 
     const handleShowCam = () => {
         setShowCam(!showCam);
+        let actionData = {
+            type: "cam",
+            enabled: showCam,
+            sender: appState.userInfo?.email,
+            recipient: appState.currentChat.isGroup ? appState.currentChat.users.filter((u) => u === appState.userInfo.email) : getRecipientEmail(appState.currentChat.users, appState.userInfo)
+        }
+        appState.socket.emit("action-change", JSON.stringify(actionData))
     }
 
     const handleShowMic = () => {
         setShowMic(!showMic);
+        let actionData = {
+            type: "mic",
+            enabled: showMic,
+            sender: appState.userInfo?.email,
+            recipient: appState.currentChat.isGroup ? appState.currentChat.users.filter((u) => u === appState.userInfo.email) : getRecipientEmail(appState.currentChat.users, appState.userInfo)
+        }
+        appState.socket.emit("action-change", JSON.stringify(actionData))
     }
 
     const handleRejectCall = () => {

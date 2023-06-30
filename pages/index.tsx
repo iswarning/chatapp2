@@ -120,7 +120,7 @@ const Page: NextPageWithLayout = () => {
         {
           Object.keys(appState.currentChat).length > 0 ? <>
             <ChatScreen chat={appState.currentChat} messages={appState.currentMessages} />
-            <InfoContentScreen />
+            {/* <InfoContentScreen /> */}
           </>  : null
         }
 

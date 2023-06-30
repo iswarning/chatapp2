@@ -29,6 +29,7 @@ import getUserBusy from "@/utils/getUserBusy";
 import sendNotificationFCM from "@/utils/sendNotificationFCM";
 import { MapUserData } from "@/types/UserType";
 import { requestMedia } from "@/utils/requestPermission";
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 
 export default function ChatScreen({ chat, messages }: { chat: ChatType, messages: Array<MessageType> }) {
   const [user] = useAuthState(auth);

@@ -9,15 +9,16 @@ import { ImageInMessageType } from '@/types/ImageInMessageType'
 import { MessageType } from '@/types/MessageType'
 import mime from 'mime-types'
 import {v4 as uuidv4} from 'uuid'
+import PermMediaIcon from '@mui/icons-material/PermMedia';
+import LinkIcon from '@mui/icons-material/Link';
+import DescriptionIcon from '@mui/icons-material/Description';
 
 function SharedFile({ messages, chatRoomId }: { messages: MessageType[], chatRoomId: string }) {
 
     const [active, setActive] = useState("Image")
 
-    const [images, setImages] = useState<any[]>([])
+    const [mediaFile, setMediaFile] = useState<any[]>([])
     const [files, setFiles] = useState<any[]>([])
-    const [videos, setVideos] = useState<any[]>([])
-    const [medias, setMedias] = useState<any[]>([])
 
     useEffect(() => {
         getAllFile()
@@ -37,28 +38,13 @@ function SharedFile({ messages, chatRoomId }: { messages: MessageType[], chatRoo
                         type: fileExtension,
                         path: result.fullPath
                     };
-                    switch(fileExtension) {
-
-                        case 'jpeg':
-                            setImages((old) => [ ...old, data ])
-                            break;
-
-                        case 'png':
-                            setImages((old) => [ ...old, data ])
-                            break;
-                            
-                        case 'mp4':
-                            setVideos((old) => [ ...old, data ])
-                            break;
-                              
-                        case 'mp3':
-                            setMedias((old) => [ ...old, data ])
-                            break; 
-
-                        default:
-                            setFiles((old) => [ ...old, data ])
-                            break; 
-                        
+                    if (fileExtension === "jpeg" 
+                    || fileExtension === "jpg" 
+                    || fileExtension === "png" 
+                    || fileExtension === "mp4") {
+                        setMediaFile((old) => [...old, data ])
+                    } else {
+                        setFiles((old) => [...old, data ])
                     }
                 })
             })
@@ -75,7 +61,7 @@ function SharedFile({ messages, chatRoomId }: { messages: MessageType[], chatRoo
                         type: fileExtension,
                         path: result.fullPath
                     };
-                    setImages((old) => [...old, data ])
+                    // setImages((old) => [...old, data ])
                 })
             })
         })
@@ -84,32 +70,32 @@ function SharedFile({ messages, chatRoomId }: { messages: MessageType[], chatRoo
   return (
     <>
         <div className="mt-4 overflow-x-hidden overflow-y-auto scrollbar-hidden">
-                <div className="flex mb-4">
-                    {
-                        active === "Image" ? <BtnActive>Image</BtnActive> : <BtnCutom onClick={() => setActive("Image")}>Image</BtnCutom>
+                <div>
+                    <LinkElement>
+                        <PermMediaIcon fontSize='medium' className='mr-2' /> Media File
+                    </LinkElement>
+                    <LinkElement>
+                        <DescriptionIcon fontSize='medium' className='mr-2' /> Other File
+                    </LinkElement>
+                    <LinkElement>
+                        <LinkIcon fontSize='medium' className='mr-2 hover:bg-sky-700' /> Link
+                    </LinkElement>
+                    {/* {
+                        active === "Media Files" ? <BtnActive>Image</BtnActive> : <BtnCutom onClick={() => setActive("Image")}>Image</BtnCutom>
                     }
                     {
-                        active === "File" ? <BtnActive>File</BtnActive> : <BtnCutom onClick={() => setActive("File")}>File</BtnCutom>
+                        active === "Other Files" ? <BtnActive>File</BtnActive> : <BtnCutom onClick={() => setActive("File")}>File</BtnCutom>
                     }
                     {
-                        active === "Video" ? <BtnActive>Video</BtnActive> : <BtnCutom onClick={() => setActive("Video")}>Video</BtnCutom>
-                    }
-                    {
-                        active === "Media" ? <BtnActive>Media</BtnActive> : <BtnCutom onClick={() => setActive("Media")}>Media</BtnCutom>
-                    }
+                        active === "Links" ? <BtnActive>File</BtnActive> : <BtnCutom onClick={() => setActive("File")}>File</BtnCutom>
+                    } */}
                 </div>
-                {
+                {/* {
                     active === "Image" && images.length > 0 ? images.map((image) => <FileElement key={image.key} file={image} chatRoomId={chatRoomId} />) : null
                 }
                 {
                     active === "File" && files.length > 0 ? files.map((file) => <FileElement key={file.key} file={file} chatRoomId={chatRoomId} />) : null
-                }
-                {
-                    active === "Video" && videos.length > 0 ? videos.map((file) => <FileElement key={file.key} file={file} chatRoomId={chatRoomId} />) : null
-                }
-                {
-                    active === "Media" && medias.length > 0 ? medias.map((file) => <FileElement key={file.key} file={file} chatRoomId={chatRoomId} />) : null
-                }
+                } */}
         </div>
     </>
   )
@@ -117,14 +103,14 @@ function SharedFile({ messages, chatRoomId }: { messages: MessageType[], chatRoo
 
 export default SharedFile
 
-const BtnCutom = styled.button`
-    margin-right: 20px;
-    &:focus {
-        border: none;
-        outline: none;
+const LinkElement = styled.div`
+    margin-bottom: 10px;
+    margin-left: 5px;
+    height: 100%;
+    cursor: pointer;
+    :hover {
+        background-color: whitesmoke;
+        border-radius: 10px;
     }
-`
-
-const BtnActive = styled(BtnCutom)`
-    border-bottom: 2px solid blue;
+    padding: 10px;
 `
