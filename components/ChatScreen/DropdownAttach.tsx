@@ -5,12 +5,13 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { auth, db, storage } from "../../firebase";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from 'react-redux'
-import { selectAppState } from "@/redux/appSlice";
+import { selectAppState, setAppState, setProgressState } from "@/redux/appSlice";
 import { v4 as uuidv4 } from 'uuid'
 import sendNotificationFCM from "@/utils/sendNotificationFCM";
-import { addMessageToFirebase, processAttachFile } from "./Functions";
+import { addMessageToFirebase } from "./Functions";
 import { MessageType } from "@/types/MessageType";
-
+import { getImageTypeFileValid } from "@/utils/getImageTypeFileValid";
+import firebase from "firebase";
 export default function DropdownAttach({ chatId, scrollToBottom, recipient, setProgress }: { chatId: string, scrollToBottom: any, recipient: any, setProgress: any }) {
 
   const [showDropdownAttach, setShowDropdownAttach] = useState(false);
@@ -95,27 +96,85 @@ export default function DropdownAttach({ chatId, scrollToBottom, recipient, setP
     }
   }
 
-  const handleAttachFile = (event: any) => {
-    processAttachFile(event, user?.email, appState.currentChat, setProgress).then((messageExport) => {
-
-      if (messageExport) {
-
-        let bodyNotify = "";
-
-        if (appState.currentChat.isGroup) {
-          bodyNotify = appState.currentChat.name + " sent a file "
-        } else {
-          bodyNotify = recipient.data().fullName + " sent a file "
+  const handleAttachFile = async(event: any) => {
+    event.preventDefault()
+    for(let i = 0; i < event.target.files.length ; i++) {
+      let file: File = event.target.files[i]
+      if (file) {
+        let fileType = file.name.split(".").pop();
+        let validImageTypes = getImageTypeFileValid();
+        let fileSize = file.size / 1024 / 1024;
+        if (!validImageTypes.includes(fileType ?? "")) {
+          toast("File upload invalid !", {
+            hideProgressBar: true,
+            type: "error",
+            autoClose: 5000,
+          });
+          return;
+        }
+        if (fileSize > 100) {
+          toast("Size file no larger than 100 MB !", {
+            hideProgressBar: true,
+            type: "error",
+            autoClose: 5000,
+          });
+          return;
         }
 
-        sendNotificationFCM("New message !", bodyNotify, { messageId: messageExport?.id, chatId: chatId } , recipient?.data()?.fcm_token).catch(
-          (err) => console.log(err)
-        );
+        let key = uuidv4();
+        let path = `public/chat-room/${chatId}/files/${key}`
+        
+        db
+        .collection("chats")
+        .doc(chatId)
+        .collection("messages")
+        .add({
+          user: user?.email,
+          type: "file",
+          key: key,
+          name: file.name,
+          size: fileSize.toFixed(1).toString(),
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        })
 
+          // upload file to storage
+          storage
+            .ref(path)
+            .put(file)
+            .on(
+              "state_changed",
+              (snapshot) => {
+                dispatch(setProgressState([
+                  ...appState.AppState.UploadProgressMultipleFile,
+                  {
+                  key: key,
+                  value: Math.round(
+                    (snapshot.bytesTransferred / snapshot.totalBytes) * 100)
+                }]))
+              },
+              (err) => {throw new Error(err.message)},
+              () => {
+                
+              }
+            );
+            NotifyMessage()
+          }
+    }
+  }
+
+    const NotifyMessage = () => {
+      let bodyNotify = "";
+
+      if (appState.currentChat.isGroup) {
+        bodyNotify = appState.currentChat.name + " sent a file "
+      } else {
+        bodyNotify = recipient.data().fullName + " sent a file "
       }
 
-    }) 
-  }
+      sendNotificationFCM("New message !", bodyNotify, recipient?.data()?.fcm_token).catch(
+        (err) => console.log(err)
+      );
+    }
 
     return (
       <div className="dropdown relative" data-placement="top">
@@ -145,6 +204,7 @@ export default function DropdownAttach({ chatId, scrollToBottom, recipient, setP
                   hidden
                   id="upload-file"
                   onChange={handleAttachFile}
+                  multiple
                 />
                 <AttachFileIcon
                   fontSize="small"

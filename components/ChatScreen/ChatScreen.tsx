@@ -29,7 +29,6 @@ import getUserBusy from "@/utils/getUserBusy";
 import sendNotificationFCM from "@/utils/sendNotificationFCM";
 import { MapUserData } from "@/types/UserType";
 import { requestMedia } from "@/utils/requestPermission";
-import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 
 export default function ChatScreen({ chat, messages }: { chat: ChatType, messages: Array<MessageType> }) {
   const [user] = useAuthState(auth);
@@ -75,30 +74,29 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
   };
 
   const showMessage = () => {
-    if (messageSnapshot) {
-      return messageSnapshot.docs?.map((message, index) => (
-        <Message
-          key={message.id}
-          message={MapMessageData(message)}
-          timestamp={message.data().timestamp}
-          chatId={chat.id}
-          lastIndex={messages[index] === messages[messages.length - 1]}
-          scrollToBottom={() => scrollToBottom()}
-        />
-      ));
-    } else {
-      return messages?.map((message: MessageType, index) => (
-        <Message
-          key={message.id}
-          message={message}
-          timestamp={message.timestamp}
-          chatId={chat.id}
-          lastIndex={messages[index] === messages[messages.length - 1]}
-          scrollToBottom={() => scrollToBottom()}
-        />
-      ));
-    }
-
+      if (messageSnapshot) {
+        return messageSnapshot.docs?.map((message, index) => (
+          <Message
+            key={message.id}
+            message={MapMessageData(message)}
+            timestamp={message.data().timestamp}
+            chatId={chat.id}
+            lastIndex={messages[index] === messages[messages.length - 1]}
+            scrollToBottom={() => scrollToBottom()}
+          />
+        ));
+      } else {
+        return messages?.map((message: MessageType, index) => (
+          <Message
+            key={message.id}
+            message={message}
+            timestamp={message.timestamp}
+            chatId={chat.id}
+            lastIndex={messages[index] === messages[messages.length - 1]}
+            scrollToBottom={() => scrollToBottom()}
+          />
+        ));
+      }
   };
 
   const sendMessage = async (e: any): Promise<any> => {
@@ -150,15 +148,13 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
           sendNotificationFCM(
             "New message !", 
             "New message from " + chat.name, 
-            { messageId: snap.id, chatId: chat.id }, 
             userInfo?.docs?.[0].data().fcm_token
           )
         }
       } else {
         sendNotificationFCM(
           "New message !", 
-          "New message from " + user?.displayName, 
-          { messageId: snap.id, chatId: chat.id }, 
+          "New message from " + user?.displayName,
           recipientInfo.fcm_token
         )
       }
@@ -283,11 +279,11 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
           </svg> 
         </a>
         </div>
-        {
+        {/* {
           progress > 0 && progress < 100 ? <div className="w-full bg-gray-200 rounded-full dark:bg-gray-700">
             <div className="text-xs font-medium text-center p-0.5 leading-none rounded-full" style={{width: `${progress}%`, background: '#6775F5', color: 'white', height: '15px'}}>{progress}%</div>
           </div> : null
-        }
+        } */}
       </div>
       {
         showEmoji ?  <EmojiContainerComponent onAddEmoji={(emoji: number) => addEmoji(emoji)} /> : null

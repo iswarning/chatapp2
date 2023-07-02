@@ -1,30 +1,30 @@
-import { db } from '@/firebase';
-import { ChunkFileType } from '@/types/ChunkFileType';
-import { FileInMessageType } from '@/types/FileInMessageType'
+import { storage } from '@/firebase';
 import { MessageType } from '@/types/MessageType';
 import { CircularProgress, Modal } from '@mui/material';
-import axios from 'axios';
-import React, { useEffect, useState } from 'react'
-import { useCollection } from 'react-firebase-hooks/firestore';
+import React from 'react'
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import { useDownloadURL } from 'react-firebase-hooks/storage';
+import { selectAppState } from '@/redux/appSlice';
+import {useSelector} from 'react-redux'
+import CancelIcon from '@mui/icons-material/Cancel';
+import styled from 'styled-components';
 
 export default function SenderTemplateFile({ 
-    file, 
-    message, 
-    chatId, 
-    timestamp, 
-    lastIndex 
+    file,
 }: { 
-    file: FileInMessageType | undefined, 
-    message: MessageType, 
-    chatId: string, 
-    timestamp: any, 
-    lastIndex: boolean 
+    file: MessageType,
 }) {
 
+    const appState = useSelector(selectAppState)
+
+    const storageRef = storage.ref(`public/chat-room/${appState.currentChat.id}/files/${file.key}`)
+
+    const [downloadUrl] = useDownloadURL(storageRef)
+
     const handleDownloadFile = async() => {
-        const response = await fetch(file?.url!);
+        const response = await fetch(downloadUrl!);
         const blob = await response.blob();
-        downloadBlob(blob, file?.name!)
+        downloadBlob(blob, file.name!)
     }
 
     function downloadBlob(blob: Blob, name: string) {
@@ -54,30 +54,41 @@ export default function SenderTemplateFile({
         // Remove link from body
         document.body.removeChild(link);
     }
+
+    const snapshot = appState.AppState.UploadProgressMultipleFile.find((data: any) => data.key === file.key)
+// console.log(snapshot)
+    const prog = snapshot ? snapshot.value : null
+console.log(appState.AppState.UploadProgressMultipleFile)
+    const fileName = file?.name!.split(".")[0]
+    const fileExtension = file?.name!.split(".").pop()
   
     return (
     <>
     {
-        file?.id ? <div className="intro-x chat-text-box flex items-end float-right mb-4">
+        <div className="intro-x chat-text-box flex items-end float-right mb-4">
             <div className="w-full">
                 <div>
                     <div className="chat-text-box__content flex items-center float-right">
-                        {/* <div className="hidden sm:block dropdown relative mr-3 mt-3">
-                            <a href="javascript:;" className="dropdown-toggle w-4 h-4"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
-                            <div className="dropdown-menu w-40">
-                                <div className="dropdown-menu__content box dark:bg-dark-1 p-2">
-                                    <a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-corner-up-left w-4 h-4 mr-2"><polyline points="9 14 4 9 9 4"></polyline><path d="M20 20v-7a4 4 0 0 0-4-4H4"></path></svg> Reply </a>
-                                    <a href="" className="flex items-center p-2 transition duration-300 ease-in-out bg-white dark:bg-dark-1 hover:bg-gray-200 dark:hover:bg-dark-2 rounded-md"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-trash w-4 h-4 mr-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> Delete </a>
-                                </div>
-                            </div>
-                        </div> */}
                         <div className="box leading-relaxed text-gray-700 dark:text-gray-300 flex flex-col sm:flex-row items-center mt-3 p-3">
                             <div className="chat-text-box__content__icon text-white w-12 flex-none bg-contain relative bg-no-repeat bg-center block">
-                                <div className="absolute m-auto top-0 left-0 right-0 bottom-0 flex items-center justify-center">{file?.type.toUpperCase()}</div>
+                                <div className="absolute m-auto top-0 left-0 right-0 bottom-0 flex items-center justify-center">{fileExtension?.toUpperCase()}</div>
                             </div>
                             <div className="sm:ml-3 mt-3 sm:mt-0 text-center sm:text-left">
-                                <div className="text-gray-700 dark:text-gray-300 whitespace-nowrap font-medium truncate">{file?.name.length >= 20 ? file.name.substring(0, 20) + "..." : file?.name}</div>
-                                <div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">Size: { Number((file?.size!).toFixed(1)) } MB</div>
+                                <div className="text-gray-700 dark:text-gray-300 whitespace-nowrap font-medium truncate">
+                                    { fileName.length >= 20 ? 
+                                        fileName.substring(0, 20) + "..." + fileExtension
+                                        : fileName + "." + fileExtension}
+                                </div>
+                                <div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">
+                                    Size: { prog ? Number(prog * Number(file.size) / 100).toFixed(1) + "/" : null } { file.size } MB { prog === 100 ? <DoneIcon fontSize='small' /> : <CancelIcon fontSize='small' style={{fontSize: "15px"}} /> }
+                                    {
+                                        prog ? <div style={{background: "#C1AEFC",height: "5px",width: `${prog}%`,borderRadius: "5px", marginTop: "5px"}}>
+                                        </div> : null
+                                    }
+                                    {
+                                        prog + "%"
+                                    }
+                                </div>
                             </div>
                             <div className="sm:ml-20 mt-3 sm:mt-0 flex">
                                 <a href="javascript:void(0)" className="tooltip w-8 h-8 block border rounded-full flex-none flex items-center justify-center ml-2 outline-none" onClick={() => handleDownloadFile()}> 
@@ -110,23 +121,14 @@ export default function SenderTemplateFile({
                 
             </div>
             
-        </div> : <>
-            <div className="-intro-x chat-text-box flex items-end float-right mb-4">
-                <div className="mr-4">
-                </div>
-                <div className="w-full">
-                    <div>
-                        <div className="chat-text-box__content flex items-center float-right">
-                            
-                            <div className="box leading-relaxed dark:text-gray-300 text-gray-700 px-4 py-3 mt-3"><CircularProgress color='info' /></div>
-
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </>
+        </div> 
     }
     <div className="clear-both"></div>
     </>
   )
 }
+
+const DoneIcon = styled(CheckCircleOutlineIcon)`
+    font-size: 15px;
+    color: rgb(193, 174, 252);
+`

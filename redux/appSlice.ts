@@ -36,7 +36,12 @@ export interface InitialState {
     acceptedCall: boolean,
     darkMode: boolean,
     stream: MediaStream | null
-  };
+    AppState: {
+      showDropdownActionUser: boolean,
+      UploadProgressMultipleFile: any
+    }
+  },
+  
 }
 
 // Initial state
@@ -53,8 +58,13 @@ const initialState: InitialState = {
     socket: io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!),
     acceptedCall: false,
     darkMode: false,
-    stream: null
+    stream: null,
+    AppState: {
+      showDropdownActionUser: false,
+      UploadProgressMultipleFile: Array<any>(),
+    }
   },
+
 };
 
 // Actual App
@@ -105,6 +115,20 @@ export const appSlice = createSlice({
 
     setStream(state, action) {
       state.data.stream = action.payload
+    },
+
+    setAppState(state, action) {
+      switch(action.payload.type) {
+        case "App/DropdownActionUser":
+          state.data.AppState.showDropdownActionUser = action.payload.data
+          break;
+        case "App/UploadProgressMultipleFile":
+          state.data.AppState.UploadProgressMultipleFile = action.payload.data
+      }
+    },
+
+    setProgressState(state, action) {
+      state.data.AppState.UploadProgressMultipleFile = action.payload
     }
     
   },
@@ -130,7 +154,9 @@ export const { setUserOnline,
   setDataVideoCall,
   setAcceptedCall,
   setDarkMode,
-  setStream
+  setStream,
+  setAppState,
+  setProgressState
    } = appSlice.actions;
 
 export const selectAppState = (state: AppState) => state.app.data;

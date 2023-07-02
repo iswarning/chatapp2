@@ -3,7 +3,6 @@ import Axios from "axios";
 export default async function sendNotificationFCM(
   title: string,
   message: string,
-  data: any,
   fcm_token: string | undefined
 ) {
   const body = {
@@ -11,8 +10,7 @@ export default async function sendNotificationFCM(
     notification: {
       body: message,
       title: title
-    },
-    data: data
+    }
   };
   const response = await Axios.post(
     `https://fcm.googleapis.com/fcm/send`,

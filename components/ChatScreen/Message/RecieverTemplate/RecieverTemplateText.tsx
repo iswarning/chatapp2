@@ -1,10 +1,12 @@
 import { MessageType } from "@/types/MessageType";
 import { getEmojiIcon } from "@/utils/getEmojiData";
-import DropdownActionMessage from "../DropdownActionMessage";
-import TimeAgo from "timeago-react";
 import MoreVertIcon from '@mui/icons-material/MoreVert'
+import { selectAppState } from "@/redux/appSlice";
+import {useSelector} from 'react-redux'
 
 export default function RecieverTemplateText({ message, timestamp, lastIndex }: { message: MessageType, timestamp: any, lastIndex: boolean }) {
+
+    const appState = useSelector(selectAppState)
 
     const handleMessage = () => {
         let messageExport: string = message.message;
@@ -17,8 +19,11 @@ export default function RecieverTemplateText({ message, timestamp, lastIndex }: 
     return (
         <>
             <div className="-intro-x chat-text-box flex items-end float-left mb-4">
-                <div className="mr-4">
-                </div>
+                {
+                    appState.currentChat.isGroup && lastIndex ? <div className="chat-text-box__photo w-10 h-10 hidden sm:block flex-none image-fit relative mr-4">
+                        <img alt="Topson Messenger Tailwind HTML Admin Template" className="rounded-full" src="https://topson.left4code.com/dist/images/profile-9.jpg"/>
+                    </div> : null
+                }
                 <div className="w-full">
                     <div>
                         <div className="chat-text-box__content flex items-center float-left" title={timestamp}>

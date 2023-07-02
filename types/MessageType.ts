@@ -14,7 +14,10 @@ export interface MessageType {
     reaction?: Array<ReactionType>
     imageInMessage?: Array<ImageInMessageType>
     imageAttach?: Array<ImageAttachType>
-    fileAttach?: FileInMessageType
+    fileAttach?: FileInMessageType,
+    key?: string,
+    size?: string,
+    name?: string,
     timestamp: any
     userInfo?: UserType
 }
@@ -28,5 +31,8 @@ export const MapMessageData = (message: firebase.firestore.DocumentSnapshot<fire
     messageData.seen = message?.data()?.seen;
     messageData.reaction = message?.data()?.reaction;
     messageData.timestamp = message?.data()?.timestamp;
+    messageData.key = message?.data()?.key;
+    messageData.size = message?.data()?.size;
+    messageData.name = message?.data()?.name;
     return messageData;
 }

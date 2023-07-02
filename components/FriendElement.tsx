@@ -21,12 +21,18 @@ export default function FriendElement({ email }: { email: string }) {
     <>
     {
         userInfo ? <div className="intro-x block mt-2">
-        <div className="box dark:bg-dark-3 cursor-pointer relative flex items-center px-4 py-3 zoom-in ">
+        <div className="box dark:bg-dark-3 cursor-pointer relative flex items-center px-4 py-3">
         <div className="w-10 h-10 flex-none image-fit mr-1">
         {
             userInfo.docs?.[0].data()?.photoURL ? <Image src={userInfo.docs?.[0].data().photoURL} width={48} height={48} alt='' className="rounded-full" /> : null
         }
-        <div className="bg-green-500 border-white w-3 h-3 absolute right-0 bottom-0 rounded-full border-2"></div>
+        {
+          appState.userOnline?.find((u: any) => u === userInfo.docs?.[0].data().email) ? (
+            <div className="border-white w-3 h-3 absolute right-0 bottom-0 rounded-full border-2" style={{background: 'green'}}></div>
+            ) : (
+            <span className="border-white w-3 h-3 absolute right-0 bottom-0 rounded-full border-2" style={{background: 'gray'}}></span>
+            )
+        }
         </div>
         <div className="ml-2 overflow-hidden">
         <a href="javascript:void(0)" className="font-medium">{userInfo.docs?.[0].data().fullName}</a>

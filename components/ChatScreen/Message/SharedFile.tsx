@@ -1,32 +1,27 @@
 import FileElement from '@/components/FileElement'
 import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
-import {useSelector} from 'react-redux'
-import { selectAppState } from '@/redux/appSlice'
 import { storage } from '@/firebase'
-import { FileInMessageType } from '@/types/FileInMessageType'
-import { ImageInMessageType } from '@/types/ImageInMessageType'
-import { MessageType } from '@/types/MessageType'
 import mime from 'mime-types'
 import {v4 as uuidv4} from 'uuid'
-import PermMediaIcon from '@mui/icons-material/PermMedia';
-import LinkIcon from '@mui/icons-material/Link';
-import DescriptionIcon from '@mui/icons-material/Description';
+import { useSelector } from 'react-redux'
+import { selectAppState } from '@/redux/appSlice'
 
-function SharedFile({ messages, chatRoomId }: { messages: MessageType[], chatRoomId: string }) {
+function SharedFile() {
 
-    const [active, setActive] = useState("Image")
+    const [active, setActive] = useState("Media Files")
 
     const [mediaFile, setMediaFile] = useState<any[]>([])
     const [files, setFiles] = useState<any[]>([])
+    const appState = useSelector(selectAppState)
 
     useEffect(() => {
         getAllFile()
     },[])
 
     function getAllFile() {
-        let pathFile = `public/chat-room/${chatRoomId}/files`;
-        let pathPhoto = `public/chat-room/${chatRoomId}/photos`
+        let pathFile = `public/chat-room/${appState.currentChat.id}/files`;
+        let pathPhoto = `public/chat-room/${appState.currentChat.id}/photos`
         storage.ref(pathFile).listAll().then((results) => {
             results.items.forEach((result) => {
                 result.getMetadata().then((meta) => {
@@ -35,16 +30,15 @@ function SharedFile({ messages, chatRoomId }: { messages: MessageType[], chatRoo
                         size: meta.size / 1024 / 1024,
                         key:  uuidv4(),
                         name: meta.name, 
-                        type: fileExtension,
                         path: result.fullPath
                     };
-                    if (fileExtension === "jpeg" 
-                    || fileExtension === "jpg" 
-                    || fileExtension === "png" 
-                    || fileExtension === "mp4") {
-                        setMediaFile((old) => [...old, data ])
-                    } else {
-                        setFiles((old) => [...old, data ])
+                    switch(fileExtension) {
+                        case "jpeg" || "jpg" || "png":
+                            setMediaFile((old) => [...old, { ...data, type: "image", extension: fileExtension } ])
+                        case "mp4":
+                            setMediaFile((old) => [...old, { ...data, type: "video", extension: fileExtension } ])
+                        default:
+                            setFiles((old) => [...old, { ...data, type: "file", extension: fileExtension } ])
                     }
                 })
             })
@@ -57,11 +51,10 @@ function SharedFile({ messages, chatRoomId }: { messages: MessageType[], chatRoo
                     let data = {
                         size: meta.size / 1024 / 1024,
                         key:  uuidv4(),
-                        name: meta.name, 
-                        type: fileExtension,
+                        name: meta.name,
                         path: result.fullPath
                     };
-                    // setImages((old) => [...old, data ])
+                    setMediaFile((old) => [...old, { ...data, type: "image", extension: fileExtension } ])
                 })
             })
         })
@@ -69,33 +62,24 @@ function SharedFile({ messages, chatRoomId }: { messages: MessageType[], chatRoo
 
   return (
     <>
-        <div className="mt-4 overflow-x-hidden overflow-y-auto scrollbar-hidden">
-                <div>
-                    <LinkElement>
-                        <PermMediaIcon fontSize='medium' className='mr-2' /> Media File
-                    </LinkElement>
-                    <LinkElement>
-                        <DescriptionIcon fontSize='medium' className='mr-2' /> Other File
-                    </LinkElement>
-                    <LinkElement>
-                        <LinkIcon fontSize='medium' className='mr-2 hover:bg-sky-700' /> Link
-                    </LinkElement>
-                    {/* {
-                        active === "Media Files" ? <BtnActive>Image</BtnActive> : <BtnCutom onClick={() => setActive("Image")}>Image</BtnCutom>
+        <div className="mt-4 overflow-x-hidden overflow-y-auto scrollbar-hidden" style={{maxHeight: '450px'}}>
+                <div className='flex'>
+                    {
+                        active === "Media Files" ? <BtnActive>Media Files</BtnActive> : <BtnCustom onClick={() => setActive("Media Files")}>Media Files</BtnCustom>
                     }
                     {
-                        active === "Other Files" ? <BtnActive>File</BtnActive> : <BtnCutom onClick={() => setActive("File")}>File</BtnCutom>
+                        active === "Other Files" ? <BtnActive>Other Files</BtnActive> : <BtnCustom onClick={() => setActive("Other Files")}>Other Files</BtnCustom>
                     }
                     {
-                        active === "Links" ? <BtnActive>File</BtnActive> : <BtnCutom onClick={() => setActive("File")}>File</BtnCutom>
-                    } */}
+                        active === "Links" ? <BtnActive>Links</BtnActive> : <BtnCustom onClick={() => setActive("Links")}>Links</BtnCustom>
+                    }
                 </div>
-                {/* {
-                    active === "Image" && images.length > 0 ? images.map((image) => <FileElement key={image.key} file={image} chatRoomId={chatRoomId} />) : null
+                {
+                    active === "Media Files" && mediaFile.length > 0 ? mediaFile.map((file) => <FileElement key={file.key} file={file} />) : null
                 }
                 {
-                    active === "File" && files.length > 0 ? files.map((file) => <FileElement key={file.key} file={file} chatRoomId={chatRoomId} />) : null
-                } */}
+                    active === "Other Files" && files.length > 0 ? files.map((file) => <FileElement key={file.key} file={file} />) : null
+                }
         </div>
     </>
   )
@@ -103,14 +87,10 @@ function SharedFile({ messages, chatRoomId }: { messages: MessageType[], chatRoo
 
 export default SharedFile
 
-const LinkElement = styled.div`
-    margin-bottom: 10px;
-    margin-left: 5px;
-    height: 100%;
+const BtnCustom = styled.div`
     cursor: pointer;
-    :hover {
-        background-color: whitesmoke;
-        border-radius: 10px;
-    }
-    padding: 10px;
+    margin-right: 10px;
+`
+const BtnActive = styled(BtnCustom)`
+    border-bottom: 2px solid #01C8CA;
 `

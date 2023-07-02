@@ -121,7 +121,7 @@ export default function Message({
               message.type === "text-image" ? <SenderTemplateTextImage imgs={imageInMessageSnap?.docs.map((image) => MapImageInMessageData(image))!} message={message} timestamp={new Date(timestamp).getTime()} lastIndex={lastIndex} scrollToBottom={() => scrollToBottom()} /> : null
             }
             {
-              message.type === "file" ? <SenderTemplateFile file={MapFileInMessageData(fileInMessageSnap?.docs?.[0]!)} message={message} chatId={chatId} lastIndex={lastIndex} timestamp={new Date(timestamp).getTime()} /> : null
+              message.type === "file" ? <SenderTemplateFile file={message} /> : null
             }
             {
               message.type === "image" ? <SenderTemplateImage imgs={imageAttachSnap?.docs.map((image) => MapImageAttachData(image))} timestamp={new Date(timestamp).getTime()} onShowImage={(urlImage: any) => {setUrlImage(urlImage);setShowImageFullscreen(true)}} lastIndex={lastIndex} /> : null
@@ -135,7 +135,7 @@ export default function Message({
               message.type === "text-image" ? <RecieverTemplateTextImage imgs={imageInMessageSnap?.docs.map((image) => MapImageInMessageData(image))!} message={message} timestamp={new Date(timestamp).getTime()} lastIndex={lastIndex} /> : null
             }
             {
-              message.type === "file" ? <RecieverTemplateFile file={MapFileInMessageData(fileInMessageSnap?.docs?.[0]!)} message={message} chatId={chatId} lastIndex={lastIndex} timestamp={new Date(timestamp).getTime()} /> : null
+              message.type === "file" ? <RecieverTemplateFile file={message} lastIndex={lastIndex} /> : null
             }
             {
               message.type === "image" ? <RecieverTemplateImage imgs={imageAttachSnap?.docs.map((image) => MapImageAttachData(image))} timestamp={new Date(timestamp).getTime()} lastIndex={lastIndex} onShowImage={(urlImage: any) => {setUrlImage(urlImage);setShowImageFullscreen(true)}} /> : null

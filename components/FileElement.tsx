@@ -4,11 +4,11 @@ import Image from 'next/image'
 import React from 'react'
 import { useDownloadURL } from 'react-firebase-hooks/storage';
 
-export default function FileElement({ file, chatRoomId }: any) {
+export default function FileElement({ file }: any) {
 
-    const isFile = file.type !== 'jpeg' && file.type !== "png"
+    const isFile = file.type === "file"
 
-    const fileName = file.name.length > 20 ? file.name.slice(0, 20) + "..." : file.name
+    const fileName = file.name.length > 20 ? file.name.slice(0, 20) + "..." + file.extension : file.name + "." + file.extension
 
 const [value, loading, error] = useDownloadURL(
     storage
@@ -17,9 +17,15 @@ const [value, loading, error] = useDownloadURL(
   return (
     <div className="shared-file border-gray-200 dark:border-dark-5 flex items-center p-3 border rounded-md relative mt-3">
         {
+            loading ? <div className='text-center'><CircularProgress size={30} /></div> : null
+        }
+        {
             isFile ? <div className="shared-file__icon text-white w-12 flex-none bg-contain relative bg-no-repeat bg-center block">
                 <div className="absolute m-auto top-0 left-0 right-0 bottom-0 flex items-center justify-center">{file.type.toUpperCase()}</div>
-            </div> : value ? loading ? <div className='text-center'><CircularProgress size={30} /></div> :<Image src={value!} width={0} height={0} alt='' className='rounded-md' style={{height: '50px', width: '50px'}} /> : null
+            </div> : null
+        }
+        {
+            value && file.type === "image" ? <Image src={value!} width={50} height={50} alt='' className='rounded-md' style={{height: '50px', width: '50px'}} /> : null
         }
         <div className="w-full ml-3">
             <div className="text-gray-700 dark:text-gray-300 whitespace-nowrap font-medium truncate">{fileName}</div>

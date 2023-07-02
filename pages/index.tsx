@@ -17,6 +17,7 @@ import { toast } from "react-toastify";
 import { useRouter } from "next/router";
 import InfoContentScreen from "@/components/ChatScreen/InfoContentScreen";
 import ChatScreen from "@/components/ChatScreen/ChatScreen";
+import DropdownActionUser from "@/components/DropdownActionUser";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -120,11 +121,12 @@ const Page: NextPageWithLayout = () => {
         {
           Object.keys(appState.currentChat).length > 0 ? <>
             <ChatScreen chat={appState.currentChat} messages={appState.currentMessages} />
-            {/* <InfoContentScreen /> */}
+            <InfoContentScreen />
           </>  : null
         }
 
         { appState.showVideoCallScreen ? <VideoCallScreen open={appState.showVideoCallScreen} /> : null }
+        { appState.AppState.showDropdownActionUser ? <DropdownActionUser /> : null }
         </div>
       </div>
     </>
