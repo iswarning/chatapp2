@@ -1,11 +1,15 @@
 import { configureStore, ThunkAction, Action } from "@reduxjs/toolkit";
 import { createWrapper } from "next-redux-wrapper";
 import { appSlice } from "./appSlice";
+import { chatSlice } from "./chatSlice";
+import { messageSlice } from "./messageSlice";
 
 const makeStore = () =>
   configureStore({
     reducer: {
       [appSlice.name]: appSlice.reducer,
+      [chatSlice.name]: chatSlice.reducer,
+      [messageSlice.name]: messageSlice.reducer,
     },
     devTools: true,
     middleware: getDefaultMiddleware =>
