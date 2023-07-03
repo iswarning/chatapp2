@@ -1,5 +1,6 @@
 import { auth, db } from "@/firebase";
-import { StatusCallType, selectAppState, setDataVideoCall, setShowVideoCallScreen, setStatusCall } from "@/redux/appSlice";
+import { selectAppState } from "@/redux/appSlice";
+import { StatusCallType, selectVideoCallState, setGlobalVideoCallState } from "@/redux/videoCallSlice";
 import { ChatType } from "@/types/ChatType";
 import { MapUserData } from "@/types/UserType";
 import getRecipientEmail from "@/utils/getRecipientEmail";
@@ -14,6 +15,7 @@ import { toast } from "react-toastify";
 export default function UserOnlineComponent({ userOn }: { userOn: string }) {
     const [user] = useAuthState(auth);
     const appState = useSelector(selectAppState)
+    const videoCallState = useSelector(selectVideoCallState)
     const dispatch = useDispatch()
 
     const [recipientSnapshot] = useCollection(
@@ -38,7 +40,7 @@ export default function UserOnlineComponent({ userOn }: { userOn: string }) {
         event.preventDefault()
         let userBusy = await getUserBusy();
 
-        if(!appState.showVideoCallScreen) {
+        if(!videoCallState.showVideoCallScreen) {
 
             if(userBusy.includes(userInfo.email) || !appState.userOnline.find((userOn) => userInfo.email === userOn)) {
 
@@ -53,8 +55,14 @@ export default function UserOnlineComponent({ userOn }: { userOn: string }) {
                     return;
                 }
 
-                dispatch(setShowVideoCallScreen(true))
-                dispatch(setStatusCall(StatusCallType.CALLING));
+                dispatch(setGlobalVideoCallState({
+                    type: "setShowVideoCallScreen",
+                    data: true
+                }))
+                dispatch(setGlobalVideoCallState({
+                    type: "setStatusCall",
+                    data: StatusCallType.CALLING
+                }));
                 let data = {
                     sender: user?.email,
                     recipient: userInfo.email,
@@ -62,7 +70,10 @@ export default function UserOnlineComponent({ userOn }: { userOn: string }) {
                     isGroup: chatInfo?.data().isGroup,
                     photoURL: userInfo.photoURL,
                 }
-                dispatch(setDataVideoCall(data))
+                dispatch(setGlobalVideoCallState({
+                    type: "setDataVideoCall",
+                    data: data
+                }))
                 appState.socket.emit("call-video-one-to-one", JSON.stringify(data));
             }
         }

@@ -7,10 +7,12 @@ import { useSelector } from 'react-redux'
 import { selectAppState } from "@/redux/appSlice";
 import { v4 as uuidv4 } from 'uuid';
 import ChatComponent from "../ChatScreen/ChatComponent";
+import { selectChatState } from "@/redux/chatSlice";
 
 export default function SidebarMessage() {
   const [user] = useAuthState(auth);
   const appState = useSelector(selectAppState)
+  const chatState = useSelector(selectChatState)
 
   const [chatSnapshot] = useCollection(
     db.collection("chats").where("users", "array-contains", user?.email)
@@ -44,7 +46,7 @@ export default function SidebarMessage() {
               <ChatComponent
                 key={chat.id}
                 chat={MapChatData(chat)}
-                active={appState.currentChat?.id === chat.id}
+                active={chatState.currentChat?.id === chat.id}
               />
             ))
         : null}

@@ -4,10 +4,17 @@ import { HYDRATE } from "next-redux-wrapper";
 import { ChatType } from "@/types/ChatType";
 import { MessageType } from "@/types/MessageType";
 
+export enum StatusCallType {
+  INCOMING_CALL,
+  CALLING,
+  CALLED,
+  DISCONNECT_CALL
+}
+
 // Type for our state
 export interface InitialState {
   data: {
-    statusCall: string,
+    statusCall: StatusCallType | null,
     showVideoCallScreen: boolean,
     dataVideoCall: any,
     acceptedCall: boolean,
@@ -18,7 +25,7 @@ export interface InitialState {
 // Initial state
 const initialState: InitialState = {
   data: {
-    statusCall: "",
+    statusCall: null,
     showVideoCallScreen: false,
     dataVideoCall: {},
     acceptedCall: false,
@@ -27,12 +34,12 @@ const initialState: InitialState = {
 };
 
 // Actual App
-export const messageSlice = createSlice({
-  name: "message",
+export const videoCallSlice = createSlice({
+  name: "videoCall",
   initialState,
   reducers: {
 
-    setGlobalChatState(state, action) {
+    setGlobalVideoCallState(state, action) {
       switch(action.payload.type) {
         case "setStatusCall":
             state.data.statusCall = action.payload.data
@@ -59,16 +66,16 @@ export const messageSlice = createSlice({
     [HYDRATE]: (state, action) => {
       return {
         ...state,
-        ...action.payload.message,
+        ...action.payload.videoCall,
       };
     },
   },
 });
 
 export const {
-  setGlobalChatState, 
-   } = messageSlice.actions;
+  setGlobalVideoCallState, 
+   } = videoCallSlice.actions;
 
-export const selectChatState = (state: AppState) => state.message.data;
+export const selectVideoCallState = (state: AppState) => state.videoCall.data;
 
-export default messageSlice.reducer;
+export default videoCallSlice.reducer;

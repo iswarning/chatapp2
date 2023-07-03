@@ -5,19 +5,21 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { auth, db, storage } from "../../firebase";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from 'react-redux'
-import { selectAppState, setAppState, setProgressState } from "@/redux/appSlice";
-import { v4 as uuidv4 } from 'uuid'
+import { selectAppState, setAppGlobalState } from "@/redux/appSlice";
+import { v4 as uuidv4, v5 } from 'uuid'
 import sendNotificationFCM from "@/utils/sendNotificationFCM";
 import { addMessageToFirebase } from "./Functions";
 import { MessageType } from "@/types/MessageType";
 import { getImageTypeFileValid } from "@/utils/getImageTypeFileValid";
 import firebase from "firebase";
+import { selectChatState } from "@/redux/chatSlice";
 export default function DropdownAttach({ chatId, scrollToBottom, recipient, setProgress }: { chatId: string, scrollToBottom: any, recipient: any, setProgress: any }) {
 
   const [showDropdownAttach, setShowDropdownAttach] = useState(false);
   const [user] = useAuthState(auth);
   const dispatch = useDispatch()
   const appState = useSelector(selectAppState)
+  const chatState = useSelector(selectChatState)
 
   async function onImageChange(event: any) {
     event.preventDefault();
@@ -144,13 +146,13 @@ export default function DropdownAttach({ chatId, scrollToBottom, recipient, setP
             .on(
               "state_changed",
               (snapshot) => {
-                dispatch(setProgressState([
-                  ...appState.AppState.UploadProgressMultipleFile,
-                  {
-                  key: key,
-                  value: Math.round(
-                    (snapshot.bytesTransferred / snapshot.totalBytes) * 100)
-                }]))
+                dispatch(setAppGlobalState({
+                  type: "setProgress",
+                  data: {
+                    key: key,
+                    value: Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100)
+                  }
+                }))
               },
               (err) => {throw new Error(err.message)},
               () => {
@@ -165,8 +167,8 @@ export default function DropdownAttach({ chatId, scrollToBottom, recipient, setP
     const NotifyMessage = () => {
       let bodyNotify = "";
 
-      if (appState.currentChat.isGroup) {
-        bodyNotify = appState.currentChat.name + " sent a file "
+      if (chatState.currentChat.isGroup) {
+        bodyNotify = chatState.currentChat.name + " sent a file "
       } else {
         bodyNotify = recipient.data().fullName + " sent a file "
       }

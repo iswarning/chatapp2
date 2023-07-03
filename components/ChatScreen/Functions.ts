@@ -86,7 +86,7 @@ export function handleImageInMessage() {
 
   let message = "";
   let countImg = 0;
-  let listElementImg: any = {};
+  let listElementImg: any[] = [];
   
   for (let i = 0; i < sizeInput; i++) { 
     let key = uuidv4();
@@ -96,7 +96,10 @@ export function handleImageInMessage() {
         break;
       case "IMG":
         message += `<br>${key}<br>`;
-        listElementImg[key] = listImage[countImg]
+        listElementImg.push({
+          key: key,
+          element: listImage[countImg]
+        })
         countImg++;
         break;
       case "BR":
@@ -111,7 +114,10 @@ export function handleImageInMessage() {
               break;
             case "IMG":
               message += `<br>${key}<br>`;
-              listElementImg[key] = listImage[countImg]
+              listElementImg.push({
+                key: key,
+                element: listImage[countImg]
+              })
               countImg++;
               break;
             case "BR":

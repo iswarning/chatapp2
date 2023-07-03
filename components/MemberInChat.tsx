@@ -4,10 +4,11 @@ import { useCollection } from 'react-firebase-hooks/firestore'
 import { db } from '@/firebase'
 import { MapUserData } from '@/types/UserType'
 import {useDispatch,useSelector} from 'react-redux'
-import { selectAppState, setAppState } from '@/redux/appSlice'
+import { selectAppState } from '@/redux/appSlice'
 import styled from 'styled-components'
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import { selectChatState } from '@/redux/chatSlice'
 export default function MemberInChat({email}: {email: string}) {
   const [showAction, setShowAction] = useState(false)
   const [userInfo] = useCollection(
@@ -19,8 +20,8 @@ export default function MemberInChat({email}: {email: string}) {
 
   const info = MapUserData(userInfo?.docs?.[0]!)
 
-  const dispatch = useDispatch()
   const appState = useSelector(selectAppState)
+  const chatState = useSelector(selectChatState)
 
   return (
     <div className="shared-file border-gray-200 dark:border-dark-5 flex items-center p-3 border rounded-md mt-3">
@@ -36,7 +37,7 @@ export default function MemberInChat({email}: {email: string}) {
               showAction ? <ActionContainer className='box'>
               <ActionElement className='mb-2'><AccountCircleIcon fontSize='small' /> Profile</ActionElement>
                 {
-                  appState.currentChat.admin === appState.userInfo.email ? <ActionElement><ExitToAppIcon fontSize='small' /> This user leave group</ActionElement> : null
+                  chatState.currentChat.admin === appState.userInfo.email ? <ActionElement><ExitToAppIcon fontSize='small' /> This user leave group</ActionElement> : null
                 }
               </ActionContainer>: null
             }

@@ -1,5 +1,6 @@
 import { storage } from '@/firebase';
 import { selectAppState } from '@/redux/appSlice';
+import { selectChatState } from '@/redux/chatSlice';
 import { MessageType } from '@/types/MessageType';
 import React from 'react'
 import { useDownloadURL } from 'react-firebase-hooks/storage';
@@ -7,9 +8,9 @@ import {useSelector} from 'react-redux'
 
 export default function RecieverTemplateFile({ file, lastIndex }: { file: MessageType, lastIndex: boolean }) {
 
-    const appState = useSelector(selectAppState)
-
-    const storageRef = storage.ref(`public/chat-room/${appState.currentChat.id}/files/${file?.key}`)
+    const chatState = useSelector(selectChatState)
+    
+    const storageRef = storage.ref(`public/chat-room/${chatState.currentChat.id}/files/${file?.key}`)
 
     const [downloadUrl] = useDownloadURL(storageRef)
 
@@ -47,10 +48,6 @@ export default function RecieverTemplateFile({ file, lastIndex }: { file: Messag
         document.body.removeChild(link);
     }
 
-    const snapshot = appState.AppState.UploadProgressMultipleFile.find((data) => data.key === file?.key)
-
-    const prog = snapshot ? Math.round((snapshot.value.bytesTransferred / snapshot.value.totalBytes) * 100) : null
-
     const fileName = file?.name!.split(".")[0]
     const fileExtension = file?.name!.split(".").pop()
   
@@ -59,7 +56,7 @@ export default function RecieverTemplateFile({ file, lastIndex }: { file: Messag
     {
         <div className="-intro-x chat-text-box flex items-end float-left mb-4">
             {
-                appState.currentChat.isGroup && lastIndex ? <div className="chat-text-box__photo w-10 h-10 hidden sm:block flex-none image-fit relative mr-4">
+                chatState.currentChat.isGroup && lastIndex ? <div className="chat-text-box__photo w-10 h-10 hidden sm:block flex-none image-fit relative mr-4">
                     <img alt="Topson Messenger Tailwind HTML Admin Template" className="rounded-full" src="https://topson.left4code.com/dist/images/profile-9.jpg"/>
                 </div> : null
             }
@@ -68,10 +65,10 @@ export default function RecieverTemplateFile({ file, lastIndex }: { file: Messag
                     <div className="chat-text-box__content flex items-center float-left">
                         <div className="box leading-relaxed text-gray-700 dark:text-gray-300 flex flex-col sm:flex-row items-center mt-3 p-3">
                             <div className="chat-text-box__content__icon text-white w-12 flex-none bg-contain relative bg-no-repeat bg-center block">
-                                <div className="absolute m-auto top-0 left-0 right-0 bottom-0 flex items-center justify-center">{file?.type?.toUpperCase()}</div>
+                                <div className="absolute m-auto top-0 left-0 right-0 bottom-0 flex items-center justify-center">{fileExtension?.toUpperCase()}</div>
                             </div>
                             <div className="sm:ml-3 mt-3 sm:mt-0 text-center sm:text-left">
-                                <div className="text-gray-700 dark:text-gray-300 whitespace-nowrap font-medium truncate">{fileName?.length! >= 20 ? fileName?.substring(0, 20) + "..." : file?.name}</div>
+                                <div className="text-gray-700 dark:text-gray-300 whitespace-nowrap font-medium truncate">{fileName?.length! >= 20 ? fileName?.substring(0, 20) + "..." + fileExtension : fileName + "." + fileExtension}</div>
                                 <div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">Size: { file?.size! } MB</div>
                             </div>
                             <div className="sm:ml-20 mt-3 sm:mt-0 flex">

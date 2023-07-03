@@ -14,12 +14,14 @@ import VideocamOffIcon from '@mui/icons-material/VideocamOff';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import Peer from 'peerjs';
+import { selectVideoCallState } from '@/redux/videoCallSlice';
 
 
 export default function OneToOneScreen({ chatRoomId, showCam, showMic, disconnectCall }: { chatRoomId: string,showCam: boolean, showMic: boolean, disconnectCall: any }) {
     
     const remoteVideoRef: any = useRef(null);
     const appState = useSelector(selectAppState)
+    const videoCallState = useSelector(selectVideoCallState)
     const [user] = useAuthState(auth);
     const localVideoRef: any = useRef(null)
     const [userCam, setUserCam] = useState(false)
@@ -74,7 +76,7 @@ export default function OneToOneScreen({ chatRoomId, showCam, showMic, disconnec
         myPeer.on('open', id => {
             let data = {
                 clientId: id,
-                chatRoomId: appState.dataVideoCall.chatId,
+                chatRoomId: videoCallState.dataVideoCall.chatId,
                 sender: user?.email,
                 name: user?.displayName
             }

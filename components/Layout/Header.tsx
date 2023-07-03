@@ -7,7 +7,7 @@ import { useState } from "react";
 import { useCollection } from "react-firebase-hooks/firestore";
 import { MapFriendRequestData } from "@/types/FriendRequestType";
 import { useDispatch, useSelector } from 'react-redux'
-import { selectAppState, setDarkMode } from "@/redux/appSlice";
+import { selectAppState } from "@/redux/appSlice";
 
 export default function Header() {
 

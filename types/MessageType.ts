@@ -10,16 +10,18 @@ export interface MessageType {
     message: string
     type: string
     user: string
-    seen: Array<string>
+    seen?: Array<string>
     reaction?: Array<ReactionType>
     imageInMessage?: Array<ImageInMessageType>
     imageAttach?: Array<ImageAttachType>
-    fileAttach?: FileInMessageType,
-    key?: string,
-    size?: string,
-    name?: string,
+    fileAttach?: FileInMessageType
+    key?: string
+    size?: string
+    name?: string
     timestamp: any
     userInfo?: UserType
+    file: string
+    images: string
 }
 
 export const MapMessageData = (message: firebase.firestore.DocumentSnapshot<firebase.firestore.DocumentData>): MessageType => {

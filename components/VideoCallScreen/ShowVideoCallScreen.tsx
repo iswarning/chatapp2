@@ -6,16 +6,20 @@ import { ActionBtn, ActionBtnActive } from './VideoCallScreenStyled'
 import VideoCameraFrontIcon from '@mui/icons-material/VideoCameraFront';
 import CallEndIcon from '@mui/icons-material/CallEnd';
 import MicIcon from '@mui/icons-material/Mic';
-import { StatusCallType, selectAppState, setShowVideoCallScreen, setStatusCall } from '@/redux/appSlice'
+import { selectAppState } from '@/redux/appSlice'
 import {useSelector,useDispatch} from 'react-redux'
 import { toast } from 'react-toastify'
 import VideocamIcon from '@mui/icons-material/Videocam';
 import getRecipientEmail from '@/utils/getRecipientEmail'
+import { selectChatState } from '@/redux/chatSlice'
+import { StatusCallType, selectVideoCallState, setGlobalVideoCallState } from '@/redux/videoCallSlice'
 export default function ShowVideoCallScreen({stream}: any) {
 
     const [showCam, setShowCam] = useState(true);
     const [showMic, setShowMic] = useState(true);
     // const [stream, setStream] = useState<MediaStream>()
+    const chatState = useSelector(selectChatState)
+    const videoCallState = useSelector(selectVideoCallState)
     const appState = useSelector(selectAppState)
     const dispatch = useDispatch()
 
@@ -24,7 +28,10 @@ export default function ShowVideoCallScreen({stream}: any) {
             let data = JSON.parse(res);
             if(data.recipient.includes(appState.userInfo.email)) {
                 toast(`${data.notify}`, { type: "info", hideProgressBar: true, autoClose: 5000,  })
-                dispatch(setStatusCall(StatusCallType.DISCONNECT_CALL))
+                dispatch(setGlobalVideoCallState({
+                    type: "setStatusCall",
+                    data: StatusCallType.DISCONNECT_CALL
+                }))
             }
         })
         return () => {
@@ -38,7 +45,7 @@ export default function ShowVideoCallScreen({stream}: any) {
             type: "cam",
             enabled: showCam,
             sender: appState.userInfo?.email,
-            recipient: appState.currentChat.isGroup ? appState.currentChat.users.filter((u) => u === appState.userInfo.email) : getRecipientEmail(appState.currentChat.users, appState.userInfo)
+            recipient: chatState.currentChat.isGroup ? chatState.currentChat.users.filter((u) => u === appState.userInfo.email) : getRecipientEmail(chatState.currentChat.users, appState.userInfo)
         }
         appState.socket.emit("action-change", JSON.stringify(actionData))
     }
@@ -49,27 +56,32 @@ export default function ShowVideoCallScreen({stream}: any) {
             type: "mic",
             enabled: showMic,
             sender: appState.userInfo?.email,
-            recipient: appState.currentChat.isGroup ? appState.currentChat.users.filter((u) => u === appState.userInfo.email) : getRecipientEmail(appState.currentChat.users, appState.userInfo)
+            recipient: chatState.currentChat.isGroup ? chatState.currentChat.users.filter((u) => u === appState.userInfo.email) : getRecipientEmail(chatState.currentChat.users, appState.userInfo)
         }
         appState.socket.emit("action-change", JSON.stringify(actionData))
     }
 
     const handleRejectCall = () => {
-        dispatch(setShowVideoCallScreen(false))
         let data = {
-            isGroup: appState.dataVideoCall.isGroup,
-            sender: appState.dataVideoCall.sender,
+            isGroup: videoCallState.dataVideoCall.isGroup,
+            sender: videoCallState.dataVideoCall.sender,
             notify: appState.userInfo.fullName + " has left the room",
-            recipient: appState.currentChat.isGroup ? appState.currentChat.users : appState.dataVideoCall.recipient
+            recipient: chatState.currentChat.isGroup ? chatState.currentChat.users : videoCallState.dataVideoCall.recipient
         }
         appState.socket.emit("disconnect-call", JSON.stringify(data))
-        dispatch(setStatusCall(StatusCallType.DISCONNECT_CALL))
-        dispatch(setShowVideoCallScreen(false))
+        dispatch(setGlobalVideoCallState({
+            type: "setStatusCall",
+            data: StatusCallType.DISCONNECT_CALL
+        }))
+        dispatch(setGlobalVideoCallState({
+            type: "setShowVideoCallScreen",
+            data: false
+        }))
     }
 
   return (
     <Container>
-        <ContainerMainVideo><OneToOneScreen chatRoomId={appState.dataVideoCall.chatId} showCam={showCam} showMic={showMic} disconnectCall={handleRejectCall} /></ContainerMainVideo>
+        <ContainerMainVideo><OneToOneScreen chatRoomId={videoCallState.dataVideoCall.chatId} showCam={showCam} showMic={showMic} disconnectCall={handleRejectCall} /></ContainerMainVideo>
             
             <ActionContainer>
                 {

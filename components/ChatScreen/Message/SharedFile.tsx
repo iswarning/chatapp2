@@ -6,6 +6,7 @@ import mime from 'mime-types'
 import {v4 as uuidv4} from 'uuid'
 import { useSelector } from 'react-redux'
 import { selectAppState } from '@/redux/appSlice'
+import { selectChatState } from '@/redux/chatSlice'
 
 function SharedFile() {
 
@@ -13,15 +14,15 @@ function SharedFile() {
 
     const [mediaFile, setMediaFile] = useState<any[]>([])
     const [files, setFiles] = useState<any[]>([])
-    const appState = useSelector(selectAppState)
+    const chatState = useSelector(selectChatState)
 
     useEffect(() => {
         getAllFile()
     },[])
 
     function getAllFile() {
-        let pathFile = `public/chat-room/${appState.currentChat.id}/files`;
-        let pathPhoto = `public/chat-room/${appState.currentChat.id}/photos`
+        let pathFile = `public/chat-room/${chatState.currentChat.id}/files`;
+        let pathPhoto = `public/chat-room/${chatState.currentChat.id}/photos`
         storage.ref(pathFile).listAll().then((results) => {
             results.items.forEach((result) => {
                 result.getMetadata().then((meta) => {

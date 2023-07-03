@@ -26,7 +26,7 @@ export const messageSlice = createSlice({
   initialState,
   reducers: {
 
-    setGlobalChatState(state, action) {
+    setGlobalMessageState(state, action) {
       switch(action.payload.type) {
         case "setCurrentMessages":
             state.data.currentMessages = action.payload.data
@@ -34,7 +34,7 @@ export const messageSlice = createSlice({
         case "addNewMessage":
             state.data.currentMessages = [
                 ...state.data.currentMessages,
-                action.payload.data.newMessage
+                action.payload.data
             ]
             break;
         default:
@@ -57,9 +57,9 @@ export const messageSlice = createSlice({
 });
 
 export const {
-  setGlobalChatState, 
+  setGlobalMessageState, 
    } = messageSlice.actions;
 
-export const selectChatState = (state: AppState) => state.message.data;
+export const selectMessageState = (state: AppState) => state.message.data;
 
 export default messageSlice.reducer;

@@ -16,9 +16,9 @@ import {
   pushUrlImageToFirestore
 } from "./Functions";
 import { useSelector, useDispatch } from 'react-redux';
-import { StatusCallType, selectAppState, setDataVideoCall, setShowVideoCallScreen, setStatusCall } from "@/redux/appSlice";
+import { selectAppState } from "@/redux/appSlice";
 import { ChatType } from "@/types/ChatType";
-import { MapMessageData, MessageType } from "@/types/MessageType";
+import { MessageType } from "@/types/MessageType";
 import Image from "next/image";
 import EmojiContainerComponent from "@/components/ChatScreen/EmojiContainerComponent";
 import styled from "styled-components";
@@ -29,7 +29,11 @@ import getUserBusy from "@/utils/getUserBusy";
 import sendNotificationFCM from "@/utils/sendNotificationFCM";
 import { MapUserData } from "@/types/UserType";
 import { requestMedia } from "@/utils/requestPermission";
-
+import { StatusCallType, selectVideoCallState, setGlobalVideoCallState } from "@/redux/videoCallSlice";
+import { setGlobalMessageState } from "@/redux/messageSlice";
+import { setGlobalChatState } from "@/redux/chatSlice";
+import {v4 as uuidv4} from 'uuid'
+import firebase from "firebase";
 export default function ChatScreen({ chat, messages }: { chat: ChatType, messages: Array<MessageType> }) {
   const [user] = useAuthState(auth);
   const endOfMessageRef: any = useRef(null);
@@ -37,14 +41,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
   const [progress, setProgress] = useState(0);
   const dispatch = useDispatch()
   const appState = useSelector(selectAppState)
-
-  const [messageSnapshot] = useCollection(
-    db
-    .collection("chats")
-    .doc(chat.id)
-    .collection("messages")
-    .orderBy("timestamp")
-  )
+  const videoCallState = useSelector(selectVideoCallState)
 
   const [recipientSnapshot] = useCollection(
     db
@@ -56,7 +53,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
 
   useEffect(() => {
     scrollToBottom();
-  }, [messageSnapshot, messages]);
+  }, [messages]);
 
   const scrollToBottom = () => {
     endOfMessageRef.current.scrollIntoView({ behavior: "smooth" });
@@ -74,100 +71,103 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
   };
 
   const showMessage = () => {
-      if (messageSnapshot) {
-        return messageSnapshot.docs?.map((message, index) => (
-          <Message
-            key={message.id}
-            message={MapMessageData(message)}
-            timestamp={message.data().timestamp}
-            chatId={chat.id}
-            lastIndex={messages[index] === messages[messages.length - 1]}
-            scrollToBottom={() => scrollToBottom()}
-          />
-        ));
-      } else {
-        return messages?.map((message: MessageType, index) => (
-          <Message
-            key={message.id}
-            message={message}
-            timestamp={message.timestamp}
-            chatId={chat.id}
-            lastIndex={messages[index] === messages[messages.length - 1]}
-            scrollToBottom={() => scrollToBottom()}
-          />
-        ));
-      }
+    return messages?.map((message: MessageType, index) => (
+      <Message
+        key={message.id}
+        message={message}
+        timestamp={message.timestamp}
+        chatId={chat.id}
+        lastIndex={messages[index] === messages[messages.length - 1]}
+        scrollToBottom={() => scrollToBottom()}
+      />
+    ));
   };
 
   const sendMessage = async (e: any): Promise<any> => {
+    let { listElementImg, message } = handleImageInMessage();
+    let newMessage = {} as MessageType;
+
+    newMessage.id = uuidv4()
+    newMessage.message = message
+    newMessage.timestamp = firebase.firestore.FieldValue.serverTimestamp()
+    newMessage.user = user?.email!
+
+    if (listElementImg.length > 0) {
+      newMessage.type = "text"
+    } else {
+      newMessage.type = "text-image"
+      let newArray = []
+      if (listElementImg.length > 0) {
+        for(const item of listElementImg) {
+          newArray.push({
+            key: item.key,
+            downloadUrl: item.element.src
+          })
+        }
+      }
+      newMessage.images = JSON.stringify(newArray)
+    }
+
+    dispatch(setGlobalMessageState({
+      type: "addNewMessage",
+      data: newMessage
+    }))
+
+    dispatch(setGlobalChatState({
+      type: "pushMessageToListChat",
+      data: {
+        chatId: chat.id,
+        newMessage: newMessage
+      }
+    }))
+
     e.preventDefault();
 
-    let { listElementImg, message } = handleImageInMessage();
+    let arrayImg = []
+    if (listElementImg.length > 0) {
+      for(const item of listElementImg) {
+          const response = await fetch(item.element.src);
+          const blob = await response.blob();
+          let path = `public/chat-room/${chat.id}/photos/${item.key}`
+          storage
+            .ref(path)
+            .put(blob)
+            .then(() => {
+              storage.ref(path).getDownloadURL().then((url) => {
+                arrayImg.push({
+                  key: item.key,
+                  downloadUrl: url
+                })
+              })
+            })
+            .catch(err => console.log(err.message))
+      }
+    }
 
-    const { messageDoc } = await addMessageToFirebase(
-      message,
-      Object.keys(listElementImg).length > 0 ? "text-image" : "text",
+    addMessageToFirebase(
+      newMessage.message,
+      newMessage.type,
       user?.email,
       chat.id
-    );
-
-    if (messageDoc) {
-      const snap = await messageDoc.get();
-      if (Object.keys(listElementImg).length > 0) {
-        for(const key of Object.keys(listElementImg)) {
-            const response = await fetch(listElementImg[key].src);
-            const blob = await response.blob();
-            let path = `public/chat-room/${chat.id}/photos/${key}`
-            storage
-              .ref(path)
-              .put(blob)
-              .on(
-                "state_changed",
-                (snapshot) => {
-                  const prog = Math.round(
-                    (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-                  );
-                  setProgress(prog);
-                },
-                (err) => console.log(err),
-                () => {
-                  pushUrlImageToFirestore(
-                    snap.id,
-                    chat.id,
-                    scrollToBottom,
-                    key,
-                    path
-                  );
-                }
-              );
-        }
-      }
-      if (chat.isGroup) {
-        for(const email of chat.users.filter((email) => email !== user?.email)) {
-          let userInfo = await db.collection("users").where("email",'==',email).limit(1).get()
-          sendNotificationFCM(
-            "New message !", 
-            "New message from " + chat.name, 
-            userInfo?.docs?.[0].data().fcm_token
-          )
-        }
-      } else {
-        sendNotificationFCM(
-          "New message !", 
-          "New message from " + user?.displayName,
-          recipientInfo.fcm_token
-        )
-      }
-    } else {
-      toast("Error when send message !", {
-        hideProgressBar: true,
-        type: "error",
-        autoClose: 5000,
-      });
-      const element = document.getElementById("input-message");
-      if (element) element.innerHTML = "";
-      return
-    }
+    ).then(ref => {
+      ref.messageDoc.get().then((data) => {
+        appState.socket.emit("send-notify", JSON.stringify(
+          { 
+            recipient: chat.users, 
+            message: `${chat.isGroup ? chat.name : user?.displayName}: ${data?.data()?.message}`,
+            type: "send-message",
+            messageId: data.id,
+            chatId: chat.id
+          }
+        ))
+        
+        toast("Error when send message !", {
+          hideProgressBar: true,
+          type: "error",
+          autoClose: 5000,
+        });
+      })
+    })
 
     const element = document.getElementById("input-message");
     if (element) element.innerHTML = "";
@@ -188,7 +188,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
 
     let userBusy = await getUserBusy();
 
-    if(!appState.showVideoCallScreen) {
+    if(!videoCallState.showVideoCallScreen) {
 
         if(userBusy.includes(userInfo.email) || !appState.userOnline.find((userOn) => userInfo.email === userOn)) {
 
@@ -204,8 +204,14 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
               return;
             }
 
-            dispatch(setShowVideoCallScreen(true))
-            dispatch(setStatusCall(StatusCallType.CALLING));
+            dispatch(setGlobalVideoCallState({
+              type: "setShowVideoCallScreen",
+              data: true
+            }))
+            dispatch(setGlobalVideoCallState({
+              type: "setStatusCall",
+              data: StatusCallType.CALLING
+            }));
             let data = {
                 sender: user?.email,
                 recipient: userInfo.email,
@@ -213,7 +219,10 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
                 isGroup: chatInfo.isGroup,
                 photoURL: userInfo.photoURL,
             }
-            dispatch(setDataVideoCall(data))
+            dispatch(setGlobalVideoCallState({
+              type: "setDataVideoCall",
+              data: data
+            }))
             appState.socket.emit("call-video-one-to-one", JSON.stringify(data));
         }
     }

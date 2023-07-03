@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext, ReactEventHandler, SyntheticEvent, useRef } from 'react'
+import { useEffect, useState, ReactEventHandler, SyntheticEvent, useRef } from 'react'
 import { 
     faMagnifyingGlassPlus,
     faMagnifyingGlassMinus,
@@ -15,6 +15,7 @@ import Image from 'next/image'
 import { v4 as uuidv4 } from 'uuid'
 import 'html2canvas'
 import html2canvas from 'html2canvas'
+import { selectChatState } from '@/redux/chatSlice'
 
 const useImageLoaded = () => {
     const [loaded, setLoaded] = useState(false)
@@ -49,12 +50,13 @@ export default function ShowImageFullScreen(
     const [urls, setUrls] = useState<Array<string>>([])
     const [urlImg, setUrlImg] = useState(urlImage)
     const appState = useSelector(selectAppState)
+    const chatState = useSelector(selectChatState)
     const [ref, loaded, onLoad] = useImageLoaded()
 
     useEffect(() => {
         const getListImage = async() => {
 
-            let path = `public/chat-room/${appState.currentChat.id}/photos`
+            let path = `public/chat-room/${chatState.currentChat.id}/photos`
             try {
                 (await storage.ref(path).listAll()).items.forEach((photo) => {
                     photo.getDownloadURL().then((url) => setUrls((u: any) => [...u, url])).catch(err => console.log(err))

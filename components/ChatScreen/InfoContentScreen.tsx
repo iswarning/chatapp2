@@ -13,21 +13,23 @@ import CustomChat from '../CustomChat'
 import MemberInChat from '../MemberInChat'
 import MemberElement from '../MemberElement'
 import FriendElement from '../FriendElement'
+import { selectChatState } from '@/redux/chatSlice'
 export default function InfoContentScreen() {
 
     const [user] = useAuthState(auth)
+    const chatState = useSelector(selectChatState)
     const appState = useSelector(selectAppState)
     const [showSharedFile, setShowSharedFile] = useState(false)
     const [showCustom, setShowCustom] = useState(false)
     const [showMember, setShowMember] = useState(false)
 
     const [recipientSnapshot] = useCollection(
-        db.collection("users").where("email",'==', getRecipientEmail(appState.currentChat.users, appState.userInfo))
+        db.collection("users").where("email",'==', getRecipientEmail(chatState.currentChat.users, appState.userInfo))
     )
 
     const getRecipientAvatar = () => {
-        if (appState.currentChat?.isGroup) {
-          if (appState.currentChat?.photoURL.length > 0) return appState.currentChat?.photoURL;
+        if (chatState.currentChat?.isGroup) {
+          if (chatState.currentChat?.photoURL.length > 0) return chatState.currentChat?.photoURL;
           else return "/images/group-default.jpg";
         } else {
           let photoUrl = recipientSnapshot?.docs?.[0]?.data().photoURL;
@@ -47,7 +49,7 @@ export default function InfoContentScreen() {
                                     getRecipientAvatar() ? <Image src={getRecipientAvatar()} width={100} height={100} alt='' className='rounded-full' /> : null
                                 }
                             </div>
-                        <div className="text-base font-medium text-center mt-3">{ appState.currentChat.isGroup ? "Group: " + appState.currentChat.name : recipientSnapshot?.docs?.[0]?.data().fullName}</div>
+                        <div className="text-base font-medium text-center mt-3">{ chatState.currentChat.isGroup ? "Group: " + chatState.currentChat.name : recipientSnapshot?.docs?.[0]?.data().fullName}</div>
                     </div>
                     {/* <div className="intro-y h-full box p-4">
                         <div className="text-base font-medium cursor-pointer" onClick={() => setShowSharedFile(!showSharedFile)}>Shared Files { showSharedFile ? <ArrowDropDownIcon fontSize='small' /> : <ArrowDropUpIcon fontSize='small' />}</div>
@@ -79,13 +81,13 @@ export default function InfoContentScreen() {
                     </div>
                 </div>
                 {
-                    appState.currentChat.isGroup ? <div className="py-2">
+                    chatState.currentChat.isGroup ? <div className="py-2">
                         <div className="intro-y h-full box p-4">
                             <div className="text-base font-medium cursor-pointer" onClick={() => setShowMember(!showMember)}>Members in chat { showMember ? <ArrowDropDownIcon fontSize='small' /> : <ArrowDropUpIcon fontSize='small' />}</div>
                             
                             <div className="overflow-x-hidden overflow-y-auto" style={{maxHeight: '450px'}}>
                                 {
-                                    showMember ? appState.currentChat.users.filter((user) => 
+                                    showMember ? chatState.currentChat.users.filter((user) => 
                                         user !== appState.userInfo.email).map((user) => 
                                             <MemberInChat email={user} />)  : null
                                 }

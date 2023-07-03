@@ -5,15 +5,17 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { auth, db } from "@/firebase";
 import { Modal } from "@mui/material";
 import {useSelector,useDispatch} from 'react-redux'
-import { StatusCallType, selectAppState, setShowVideoCallScreen, setStatusCall } from "@/redux/appSlice";
+import { selectAppState } from "@/redux/appSlice";
 import styled from "styled-components";
 import ShowVideoCallScreen from "./ShowVideoCallScreen";
 import { useState } from "react";
+import { StatusCallType, selectVideoCallState, setGlobalVideoCallState } from "@/redux/videoCallSlice";
 
 export default function VideoCallScreen({open}: any) {
 
     const [user] = useAuthState(auth);
     const appState = useSelector(selectAppState)
+    const videoCallState = useSelector(selectVideoCallState)
     const dispatch = useDispatch()
     const [stream, setStream] = useState()
     const getUserInfo = async(email: string) => {
@@ -25,11 +27,14 @@ export default function VideoCallScreen({open}: any) {
     }
     
     const handleAcceptCall = () => {
-        dispatch(setStatusCall(StatusCallType.CALLED))
+        dispatch(setGlobalVideoCallState({
+            type: "setStatusCall",
+            data: StatusCallType.CALLED
+        }))
         let data: any = {
-            sender: appState.dataVideoCall.recipient,
-            recipient: appState.dataVideoCall.sender,
-            chatId: appState.dataVideoCall.chatId
+            sender: videoCallState.dataVideoCall.recipient,
+            recipient: videoCallState.dataVideoCall.sender,
+            chatId: videoCallState.dataVideoCall.chatId
         }
         appState.socket.emit("accept-call-one-to-one", JSON.stringify(data))
         
@@ -37,22 +42,25 @@ export default function VideoCallScreen({open}: any) {
 
     const handleRejectCall = () => {
         
-        dispatch(setShowVideoCallScreen(false))
+        dispatch(setGlobalVideoCallState({
+            type: "setShowVideoCallScreen",
+            data: false
+        }))
 
-            if (appState.statusCall === StatusCallType.CALLING) {
-                getUserInfo(appState.dataVideoCall.sender).then((d) => {
+            if (videoCallState.statusCall === StatusCallType.CALLING) {
+                getUserInfo(videoCallState.dataVideoCall.sender).then((d) => {
                     let data: any = {
-                        sender: appState.dataVideoCall.sender,
-                        recipient: appState.dataVideoCall.recipient,
+                        sender: videoCallState.dataVideoCall.sender,
+                        recipient: videoCallState.dataVideoCall.recipient,
                         name: d?.fullName,
-                        chatId: appState.dataVideoCall.chatId,
-                        isGroup: appState.dataVideoCall.isGroup
+                        chatId: videoCallState.dataVideoCall.chatId,
+                        isGroup: videoCallState.dataVideoCall.isGroup
                     }
                     appState.socket.emit("reject-call-one-to-one", JSON.stringify(data))
                 }).catch((err) => console.log(err))
             }
 
-        if (appState.statusCall === StatusCallType.INCOMING_CALL) {
+        if (videoCallState.statusCall === StatusCallType.INCOMING_CALL) {
 
             // getUserInfo(user?.email!).then((d) => {
             //     let recipientData = [];
@@ -72,10 +80,10 @@ export default function VideoCallScreen({open}: any) {
             getUserInfo(user?.email!).then((d) => {
                 let data: any = {
                     sender: user?.email,
-                    recipient: appState.dataVideoCall.recipient,
+                    recipient: videoCallState.dataVideoCall.recipient,
                     name: d?.fullName,
-                    chatId: appState.dataVideoCall.chatId,
-                    isGroup: appState.dataVideoCall.isGroup
+                    chatId: videoCallState.dataVideoCall.chatId,
+                    isGroup: videoCallState.dataVideoCall.isGroup
                 }
                 appState.socket.emit("reject-call-one-to-one", JSON.stringify(data))
             }).catch((err) => console.log(err))
@@ -91,15 +99,15 @@ export default function VideoCallScreen({open}: any) {
         <>
         <ModalContainer open={open}>
             {
-                appState.statusCall === StatusCallType.CALLED ? <ShowVideoCallScreen stream={stream}  /> : <VideoCalling>
+                videoCallState.statusCall === StatusCallType.CALLED ? <ShowVideoCallScreen stream={stream}  /> : <VideoCalling>
                 <UserContainer>
 
                     <ContentCenter>
-                        <Pulse> <UserAvatar src={appState.dataVideoCall.photoURL}/> </Pulse>
+                        <Pulse> <UserAvatar src={videoCallState.dataVideoCall.photoURL}/> </Pulse>
                     </ContentCenter>                  
                     <BtnContainer>
                         {
-                            appState.statusCall === StatusCallType.INCOMING_CALL ? <><BtnRejectCall title="Cancel" onClick={handleRejectCall}>
+                            videoCallState.statusCall === StatusCallType.INCOMING_CALL ? <><BtnRejectCall title="Cancel" onClick={handleRejectCall}>
                                 <CallEndIcon fontSize="large"/>
                             </BtnRejectCall>
                             <BtnAcceptCall onClick={handleAcceptCall}>

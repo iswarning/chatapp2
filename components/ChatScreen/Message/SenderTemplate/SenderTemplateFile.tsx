@@ -8,6 +8,7 @@ import { selectAppState } from '@/redux/appSlice';
 import {useSelector} from 'react-redux'
 import CancelIcon from '@mui/icons-material/Cancel';
 import styled from 'styled-components';
+import { selectChatState } from '@/redux/chatSlice';
 
 export default function SenderTemplateFile({ 
     file,
@@ -16,8 +17,9 @@ export default function SenderTemplateFile({
 }) {
 
     const appState = useSelector(selectAppState)
+    const chatState = useSelector(selectChatState)
 
-    const storageRef = storage.ref(`public/chat-room/${appState.currentChat.id}/files/${file.key}`)
+    const storageRef = storage.ref(`public/chat-room/${chatState.currentChat.id}/files/${file.key}`)
 
     const [downloadUrl] = useDownloadURL(storageRef)
 
@@ -55,10 +57,10 @@ export default function SenderTemplateFile({
         document.body.removeChild(link);
     }
 
-    const snapshot = appState.AppState.UploadProgressMultipleFile.find((data: any) => data.key === file.key)
+    const snapshot = appState.UploadProgressMultipleFile.find((data: any) => data.key === file.key)
 // console.log(snapshot)
     const prog = snapshot ? snapshot.value : null
-console.log(appState.AppState.UploadProgressMultipleFile)
+console.log(appState.UploadProgressMultipleFile)
     const fileName = file?.name!.split(".")[0]
     const fileExtension = file?.name!.split(".").pop()
   

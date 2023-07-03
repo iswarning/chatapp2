@@ -7,7 +7,7 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@/firebase";
 import Loading from "@/components/Loading";
 import {useDispatch, useSelector} from 'react-redux'
-import { SidebarType, StatusCallType, selectAppState, setAcceptedCall, setCurrentMessages, setDataVideoCall, setShowVideoCallScreen, setStatusCall, setUserInfo, setUserOnline } from "@/redux/appSlice";
+import { SidebarType, selectAppState, setAppGlobalState } from "@/redux/appSlice";
 import SidebarGroups from "@/components/Sidebar/SidebarGroups";
 import SidebarContact from "@/components/Sidebar/SidebarContact";
 import SidebarProfile from "@/components/Sidebar/SidebarProfile";
@@ -18,6 +18,10 @@ import { useRouter } from "next/router";
 import InfoContentScreen from "@/components/ChatScreen/InfoContentScreen";
 import ChatScreen from "@/components/ChatScreen/ChatScreen";
 import DropdownActionUser from "@/components/DropdownActionUser";
+import { selectChatState } from "@/redux/chatSlice";
+import { selectMessageState } from "@/redux/messageSlice";
+import { StatusCallType, selectVideoCallState, setGlobalVideoCallState } from "@/redux/videoCallSlice";
+import getNotification from "@/utils/getNotifications";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -28,12 +32,17 @@ const Page: NextPageWithLayout = () => {
   
   const dispatch = useDispatch();
   const appState = useSelector(selectAppState);
-  const router = useRouter();
+  const chatState = useSelector(selectChatState);
+  const messageState = useSelector(selectMessageState);
+  const videoCallState = useSelector(selectVideoCallState);
 
   useEffect(() => {
     setLoading(true)
     getInitialState(user?.uid).then((data) => {
-      dispatch(setUserInfo(data.userInfo))
+      dispatch(setAppGlobalState({
+        type: "setUserInfo",
+        data: data.userInfo
+      }))
     })
     .catch(err => console.log(err))
     .finally(() => setLoading(false))
@@ -41,7 +50,10 @@ const Page: NextPageWithLayout = () => {
 
   useEffect(() => {
     appState.socket.on("get-user-online", (data) => {
-      dispatch(setUserOnline(data))
+      dispatch(setAppGlobalState({
+        type: "setUserOnline",
+        data: data
+      }))
     });
     return () => {
       appState.socket.disconnect();
@@ -52,14 +64,23 @@ const Page: NextPageWithLayout = () => {
       appState.socket.on("response-call-video-one-to-one", (res: string) => {
         let data = JSON.parse(res);
         if(data.recipient === user?.email) {
-            dispatch(setDataVideoCall({
-              chatId: data.chatId,
-              sender: user?.email,
-              recipient: data.sender,
-              isGroup: data.isGroup,
+            dispatch(setGlobalVideoCallState({
+              type: "setDataVideoCall",
+              data: {
+                chatId: data.chatId,
+                sender: user?.email,
+                recipient: data.sender,
+                isGroup: data.isGroup,
+              } 
             }))
-            dispatch(setShowVideoCallScreen(true))
-            dispatch(setStatusCall(StatusCallType.INCOMING_CALL))
+            dispatch(setGlobalVideoCallState({
+              type: "setShowVideoCallScreen",
+              data: true
+            }))
+            dispatch(setGlobalVideoCallState({
+              type: "setStatusCall",
+              data: StatusCallType.INCOMING_CALL
+            }))
         }
       });
       return () => {
@@ -71,7 +92,10 @@ const Page: NextPageWithLayout = () => {
     appState.socket.on("response-accept-call-one-to-one", (res: string) => {
       let data = JSON.parse(res);
       if(data.sender === user?.email) {
-          dispatch(setStatusCall(StatusCallType.CALLED))
+        dispatch(setGlobalVideoCallState({
+          type: "setStatusCall",
+          data: StatusCallType.CALLED
+        }))
       }
     })
     return () => {
@@ -83,12 +107,38 @@ const Page: NextPageWithLayout = () => {
     appState.socket.on('response-reject-call-one-to-one', (res: string) => {
       let data = JSON.parse(res);
       if(data.recipient === user?.email) {
-          dispatch(setShowVideoCallScreen(false))
+        dispatch(setGlobalVideoCallState({
+          type: "setShowVideoCallScreen",
+          data: false
+        }))
       }
     });
     return () => {
       appState.socket.disconnect();
     };
+  },[])
+
+  useEffect(() => {
+    appState.socket.on("response-notify", (msg: string) => {
+      const data = JSON.parse(msg);
+
+      if(data.type === 'send-message' && data.recipient.includes(user?.email)) {
+        dispatch()
+        toast(`${data.message}`, { hideProgressBar: true, autoClose: 5000, type: 'info' })
+      }  
+
+      if(data.type === 'accept-friend' && data.recipient.includes(user?.email)) {
+        toast(`${data.message}`, { hideProgressBar: true, autoClose: 5000, type: 'info' })
+      }
+
+      if(data.type === 'send-add-friend' && data.recipient.includes(user?.email)) {
+        toast(`${data.message}`, { hideProgressBar: true, autoClose: 5000, type: 'info' })
+      }  
+
+    });
+    return () => {
+      appState.socket.disconnect()
+    }
   },[])
 
   return (
@@ -119,14 +169,13 @@ const Page: NextPageWithLayout = () => {
         }
 
         {
-          Object.keys(appState.currentChat).length > 0 ? <>
-            <ChatScreen chat={appState.currentChat} messages={appState.currentMessages} />
+          Object.keys(chatState.currentChat).length > 0 ? <>
+            <ChatScreen chat={chatState.currentChat} messages={messageState.currentMessages} />
             <InfoContentScreen />
           </>  : null
         }
 
-        { appState.showVideoCallScreen ? <VideoCallScreen open={appState.showVideoCallScreen} /> : null }
-        { appState.AppState.showDropdownActionUser ? <DropdownActionUser /> : null }
+        { videoCallState.showVideoCallScreen ? <VideoCallScreen open={videoCallState.showVideoCallScreen} /> : null }
         </div>
       </div>
     </>

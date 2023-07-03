@@ -3,6 +3,7 @@ import { createWrapper } from "next-redux-wrapper";
 import { appSlice } from "./appSlice";
 import { chatSlice } from "./chatSlice";
 import { messageSlice } from "./messageSlice";
+import { videoCallSlice } from "./videoCallSlice";
 
 const makeStore = () =>
   configureStore({
@@ -10,6 +11,7 @@ const makeStore = () =>
       [appSlice.name]: appSlice.reducer,
       [chatSlice.name]: chatSlice.reducer,
       [messageSlice.name]: messageSlice.reducer,
+      [videoCallSlice.name]: videoCallSlice.reducer,
     },
     devTools: true,
     middleware: getDefaultMiddleware =>

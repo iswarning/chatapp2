@@ -8,7 +8,7 @@ import Image from "next/image";
 import TimeAgo from "timeago-react";
 import { useEffect, useState } from "react";
 import {useSelector} from 'react-redux'
-import { selectAppState, setCurrentChat, setCurrentMessages } from "@/redux/appSlice";
+import { selectAppState } from "@/redux/appSlice";
 import { useDispatch } from 'react-redux'
 import { ChatType } from "@/types/ChatType";
 import { MapMessageData } from "@/types/MessageType";
@@ -18,12 +18,16 @@ import { MapImageInMessageData } from "@/types/ImageInMessageType";
 import { MapImageAttachData } from "@/types/ImageAttachType";
 import { MapFileInMessageData } from "@/types/FileInMessageType";
 import { MapUserData } from "@/types/UserType";
+import { selectChatState, setGlobalChatState } from "@/redux/chatSlice";
+import { selectMessageState, setGlobalMessageState } from "@/redux/messageSlice";
 
 export default function ChatComponent({ chat, active }: { chat: ChatType, active: boolean}) {
   const [user] = useAuthState(auth);
   const router = useRouter();
   const [userOnline, setUserOnline] = useState<Array<string>>();
   const appState = useSelector(selectAppState)
+  const chatState = useSelector(selectChatState)
+  const messageState = useSelector(selectMessageState)
   const dispatch = useDispatch()
 
   useEffect(() => {
@@ -54,8 +58,26 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
   );
 
   const handleShowChatScreen = async() => {
-    dispatch(setCurrentChat(chat))
-    dispatch(setCurrentMessages(await getMessage(chat.id)))
+    let chatExist = chatState.listChat.find((chatExist) => chatExist.id === chat.id)
+    if (chatExist?.messages) {
+      dispatch(setGlobalChatState({
+        type: "setCurrentChat",
+        data: chatExist
+      }))
+      dispatch(setGlobalMessageState({
+        type: "setCurrentMessages",
+        data: chatExist.messages
+      }))
+    } else {
+      dispatch(setGlobalChatState({
+        type: "setCurrentChat",
+        data: chatExist
+      }))
+      dispatch(setGlobalMessageState({
+        type: "setCurrentMessages",
+        data: await getMessage(chat.id)
+      }))
+    }
   };
 
   const getFileInMsg = async(m: any) => {
