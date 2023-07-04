@@ -18,10 +18,12 @@ import { useRouter } from "next/router";
 import InfoContentScreen from "@/components/ChatScreen/InfoContentScreen";
 import ChatScreen from "@/components/ChatScreen/ChatScreen";
 import DropdownActionUser from "@/components/DropdownActionUser";
-import { selectChatState } from "@/redux/chatSlice";
+import { selectChatState, setGlobalChatState } from "@/redux/chatSlice";
 import { selectMessageState } from "@/redux/messageSlice";
 import { StatusCallType, selectVideoCallState, setGlobalVideoCallState } from "@/redux/videoCallSlice";
 import getNotification from "@/utils/getNotifications";
+import { setGlobalFriendState } from "@/redux/friendSlice";
+import { setGlobalFriendRequestState } from "@/redux/friendRequestSlice";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -42,6 +44,18 @@ const Page: NextPageWithLayout = () => {
       dispatch(setAppGlobalState({
         type: "setUserInfo",
         data: data.userInfo
+      }))
+      dispatch(setGlobalFriendState({
+        type: "setListFriend",
+        data: data.listFriend
+      }))
+      dispatch(setGlobalFriendRequestState({
+        type: "setListFriendRequest",
+        data: data.listFriendRequest
+      }))
+      dispatch(setGlobalChatState({
+        type: "setListChat",
+        data: data.listChat
       }))
     })
     .catch(err => console.log(err))
@@ -123,15 +137,26 @@ const Page: NextPageWithLayout = () => {
       const data = JSON.parse(msg);
 
       if(data.type === 'send-message' && data.recipient.includes(user?.email)) {
-        dispatch()
+        dispatch(setGlobalChatState({
+          type: "pushMessageToListChat",
+          data: data.data
+        }))
         toast(`${data.message}`, { hideProgressBar: true, autoClose: 5000, type: 'info' })
       }  
 
       if(data.type === 'accept-friend' && data.recipient.includes(user?.email)) {
+        dispatch(setGlobalFriendState({
+          type: "addNewFriend",
+          data: data.data
+        }))
         toast(`${data.message}`, { hideProgressBar: true, autoClose: 5000, type: 'info' })
       }
 
       if(data.type === 'send-add-friend' && data.recipient.includes(user?.email)) {
+        dispatch(setGlobalFriendState({
+          type: "addNewFriendRequest",
+          data: data.data
+        }))
         toast(`${data.message}`, { hideProgressBar: true, autoClose: 5000, type: 'info' })
       }  
 

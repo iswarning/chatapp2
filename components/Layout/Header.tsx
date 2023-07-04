@@ -8,13 +8,13 @@ import { useCollection } from "react-firebase-hooks/firestore";
 import { MapFriendRequestData } from "@/types/FriendRequestType";
 import { useDispatch, useSelector } from 'react-redux'
 import { selectAppState } from "@/redux/appSlice";
+import { selectFriendRequestState } from "@/redux/friendRequestSlice";
 
 export default function Header() {
 
     const [user] = useAuthState(auth);
     const [show, setShow] = useState(false)
-    const dispatch = useDispatch()
-    const appState = useSelector(selectAppState)
+    const friendRequestState = useSelector(selectFriendRequestState)
 
     const [friendR] = useCollection(
         db
@@ -80,7 +80,7 @@ export default function Header() {
         </div>
         </div>
         </div>
-        { show ? <NotificationScreen friendR={friendR?.docs.map((f) => MapFriendRequestData(f))!} /> : null }
+        { show ? <NotificationScreen friendR={friendRequestState.listFriendRequest} /> : null }
         </>
     );
 }

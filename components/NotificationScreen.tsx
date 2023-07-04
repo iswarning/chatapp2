@@ -18,7 +18,7 @@ export default function NotificationScreen({ friendR }: { friendR: Array<FriendR
             <div className="dropdown-menu__content box dark:bg-dark-2 px-4 pt-4 pb-5">
                 <div className="text-base font-medium leading-tight mb-4">Friend Requests</div>
                 {
-                    friendR && friendR?.length > 0 ? friendR?.map((friend: FriendRequestType) => <FriendRequestElement friend={friend} />) : "No friend request !"
+                    friendR && friendR?.length > 0 ? friendR?.map((friend: FriendRequestType) => <FriendRequestElement key={friend.id} friend={friend} />) : "No friend request !"
                 }
             </div>
         </Container>

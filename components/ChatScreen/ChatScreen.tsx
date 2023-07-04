@@ -18,7 +18,7 @@ import {
 import { useSelector, useDispatch } from 'react-redux';
 import { selectAppState } from "@/redux/appSlice";
 import { ChatType } from "@/types/ChatType";
-import { MessageType } from "@/types/MessageType";
+import { MapMessageData, MessageType } from "@/types/MessageType";
 import Image from "next/image";
 import EmojiContainerComponent from "@/components/ChatScreen/EmojiContainerComponent";
 import styled from "styled-components";
@@ -34,6 +34,7 @@ import { setGlobalMessageState } from "@/redux/messageSlice";
 import { setGlobalChatState } from "@/redux/chatSlice";
 import {v4 as uuidv4} from 'uuid'
 import firebase from "firebase";
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 export default function ChatScreen({ chat, messages }: { chat: ChatType, messages: Array<MessageType> }) {
   const [user] = useAuthState(auth);
   const endOfMessageRef: any = useRef(null);
@@ -153,11 +154,10 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
       ref.messageDoc.get().then((data) => {
         appState.socket.emit("send-notify", JSON.stringify(
           { 
-            recipient: chat.users, 
+            recipient: chat.users.filter((u) => user?.email !== u), 
             message: `${chat.isGroup ? chat.name : user?.displayName}: ${data?.data()?.message}`,
             type: "send-message",
-            messageId: data.id,
-            chatId: chat.id
+            data: MapMessageData(data)
           }
         ))
         
@@ -254,6 +254,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
         <ScrollBarCustom className="overflow-y-auto pt-5 flex-1 px-4">
 
         {showMessage()}
+        <CheckCircleOutlineIcon fontSize="small" />
         <EndOfMessage ref={endOfMessageRef} /> 
 
         </ScrollBarCustom>
