@@ -5,37 +5,37 @@ import DropdownActionMessage from "../DropdownActionMessage";
 
 export default function RecieverTemplateTextImage(
     { 
-        imgs, 
         message, 
         timestamp, 
         lastIndex
     }: 
-    { 
-        imgs: Array<ImageInMessageType>, 
+    {  
         message: MessageType, 
         timestamp: any, 
         lastIndex: boolean 
     }) {
 
-    const handleMessage = () => {
-        let messageExport: string = message.message;
-        if (message.type === "text-image") {
-            imgs?.forEach((img: any) => {
-            messageExport = messageExport.replace(
-              img?.key,
-              `<img 
-                loading="lazy"
-                decoding="async" 
-                src="${img?.url}" 
-                style="color: transparent;"/>`
-            );
-          });
-        }
-        return <div 
-                dangerouslySetInnerHTML={{ __html: messageExport }} 
-                style={{fontSize: message.type === 'text' && getEmojiIcon.includes(message.message) && message.message.length === 2 ? '50px' : '' }}>
-                </div>;
-      };
+        const handleMessage = () => {
+            let messageExport: string = message.message;
+            let images = JSON.parse(message.images!)
+            if (message.type === "text-image") {
+                images?.forEach((image: any) => {
+                messageExport = messageExport.replace(
+                    image?.key,
+                  `<img
+                    className="image-in-message"
+                    loading="lazy"
+                    decoding="async" 
+                    src="${image?.downloadUrl}"
+                    style="color: transparent;"/>`
+                );
+              });
+            }
+            return <div 
+                    dangerouslySetInnerHTML={{ __html: messageExport }} 
+                    style={{fontSize: message.type === 'text' && getEmojiIcon.includes(message.message) && message.message.length === 2 ? '50px' : '' }}>
+                    </div>;
+        };
 
     return (
         <>

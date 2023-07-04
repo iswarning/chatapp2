@@ -1,19 +1,21 @@
 import { storage } from '@/firebase';
 import { MessageType } from '@/types/MessageType';
-import { CircularProgress, Modal } from '@mui/material';
 import React from 'react'
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import { useDownloadURL } from 'react-firebase-hooks/storage';
 import { selectAppState } from '@/redux/appSlice';
 import {useSelector} from 'react-redux'
 import CancelIcon from '@mui/icons-material/Cancel';
 import styled from 'styled-components';
 import { selectChatState } from '@/redux/chatSlice';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import StatusSend from './StatusSend';
 
 export default function SenderTemplateFile({ 
     file,
+    lastIndex
 }: { 
     file: MessageType,
+    lastIndex: boolean
 }) {
 
     const appState = useSelector(selectAppState)
@@ -82,13 +84,12 @@ console.log(appState.UploadProgressMultipleFile)
                                         : fileName + "." + fileExtension}
                                 </div>
                                 <div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">
-                                    Size: { prog ? Number(prog * Number(file.size) / 100).toFixed(1) + "/" : null } { file.size } MB { prog === 100 ? <DoneIcon fontSize='small' /> : <CancelIcon fontSize='small' style={{fontSize: "15px"}} /> }
+                                    Size: { prog ? Number(prog * Number(file.size) / 100).toFixed(1) + "/" : null } { file.size } MB 
+                                    { prog && prog === 100 ? <DoneIcon fontSize='small' /> : null }
+                                    { prog && prog > 1 && prog < 100 ? <CancelIcon fontSize='small' style={{fontSize: "15px"}} /> : null }
                                     {
                                         prog ? <div style={{background: "#C1AEFC",height: "5px",width: `${prog}%`,borderRadius: "5px", marginTop: "5px"}}>
                                         </div> : null
-                                    }
-                                    {
-                                        prog + "%"
                                     }
                                 </div>
                             </div>
@@ -122,7 +123,7 @@ console.log(appState.UploadProgressMultipleFile)
                 </div>
                 
             </div>
-            
+            <StatusSend lastIndex={lastIndex} />
         </div> 
     }
     <div className="clear-both"></div>

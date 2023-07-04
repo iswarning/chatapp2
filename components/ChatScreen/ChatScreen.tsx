@@ -16,7 +16,7 @@ import {
   pushUrlImageToFirestore
 } from "./Functions";
 import { useSelector, useDispatch } from 'react-redux';
-import { selectAppState } from "@/redux/appSlice";
+import { StatusSendType, selectAppState, setAppGlobalState } from "@/redux/appSlice";
 import { ChatType } from "@/types/ChatType";
 import { MapMessageData, MessageType } from "@/types/MessageType";
 import Image from "next/image";
@@ -85,26 +85,30 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
   };
 
   const sendMessage = async (e: any): Promise<any> => {
-    let { listElementImg, message } = handleImageInMessage();
-    let newMessage = {} as MessageType;
+    dispatch(setAppGlobalState({
+      type: "setStatusSend",
+      data: StatusSendType.SENDING
+    }))
+    e.preventDefault();
 
+    let { listElementImg, message } = handleImageInMessage();
+
+    let newMessage = {} as MessageType
     newMessage.id = uuidv4()
     newMessage.message = message
     newMessage.timestamp = firebase.firestore.FieldValue.serverTimestamp()
     newMessage.user = user?.email!
 
-    if (listElementImg.length > 0) {
+    if (listElementImg.length === 0) {
       newMessage.type = "text"
     } else {
       newMessage.type = "text-image"
-      let newArray = []
-      if (listElementImg.length > 0) {
+        let newArray = []
         for(const item of listElementImg) {
           newArray.push({
             key: item.key,
             downloadUrl: item.element.src
-          })
-        }
+        })
       }
       newMessage.images = JSON.stringify(newArray)
     }
@@ -122,57 +126,64 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
       }
     }))
 
-    e.preventDefault();
-
-    let arrayImg = []
+    let str = ""
     if (listElementImg.length > 0) {
+      let arrayImg: any[] = []
       for(const item of listElementImg) {
           const response = await fetch(item.element.src);
           const blob = await response.blob();
           let path = `public/chat-room/${chat.id}/photos/${item.key}`
-          storage
-            .ref(path)
-            .put(blob)
-            .then(() => {
-              storage.ref(path).getDownloadURL().then((url) => {
-                arrayImg.push({
-                  key: item.key,
-                  downloadUrl: url
-                })
-              })
+          const res = await storage.ref(path).put(blob)
+          if (res) {
+            const downloadUrl = await storage.ref(path).getDownloadURL()
+            arrayImg.push({
+              key: item.key,
+              downloadUrl: downloadUrl
             })
-            .catch(err => console.log(err.message))
+          }   
       }
+      str = JSON.stringify(arrayImg)
     }
 
-    addMessageToFirebase(
-      newMessage.message,
-      newMessage.type,
-      user?.email,
-      chat.id
-    ).then(ref => {
-      ref.messageDoc.get().then((data) => {
-        appState.socket.emit("send-notify", JSON.stringify(
-          { 
-            recipient: chat.users.filter((u) => user?.email !== u), 
-            message: `${chat.isGroup ? chat.name : user?.displayName}: ${data?.data()?.message}`,
-            type: "send-message",
-            data: MapMessageData(data)
-          }
-        ))
-        
-        toast("Error when send message !", {
-          hideProgressBar: true,
-          type: "error",
-          autoClose: 5000,
-        });
-      })
+    db
+    .collection("chats")
+    .doc(chat.id)
+    .collection("messages")
+    .doc(newMessage.id)
+    .set({ ...newMessage, images: str })
+    .then(() => {
+      appState.socket.emit("send-notify", JSON.stringify(
+        { 
+          recipient: chat.users.filter((u) => user?.email !== u), 
+          message: `${chat.isGroup ? chat.name : user?.displayName}: ${newMessage.message}`,
+          type: "send-message",
+          data: JSON.stringify(newMessage)
+        }
+      ))
+      toast("Error when send message !", {
+        hideProgressBar: true,
+        type: "error",
+        autoClose: 5000,
+      });
+    })
+    .catch(err => {
+      dispatch(setAppGlobalState({
+        type: "setStatusSend",
+        data: StatusSendType.ERROR
+      }))
+      console.log(err)
+    })
+    .finally(() => {
+      dispatch(setAppGlobalState({
+        type: "setStatusSend",
+        data: StatusSendType.SENT
+      }))
+      scrollToBottom();
     })
 
     const element = document.getElementById("input-message");
     if (element) element.innerHTML = "";
 
-    scrollToBottom();
   };
 
   const addEmoji = (e: number) => {
@@ -183,8 +194,6 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
   };
 
   const handleCalling = async(chatInfo: any = chat ,  userInfo: any = recipientInfo) => {
-    
-    
 
     let userBusy = await getUserBusy();
 
@@ -252,9 +261,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
         </div>
 
         <ScrollBarCustom className="overflow-y-auto pt-5 flex-1 px-4">
-
         {showMessage()}
-        <CheckCircleOutlineIcon fontSize="small" />
         <EndOfMessage ref={endOfMessageRef} /> 
 
         </ScrollBarCustom>

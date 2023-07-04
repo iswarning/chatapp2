@@ -4,40 +4,32 @@ import {useSelector} from 'react-redux'
 import { selectAppState } from "@/redux/appSlice";
 import { ImageInMessageType } from "@/types/ImageInMessageType";
 import { MessageType } from "@/types/MessageType";
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import { SentIcon } from "./SenderTemplateText";
-import DropdownActionMessage from "../DropdownActionMessage";
+import StatusSend from "./StatusSend";
+import { useEffect, useState } from "react";
+import { storage } from "@/firebase";
 
 export default function SenderTemplateTextImage(
     { 
-        imgs, 
         message, 
         timestamp,
         lastIndex,
         scrollToBottom 
     }: {
-        imgs: Array<ImageInMessageType>,
         message: MessageType,
         timestamp: any,
         lastIndex: boolean,
         scrollToBottom: any
 }) {
 
-    const appState  = useSelector(selectAppState)
-
     const handleMessage = () => {
         let messageExport: string = message.message;
+        let images = JSON.parse(message.images!)
         if (message.type === "text-image") {
-            imgs?.forEach((img) => {
-            messageExport = messageExport.replace(
-              img?.key,
-              `<img
-                className="image-in-message"
-                loading="lazy"
-                decoding="async" 
-                src="${img?.url}"
-                style="color: transparent;"/>`
-            );
+            images?.forEach((image: any) => {
+                messageExport = messageExport.replace(
+                    image?.key,
+                  `<img src=${image.downloadUrl} loading="lazy" decoding="async" class="image-in-message" />`
+                );
           });
         }
         return <div 
@@ -57,8 +49,7 @@ export default function SenderTemplateTextImage(
                     </div>
                 </div>
             </div>
-            <div className="ml-4">
-            </div>
+            <StatusSend lastIndex={lastIndex} />
         </div>
         <div className="clear-both"></div>
         </>

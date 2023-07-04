@@ -4,8 +4,9 @@ import Image from "next/image";
 import TimeAgo from "timeago-react";
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import {useSelector} from 'react-redux'
-import { selectAppState } from "@/redux/appSlice";
+import { StatusSendType, selectAppState } from "@/redux/appSlice";
 import { SentIcon } from "./SenderTemplateText";
+import StatusSend from "./StatusSend";
 
 export default function SenderTemplateImage(
     { 
@@ -44,8 +45,7 @@ export default function SenderTemplateImage(
                     </div> 
                 </div>
             </div>
-            <div className="ml-4">
-            </div>
+            <StatusSend lastIndex={lastIndex} />
         </div>
         <div className="clear-both"></div>
         </>

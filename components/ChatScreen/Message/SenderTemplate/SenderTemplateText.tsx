@@ -4,6 +4,7 @@ import styled from "styled-components";
 import { useSelector } from 'react-redux'
 import { selectAppState } from "@/redux/appSlice";
 import { MessageType } from "@/types/MessageType";
+import StatusSend from "./StatusSend";
 
 export default function SenderTemplateText(
     { 
@@ -37,8 +38,7 @@ export default function SenderTemplateText(
                     </div>
                 </div>
             </div>
-            <div className="ml-4">
-            </div>
+            <StatusSend lastIndex={lastIndex} />
         </div>
         <div className="clear-both"></div>
     </>

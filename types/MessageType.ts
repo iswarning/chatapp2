@@ -21,7 +21,7 @@ export interface MessageType {
     timestamp: any
     userInfo?: UserType
     file: string
-    images: string
+    images: string | undefined
 }
 
 export const MapMessageData = (message: firebase.firestore.DocumentSnapshot<firebase.firestore.DocumentData>): MessageType => {
@@ -36,5 +36,6 @@ export const MapMessageData = (message: firebase.firestore.DocumentSnapshot<fire
     messageData.key = message?.data()?.key;
     messageData.size = message?.data()?.size;
     messageData.name = message?.data()?.name;
+    messageData.images = message?.data()?.images;
     return messageData;
 }

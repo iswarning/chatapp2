@@ -11,6 +11,12 @@ export enum SidebarType {
   PROFILE,
 }
 
+export enum StatusSendType {
+  SENDING,
+  SENT,
+  ERROR
+}
+
 
 // Type for our state
 export interface InitialState {
@@ -20,7 +26,8 @@ export interface InitialState {
     currentSidebar: SidebarType,
     socket: Socket,
     darkMode: boolean,
-    UploadProgressMultipleFile: any
+    UploadProgressMultipleFile: any,
+    statusSend?: StatusSendType
   },
   
 }
@@ -34,6 +41,7 @@ const initialState: InitialState = {
     socket: io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!),
     darkMode: false,
     UploadProgressMultipleFile: Array<any>(),
+    statusSend: undefined
   },
 
 };
@@ -64,6 +72,9 @@ export const appSlice = createSlice({
         case "setUserOnline":
           state.data.userOnline = action.payload.data;
           break;
+        case "setStatusSend":
+          state.data.statusSend = action.payload.data;
+          break
         default:
           return
       }

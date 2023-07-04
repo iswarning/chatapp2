@@ -7355,3 +7355,30 @@ ul {
 li {
 display: inline;
 }
+
+.image-in-message {
+    width: 400px;
+    height: 200px;
+}
+
+.loader {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: inline-block;
+    border-top: 3px solid #FFF;
+    border-right: 3px solid transparent;
+    box-sizing: border-box;
+    animation: rotation 1s linear infinite;
+    margin-left: 175px;
+    margin-top: 75px;
+  }
+  
+@keyframes rotation {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+} 
