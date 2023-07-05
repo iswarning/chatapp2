@@ -89,7 +89,7 @@ export default function InfoContentScreen() {
                                 {
                                     showMember ? chatState.currentChat.users.filter((user) => 
                                         user !== appState.userInfo.email).map((user) => 
-                                            <MemberInChat email={user} />)  : null
+                                            <MemberInChat key={user} email={user} />)  : null
                                 }
                             </div>
                             
