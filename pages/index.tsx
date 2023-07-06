@@ -24,6 +24,7 @@ import { StatusCallType, selectVideoCallState, setGlobalVideoCallState } from "@
 import getNotification from "@/utils/getNotifications";
 import { setGlobalFriendState } from "@/redux/friendSlice";
 import { setGlobalFriendRequestState } from "@/redux/friendRequestSlice";
+import { setListChat } from "@/components/services/cache";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -53,10 +54,7 @@ const Page: NextPageWithLayout = () => {
         type: "setListFriendRequest",
         data: data.listFriendRequest
       }))
-      dispatch(setGlobalChatState({
-        type: "setListChat",
-        data: data.listChat
-      }))
+      setListChat(data.listChat)
     })
     .catch(err => console.log(err))
     .finally(() => setLoading(false))

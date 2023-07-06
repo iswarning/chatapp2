@@ -30,7 +30,7 @@ export const chatSlice = createSlice({
     setGlobalChatState(state, action) {
       switch(action.payload.type) {
         case "setCurrentChat":
-            state.data.currentChat = action.payload.data
+            state.data.currentChat = action.payload.data         
             break;
         case "setListChat":
             state.data.listChat = action.payload.data

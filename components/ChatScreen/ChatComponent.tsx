@@ -34,24 +34,24 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
     
   }, []);
 
-  const [recipientSnapshot] = useCollection(
-    db
-      .collection("users")
-      .where("email", "==", getRecipientEmail(chat.users, user))
-  );
+  // const [recipientSnapshot] = useCollection(
+  //   db
+  //     .collection("users")
+  //     .where("email", "==", getRecipientEmail(chat.users, user))
+  // );
 
-  const recipientInfo = MapUserData(recipientSnapshot?.docs?.[0]!)
+  const recipientInfo = chat.recipientInfo
 
-  const [lastMessageSnapshot] = useCollection(
-    db
-      .collection("chats")
-      .doc(chat.id)
-      .collection("messages")
-      .orderBy("timestamp", 'desc')
-      .limit(1)
-  );
+  // const [lastMessageSnapshot] = useCollection(
+  //   db
+  //     .collection("chats")
+  //     .doc(chat.id)
+  //     .collection("messages")
+  //     .orderBy("timestamp", 'desc')
+  //     .limit(1)
+  // );
 
-  const lastMessage = MapMessageData(lastMessageSnapshot?.docs?.[0]!);
+  const lastMessage = messageState?.currentMessages?.[messageState.currentMessages.length - 1] ?? null;
 
   const [userInfoOfLastMessageSnapshot] = useCollection(
     db.collection("users").where("email", "==", String(lastMessage?.user))
@@ -59,20 +59,16 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
 
   const handleShowChatScreen = async() => {
     let chatExist = chatState.listChat.find((chatExist) => chatExist.id === chat.id)
+    dispatch(setGlobalChatState({
+      type: "setCurrentChat",
+      data: chatExist
+    }))
     if (chatExist?.messages) {
-      dispatch(setGlobalChatState({
-        type: "setCurrentChat",
-        data: chatExist
-      }))
       dispatch(setGlobalMessageState({
         type: "setCurrentMessages",
         data: chatExist.messages
       }))
     } else {
-      dispatch(setGlobalChatState({
-        type: "setCurrentChat",
-        data: chatExist
-      }))
       dispatch(setGlobalMessageState({
         type: "setCurrentMessages",
         data: await getMessage(chat.id)
@@ -113,7 +109,7 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
   };
 
   const handleShowLastMessage = () => {
-    if(!lastMessageSnapshot) return;
+    if(!lastMessage) return;
     const StyleIcon = {
       fontSize: '15px', 
       marginBottom: '4px'
@@ -168,7 +164,7 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
 
     } else {
       
-      if (lastMessageSnapshot?.docs?.[0].data().type === "image") {
+      if (lastMessage.type === "image") {
         if (lastMessage?.user === user?.email) {
           return <div className={active ? "text-opacity-80 truncate mt-0.5 text-white" : "text-opacity-80 truncate mt-0.5 text-gray-800 dark:text-gray-500"}>
             You: <ImageOutlinedIcon style={StyleIcon} /> Image</div>
@@ -260,7 +256,7 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
   /> : null
 }
 {!chat.isGroup ? (
-  appState.userOnline?.find((u: any) => u === recipientInfo.email) ? (
+  appState.userOnline?.find((u: any) => u === recipientInfo?.email) ? (
     <div className="border-white w-3 h-3 absolute right-0 bottom-0 rounded-full border-2" style={{background: 'green'}}></div>
   ) : (
     <span className="border-white w-3 h-3 absolute right-0 bottom-0 rounded-full border-2" style={{background: 'gray'}}></span>
@@ -272,14 +268,14 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
 )}
 </div>
 <div className="ml-2 overflow-hidden">
-<a href="javascript:void(0)" className={active ? "font-medium text-white" :"font-medium text-gray-800 dark:text-white"}>{ chat.isGroup ? "Group: " + chat.name : recipientInfo.fullName}</a>
-{lastMessageSnapshot?.docs.length! > 0
+<a href="javascript:void(0)" className={active ? "font-medium text-white" :"font-medium text-gray-800 dark:text-white"}>{ chat.isGroup ? "Group: " + chat.name : recipientInfo?.fullName}</a>
+{lastMessage
     ? handleShowLastMessage()
 : ""}
 </div>
 <div className="ml-auto">
 <div className={active ? "whitespace-nowrap text-opacity-80 text-xs text-white" : "whitespace-nowrap text-opacity-80 text-xs text-gray-800 dark:text-gray-600"}>
-{lastMessageSnapshot?.docs.length! > 0 ? (
+{lastMessage ? (
       lastMessage?.timestamp ? (
         <TimeAgo datetime={lastMessage?.timestamp?.toDate()} />
       ) : (

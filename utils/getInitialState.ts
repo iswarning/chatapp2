@@ -60,16 +60,20 @@ export default async function getInitialState(userId: string | undefined) {
     .get();
 
   for (const chat of listChat?.docs || []) {
-    let info = await db
+    if(!chat.data().isGroup) {
+      let info = await db
       .collection("users")
       .where("email", "==", getRecipientEmail(chat.data().users, userInfo.data()))
       .get();
     
-    let item = MapChatData(chat);
-    
-    item.recipientInfo = MapUserData(info?.docs?.[0])
-
-    data.listChat.push(item)
+      let item = MapChatData(chat);
+      
+      item.recipientInfo = MapUserData(info?.docs?.[0])
+      data.listChat.push(item)
+    } else {
+      let item = MapChatData(chat);
+      data.listChat.push(item)
+    }
   }
 
   return data;
