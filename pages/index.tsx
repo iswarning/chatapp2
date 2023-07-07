@@ -24,7 +24,7 @@ import { StatusCallType, selectVideoCallState, setGlobalVideoCallState } from "@
 import getNotification from "@/utils/getNotifications";
 import { setGlobalFriendState } from "@/redux/friendSlice";
 import { setGlobalFriendRequestState } from "@/redux/friendRequestSlice";
-import { setListChat } from "@/components/services/cache";
+import { setListChat, setListFriend, setListFriendRequest, setUserInfo } from "@/services/cache";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -42,19 +42,10 @@ const Page: NextPageWithLayout = () => {
   useEffect(() => {
     setLoading(true)
     getInitialState(user?.uid).then((data) => {
-      dispatch(setAppGlobalState({
-        type: "setUserInfo",
-        data: data.userInfo
-      }))
-      dispatch(setGlobalFriendState({
-        type: "setListFriend",
-        data: data.listFriend
-      }))
-      dispatch(setGlobalFriendRequestState({
-        type: "setListFriendRequest",
-        data: data.listFriendRequest
-      }))
-      setListChat(data.listChat)
+      setUserInfo(data.userInfo, dispatch)
+      setListFriend(data.listFriend, dispatch)
+      setListFriendRequest(data.listFriendRequest, dispatch)
+      setListChat(data.listChat, dispatch)
     })
     .catch(err => console.log(err))
     .finally(() => setLoading(false))
