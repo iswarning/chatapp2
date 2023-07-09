@@ -21,6 +21,7 @@ const getImageTypeFileValid = () => {
         "pptx",
         "zip",
         "exe",
+        "msi"
     ]
 } 
 

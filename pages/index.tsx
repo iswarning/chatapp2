@@ -24,7 +24,8 @@ import { StatusCallType, selectVideoCallState, setGlobalVideoCallState } from "@
 import getNotification from "@/utils/getNotifications";
 import { setGlobalFriendState } from "@/redux/friendSlice";
 import { setGlobalFriendRequestState } from "@/redux/friendRequestSlice";
-import { setListChat, setListFriend, setListFriendRequest, setUserInfo } from "@/services/cache";
+import { getLocalStorage, setCurrentChat, setCurrentMessages, setListChat, setListFriend, setListFriendRequest, setUserInfo } from "@/services/cache";
+import { UserType } from "@/types/UserType";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -41,14 +42,25 @@ const Page: NextPageWithLayout = () => {
 
   useEffect(() => {
     setLoading(true)
-    getInitialState(user?.uid).then((data) => {
-      setUserInfo(data.userInfo, dispatch)
-      setListFriend(data.listFriend, dispatch)
-      setListFriendRequest(data.listFriendRequest, dispatch)
-      setListChat(data.listChat, dispatch)
-    })
-    .catch(err => console.log(err))
-    .finally(() => setLoading(false))
+    localStorage.clear()
+    if (!getLocalStorage("appStorage.userInfo")) {
+      getInitialState(user?.uid).then((data) => {
+        setUserInfo(data.userInfo, dispatch)
+        setListFriend(data.listFriend, dispatch)
+        setListFriendRequest(data.listFriendRequest, dispatch)
+        setListChat(data.listChat, dispatch)
+      })
+      .catch(err => console.log(err))
+      .finally(() => setLoading(false))
+    } else {
+      setUserInfo(getLocalStorage("appStorage.userInfo"), dispatch)
+      setListFriend(getLocalStorage("appStorage.listFriend"), dispatch)
+      setListFriendRequest(getLocalStorage("appStorage.listFriendRequest"), dispatch)
+      setListChat(getLocalStorage("appStorage.listChat"), dispatch)
+      setCurrentChat(getLocalStorage("appStorage.currentChat"), dispatch)
+      setCurrentMessages(getLocalStorage("appStorage.currentChat").id,getLocalStorage("appStorage.currentMessages"), dispatch)
+      setLoading(false)
+    }
   },[])
 
   useEffect(() => {

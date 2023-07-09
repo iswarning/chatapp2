@@ -18,7 +18,7 @@ export default function RecieverTemplateText({ message, timestamp, lastIndex }: 
 
     return (
         <>
-            <div className="-intro-x chat-text-box flex items-end float-left mb-4">
+            <div className="-intro-x chat-text-box flex items-end float-left mb-4" title={timestamp}>
                 {
                     chatState.currentChat.isGroup && lastIndex ? <div className="chat-text-box__photo w-10 h-10 hidden sm:block flex-none image-fit relative mr-4">
                         <img alt="Topson Messenger Tailwind HTML Admin Template" className="rounded-full" src="https://topson.left4code.com/dist/images/profile-9.jpg"/>

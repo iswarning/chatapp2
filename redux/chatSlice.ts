@@ -1,13 +1,13 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { AppState } from "./store";
 import { HYDRATE } from "next-redux-wrapper";
-import { ChatType } from "@/types/ChatType";
+import { ChatType, FileInfo } from "@/types/ChatType";
 
 // Type for our state
 export interface InitialState {
   data: {
     currentChat: ChatType,
-    listChat: Array<ChatType>
+    listChat: Array<ChatType>,
   },
   
 }
@@ -16,7 +16,7 @@ export interface InitialState {
 const initialState: InitialState = {
   data: {
     currentChat: {} as ChatType,
-    listChat: Array<ChatType>()
+    listChat: Array<ChatType>(),
   },
 
 };
@@ -44,13 +44,25 @@ export const chatSlice = createSlice({
                         ...chatExist,
                         messages: [
                             ...chatExist.messages,
-                            action.payload.newMessage
+                            action.payload.data.newMessage
                         ]
                     }
                 ]
             } else {
                 return
             }
+            break;
+        case "setListImageInRoom":
+            state.data.listChat = state.data.listChat.map((chat) => {
+              if (chat.id === action.payload.data.chatId) {
+                return {
+                  ...chat,
+                  listImage: action.payload.data.listImage
+                }
+              } else {
+                return chat
+              }
+            })
             break;
         default:
             return

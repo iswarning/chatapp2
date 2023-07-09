@@ -15,8 +15,6 @@ export default function SidebarMessage() {
   const appState = useSelector(selectAppState)
   const chatState = useSelector(selectChatState)
 
-  console.log(getLocalStorage("appStorage.listFriend"))
-
   return (
     <>
 

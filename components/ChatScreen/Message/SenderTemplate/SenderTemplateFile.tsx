@@ -12,10 +12,14 @@ import StatusSend from './StatusSend';
 
 export default function SenderTemplateFile({ 
     file,
-    lastIndex
+    lastIndex,
+    timestamp,
+    type
 }: { 
-    file: MessageType,
-    lastIndex: boolean
+    file: any,
+    lastIndex: boolean,
+    timestamp: any,
+    type: string
 }) {
 
     const appState = useSelector(selectAppState)
@@ -59,17 +63,35 @@ export default function SenderTemplateFile({
         document.body.removeChild(link);
     }
 
-    const snapshot = appState.UploadProgressMultipleFile.find((data: any) => data.key === file.key)
-// console.log(snapshot)
-    const prog = snapshot ? snapshot.value : null
-console.log(appState.UploadProgressMultipleFile)
     const fileName = file?.name!.split(".")[0]
     const fileExtension = file?.name!.split(".").pop()
-  
+    const progress = appState.UploadProgressMultipleFile
+    const showFileProgress = () => {
+        if (type === "file-uploading") {
+            if (appState?.fileUploading?.value === "uploading" && appState?.fileUploading?.key === file.key) {
+                return <>
+                    Size: { Number(progress * Number(file.size) / 100).toFixed(1) + "/" + file.size.toFixed(1) } MB
+                    &nbsp;<CancelIcon fontSize='small' style={{fontSize: "15px"}} />
+                    <ProgressBar style={{width: `${progress}%`}} />
+                </>
+            }
+            if(appState.fileUploadDone.includes(file.key)) { 
+                return <>
+                    Size: { file.size.toFixed(1) + "/" + file.size.toFixed(1) } MB
+                    &nbsp;<DoneIcon fontSize='small' />
+                </>
+            } 
+        } else {
+            return <>
+                Size: { file.size.toFixed(1) } MB
+            </>
+        }
+    }
+
     return (
     <>
     {
-        <div className="intro-x chat-text-box flex items-end float-right mb-4">
+        <div className="intro-x chat-text-box flex items-end float-right mb-4" title={timestamp}>
             <div className="w-full">
                 <div>
                     <div className="chat-text-box__content flex items-center float-right">
@@ -84,37 +106,19 @@ console.log(appState.UploadProgressMultipleFile)
                                         : fileName + "." + fileExtension}
                                 </div>
                                 <div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">
-                                    Size: { prog ? Number(prog * Number(file.size) / 100).toFixed(1) + "/" : null } { file.size } MB 
-                                    { prog && prog === 100 ? <DoneIcon fontSize='small' /> : null }
-                                    { prog && prog > 1 && prog < 100 ? <CancelIcon fontSize='small' style={{fontSize: "15px"}} /> : null }
-                                    {
-                                        prog ? <div style={{background: "#C1AEFC",height: "5px",width: `${prog}%`,borderRadius: "5px", marginTop: "5px"}}>
-                                        </div> : null
-                                    }
+                                    {showFileProgress()}
                                 </div>
                             </div>
                             <div className="sm:ml-20 mt-3 sm:mt-0 flex">
-                                <a href="javascript:void(0)" className="tooltip w-8 h-8 block border rounded-full flex-none flex items-center justify-center ml-2 outline-none" onClick={() => handleDownloadFile()}> 
+                                <a onClick={() => handleDownloadFile()} href="javascript:void(0)" className="tooltip w-8 h-8 block border rounded-full flex-none flex items-center justify-center ml-2 outline-none"> 
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-download w-4 h-4">
                                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                                         <polyline points="7 10 12 15 17 10"></polyline>
                                         <line x1="12" y1="15" x2="12" y2="3"></line>
                                     </svg> 
                                 </a>
-                                <a href="javascript:void(0)" className="tooltip w-8 h-8 block border rounded-full flex-none flex items-center justify-center ml-2"> 
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share w-4 h-4">
-                                        <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
-                                        <polyline points="16 6 12 2 8 6"></polyline>
-                                        <line x1="12" y1="2" x2="12" y2="15"></line>
-                                    </svg> 
-                                </a>
-                                <a href="javascript:void(0)" className="tooltip w-8 h-8 block border rounded-full flex-none flex items-center justify-center ml-2"> 
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-horizontal w-4 h-4">
-                                        <circle cx="12" cy="12" r="1"></circle>
-                                        <circle cx="19" cy="12" r="1"></circle>
-                                        <circle cx="5" cy="12" r="1"></circle>
-                                    </svg> 
-                                </a>
+                                <ShareButton />
+                                <MoreButton />
                             </div>
 
                         </div>
@@ -124,9 +128,9 @@ console.log(appState.UploadProgressMultipleFile)
                 
             </div>
             <StatusSend lastIndex={lastIndex} />
-        </div> 
+        </div>
     }
-    <div className="clear-both"></div>
+    <div className="clear-both"></div> 
     </>
   )
 }
@@ -135,3 +139,27 @@ const DoneIcon = styled(CheckCircleOutlineIcon)`
     font-size: 15px;
     color: rgb(193, 174, 252);
 `
+
+const ProgressBar = styled.div`
+    background: #C1AEFC;
+    height: 5px;
+    border-radius: 5px; 
+    margin-top: 5px
+`
+
+const ShareButton = () => <a href="javascript:void(0)" className="tooltip w-8 h-8 block border rounded-full flex-none flex items-center justify-center ml-2"> 
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share w-4 h-4">
+        <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+        <polyline points="16 6 12 2 8 6"></polyline>
+        <line x1="12" y1="2" x2="12" y2="15"></line>
+    </svg> 
+</a>
+
+const MoreButton = () => <a href="javascript:void(0)" className="tooltip w-8 h-8 block border rounded-full flex-none flex items-center justify-center ml-2"> 
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-horizontal w-4 h-4">
+        <circle cx="12" cy="12" r="1"></circle>
+        <circle cx="19" cy="12" r="1"></circle>
+        <circle cx="5" cy="12" r="1"></circle>
+    </svg> 
+</a>
+

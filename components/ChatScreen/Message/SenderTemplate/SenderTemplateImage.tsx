@@ -25,7 +25,7 @@ export default function SenderTemplateImage(
 
     return (
         <>
-        <div className="intro-x chat-text-box flex items-end float-right mb-4">
+        <div className="intro-x chat-text-box flex items-end float-right mb-4" title={timestamp}>
             <div className="w-full">
                 <div>
                     <div className="chat-text-box__content flex items-center float-right" title={timestamp}>

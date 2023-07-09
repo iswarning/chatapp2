@@ -20,6 +20,7 @@ import { MapFileInMessageData } from "@/types/FileInMessageType";
 import { MapUserData } from "@/types/UserType";
 import { selectChatState, setGlobalChatState } from "@/redux/chatSlice";
 import { selectMessageState, setGlobalMessageState } from "@/redux/messageSlice";
+import { setCurrentChat, setCurrentMessages } from "@/services/cache";
 
 export default function ChatComponent({ chat, active }: { chat: ChatType, active: boolean}) {
   const [user] = useAuthState(auth);
@@ -30,28 +31,18 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
   const messageState = useSelector(selectMessageState)
   const dispatch = useDispatch()
 
-  useEffect(() => {
-    
-  }, []);
-
-  // const [recipientSnapshot] = useCollection(
-  //   db
-  //     .collection("users")
-  //     .where("email", "==", getRecipientEmail(chat.users, user))
-  // );
-
   const recipientInfo = chat.recipientInfo
 
-  // const [lastMessageSnapshot] = useCollection(
-  //   db
-  //     .collection("chats")
-  //     .doc(chat.id)
-  //     .collection("messages")
-  //     .orderBy("timestamp", 'desc')
-  //     .limit(1)
-  // );
+  const [lastMessageSnapshot] = useCollection(
+    db
+      .collection("chats")
+      .doc(chat.id)
+      .collection("messages")
+      .orderBy("timestamp", 'desc')
+      .limit(1)
+  );
 
-  const lastMessage = messageState?.currentMessages?.[messageState.currentMessages.length - 1] ?? null;
+  const lastMessage = MapMessageData(lastMessageSnapshot?.docs?.[0]!)
 
   const [userInfoOfLastMessageSnapshot] = useCollection(
     db.collection("users").where("email", "==", String(lastMessage?.user))
@@ -59,32 +50,24 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
 
   const handleShowChatScreen = async() => {
     let chatExist = chatState.listChat.find((chatExist) => chatExist.id === chat.id)
-    dispatch(setGlobalChatState({
-      type: "setCurrentChat",
-      data: chatExist
-    }))
+    setCurrentChat(chatExist!, dispatch)
     if (chatExist?.messages) {
-      dispatch(setGlobalMessageState({
-        type: "setCurrentMessages",
-        data: chatExist.messages
-      }))
+      setCurrentMessages(chat.id,chatExist.messages, dispatch)
     } else {
-      dispatch(setGlobalMessageState({
-        type: "setCurrentMessages",
-        data: await getMessage(chat.id)
-      }))
+      setCurrentMessages(chat.id,await getMessage(chat.id), dispatch)
     }
   };
 
   const getFileInMsg = async(m: any) => {
-    let msg = MapMessageData(m)
-    const imgRef = await db.collection("chats").doc(chat.id).collection("messages").doc(msg.id).collection("imageInMessage").get()
-    msg.imageInMessage = imgRef.docs.map((img) => MapImageInMessageData(img))
-    const imgAttachRef = await db.collection("chats").doc(chat.id).collection("messages").doc(msg.id).collection("imageAttach").get()
-    msg.imageAttach = imgAttachRef.docs.map((img) => MapImageAttachData(img))
-    const fileAttachRef = await db.collection("chats").doc(chat.id).collection("messages").doc(msg.id).collection("fileInMessage").limit(1).get()
-    msg.fileAttach = MapFileInMessageData(fileAttachRef.docs?.[0])
-    return msg
+    let fil
+    // let msg = MapMessageData(m)
+    // const imgRef = await db.collection("chats").doc(chat.id).collection("messages").doc(msg.id).collection("imageInMessage").get()
+    // msg.imageInMessage = imgRef.docs.map((img) => MapImageInMessageData(img))
+    // const imgAttachRef = await db.collection("chats").doc(chat.id).collection("messages").doc(msg.id).collection("imageAttach").get()
+    // msg.imageAttach = imgAttachRef.docs.map((img) => MapImageAttachData(img))
+    // const fileAttachRef = await db.collection("chats").doc(chat.id).collection("messages").doc(msg.id).collection("fileInMessage").limit(1).get()
+    // msg.fileAttach = MapFileInMessageData(fileAttachRef.docs?.[0])
+    // return msg
   }
 
   const getMessage = async (id: string) => {
@@ -279,7 +262,7 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
       lastMessage?.timestamp ? (
         <TimeAgo datetime={lastMessage?.timestamp?.toDate()} />
       ) : (
-        "Unavailable"
+        ""
       )
     ) : null}
 </div>

@@ -27,7 +27,9 @@ export interface InitialState {
     socket: Socket,
     darkMode: boolean,
     UploadProgressMultipleFile: any,
-    statusSend?: StatusSendType
+    statusSend?: StatusSendType,
+    fileUploading: any,
+    fileUploadDone: any
   },
   
 }
@@ -40,8 +42,10 @@ const initialState: InitialState = {
     currentSidebar: SidebarType.CHAT,
     socket: io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!),
     darkMode: false,
-    UploadProgressMultipleFile: Array<any>(),
-    statusSend: undefined
+    UploadProgressMultipleFile: [],
+    statusSend: undefined,
+    fileUploading: [],
+    fileUploadDone: []
   },
 
 };
@@ -55,10 +59,7 @@ export const appSlice = createSlice({
     setAppGlobalState(state, action) {
       switch(action.payload.type) {
         case "setProgress":
-          state.data.UploadProgressMultipleFile = [
-            ...state.data.UploadProgressMultipleFile,
-            action.payload.data
-          ]
+          state.data.UploadProgressMultipleFile = action.payload.data
           break;
         case "setDarkMode":
           state.data.darkMode = action.payload.data;
@@ -74,6 +75,15 @@ export const appSlice = createSlice({
           break;
         case "setStatusSend":
           state.data.statusSend = action.payload.data;
+          break
+        case "setFileUploading":
+          state.data.fileUploading = action.payload.data
+          break
+        case "setFileUploadDone":
+          state.data.fileUploadDone = [
+            ...state.data.fileUploadDone,
+            action.payload.data
+          ]
           break
         default:
           return

@@ -7,7 +7,7 @@ import { FileInMessageType } from "./FileInMessageType";
 
 export interface MessageType {
     id: string
-    message: string
+    message?: string
     type: string
     user: string
     seen?: Array<string>
@@ -15,13 +15,10 @@ export interface MessageType {
     imageInMessage?: Array<ImageInMessageType>
     imageAttach?: Array<ImageAttachType>
     fileAttach?: FileInMessageType
-    key?: string
-    size?: string
-    name?: string
     timestamp: any
     userInfo?: UserType
-    file: string
-    images: string | undefined
+    file?: string
+    images?: string | undefined
 }
 
 export const MapMessageData = (message: firebase.firestore.DocumentSnapshot<firebase.firestore.DocumentData>): MessageType => {
@@ -33,9 +30,7 @@ export const MapMessageData = (message: firebase.firestore.DocumentSnapshot<fire
     messageData.seen = message?.data()?.seen;
     messageData.reaction = message?.data()?.reaction;
     messageData.timestamp = message?.data()?.timestamp;
-    messageData.key = message?.data()?.key;
-    messageData.size = message?.data()?.size;
-    messageData.name = message?.data()?.name;
     messageData.images = message?.data()?.images;
+    messageData.file = message?.data()?.file;
     return messageData;
 }

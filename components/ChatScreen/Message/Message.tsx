@@ -18,6 +18,7 @@ import { MapImageInMessageData } from "@/types/ImageInMessageType";
 import SenderTemplateFile from "./SenderTemplate/SenderTemplateFile";
 import { MapFileInMessageData } from "@/types/FileInMessageType";
 import RecieverTemplateFile from "./RecieverTemplate/RecieverTemplateFile";
+import { parseTimeStamp } from "@/utils/core";
 
 export default function Message({
   message,
@@ -115,30 +116,30 @@ export default function Message({
         message.user === userLoggedIn?.email ? 
           <>
             {
-              message.type === "text" ? <SenderTemplateText message={message} timestamp={timestamp} lastIndex={lastIndex} /> : null
+              message.type === "text" ? <SenderTemplateText message={message} timestamp={parseTimeStamp(timestamp)} lastIndex={lastIndex} /> : null
             }
             {
-              message.type === "text-image" ? <SenderTemplateTextImage message={message} timestamp={new Date(timestamp).getTime()} lastIndex={lastIndex} scrollToBottom={() => scrollToBottom()} /> : null
+              message.type === "text-image" ? <SenderTemplateTextImage message={message} timestamp={parseTimeStamp(timestamp)} lastIndex={lastIndex} scrollToBottom={() => scrollToBottom()} /> : null
             }
             {
-              message.type === "file" ? <SenderTemplateFile file={message} lastIndex={lastIndex} /> : null
+              message.type === "file" || message.type === "file-uploading" ? <SenderTemplateFile file={JSON.parse(message.file!)} lastIndex={lastIndex} timestamp={parseTimeStamp(timestamp)} type={message.type} /> : null
             }
             {
-              message.type === "image" ? <SenderTemplateImage imgs={imageAttachSnap?.docs.map((image) => MapImageAttachData(image))} timestamp={new Date(timestamp).getTime()} onShowImage={(urlImage: any) => {setUrlImage(urlImage);setShowImageFullscreen(true)}} lastIndex={lastIndex} /> : null
+              message.type === "image" ? <SenderTemplateImage imgs={imageAttachSnap?.docs.map((image) => MapImageAttachData(image))} timestamp={parseTimeStamp(timestamp)} onShowImage={(urlImage: any) => {setUrlImage(urlImage);setShowImageFullscreen(true)}} lastIndex={lastIndex} /> : null
             }
           </> : 
           <>
             {
-              message.type === "text" ? <RecieverTemplateText message={message} timestamp={timestamp.toDate()} lastIndex={lastIndex} /> : null
+              message.type === "text" ? <RecieverTemplateText message={message} timestamp={parseTimeStamp(timestamp)} lastIndex={lastIndex} /> : null
             }
             {
-              message.type === "text-image" ? <RecieverTemplateTextImage message={message} timestamp={new Date(timestamp).getTime()} lastIndex={lastIndex} /> : null
+              message.type === "text-image" ? <RecieverTemplateTextImage message={message} timestamp={parseTimeStamp(timestamp)} lastIndex={lastIndex} /> : null
             }
             {
-              message.type === "file" ? <RecieverTemplateFile file={message} lastIndex={lastIndex} /> : null
+              message.type === "file" ? <RecieverTemplateFile file={message} lastIndex={lastIndex} timestamp={parseTimeStamp(timestamp)} /> : null
             }
             {
-              message.type === "image" ? <RecieverTemplateImage imgs={imageAttachSnap?.docs.map((image) => MapImageAttachData(image))} timestamp={new Date(timestamp).getTime()} lastIndex={lastIndex} onShowImage={(urlImage: any) => {setUrlImage(urlImage);setShowImageFullscreen(true)}} /> : null
+              message.type === "image" ? <RecieverTemplateImage imgs={imageAttachSnap?.docs.map((image) => MapImageAttachData(image))} timestamp={parseTimeStamp(timestamp)} lastIndex={lastIndex} onShowImage={(urlImage: any) => {setUrlImage(urlImage);setShowImageFullscreen(true)}} /> : null
             }
           </>
       }

@@ -29,10 +29,10 @@ export default function SenderTemplateText(
 
     return (
         <>
-        <div className="intro-x chat-text-box flex items-end float-right mb-4">
+        <div className="intro-x chat-text-box flex items-end float-right mb-4" title={timestamp}>
             <div className="w-full">
                 <div>
-                    <div className="chat-text-box__content flex items-center float-right" title={timestamp}>
+                    <div className="chat-text-box__content flex items-center float-right" >
                         {/* Message content */}
                         <div className="box leading-relaxed bg-theme-1 text-opacity-80 text-white px-4 py-3 mt-3"> {handleMessage()} </div>
                     </div>

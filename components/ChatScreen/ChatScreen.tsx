@@ -44,13 +44,13 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
   const appState = useSelector(selectAppState)
   const videoCallState = useSelector(selectVideoCallState)
 
-  const [recipientSnapshot] = useCollection(
-    db
-      .collection("users")
-      .where("email", "==", getRecipientEmail(chat.users, user))
-  );
+  // const [recipientSnapshot] = useCollection(
+  //   db
+  //     .collection("users")
+  //     .where("email", "==", getRecipientEmail(chat.users, user))
+  // );
 
-  const recipientInfo = MapUserData(recipientSnapshot?.docs?.[0]!)
+  // const recipientInfo = MapUserData(recipientSnapshot?.docs?.[0]!)
 
   useEffect(() => {
     scrollToBottom();
@@ -65,8 +65,8 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
       if (chat?.photoURL.length > 0) return chat?.photoURL;
       else return "/images/group-default.jpg";
     } else {
-      let photoUrl = recipientInfo.photoURL;
-      if (photoUrl?.length > 0) return photoUrl;
+      let photoUrl = chat?.recipientInfo?.photoURL;
+      if (photoUrl?.length! > 0) return photoUrl;
       else return "/images/avatar-default.png";
     }
   };
@@ -142,7 +142,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
             })
           }   
       }
-      str = JSON.stringify(arrayImg)
+      str = JSON.stringify(arrayImg.map((img) => img.key))
     }
 
     db
@@ -193,7 +193,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
     setShowEmoji(false);
   };
 
-  const handleCalling = async(chatInfo: any = chat ,  userInfo: any = recipientInfo) => {
+  const handleCalling = async(chatInfo: any = chat ,  userInfo: any = chat.recipientInfo) => {
 
     let userBusy = await getUserBusy();
 
@@ -244,7 +244,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
           <div className="flex items-center mr-auto">
             <div className="w-12 h-12 flex-none image-fit mr-1">
               <Image 
-                src={getRecipientAvatar()}
+                src={getRecipientAvatar()!}
                 width={48}
                 height={48}
                 alt=""
@@ -252,7 +252,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
               />
             </div>
             <div className="ml-2 overflow-hidden">
-              <a href="javascript:void(0)" className="text-base font-medium">{ chat.isGroup ? "Group: " + chat.name : recipientInfo.fullName}</a>
+              <a href="javascript:void(0)" className="text-base font-medium">{ chat.isGroup ? "Group: " + chat.name : chat?.recipientInfo?.fullName}</a>
             </div>
           </div>
           <a className="text-gray-600 hover:text-theme-1" href="javascript:void(0)" onClick={handleCalling}> 
@@ -267,7 +267,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
         </ScrollBarCustom>
 
         <div className="intro-y chat-input box border-theme-3 dark:bg-dark-2 dark:border-dark-2 border flex items-center px-5 py-4">
-        <DropdownAttach chatId={chat.id} scrollToBottom={scrollToBottom} recipient={recipientSnapshot?.docs?.[0]} setProgress={(prog: any) => setProgress(prog)} />
+        <DropdownAttach chatId={chat.id} scrollToBottom={scrollToBottom} recipient={chat.recipientInfo} setProgress={(prog: any) => setProgress(prog)} />
         <InputMessage
           contentEditable="true"
           className="w-full block outline-none py-4 px-4 bg-transparent"

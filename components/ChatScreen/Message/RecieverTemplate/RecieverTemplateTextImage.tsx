@@ -39,7 +39,7 @@ export default function RecieverTemplateTextImage(
 
     return (
         <>
-        <div className="-intro-x chat-text-box flex items-end float-left mb-4">
+        <div className="-intro-x chat-text-box flex items-end float-left mb-4" title={timestamp}>
                 <div className="mr-4">
                 </div>
                 <div className="w-full">

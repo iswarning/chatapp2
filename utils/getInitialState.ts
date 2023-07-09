@@ -1,8 +1,8 @@
-import { db } from "@/firebase";
+import { db, storage } from "@/firebase";
 import { MapUserData, UserType } from "@/types/UserType";
 import { FriendType, MapFriendData } from "@/types/FriendType";
 import { FriendRequestType, MapFriendRequestData } from "@/types/FriendRequestType";
-import { ChatType, MapChatData } from "@/types/ChatType";
+import { ChatType, FileInfo, MapChatData } from "@/types/ChatType";
 import getRecipientEmail from "./getRecipientEmail";
 
 export default async function getInitialState(userId: string | undefined) {
@@ -74,6 +74,17 @@ export default async function getInitialState(userId: string | undefined) {
       let item = MapChatData(chat);
       data.listChat.push(item)
     }
+
+    let listImage = (await storage.ref(`public/chat-room/${chat.id}/photos`).listAll()).items.map(async(result) => {
+      const downloadURL = await result.getDownloadURL()
+      const metaData = await result.getMetadata()
+      let fileInfo = {} as FileInfo
+      fileInfo.url = downloadURL
+      fileInfo.key = result.name.split(".")[0]
+      fileInfo.name = result.name
+      fileInfo.size = metaData.size
+      return fileInfo
+    })
   }
 
   return data;

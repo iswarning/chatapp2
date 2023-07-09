@@ -12,6 +12,16 @@ export interface ChatType {
     messages?: Array<MessageType>;
     recipientInfo?: UserType;
     sizeMessage?: number
+    lastMessage?: MessageType,
+    listImage?: FileInfo[],
+    listFile?: FileInfo[],
+}
+
+export interface FileInfo {
+    key: string,
+    name: string,
+    size: number,
+    url: string,
 }
 
 export const MapChatData = (chat: firebase.firestore.DocumentSnapshot<firebase.firestore.DocumentData>): ChatType => {

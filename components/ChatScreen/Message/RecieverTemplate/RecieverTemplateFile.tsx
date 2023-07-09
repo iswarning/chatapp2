@@ -6,7 +6,7 @@ import React from 'react'
 import { useDownloadURL } from 'react-firebase-hooks/storage';
 import {useSelector} from 'react-redux'
 
-export default function RecieverTemplateFile({ file, lastIndex }: { file: MessageType, lastIndex: boolean }) {
+export default function RecieverTemplateFile({ file, lastIndex, timestamp }: { file: MessageType, lastIndex: boolean, timestamp: any }) {
 
     const chatState = useSelector(selectChatState)
     
@@ -54,7 +54,7 @@ export default function RecieverTemplateFile({ file, lastIndex }: { file: Messag
     return (
     <>
     {
-        <div className="-intro-x chat-text-box flex items-end float-left mb-4">
+        <div className="-intro-x chat-text-box flex items-end float-left mb-4" title={timestamp}>
             {
                 chatState.currentChat.isGroup && lastIndex ? <div className="chat-text-box__photo w-10 h-10 hidden sm:block flex-none image-fit relative mr-4">
                     <img alt="Topson Messenger Tailwind HTML Admin Template" className="rounded-full" src="https://topson.left4code.com/dist/images/profile-9.jpg"/>
