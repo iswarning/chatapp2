@@ -31,7 +31,7 @@ export function setListFriendRequest(listFriendRequest: FriendRequestType[], dis
         type: "setListFriendRequest",
         data: listFriendRequest
     }))
-    setLocalStorage("appStorage.listFriendRequest", listFriendRequest)
+    setLocalStorage("ListFriendRequest", listFriendRequest)
 }
 
 export function setListFriend(listFriend: FriendType[], dispatch: Dispatch<AnyAction>) {
@@ -39,7 +39,7 @@ export function setListFriend(listFriend: FriendType[], dispatch: Dispatch<AnyAc
         type: "setListFriend",
         data: listFriend
     }))
-    setLocalStorage("appStorage.listFriend", listFriend)
+    setLocalStorage("ListFriend", listFriend)
 }
 
 export function setCurrentChat(chat: ChatType, dispatch: Dispatch<AnyAction>) {
@@ -47,7 +47,7 @@ export function setCurrentChat(chat: ChatType, dispatch: Dispatch<AnyAction>) {
         type: "setCurrentChat",
         data: chat
     }))
-    setLocalStorage("appStorage.currentChat", chat)
+    setLocalStorage("CurrentChat", chat)
 }
 
 export function setListChat(listChat: ChatType[], dispatch: Dispatch<AnyAction>) {
@@ -55,7 +55,7 @@ export function setListChat(listChat: ChatType[], dispatch: Dispatch<AnyAction>)
         type: "setListChat",
         data: listChat
     }))
-    setLocalStorage("appStorage.listChat", listChat)
+    setLocalStorage("ListChat", listChat)
 }
 
 export function setUserInfo(userInfo: UserType, dispatch: Dispatch<AnyAction>) {
@@ -63,7 +63,7 @@ export function setUserInfo(userInfo: UserType, dispatch: Dispatch<AnyAction>) {
         type: "setUserInfo",
         data: userInfo
     }))
-    setLocalStorage("appStorage.userInfo", userInfo)
+    setLocalStorage("UserInfo", userInfo)
 }
 
 export function setCurrentMessages(chatId: string,messages: MessageType[], dispatch: Dispatch<AnyAction>) {
@@ -73,7 +73,7 @@ export function setCurrentMessages(chatId: string,messages: MessageType[], dispa
                 type: "setCurrentMessages",
                 data: messages
             }))
-            setLocalStorage("appStorage.currentMessages", messages)
+            setLocalStorage("CurrentMessages", messages)
         } else {
             db.collection("chats").doc(chatId).collection("messages").get().then((snap) => {
                 let newMessages = snap.docs.map((m) => MapMessageData(m))
@@ -81,7 +81,7 @@ export function setCurrentMessages(chatId: string,messages: MessageType[], dispa
                     type: "setCurrentMessages",
                     data: newMessages
                 }))
-                setLocalStorage("appStorage.currentMessages", newMessages)
+                setLocalStorage("CurrentMessages", newMessages)
             })
         }
     })
@@ -94,19 +94,12 @@ export function addNewMessage(newMessage: MessageType, dispatch: Dispatch<AnyAct
     }))
 }
 
-export function setFileUploading(keyFile: string, dispatch: Dispatch<AnyAction>) {
-    dispatch(setAppGlobalState({
-        type: "setFileUploading",
-        data: keyFile
-    }))
-}
-
 export function setListImageInRoom(chatId: string, listImage: FileInfo[], dispatch: Dispatch<AnyAction>) {
     dispatch(setAppGlobalState({
         type: "setListImageInRoom",
         data: {
-            chatId: chatId,
-            listImage: listImage
+            chatId,
+            listImage
         }
     }))
 }
@@ -127,9 +120,44 @@ export function pushMessageToListChat(chatId: string, newMessage: MessageType, d
     dispatch(setGlobalChatState({
         type: "pushMessageToListChat",
         data: {
-            chatId: chatId,
-            newMessage: newMessage
+            chatId,
+            newMessage
         }
     }))
-    // setLocalStorage("appStorage.listChat", listChat)
+    // setLocalStorage("ListChat", listChat)
 }
+
+export function setFileUploading(key: string, value: string, dispatch: Dispatch<AnyAction>) {
+    dispatch(setAppGlobalState({
+        type: "setFileUploading",
+        data: {
+          key,
+          value
+        }
+    }))
+}
+
+export function setFileUploadDone(key: string, dispatch: Dispatch<AnyAction>) {
+    dispatch(setAppGlobalState({
+        type: "setFileUploadDone",
+        data: key
+    }))
+}
+
+export function setProgress(progress: number, dispatch: Dispatch<AnyAction>) {
+    dispatch(setAppGlobalState({
+        type: "setProgress",
+        data: progress
+    }))
+}
+
+export function setShowImageFullScreen(urlImage: string, isShow: boolean, dispatch: Dispatch<AnyAction>) {
+    dispatch(setAppGlobalState({
+        type: "setShowImageFullScreen",
+        data: {
+            isShow,
+            urlImage
+        }
+    }))
+}
+

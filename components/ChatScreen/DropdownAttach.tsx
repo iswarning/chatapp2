@@ -5,7 +5,7 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { auth, db, storage } from "../../firebase";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from 'react-redux'
-import { selectAppState, setAppGlobalState } from "@/redux/appSlice";
+import { StatusSendType, selectAppState, setAppGlobalState } from "@/redux/appSlice";
 import { v4 as uuidv4, v5 } from 'uuid'
 import sendNotificationFCM from "@/utils/sendNotificationFCM";
 import { addMessageToFirebase } from "./Functions";
@@ -13,26 +13,28 @@ import { MessageType } from "@/types/MessageType";
 import { getImageTypeFileValid } from "@/utils/getImageTypeFileValid";
 import firebase from "firebase";
 import { selectChatState } from "@/redux/chatSlice";
-import { addNewMessage, setCurrentMessages } from "@/services/cache";
+import { addNewMessage, setCurrentMessages, setFileUploadDone, setFileUploading, setProgress, setStatusSend } from "@/services/cache";
 import { selectMessageState } from "@/redux/messageSlice";
 import { AlertError } from "@/utils/core";
-export default function DropdownAttach({ chatId, scrollToBottom, recipient, setProgress }: { chatId: string, scrollToBottom: any, recipient: any, setProgress: any }) {
+import CancelIcon from '@mui/icons-material/Cancel';
+
+export default function DropdownAttach({ chatId, scrollToBottom, recipient }: { chatId: string, scrollToBottom: any, recipient: any }) {
 
   const [showDropdownAttach, setShowDropdownAttach] = useState(false);
   const [user] = useAuthState(auth);
   const dispatch = useDispatch()
   const chatState = useSelector(selectChatState)
   const messageState = useSelector(selectMessageState)
+  const appState = useSelector(selectAppState)
 
-  async function onImageChange(event: any) {
+  function onImageChange(event: any) {
     event.preventDefault();
     let newArray: any[] = []
     if (event.target.files && event.target.files.length > 0) {
       for (const file of event.target.files) {
-        let img: File = file;
-        let imgType = img["type"];
+        let imgType = file["type"];
         let validImageTypes = ["image/jpeg", "image/png"];
-        let fileSize = img.size / 1024 / 1024;
+        let fileSize = file.size / 1024 / 1024;
 
         if (!validImageTypes.includes(imgType)) {
           AlertError("Image upload invalid !")
@@ -48,15 +50,16 @@ export default function DropdownAttach({ chatId, scrollToBottom, recipient, setP
           AlertError("Maximum image attach !")
           return;
         }      
-        
         let key = uuidv4(); 
         let path = `public/chat-room/${chatState.currentChat.id}/photos/${key}`
         storage
         .ref(path)
-        .put(img)
+        .put(file)
         .on(
           "state_changed",
-          () => {},
+          () => {
+
+          },
           (err) => console.log(err),
           () => {
             storage.ref(path).getDownloadURL().then((url) => {
@@ -68,40 +71,42 @@ export default function DropdownAttach({ chatId, scrollToBottom, recipient, setP
           }
         );
       }
-    }    
+    }   
 
-    if (newArray.length > 0) {
-      let newMessage = {} as MessageType
+    let newMessage = {} as MessageType
       newMessage.id = uuidv4()
       newMessage.timestamp = firebase.firestore.FieldValue.serverTimestamp()
       newMessage.user = user?.email!
       newMessage.type = "image"
       newMessage.images = JSON.stringify(newArray)
+      console.log(newArray)
+
       addNewMessage(newMessage, dispatch)
+
       db
       .collection("chats")
       .doc(chatId)
       .collection("messages")
-      .add({...newMessage, images: JSON.stringify(JSON.parse(newMessage.images).map((img: any) => img.key))});
+      .doc(newMessage.id)
+      .set({...newMessage, images: JSON.stringify(JSON.parse(newMessage.images).map((img: any) => img.key))})
+      .catch(err => console.log(err))
       scrollToBottom();
-    }
   }
 
-  const handleAttachFile = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleAttachFile = (event: any) => {
+    setStatusSend(StatusSendType.SENDING, dispatch)
     event.preventDefault()
     let result = []
     if(!event.target.files) return
-    for(let i = 0; i < event.target.files.length ; i++) {
-      let file: File = event.target.files[i]
+    for(const element of event.target.files) {
+      let file: File = element
       if (file) {
         let key = uuidv4()
-        let fileType = file.name.split(".").pop();
-        let validImageTypes = getImageTypeFileValid();
         let fileSize = file.size / 1024 / 1024;
-        if (!validImageTypes.includes(fileType ?? "")) {
+        if (!getImageTypeFileValid().includes(file.name.split(".").pop() ?? "")) {
           AlertError("File upload invalid !")
           return;
-        }
+        } 
         if (fileSize > 100) {
           AlertError("Size file no larger than 100 MB !")
           return;
@@ -142,52 +147,43 @@ export default function DropdownAttach({ chatId, scrollToBottom, recipient, setP
         "state_changed",
         (snapshot) => {
           let progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100)
-          dispatch(setAppGlobalState({
-            type: "setProgress",
-            data: progress
-          }))
+          setProgress(progress, dispatch)
           if (progress === 100) {
-            dispatch(setAppGlobalState({
-              type: "setFileUploading",
-              data: {
-                key: result[count].key,
-                value: "done"
-              }
-            }))
-            dispatch(setAppGlobalState({
-              type: "setFileUploadDone",
-              data: result[count].key
-            }))
+            setFileUploading(result[count].key, "done", dispatch)
+            setFileUploadDone(result[count].key, dispatch)
             if (count === result.length - 1) {
               return
             }
             count++
             uploadFileQueuing(result)
           } else if(progress > 1 && progress < 100) {
-            dispatch(setAppGlobalState({
-              type: "setFileUploading",
-              data: {
-                key: result[count].key,
-                value: "uploading"
-              }
-            }
-            ))
+            setFileUploading(result[count].key, "uploading", dispatch)
           }
         },
         (err) => {throw new Error(err.message)},
         () => {
-          let getMsg = messageState.currentMessages
-          .filter((msg) => msg.type === "file-uploading")
-          .find((msg) => JSON.parse(msg.file!).key === result[count].key)
           db
           .collection("chats")
           .doc(chatId)
           .collection("messages")
-          .add({...getMsg, type: "file"})
+          .add({
+            type: "file",
+            user: user?.email,
+            file: result[count].key,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+          })
+          .then(() => {
+            setStatusSend(StatusSendType.SENT, dispatch)
+          })
+          .catch(err => {
+            console.log(err);
+            setStatusSend(StatusSendType.ERROR, dispatch)
+            AlertError("Error when send message !")
+          })
         }
       );
       
-    // NotifyMessage()
+    NotifyMessage()
   }
 
   
@@ -221,7 +217,7 @@ export default function DropdownAttach({ chatId, scrollToBottom, recipient, setP
                   type="file"
                   hidden
                   id="upload-image"
-                  onChange={onImageChange}
+                  onChange={(e) => onImageChange(e)}
                   multiple
                 />
                 <InsertPhotoIcon

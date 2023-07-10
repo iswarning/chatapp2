@@ -1,72 +1,34 @@
-import { useEffect, useState, ReactEventHandler, SyntheticEvent, useRef } from 'react'
+import { useState } from 'react'
 import { 
     faMagnifyingGlassPlus,
     faMagnifyingGlassMinus,
     faRotateRight,
     faRotateLeft,
-    faDownload
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {useSelector} from 'react-redux'
 import { selectAppState } from '@/redux/appSlice'
-import { db, storage } from '@/firebase'
 import styled from 'styled-components'
 import Image from 'next/image'
 import { v4 as uuidv4 } from 'uuid'
-import 'html2canvas'
 import html2canvas from 'html2canvas'
 import { selectChatState } from '@/redux/chatSlice'
-
-const useImageLoaded = () => {
-    const [loaded, setLoaded] = useState(false)
-    const ref: any = useRef()
-  
-    const onLoad = () => {
-      setLoaded(true)
-    }
-  
-    useEffect(() => {
-      if (ref.current && ref.current.complete) {
-        onLoad()
-      }
-    })
-  
-    return [ref, loaded, onLoad]
-}
 
 export default function ShowImageFullScreen(
     { 
         urlImage, 
         onHide,
-        chatId,
     }: { 
         urlImage: string, 
-        onHide: any,
-        chatId: string
+        onHide: any
     }) {
 
     const [scale, setScale] = useState(100)
     const [rotate, setRotate] = useState(0)
-    const [urls, setUrls] = useState<Array<string>>([])
     const [urlImg, setUrlImg] = useState(urlImage)
     const appState = useSelector(selectAppState)
     const chatState = useSelector(selectChatState)
-    const [ref, loaded, onLoad] = useImageLoaded()
-
-    useEffect(() => {
-        const getListImage = async() => {
-
-            let path = `public/chat-room/${chatState.currentChat.id}/photos`
-            try {
-                (await storage.ref(path).listAll()).items.forEach((photo) => {
-                    photo.getDownloadURL().then((url) => setUrls((u: any) => [...u, url])).catch(err => console.log(err))
-                })
-            } catch (error) {
-                console.log("Error get photos: ", error)
-            }
-        }
-        getListImage().catch(err => console.log(err));
-    },[])
+    const urls = chatState.currentChat.listImage?.sort((item1: any, item2: any) => item2.timeCreated - item1.timeCreated).map((image) => image.url)
 
     const handleEnlarge = () => {
         if(scale >= 100 && scale < 500)
@@ -88,7 +50,9 @@ export default function ShowImageFullScreen(
 
     const StyleImage = {
         scale: `${scale}%`, 
-        transform: `rotate(${rotate}deg)`
+        transform: `rotate(${rotate}deg)`,
+        maxHeight: "400px",
+        maxWidth: "450px",
     }
 
     const handleChangeImage = (url: any) => {
@@ -106,10 +70,6 @@ export default function ShowImageFullScreen(
         }).catch(err => console.log(err))
     }
 
-    const handleOnload = (event: SyntheticEvent<HTMLImageElement, Event>) => {
-        console.log()
-    }
-
     return (
         <ScreenContainer>
             <ActionBarTop className='top-0 position-fixed right-0 d-flex'>
@@ -118,14 +78,13 @@ export default function ShowImageFullScreen(
             <div className='flex' >
                 <ContainerImage id='container-main-image'>
                     <MainImage src={urlImg} alt='' style={StyleImage} width={450} height={400}/>
-                    {loaded && <h1>Loaded!</h1>}
                 </ContainerImage>
                 <ImageBox className='flex-column' style={{overflowY: urls?.length! > 7 ? 'scroll' : 'unset'}}>
-                    { urls?.map((url: string) => <div key={uuidv4()} onClick={() => handleChangeImage(url)}>
+                    { urls?.map((url) => <div key={uuidv4()} onClick={() => handleChangeImage(url)}>
                         {
                             (urlImg === url && urlImage !== urlImg) || urlImage === url ?
-                            <ImageBoxElementActive className='image' ref={ref} onLoad={onLoad} alt='' src={url} width={100} height={100}/>
-                            : <ImageBoxElement className='image' ref={ref} onLoad={onLoad} alt='' src={url} width={100} height={100}/>
+                            <ImageBoxElementActive className='image' alt='' src={url} width={100} height={100}/>
+                            : <ImageBoxElement className='image' alt='' src={url} width={100} height={100}/>
                         }
                     </div>)
                     }

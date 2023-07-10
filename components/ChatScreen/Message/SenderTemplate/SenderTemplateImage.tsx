@@ -1,27 +1,19 @@
-import { ImageAttachType } from "@/types/ImageAttachType";
-import { MessageType } from "@/types/MessageType";
 import Image from "next/image";
-import TimeAgo from "timeago-react";
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import {useSelector} from 'react-redux'
-import { StatusSendType, selectAppState } from "@/redux/appSlice";
-import { SentIcon } from "./SenderTemplateText";
 import StatusSend from "./StatusSend";
+import { FileInfo } from "@/types/ChatType";
 
 export default function SenderTemplateImage(
     { 
-        imgs, 
+        files, 
         timestamp, 
         onShowImage,
         lastIndex
     }: { 
-        imgs: Array<ImageAttachType> | undefined , 
+        files: Array<FileInfo> | undefined , 
         timestamp: any, 
         onShowImage: any,
         lastIndex: boolean
     }) {
-
-    const appState = useSelector(selectAppState)
 
     return (
         <>
@@ -31,7 +23,7 @@ export default function SenderTemplateImage(
                     <div className="chat-text-box__content flex items-center float-right" title={timestamp}>
                         <div className="rounded-md text-gray-700 chat-text-box__content__text--image flex justify-end mt-3">
                             {
-                                imgs?.map((img, i) => <div key={img.key} className={ i === 0 ? "tooltip w-16 h-16 image-fit zoom-in" : "tooltip w-16 h-16 image-fit zoom-in ml-2"} onClick={() => onShowImage(img.url)}>
+                                files?.map((img, i) => <div key={img.key} className={ i === 0 ? "tooltip w-16 h-16 image-fit zoom-in" : "tooltip w-16 h-16 image-fit zoom-in ml-2"} onClick={() => onShowImage(img.url)}>
                                     <Image 
                                         src={img.url}
                                         className="rounded-md"

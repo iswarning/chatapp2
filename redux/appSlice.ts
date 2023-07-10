@@ -29,7 +29,8 @@ export interface InitialState {
     UploadProgressMultipleFile: any,
     statusSend?: StatusSendType,
     fileUploading: any,
-    fileUploadDone: any
+    fileUploadDone: any,
+    showImageFullScreenData: any
   },
   
 }
@@ -45,7 +46,11 @@ const initialState: InitialState = {
     UploadProgressMultipleFile: [],
     statusSend: undefined,
     fileUploading: [],
-    fileUploadDone: []
+    fileUploadDone: [],
+    showImageFullScreenData: {
+      isShow: false,
+      urlImage: ""
+    }
   },
 
 };
@@ -85,6 +90,9 @@ export const appSlice = createSlice({
             action.payload.data
           ]
           break
+        case "setShowImageFullScreen":
+            state.data.showImageFullScreenData = action.payload.data
+            break
         default:
           return
       }

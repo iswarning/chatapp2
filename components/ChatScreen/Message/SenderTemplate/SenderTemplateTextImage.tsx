@@ -2,34 +2,45 @@
 import { getEmojiIcon } from "@/utils/getEmojiData";
 import { MessageType } from "@/types/MessageType";
 import StatusSend from "./StatusSend";
+import { FileInfo } from "@/types/ChatType";
+import ReactDOM from "react-dom";
+import { useEffect } from "react";
 
 export default function SenderTemplateTextImage(
     { 
-        message, 
+        message,
+        imgs, 
         timestamp,
         lastIndex,
-        scrollToBottom 
+        scrollToBottom,
+        onShowImage
     }: {
         message: MessageType,
+        imgs: FileInfo[],
         timestamp: any,
         lastIndex: boolean,
-        scrollToBottom: any
+        scrollToBottom: any,
+        onShowImage: any
 }) {
 
+    useEffect(() => {
+        
+    },[])
+
     const handleMessage = () => {
-        let messageExport: string = message.message;
+        let messageExport = message.message;
         let images = JSON.parse(message.images!)
         if (message.type === "text-image") {
-            images?.forEach((image: any) => {
-                messageExport = messageExport.replace(
+            imgs?.forEach((image) => {
+                messageExport = messageExport?.replace(
                     image?.key,
-                  `<img src=${image.downloadUrl} loading="lazy" decoding="async" class="image-in-message" />`
+                  `<div><img src=${image.url} loading="lazy" decoding="async" id=${image.key} class="image-in-message" /></div>`
                 );
           });
         }
         return <div 
-                dangerouslySetInnerHTML={{ __html: messageExport }} 
-                style={{fontSize: message.type === 'text' && getEmojiIcon.includes(message.message) && message.message.length === 2 ? '50px' : '' }}>
+                dangerouslySetInnerHTML={{ __html: messageExport! }} 
+                style={{fontSize: message.type === 'text' && getEmojiIcon.includes(message.message ?? "") && message?.message?.length! === 2 ? '50px' : '' }}>
                 </div>;
       };
 

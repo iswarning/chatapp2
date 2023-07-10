@@ -1,12 +1,11 @@
 import { auth, db } from "@/firebase";
-import getRecipientEmail from "@/utils/getRecipientEmail";
 import { useRouter } from "next/router";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useCollection } from "react-firebase-hooks/firestore";
 import styled from "styled-components";
 import Image from "next/image";
 import TimeAgo from "timeago-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {useSelector} from 'react-redux'
 import { selectAppState } from "@/redux/appSlice";
 import { useDispatch } from 'react-redux'
@@ -14,12 +13,8 @@ import { ChatType } from "@/types/ChatType";
 import { MapMessageData } from "@/types/MessageType";
 import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined';
 import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutlined';
-import { MapImageInMessageData } from "@/types/ImageInMessageType";
-import { MapImageAttachData } from "@/types/ImageAttachType";
-import { MapFileInMessageData } from "@/types/FileInMessageType";
-import { MapUserData } from "@/types/UserType";
-import { selectChatState, setGlobalChatState } from "@/redux/chatSlice";
-import { selectMessageState, setGlobalMessageState } from "@/redux/messageSlice";
+import { selectChatState } from "@/redux/chatSlice";
+import { selectMessageState } from "@/redux/messageSlice";
 import { setCurrentChat, setCurrentMessages } from "@/services/cache";
 
 export default function ChatComponent({ chat, active }: { chat: ChatType, active: boolean}) {
@@ -58,18 +53,6 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
     }
   };
 
-  const getFileInMsg = async(m: any) => {
-    let fil
-    // let msg = MapMessageData(m)
-    // const imgRef = await db.collection("chats").doc(chat.id).collection("messages").doc(msg.id).collection("imageInMessage").get()
-    // msg.imageInMessage = imgRef.docs.map((img) => MapImageInMessageData(img))
-    // const imgAttachRef = await db.collection("chats").doc(chat.id).collection("messages").doc(msg.id).collection("imageAttach").get()
-    // msg.imageAttach = imgAttachRef.docs.map((img) => MapImageAttachData(img))
-    // const fileAttachRef = await db.collection("chats").doc(chat.id).collection("messages").doc(msg.id).collection("fileInMessage").limit(1).get()
-    // msg.fileAttach = MapFileInMessageData(fileAttachRef.docs?.[0])
-    // return msg
-  }
-
   const getMessage = async (id: string) => {
     const ref = db
       .collection("chats")
@@ -91,8 +74,8 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
     }
   };
 
-  const handleShowLastMessage = () => {
-    if(!lastMessage) return;
+  function handleShowLastMessage() {
+    if(!lastMessage) return null;
     const StyleIcon = {
       fontSize: '15px', 
       marginBottom: '4px'

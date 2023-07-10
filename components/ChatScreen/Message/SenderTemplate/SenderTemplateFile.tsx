@@ -3,12 +3,13 @@ import { MessageType } from '@/types/MessageType';
 import React from 'react'
 import { useDownloadURL } from 'react-firebase-hooks/storage';
 import { selectAppState } from '@/redux/appSlice';
-import {useSelector} from 'react-redux'
+import {useSelector,useDispatch} from 'react-redux'
 import CancelIcon from '@mui/icons-material/Cancel';
 import styled from 'styled-components';
 import { selectChatState } from '@/redux/chatSlice';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import StatusSend from './StatusSend';
+import { setFileUploading } from '@/services/cache';
 
 export default function SenderTemplateFile({ 
     file,
@@ -24,7 +25,7 @@ export default function SenderTemplateFile({
 
     const appState = useSelector(selectAppState)
     const chatState = useSelector(selectChatState)
-
+    const dispatch = useDispatch()
     const storageRef = storage.ref(`public/chat-room/${chatState.currentChat.id}/files/${file.key}`)
 
     const [downloadUrl] = useDownloadURL(storageRef)
@@ -78,9 +79,9 @@ export default function SenderTemplateFile({
             if(appState.fileUploadDone.includes(file.key)) { 
                 return <>
                     Size: { file.size.toFixed(1) + "/" + file.size.toFixed(1) } MB
-                    &nbsp;<DoneIcon fontSize='small' />
+                    &nbsp;<DoneIcon fontSize='small' style={{marginBottom: "3px"}} />
                 </>
-            } 
+            }
         } else {
             return <>
                 Size: { file.size.toFixed(1) } MB

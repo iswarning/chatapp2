@@ -15,15 +15,15 @@ export default function StatusSend({ lastIndex }: { lastIndex: boolean } ) {
                 switch(appState.statusSend) {
                     case StatusSendType.SENDING:
                         return <div className='ml-2'>
-                            <CheckCircleOutlineIcon fontSize='small' titleAccess='Sending'/>
+                            <CheckCircleOutlineIcon fontSize='small' titleAccess='Sending' style={{color: "#3A8DF6"}}/>
                         </div>
                     case StatusSendType.SENT:
                         return <div className='ml-2'>
-                            <CheckCircleIcon fontSize='small' titleAccess='Sent'/>
+                            <CheckCircleIcon fontSize='small' titleAccess='Sent' style={{color: "#3A8DF6"}}/>
                         </div>
                     case StatusSendType.ERROR:
                         return <div className='ml-2'>
-                        <CancelIcon fontSize='small' titleAccess='Error'/>
+                        <CancelIcon fontSize='small' titleAccess='Error' style={{color: "red"}}/>
                     </div>
                 }
             } else return <div style={{marginLeft: "25px"}}></div>

@@ -22,6 +22,7 @@ export interface FileInfo {
     name: string,
     size: number,
     url: string,
+    timeCreated: string
 }
 
 export const MapChatData = (chat: firebase.firestore.DocumentSnapshot<firebase.firestore.DocumentData>): ChatType => {

@@ -39,7 +39,6 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
   const [user] = useAuthState(auth);
   const endOfMessageRef: any = useRef(null);
   const [showEmoji, setShowEmoji] = useState(false);
-  const [progress, setProgress] = useState(0);
   const dispatch = useDispatch()
   const appState = useSelector(selectAppState)
   const videoCallState = useSelector(selectVideoCallState)
@@ -267,7 +266,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
         </ScrollBarCustom>
 
         <div className="intro-y chat-input box border-theme-3 dark:bg-dark-2 dark:border-dark-2 border flex items-center px-5 py-4">
-        <DropdownAttach chatId={chat.id} scrollToBottom={scrollToBottom} recipient={chat.recipientInfo} setProgress={(prog: any) => setProgress(prog)} />
+        <DropdownAttach chatId={chat.id} scrollToBottom={scrollToBottom} recipient={chat.recipientInfo} />
         <InputMessage
           contentEditable="true"
           className="w-full block outline-none py-4 px-4 bg-transparent"

@@ -4,7 +4,7 @@ import { FriendType, MapFriendData } from "@/types/FriendType";
 import { FriendRequestType, MapFriendRequestData } from "@/types/FriendRequestType";
 import { ChatType, FileInfo, MapChatData } from "@/types/ChatType";
 import getRecipientEmail from "./getRecipientEmail";
-
+import mime from 'mime-types'
 export default async function getInitialState(userId: string | undefined) {
   let data = {
     userInfo: {} as UserType,
@@ -60,31 +60,49 @@ export default async function getInitialState(userId: string | undefined) {
     .get();
 
   for (const chat of listChat?.docs || []) {
-    if(!chat.data().isGroup) {
-      let info = await db
-      .collection("users")
-      .where("email", "==", getRecipientEmail(chat.data().users, userInfo.data()))
-      .get();
-    
-      let item = MapChatData(chat);
-      
-      item.recipientInfo = MapUserData(info?.docs?.[0])
-      data.listChat.push(item)
+
+    let info = {} as UserType
+    let recipientEmail = getRecipientEmail(chat.data().users, userInfo.data())
+    const infoByFriend = data.listFriend.find((f) => f.userInfo?.email === recipientEmail) ?? null
+    const infoByFriendRequest = data.listFriendRequest.find((fR) => fR.userInfo?.email === recipientEmail) ?? null
+    if (!infoByFriend && !infoByFriendRequest) {
+      const snapshot = await db.collection("users").where("email", "==", recipientEmail).get()
+      info = MapUserData(snapshot.docs?.[0]);
     } else {
-      let item = MapChatData(chat);
-      data.listChat.push(item)
+      info = infoByFriend?.userInfo ?? infoByFriendRequest?.userInfo!
     }
 
-    let listImage = (await storage.ref(`public/chat-room/${chat.id}/photos`).listAll()).items.map(async(result) => {
-      const downloadURL = await result.getDownloadURL()
-      const metaData = await result.getMetadata()
-      let fileInfo = {} as FileInfo
-      fileInfo.url = downloadURL
-      fileInfo.key = result.name.split(".")[0]
-      fileInfo.name = result.name
-      fileInfo.size = metaData.size
-      return fileInfo
+    data.listChat.push({
+      ...MapChatData(chat),
+      recipientInfo: chat.data().isGroup ? undefined : info,
+      listImage: await Promise.all(
+        (await storage.ref(`public/chat-room/${chat.id}/photos`).listAll())
+        .items
+        .map(async(result) => {
+        let metadata = await result.getMetadata()
+        return {
+          url: await result.getDownloadURL(),
+          key: result.name,
+          name: result.name + mime.extension(metadata.contentType),
+          size: metadata.size,
+          timeCreated: metadata.timeCreated
+        }
+      })),
+      listFile: await Promise.all(
+        (await storage.ref(`public/chat-room/${chat.id}/files`).listAll())
+        .items
+        .map(async(result) => {
+        let metadata = await result.getMetadata()  
+        return {
+          url: await result.getDownloadURL(),
+          key: result.name,
+          name: result.name + mime.extension(metadata.contentType),
+          size: metadata.size,
+          timeCreated: metadata.timeCreated
+        }
+      }))
     })
+    
   }
 
   return data;

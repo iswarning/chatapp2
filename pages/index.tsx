@@ -24,8 +24,9 @@ import { StatusCallType, selectVideoCallState, setGlobalVideoCallState } from "@
 import getNotification from "@/utils/getNotifications";
 import { setGlobalFriendState } from "@/redux/friendSlice";
 import { setGlobalFriendRequestState } from "@/redux/friendRequestSlice";
-import { getLocalStorage, setCurrentChat, setCurrentMessages, setListChat, setListFriend, setListFriendRequest, setUserInfo } from "@/services/cache";
+import { getLocalStorage, setCurrentChat, setCurrentMessages, setListChat, setListFriend, setListFriendRequest, setShowImageFullScreen, setUserInfo } from "@/services/cache";
 import { UserType } from "@/types/UserType";
+import ShowImageFullScreen from "@/components/ChatScreen/Message/ShowImageFullScreen";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -43,7 +44,7 @@ const Page: NextPageWithLayout = () => {
   useEffect(() => {
     setLoading(true)
     localStorage.clear()
-    if (!getLocalStorage("appStorage.userInfo")) {
+    if (!getLocalStorage("UserInfo")) {
       getInitialState(user?.uid).then((data) => {
         setUserInfo(data.userInfo, dispatch)
         setListFriend(data.listFriend, dispatch)
@@ -53,12 +54,12 @@ const Page: NextPageWithLayout = () => {
       .catch(err => console.log(err))
       .finally(() => setLoading(false))
     } else {
-      setUserInfo(getLocalStorage("appStorage.userInfo"), dispatch)
-      setListFriend(getLocalStorage("appStorage.listFriend"), dispatch)
-      setListFriendRequest(getLocalStorage("appStorage.listFriendRequest"), dispatch)
-      setListChat(getLocalStorage("appStorage.listChat"), dispatch)
-      setCurrentChat(getLocalStorage("appStorage.currentChat"), dispatch)
-      setCurrentMessages(getLocalStorage("appStorage.currentChat").id,getLocalStorage("appStorage.currentMessages"), dispatch)
+      setUserInfo(getLocalStorage("UserInfo"), dispatch)
+      setListFriend(getLocalStorage("ListFriend"), dispatch)
+      setListFriendRequest(getLocalStorage("ListFriendRequest"), dispatch)
+      setListChat(getLocalStorage("ListChat"), dispatch)
+      setCurrentChat(getLocalStorage("CurrentChat"), dispatch)
+      setCurrentMessages(getLocalStorage("CurrentChat").id,getLocalStorage("CurrentMessages"), dispatch)
       setLoading(false)
     }
   },[])
@@ -202,6 +203,12 @@ const Page: NextPageWithLayout = () => {
         }
 
         { videoCallState.showVideoCallScreen ? <VideoCallScreen open={videoCallState.showVideoCallScreen} /> : null }
+
+        {
+          appState.showImageFullScreenData.isShow ? <ShowImageFullScreen 
+          urlImage={appState.showImageFullScreenData.urlImage} 
+          onHide={() => setShowImageFullScreen(appState.showImageFullScreenData.urlImage,!appState.showImageFullScreenData.isShow, dispatch)}  /> : null
+        }
         </div>
       </div>
     </>
