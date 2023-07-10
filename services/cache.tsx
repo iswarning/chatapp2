@@ -1,5 +1,5 @@
 import { db } from "@/firebase";
-import { setAppGlobalState } from "@/redux/appSlice";
+import { StatusSendType, setAppGlobalState } from "@/redux/appSlice";
 import { setGlobalChatState } from "@/redux/chatSlice";
 import { setGlobalFriendRequestState } from "@/redux/friendRequestSlice";
 import { setGlobalFriendState } from "@/redux/friendSlice";
@@ -158,6 +158,13 @@ export function setShowImageFullScreen(urlImage: string, isShow: boolean, dispat
             isShow,
             urlImage
         }
+    }))
+}
+
+export function setStatusSend(status: StatusSendType, dispatch: Dispatch<AnyAction>) {
+    dispatch(setAppGlobalState({
+        type: "setStatusSend",
+        data: status
     }))
 }
 

@@ -35,6 +35,8 @@ import { setGlobalChatState } from "@/redux/chatSlice";
 import {v4 as uuidv4} from 'uuid'
 import firebase from "firebase";
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import { addNewMessage, pushMessageToListChat, setStatusSend } from "@/services/cache";
+import { AlertError } from "@/utils/core";
 export default function ChatScreen({ chat, messages }: { chat: ChatType, messages: Array<MessageType> }) {
   const [user] = useAuthState(auth);
   const endOfMessageRef: any = useRef(null);
@@ -84,10 +86,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
   };
 
   const sendMessage = async (e: any): Promise<any> => {
-    dispatch(setAppGlobalState({
-      type: "setStatusSend",
-      data: StatusSendType.SENDING
-    }))
+    setStatusSend(StatusSendType.SENDING, dispatch)
     e.preventDefault();
 
     let { listElementImg, message } = handleImageInMessage();
@@ -112,18 +111,9 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
       newMessage.images = JSON.stringify(newArray)
     }
 
-    dispatch(setGlobalMessageState({
-      type: "addNewMessage",
-      data: newMessage
-    }))
+    addNewMessage(newMessage, dispatch)
 
-    dispatch(setGlobalChatState({
-      type: "pushMessageToListChat",
-      data: {
-        chatId: chat.id,
-        newMessage: newMessage
-      }
-    }))
+    pushMessageToListChat(chat.id, newMessage, dispatch)
 
     let str = ""
     if (listElementImg.length > 0) {
@@ -159,24 +149,14 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
           data: JSON.stringify(newMessage)
         }
       ))
-      toast("Error when send message !", {
-        hideProgressBar: true,
-        type: "error",
-        autoClose: 5000,
-      });
     })
     .catch(err => {
-      dispatch(setAppGlobalState({
-        type: "setStatusSend",
-        data: StatusSendType.ERROR
-      }))
+      setStatusSend(StatusSendType.ERROR, dispatch)
+      AlertError("Error when send message !")
       console.log(err)
     })
     .finally(() => {
-      dispatch(setAppGlobalState({
-        type: "setStatusSend",
-        data: StatusSendType.SENT
-      }))
+      setStatusSend(StatusSendType.SENT, dispatch)
       scrollToBottom();
     })
 
