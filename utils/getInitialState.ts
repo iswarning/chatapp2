@@ -40,7 +40,7 @@ export default async function getInitialState(userId: string | undefined) {
     .collection("friend_requests")
     .where("recipientEmail", "==", data.userInfo.email)
     .get();
-    console.log(88888)
+    
   for (const fR of listFriendRequest?.docs || []) {
     let info = await db
       .collection("users")
@@ -52,32 +52,25 @@ export default async function getInitialState(userId: string | undefined) {
 
     data.listFriendRequest.push(itemToPush);
   }
-  console.log(444444)
+  console.log(data)
   const listChat = await db
     .collection("chats")
     .where("users", 'array-contains', data.userInfo.email)
-    .orderBy("updatedAt")
-    .get();
-    console.log(55555555555)
-  for (const chat of listChat?.docs || []) {
+    .get()
 
+  for (const chat of listChat?.docs || []) {
     let info = {} as UserType
     let listInfo = []
     if (chat.data().isGroup) {
-      for(const recipientEmail of chat.data().users) {
-        console.log(11111111)
-        
+      for(const recipientEmail of chat.data().users) {     
         if (recipientEmail !== userInfo?.data()?.email) {
           const infoByFriend = data.listFriend.find((f) => f.userInfo?.email === recipientEmail) ?? null
           const infoByFriendRequest = data.listFriendRequest.find((fR) => fR.userInfo?.email === recipientEmail) ?? null
-          console.log(222222222222)
           if (!infoByFriend && !infoByFriendRequest) {
             const snapshot = await db.collection("users").where("email", "==", recipientEmail).get()
             listInfo.push(MapUserData(snapshot.docs?.[0]));
-            console.log(333333333)
           } else {
             listInfo.push(infoByFriend?.userInfo ?? infoByFriendRequest?.userInfo!)
-            console.log(444444444)
           }
         }
       }

@@ -18,7 +18,7 @@ import InfoContentScreen from "@/components/ChatScreen/InfoContentScreen";
 import ChatScreen from "@/components/ChatScreen/ChatScreen";
 import { selectChatState, setGlobalChatState } from "@/redux/chatSlice";
 import { StatusCallType, selectVideoCallState, setGlobalVideoCallState } from "@/redux/videoCallSlice";
-import { setGlobalFriendState } from "@/redux/friendSlice";
+import { selectFriendState, setGlobalFriendState } from "@/redux/friendSlice";
 import { getLocalStorage, setCurrentChat, setListChat, setListFriend, setListFriendRequest, setShowImageFullScreen, setUserInfo } from "@/services/cache";
 import ShowImageFullScreen from "@/components/ChatScreen/Message/ShowImageFullScreen";
 
@@ -32,11 +32,11 @@ const Page: NextPageWithLayout = () => {
   const dispatch = useDispatch();
   const appState = useSelector(selectAppState);
   const chatState = useSelector(selectChatState);
+  const friendState = useSelector(selectFriendState);
   const videoCallState = useSelector(selectVideoCallState);
 
   useEffect(() => {
     setLoading(true)
-    localStorage.clear()
     if (!getLocalStorage("UserInfo")) {
       getInitialState(user?.uid).then((data) => {
         setUserInfo(data.userInfo, dispatch)
@@ -51,7 +51,7 @@ const Page: NextPageWithLayout = () => {
       setListFriend(getLocalStorage("ListFriend"), dispatch)
       setListFriendRequest(getLocalStorage("ListFriendRequest"), dispatch)
       setListChat(getLocalStorage("ListChat"), dispatch)
-      setCurrentChat(getLocalStorage("CurrentChat"), dispatch)
+      getLocalStorage("CurrentChat") ? setCurrentChat(getLocalStorage("CurrentChat"), dispatch) : null;
       setLoading(false)
     }
   },[])
