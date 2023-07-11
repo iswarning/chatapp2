@@ -1,41 +1,30 @@
 import { auth, db, storage } from "@/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { useCollection } from "react-firebase-hooks/firestore";
 import Message from "./Message/Message";
 import { useEffect, useRef, useState } from "react";
-import getRecipientEmail from "@/utils/getRecipientEmail";
-import { useRouter } from "next/router";
 import {
   EndOfMessage,
   InputMessage,
 } from "./ChatScreenStyled";
 import { toast } from "react-toastify";
 import {
-  addMessageToFirebase,
   handleImageInMessage,
-  pushUrlImageToFirestore
 } from "./Functions";
 import { useSelector, useDispatch } from 'react-redux';
-import { StatusSendType, selectAppState, setAppGlobalState } from "@/redux/appSlice";
+import { StatusSendType, selectAppState } from "@/redux/appSlice";
 import { ChatType } from "@/types/ChatType";
-import { MapMessageData, MessageType } from "@/types/MessageType";
+import { MessageType } from "@/types/MessageType";
 import Image from "next/image";
 import EmojiContainerComponent from "@/components/ChatScreen/EmojiContainerComponent";
 import styled from "styled-components";
 import DropdownAttach from "@/components/ChatScreen/DropdownAttach";
 import CallIcon from '@mui/icons-material/Call';
-import { io } from "socket.io-client";
 import getUserBusy from "@/utils/getUserBusy";
-import sendNotificationFCM from "@/utils/sendNotificationFCM";
-import { MapUserData } from "@/types/UserType";
 import { requestMedia } from "@/utils/requestPermission";
 import { StatusCallType, selectVideoCallState, setGlobalVideoCallState } from "@/redux/videoCallSlice";
-import { setGlobalMessageState } from "@/redux/messageSlice";
-import { setGlobalChatState } from "@/redux/chatSlice";
 import {v4 as uuidv4} from 'uuid'
 import firebase from "firebase";
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import { addNewMessage, pushMessageToListChat, setStatusSend } from "@/services/cache";
+import { pushMessageToListChat, setStatusSend } from "@/services/cache";
 import { AlertError } from "@/utils/core";
 export default function ChatScreen({ chat, messages }: { chat: ChatType, messages: Array<MessageType> }) {
   const [user] = useAuthState(auth);
@@ -107,11 +96,11 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
             key: item.key,
             downloadUrl: item.element.src
         })
+        newMessage.images = JSON.stringify(newArray)
       }
-      newMessage.images = JSON.stringify(newArray)
     }
 
-    addNewMessage(newMessage, dispatch)
+    pushMessageToListChat(chat.id, newMessage, dispatch)
 
     pushMessageToListChat(chat.id, newMessage, dispatch)
 
@@ -139,7 +128,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
     .doc(chat.id)
     .collection("messages")
     .doc(newMessage.id)
-    .set({ ...newMessage, images: str })
+    .set({ ...newMessage, images: str.length > 0 ? str : undefined })
     .then(() => {
       appState.socket.emit("send-notify", JSON.stringify(
         { 

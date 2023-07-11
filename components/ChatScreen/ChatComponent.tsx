@@ -1,4 +1,4 @@
-import { auth, db } from "@/firebase";
+import { auth, db, storage } from "@/firebase";
 import { useRouter } from "next/router";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useCollection } from "react-firebase-hooks/firestore";
@@ -9,21 +9,18 @@ import { useState } from "react";
 import {useSelector} from 'react-redux'
 import { selectAppState } from "@/redux/appSlice";
 import { useDispatch } from 'react-redux'
-import { ChatType } from "@/types/ChatType";
-import { MapMessageData } from "@/types/MessageType";
+import { ChatType, FileInfo } from "@/types/ChatType";
+import { MapMessageData, MessageType } from "@/types/MessageType";
 import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined';
 import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutlined';
 import { selectChatState } from "@/redux/chatSlice";
-import { selectMessageState } from "@/redux/messageSlice";
-import { setCurrentChat, setCurrentMessages } from "@/services/cache";
+import { setCurrentChat, setListFileInRoom, setListImageInRoom, setListMessageInRoom } from "@/services/cache";
+import mime from "mime-types";
 
 export default function ChatComponent({ chat, active }: { chat: ChatType, active: boolean}) {
   const [user] = useAuthState(auth);
-  const router = useRouter();
-  const [userOnline, setUserOnline] = useState<Array<string>>();
   const appState = useSelector(selectAppState)
   const chatState = useSelector(selectChatState)
-  const messageState = useSelector(selectMessageState)
   const dispatch = useDispatch()
 
   const recipientInfo = chat.recipientInfo
@@ -45,13 +42,53 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
 
   const handleShowChatScreen = async() => {
     let chatExist = chatState.listChat.find((chatExist) => chatExist.id === chat.id)
-    setCurrentChat(chatExist!, dispatch)
-    if (chatExist?.messages) {
-      setCurrentMessages(chat.id,chatExist.messages, dispatch)
-    } else {
-      setCurrentMessages(chat.id,await getMessage(chat.id), dispatch)
+    let newMessages = chatExist?.messages
+    
+    if (!chatExist?.messages) {
+      newMessages = await getMessage(chat.id)
+      setListMessageInRoom(chat.id, newMessages, dispatch)
     }
+
+    setCurrentChat({
+      ...chatExist as ChatType,
+      messages: newMessages
+    }, dispatch)
+
+    setListImageInRoom(chat.id, await getListImage(), dispatch)
+    setListFileInRoom(chat.id, await getListFile(), dispatch)
   };
+
+  const getListImage = async() => {
+    return await Promise.all(
+      (await storage.ref(`public/chat-room/${chat.id}/photos`).listAll())
+      .items
+      .map(async(result) => {
+      let metadata = await result.getMetadata()
+      return {
+        url: await result.getDownloadURL(),
+        key: result.name,
+        name: result.name + mime.extension(metadata.contentType),
+        size: metadata.size,
+        timeCreated: metadata.timeCreated
+      }
+    })) as FileInfo[]
+  }
+
+  const getListFile = async() => {
+    return await Promise.all(
+      (await storage.ref(`public/chat-room/${chat.id}/files`).listAll())
+      .items
+      .map(async(result) => {
+      let metadata = await result.getMetadata()  
+      return {
+        url: await result.getDownloadURL(),
+        key: result.name,
+        name: result.name + mime.extension(metadata.contentType),
+        size: metadata.size,
+        timeCreated: metadata.timeCreated
+      }
+    })) as FileInfo[]
+  } 
 
   const getMessage = async (id: string) => {
     const ref = db

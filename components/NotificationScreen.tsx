@@ -31,29 +31,29 @@ const Container = styled.div`
     position: absolute;
     inset: 0px auto auto 0px;
     margin: 0px;
-    transform: translate(1374px, 63px);
+    transform: translate(1140px, 63px);
 `
 
 function FriendRequestElement({ friend }: { friend: FriendRequestType }) {
 
-    const [userInfo] = useCollection(
-        db
-        .collection("users")
-        .where("email",'==', friend.senderEmail)
-        .limit(1)
-    )
+    // const [userInfo] = useCollection(
+    //     db
+    //     .collection("users")
+    //     .where("email",'==', friend.senderEmail)
+    //     .limit(1)
+    // )
 
     return (
         <div className="cursor-pointer relative flex items-center mt-6">
             <div className="w-10 h-10 flex-none image-fit mr-1">
                 {
-                    userInfo?.docs?.[0].data().photoURL ? <Image src={userInfo?.docs?.[0].data().photoURL} width={40} height={40} alt='' /> : null
+                    friend?.userInfo?.photoURL ? <Image src={friend?.userInfo?.photoURL} width={40} height={40} alt='' /> : null
                 }
                 <div className="w-3 h-3 absolute right-0 bottom-0 bg-theme-1 border-white rounded-full border-2"></div>
             </div>
             <div className="ml-2 overflow-hidden">
                 <div className="flex items-center">
-                    <a href="javascript:;" className="font-medium truncate mr-5">{userInfo?.docs?.[0].data().fullName}</a>
+                    <a href="javascript:;" className="font-medium truncate mr-5">{friend?.userInfo?.fullName}</a>
                     <div className="text-opacity-50 text-gray-800 text-xs ml-auto whitespace-nowrap -mt-0.5">01:10 PM</div>
                 </div>
                 <div className='mt-0.5 '>

@@ -2,7 +2,6 @@ import { configureStore, ThunkAction, Action } from "@reduxjs/toolkit";
 import { createWrapper } from "next-redux-wrapper";
 import { appSlice } from "./appSlice";
 import { chatSlice } from "./chatSlice";
-import { messageSlice } from "./messageSlice";
 import { videoCallSlice } from "./videoCallSlice";
 import { friendSlice } from "./friendSlice";
 import { friendRequestSlice } from "./friendRequestSlice";
@@ -12,7 +11,6 @@ const makeStore = () =>
     reducer: {
       [appSlice.name]: appSlice.reducer,
       [chatSlice.name]: chatSlice.reducer,
-      [messageSlice.name]: messageSlice.reducer,
       [videoCallSlice.name]: videoCallSlice.reducer,
       [friendSlice.name]: friendSlice.reducer,
       [friendRequestSlice.name]: friendRequestSlice.reducer,

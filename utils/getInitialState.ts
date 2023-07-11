@@ -1,10 +1,9 @@
-import { db, storage } from "@/firebase";
+import { db } from "@/firebase";
 import { MapUserData, UserType } from "@/types/UserType";
 import { FriendType, MapFriendData } from "@/types/FriendType";
 import { FriendRequestType, MapFriendRequestData } from "@/types/FriendRequestType";
 import { ChatType, FileInfo, MapChatData } from "@/types/ChatType";
 import getRecipientEmail from "./getRecipientEmail";
-import mime from 'mime-types'
 export default async function getInitialState(userId: string | undefined) {
   let data = {
     userInfo: {} as UserType,
@@ -41,7 +40,7 @@ export default async function getInitialState(userId: string | undefined) {
     .collection("friend_requests")
     .where("recipientEmail", "==", data.userInfo.email)
     .get();
-
+    console.log(88888)
   for (const fR of listFriendRequest?.docs || []) {
     let info = await db
       .collection("users")
@@ -53,57 +52,55 @@ export default async function getInitialState(userId: string | undefined) {
 
     data.listFriendRequest.push(itemToPush);
   }
-
+  console.log(444444)
   const listChat = await db
     .collection("chats")
     .where("users", 'array-contains', data.userInfo.email)
+    .orderBy("updatedAt")
     .get();
-
+    console.log(55555555555)
   for (const chat of listChat?.docs || []) {
 
     let info = {} as UserType
-    let recipientEmail = getRecipientEmail(chat.data().users, userInfo.data())
-    const infoByFriend = data.listFriend.find((f) => f.userInfo?.email === recipientEmail) ?? null
-    const infoByFriendRequest = data.listFriendRequest.find((fR) => fR.userInfo?.email === recipientEmail) ?? null
-    if (!infoByFriend && !infoByFriendRequest) {
-      const snapshot = await db.collection("users").where("email", "==", recipientEmail).get()
-      info = MapUserData(snapshot.docs?.[0]);
+    let listInfo = []
+    if (chat.data().isGroup) {
+      for(const recipientEmail of chat.data().users) {
+        console.log(11111111)
+        
+        if (recipientEmail !== userInfo?.data()?.email) {
+          const infoByFriend = data.listFriend.find((f) => f.userInfo?.email === recipientEmail) ?? null
+          const infoByFriendRequest = data.listFriendRequest.find((fR) => fR.userInfo?.email === recipientEmail) ?? null
+          console.log(222222222222)
+          if (!infoByFriend && !infoByFriendRequest) {
+            const snapshot = await db.collection("users").where("email", "==", recipientEmail).get()
+            listInfo.push(MapUserData(snapshot.docs?.[0]));
+            console.log(333333333)
+          } else {
+            listInfo.push(infoByFriend?.userInfo ?? infoByFriendRequest?.userInfo!)
+            console.log(444444444)
+          }
+        }
+      }
     } else {
-      info = infoByFriend?.userInfo ?? infoByFriendRequest?.userInfo!
+      let recipientEmail = getRecipientEmail(chat.data().users, userInfo.data())
+      const infoByFriend = data.listFriend.find((f) => f.userInfo?.email === recipientEmail) ?? null
+      const infoByFriendRequest = data.listFriendRequest.find((fR) => fR.userInfo?.email === recipientEmail) ?? null
+      if (!infoByFriend && !infoByFriendRequest) {
+        const snapshot = await db.collection("users").where("email", "==", recipientEmail).get()
+        info = MapUserData(snapshot.docs?.[0]);
+      } else {
+        info = infoByFriend?.userInfo ?? infoByFriendRequest?.userInfo!
+      }
     }
+   
 
     data.listChat.push({
       ...MapChatData(chat),
-      recipientInfo: chat.data().isGroup ? undefined : info,
-      listImage: await Promise.all(
-        (await storage.ref(`public/chat-room/${chat.id}/photos`).listAll())
-        .items
-        .map(async(result) => {
-        let metadata = await result.getMetadata()
-        return {
-          url: await result.getDownloadURL(),
-          key: result.name,
-          name: result.name + mime.extension(metadata.contentType),
-          size: metadata.size,
-          timeCreated: metadata.timeCreated
-        }
-      })),
-      listFile: await Promise.all(
-        (await storage.ref(`public/chat-room/${chat.id}/files`).listAll())
-        .items
-        .map(async(result) => {
-        let metadata = await result.getMetadata()  
-        return {
-          url: await result.getDownloadURL(),
-          key: result.name,
-          name: result.name + mime.extension(metadata.contentType),
-          size: metadata.size,
-          timeCreated: metadata.timeCreated
-        }
-      }))
+      recipientInfo: info,
+      listRecipientInfo: listInfo
     })
     
   }
-
+  console.log(data.listChat) 
   return data;
 }

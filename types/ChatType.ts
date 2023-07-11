@@ -3,25 +3,25 @@ import firebase from "firebase";
 import { UserType } from "./UserType";
 
 export interface ChatType {
-    id: string;
-    users: Array<string>;
-    photoURL: string;
-    isGroup: boolean;
-    name: string;
-    admin: string;
-    messages?: Array<MessageType>;
-    recipientInfo?: UserType;
-    sizeMessage?: number
-    lastMessage?: MessageType,
-    listImage?: FileInfo[],
-    listFile?: FileInfo[],
+    id: string
+    users: Array<string>
+    photoURL: string
+    isGroup: boolean
+    name: string
+    admin: string
+    messages?: Array<MessageType>
+    recipientInfo?: UserType
+    listRecipientInfo?: UserType[]
+    lastMessage?: MessageType
+    listImage?: FileInfo[]
+    listFile?: FileInfo[]
 }
 
 export interface FileInfo {
-    key: string,
-    name: string,
-    size: number,
-    url: string,
+    key: string
+    name: string
+    size: number
+    url: string
     timeCreated: string
 }
 

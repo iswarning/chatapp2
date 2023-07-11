@@ -12,7 +12,8 @@ import { useCollection } from 'react-firebase-hooks/firestore'
 import { useQuery } from '@tanstack/react-query'
 import MemberElement from '../MemberElement'
 import getRecipientEmail from '@/utils/getRecipientEmail'
-
+import firebase from 'firebase'
+import { selectFriendState } from '@/redux/friendSlice'
 export default function SidebarGroups() {
 
     const [active, setActive] = useState("Members")
@@ -21,6 +22,7 @@ export default function SidebarGroups() {
     const CLASS_ACTIVE = "hover:bg-gray-100 dark:hover:bg-dark-2 flex-1 py-2 rounded-md text-center active"
     const CLASS_NOT_ACTIVE = "hover:bg-gray-100 dark:hover:bg-dark-2 flex-1 py-2 rounded-md text-center"
     const appState = useSelector(selectAppState)
+    const friendState = useSelector(selectFriendState)
     const [image, setImage]: any = useState(null);
     const dispatch = useDispatch()
 
@@ -30,9 +32,9 @@ export default function SidebarGroups() {
         formState: { errors },
       } = useForm();
 
-    const [friendSnapshot] = useCollection(
-        db.collection("friends").where("users", "array-contains", appState.userInfo?.email)
-    );
+    // const [friendSnapshot] = useCollection(
+    //     db.collection("friends").where("users", "array-contains", appState.userInfo?.email)
+    // );
 
     const handleAddMemberToGroup = (checked: any, member: UserType | undefined) => {
         if (checked) {
@@ -62,7 +64,9 @@ export default function SidebarGroups() {
             photoURL: "",
             isGroup: true,
             name: data.groupName,
-            admin: appState.userInfo.email
+            admin: appState.userInfo.email,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
         })
         .then(doc => {
             doc.get().then(snap => {
@@ -154,10 +158,10 @@ export default function SidebarGroups() {
                             <div className="user-list">
                                 <div className="intro-x pb-6">
                                 {
-                                    friendSnapshot ? friendSnapshot.docs.map((friend) => 
+                                    friendState ? friendState.listFriend.map((friend) => 
                                         <MemberElement 
                                         key={friend.id}
-                                        email={getRecipientEmail(friend.data().users, appState.userInfo)} 
+                                        info={friend.userInfo}
                                         handleAddMemberToGroup={(checked: boolean, userInfo: UserType) => handleAddMemberToGroup(checked, userInfo)} 
                                         listMember={listMember}
                                         />)  : null

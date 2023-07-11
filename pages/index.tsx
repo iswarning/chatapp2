@@ -14,18 +14,12 @@ import SidebarProfile from "@/components/Sidebar/SidebarProfile";
 import getInitialState from "@/utils/getInitialState";
 import VideoCallScreen from "@/components/VideoCallScreen/VideoCallScreen";
 import { toast } from "react-toastify";
-import { useRouter } from "next/router";
 import InfoContentScreen from "@/components/ChatScreen/InfoContentScreen";
 import ChatScreen from "@/components/ChatScreen/ChatScreen";
-import DropdownActionUser from "@/components/DropdownActionUser";
 import { selectChatState, setGlobalChatState } from "@/redux/chatSlice";
-import { selectMessageState } from "@/redux/messageSlice";
 import { StatusCallType, selectVideoCallState, setGlobalVideoCallState } from "@/redux/videoCallSlice";
-import getNotification from "@/utils/getNotifications";
 import { setGlobalFriendState } from "@/redux/friendSlice";
-import { setGlobalFriendRequestState } from "@/redux/friendRequestSlice";
-import { getLocalStorage, setCurrentChat, setCurrentMessages, setListChat, setListFriend, setListFriendRequest, setShowImageFullScreen, setUserInfo } from "@/services/cache";
-import { UserType } from "@/types/UserType";
+import { getLocalStorage, setCurrentChat, setListChat, setListFriend, setListFriendRequest, setShowImageFullScreen, setUserInfo } from "@/services/cache";
 import ShowImageFullScreen from "@/components/ChatScreen/Message/ShowImageFullScreen";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -38,7 +32,6 @@ const Page: NextPageWithLayout = () => {
   const dispatch = useDispatch();
   const appState = useSelector(selectAppState);
   const chatState = useSelector(selectChatState);
-  const messageState = useSelector(selectMessageState);
   const videoCallState = useSelector(selectVideoCallState);
 
   useEffect(() => {
@@ -59,7 +52,6 @@ const Page: NextPageWithLayout = () => {
       setListFriendRequest(getLocalStorage("ListFriendRequest"), dispatch)
       setListChat(getLocalStorage("ListChat"), dispatch)
       setCurrentChat(getLocalStorage("CurrentChat"), dispatch)
-      setCurrentMessages(getLocalStorage("CurrentChat").id,getLocalStorage("CurrentMessages"), dispatch)
       setLoading(false)
     }
   },[])
@@ -197,7 +189,7 @@ const Page: NextPageWithLayout = () => {
 
         {
           Object.keys(chatState.currentChat).length > 0 ? <>
-            <ChatScreen chat={chatState.currentChat} messages={messageState.currentMessages} />
+            <ChatScreen chat={chatState.currentChat} messages={chatState.currentChat.messages!} />
             <InfoContentScreen />
           </>  : null
         }

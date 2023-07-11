@@ -1,22 +1,18 @@
 import InsertPhotoIcon from "@mui/icons-material/InsertPhoto";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
-import { ChangeEvent, useEffect, useState } from "react";
+import { useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth, db, storage } from "../../firebase";
-import { toast } from "react-toastify";
 import { useDispatch, useSelector } from 'react-redux'
-import { StatusSendType, selectAppState, setAppGlobalState } from "@/redux/appSlice";
+import { StatusSendType, selectAppState } from "@/redux/appSlice";
 import { v4 as uuidv4, v5 } from 'uuid'
 import sendNotificationFCM from "@/utils/sendNotificationFCM";
-import { addMessageToFirebase } from "./Functions";
-import { MessageType } from "@/types/MessageType";
 import { getImageTypeFileValid } from "@/utils/getImageTypeFileValid";
 import firebase from "firebase";
 import { selectChatState } from "@/redux/chatSlice";
-import { addNewMessage, setCurrentMessages, setFileUploadDone, setFileUploading, setProgress, setStatusSend } from "@/services/cache";
-import { selectMessageState } from "@/redux/messageSlice";
+import { pushMessageToListChat, setFileUploadDone, setFileUploading, setProgress, setStatusSend } from "@/services/cache";
 import { AlertError } from "@/utils/core";
-import CancelIcon from '@mui/icons-material/Cancel';
+import { MessageType } from "@/types/MessageType";
 
 export default function DropdownAttach({ chatId, scrollToBottom, recipient }: { chatId: string, scrollToBottom: any, recipient: any }) {
 
@@ -24,8 +20,6 @@ export default function DropdownAttach({ chatId, scrollToBottom, recipient }: { 
   const [user] = useAuthState(auth);
   const dispatch = useDispatch()
   const chatState = useSelector(selectChatState)
-  const messageState = useSelector(selectMessageState)
-  const appState = useSelector(selectAppState)
 
   function onImageChange(event: any) {
     event.preventDefault();
@@ -79,9 +73,8 @@ export default function DropdownAttach({ chatId, scrollToBottom, recipient }: { 
       newMessage.user = user?.email!
       newMessage.type = "image"
       newMessage.images = JSON.stringify(newArray)
-      console.log(newArray)
 
-      addNewMessage(newMessage, dispatch)
+      pushMessageToListChat(chatState.currentChat.id, newMessage, dispatch)
 
       db
       .collection("chats")
@@ -129,7 +122,7 @@ export default function DropdownAttach({ chatId, scrollToBottom, recipient }: { 
           key: key,
           file: file
         })
-        addNewMessage(newMessage, dispatch)
+        pushMessageToListChat(chatId, newMessage, dispatch)
       }
     }
     if(result.length > 0)

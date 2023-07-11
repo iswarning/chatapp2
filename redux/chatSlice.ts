@@ -2,6 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import { AppState } from "./store";
 import { HYDRATE } from "next-redux-wrapper";
 import { ChatType, FileInfo } from "@/types/ChatType";
+import { setLocalStorage } from "@/services/cache";
 
 // Type for our state
 export interface InitialState {
@@ -34,6 +35,7 @@ export const chatSlice = createSlice({
             break;
         case "setListChat":
             state.data.listChat = action.payload.data
+            setLocalStorage("ListChat", state.data.listChat)
             break;
         case "pushMessageToListChat":
             let chatExist = state.data.listChat.find((chat) => chat.id === action.payload.data.chatId);
@@ -51,7 +53,21 @@ export const chatSlice = createSlice({
             } else {
                 return
             }
+            setLocalStorage("ListChat", state.data.listChat)
             break;
+        case "setListMessageInRoom":
+          state.data.listChat = state.data.listChat.map((chat) => {
+            if (chat.id === action.payload.data.chatId) {
+              return {
+                ...chat,
+                messages: action.payload.data.newMessages
+              }
+            } else {
+              return chat
+            }
+          })
+          setLocalStorage("ListChat", state.data.listChat)
+          break;
         case "setListImageInRoom":
             state.data.listChat = state.data.listChat.map((chat) => {
               if (chat.id === action.payload.data.chatId) {
@@ -63,10 +79,23 @@ export const chatSlice = createSlice({
                 return chat
               }
             })
+            setLocalStorage("ListChat", state.data.listChat)
             break;
+        case "setListFileInRoom":
+              state.data.listChat = state.data.listChat.map((chat) => {
+                if (chat.id === action.payload.data.chatId) {
+                  return {
+                    ...chat,
+                    listFile: action.payload.data.listFile
+                  }
+                } else {
+                  return chat
+                }
+              })
+              setLocalStorage("ListChat", state.data.listChat)
+              break;
         default:
             return
-
       }
     },
     

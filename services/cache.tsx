@@ -3,7 +3,6 @@ import { StatusSendType, setAppGlobalState } from "@/redux/appSlice";
 import { setGlobalChatState } from "@/redux/chatSlice";
 import { setGlobalFriendRequestState } from "@/redux/friendRequestSlice";
 import { setGlobalFriendState } from "@/redux/friendSlice";
-import { setGlobalMessageState } from "@/redux/messageSlice";
 import { ChatType, FileInfo } from "@/types/ChatType";
 import { FriendRequestType } from "@/types/FriendRequestType";
 import { FriendType } from "@/types/FriendType";
@@ -55,7 +54,6 @@ export function setListChat(listChat: ChatType[], dispatch: Dispatch<AnyAction>)
         type: "setListChat",
         data: listChat
     }))
-    setLocalStorage("ListChat", listChat)
 }
 
 export function setUserInfo(userInfo: UserType, dispatch: Dispatch<AnyAction>) {
@@ -66,42 +64,49 @@ export function setUserInfo(userInfo: UserType, dispatch: Dispatch<AnyAction>) {
     setLocalStorage("UserInfo", userInfo)
 }
 
-export function setCurrentMessages(chatId: string,messages: MessageType[], dispatch: Dispatch<AnyAction>) {
-    getLastMessage(chatId).then((lastMsg) => {
-        if(messages[messages.length - 1].id === lastMsg.id) {
-            dispatch(setGlobalMessageState({
-                type: "setCurrentMessages",
-                data: messages
-            }))
-            setLocalStorage("CurrentMessages", messages)
-        } else {
-            db.collection("chats").doc(chatId).collection("messages").get().then((snap) => {
-                let newMessages = snap.docs.map((m) => MapMessageData(m))
-                dispatch(setGlobalMessageState({
-                    type: "setCurrentMessages",
-                    data: newMessages
-                }))
-                setLocalStorage("CurrentMessages", newMessages)
-            })
-        }
-    })
-}
-
-export function addNewMessage(newMessage: MessageType, dispatch: Dispatch<AnyAction>) {
-    dispatch(setGlobalMessageState({
-        type: "addNewMessage",
-        data: newMessage
-    }))
-}
-
 export function setListImageInRoom(chatId: string, listImage: FileInfo[], dispatch: Dispatch<AnyAction>) {
-    dispatch(setAppGlobalState({
+    dispatch(setGlobalChatState({
         type: "setListImageInRoom",
         data: {
             chatId,
             listImage
         }
     }))
+}
+
+export function setListFileInRoom(chatId: string, listFile: FileInfo[], dispatch: Dispatch<AnyAction>) {
+    dispatch(setGlobalChatState({
+        type: "setListFileInRoom",
+        data: {
+            chatId,
+            listFile
+        }
+    }))
+}
+
+export function setListMessageInRoom(chatId: string, messages: MessageType[], dispatch: Dispatch<AnyAction>) {
+    getLastMessage(chatId).then((lastMsg) => {
+        if(messages[messages.length - 1].id === lastMsg.id) {
+            dispatch(setGlobalChatState({
+                type: "setListMessageInRoom",
+                data: {
+                    chatId,
+                    newMessages: messages
+                }
+            }))
+        } else {
+            db.collection("chats").doc(chatId).collection("messages").get().then((snap) => {
+                let newMessages = snap.docs.map((m) => MapMessageData(m))
+                dispatch(setGlobalChatState({
+                    type: "setListMessageInRoom",
+                    data: {
+                        chatId,
+                        newMessages
+                    }
+                }))
+            })
+        }
+    })
 }
 
 async function getLastMessage(chatId: string) {
@@ -124,7 +129,6 @@ export function pushMessageToListChat(chatId: string, newMessage: MessageType, d
             newMessage
         }
     }))
-    // setLocalStorage("ListChat", listChat)
 }
 
 export function setFileUploading(key: string, value: string, dispatch: Dispatch<AnyAction>) {

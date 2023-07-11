@@ -1,36 +1,31 @@
-import { auth, db } from '@/firebase'
-import { selectAppState } from '@/redux/appSlice'
-import React, { useCallback, useMemo, useState } from 'react'
-import { useAuthState } from 'react-firebase-hooks/auth'
+import React, { useState } from 'react'
 import { useSelector } from 'react-redux'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import SharedFile from './Message/SharedFile'
 import Image from 'next/image'
-import { useCollection } from 'react-firebase-hooks/firestore'
-import getRecipientEmail from '@/utils/getRecipientEmail'
 import CustomChat from '../CustomChat'
 import MemberInChat from '../MemberInChat'
-import MemberElement from '../MemberElement'
-import FriendElement from '../FriendElement'
 import { selectChatState } from '@/redux/chatSlice'
-import { selectFriendState } from '@/redux/friendSlice'
+import {v4 as uuidv4} from 'uuid'
+
 export default function InfoContentScreen() {
 
-    const [user] = useAuthState(auth)
     const chatState = useSelector(selectChatState)
-    const appState = useSelector(selectAppState)
     const [showSharedFile, setShowSharedFile] = useState(false)
     const [showCustom, setShowCustom] = useState(false)
     const [showMember, setShowMember] = useState(false)
+
+    const recipientInfo = chatState.currentChat.recipientInfo
+    const listRecipientInfo = chatState.currentChat.listRecipientInfo ?? []
 
     const getRecipientAvatar = () => {
         if (chatState.currentChat?.isGroup) {
           if (chatState.currentChat?.photoURL.length > 0) return chatState.currentChat?.photoURL;
           else return "/images/group-default.jpg";
         } else {
-          let photoUrl = chatState.currentChat.recipientInfo?.photoURL;
-          if (photoUrl?.length! > 0) return photoUrl;
+          let photoUrl = recipientInfo?.photoURL ?? null;
+          if (photoUrl) return photoUrl;
           else return "/images/avatar-default.png";
         }
     };
@@ -46,16 +41,8 @@ export default function InfoContentScreen() {
                                     getRecipientAvatar() ? <Image src={getRecipientAvatar()!} width={100} height={100} alt='' className='rounded-full' /> : null
                                 }
                             </div>
-                        <div className="text-base font-medium text-center mt-3">{ chatState.currentChat.isGroup ? "Group: " + chatState.currentChat.name : chatState.currentChat.recipientInfo?.fullName}</div>
+                        <div className="text-base font-medium text-center mt-3">{ chatState.currentChat.isGroup ? "Group: " + chatState.currentChat.name : recipientInfo?.fullName}</div>
                     </div>
-                    {/* <div className="intro-y h-full box p-4">
-                        <div className="text-base font-medium cursor-pointer" onClick={() => setShowSharedFile(!showSharedFile)}>Shared Files { showSharedFile ? <ArrowDropDownIcon fontSize='small' /> : <ArrowDropUpIcon fontSize='small' />}</div>
-                        
-                        {
-                                showSharedFile ? <SharedFile messages={appState?.currentMessages} chatRoomId={appState.currentChat.id} /> : null
-                        }
-                        
-                    </div> */}
                 </div>
                 <div className="py-2">
                     <div className="intro-y h-full box p-4">
@@ -84,9 +71,8 @@ export default function InfoContentScreen() {
                             
                             <div className="overflow-x-hidden overflow-y-auto" style={{maxHeight: '450px'}}>
                                 {
-                                    showMember ? chatState.currentChat.users.filter((user) => 
-                                        user !== appState.userInfo.email).map((user) => 
-                                            <MemberInChat key={user} email={user} />)  : null
+                                    showMember && listRecipientInfo.length > 0 ? listRecipientInfo.map((info) => 
+                                            <MemberInChat key={uuidv4()} info={info} />)  : null
                                 }
                             </div>
                             
