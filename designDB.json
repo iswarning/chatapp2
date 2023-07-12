@@ -19,7 +19,9 @@
                 "key": ""
             },
             "timestamp": ""
-        }
+        },
+        "images": "",
+        "file": ""
     },
 
     "users": {
@@ -27,7 +29,9 @@
         "photoURL": "",
         "fullName": "",
         "phoneNumber": "",
-        "fcm_token": ""
+        "fcm_token": "",
+        "createdAt": "",
+        "updatedAt": ""
     },
 
     "friends": [{
