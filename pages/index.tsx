@@ -21,6 +21,8 @@ import { StatusCallType, selectVideoCallState, setGlobalVideoCallState } from "@
 import { selectFriendState, setGlobalFriendState } from "@/redux/friendSlice";
 import { getLocalStorage, setCurrentChat, setListChat, setListFriend, setListFriendRequest, setShowImageFullScreen, setUserInfo } from "@/services/cache";
 import ShowImageFullScreen from "@/components/ChatScreen/Message/ShowImageFullScreen";
+import getInitialData from "@/graphql/getInitialData";
+import { useQuery } from "@apollo/client";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -34,9 +36,11 @@ const Page: NextPageWithLayout = () => {
   const chatState = useSelector(selectChatState);
   const friendState = useSelector(selectFriendState);
   const videoCallState = useSelector(selectVideoCallState);
+  // const { loading, error, data } = useQuery()
 
   useEffect(() => {
     setLoading(true)
+    console.log(getInitialData())
     if (!getLocalStorage("UserInfo")) {
       getInitialState(user?.uid).then((data) => {
         setUserInfo(data.userInfo, dispatch)
@@ -55,6 +59,13 @@ const Page: NextPageWithLayout = () => {
       setLoading(false)
     }
   },[])
+
+  useEffect(() => {
+    appState.socket.emit("login", { userId: user?.email });
+    return () => {
+      appState.socket.disconnect();
+    };
+  }, []);
 
   useEffect(() => {
     appState.socket.on("get-user-online", (data) => {

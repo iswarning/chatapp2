@@ -16,6 +16,7 @@ import requestPermission from "@/utils/requestPermission";
 import { io } from "socket.io-client";
 import { wrapper } from "../redux/store";
 import { Provider } from "react-redux";
+import { ApolloProvider, ApolloClient, InMemoryCache } from "@apollo/client";
 import Layout from "@/components/Layout/Layout";
 config.autoAddCss = false;
 
@@ -31,6 +32,11 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
   const { store, props } = wrapper.useWrappedStore(rest);
   const [user, loading] = useAuthState(auth);
 
+  const client = new ApolloClient({
+    uri: process.env.NEXT_PUBLIC_GRAPHQL_ENPOINT,
+    cache: new InMemoryCache()
+  });
+
   useEffect(() => {
     if (user) {
       requestPermission();
@@ -40,26 +46,17 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
         createNewUser(user, token).catch((err) => console.log(err));
       })
       .catch((err) => console.log(err));
-
-      const socket = io(process.env.NEXT_PUBLIC_SOCKET_IO_URL!);
-      socket.emit("login", { userId: user?.email });
-
-      return () => {
-        socket.disconnect();
-      };
     }
   }, [user]);
-
-
 
   if (!user) return <Login />;
 
   if (loading) return <Loading />;
 
-  return <Provider store={store}>
+  return <ApolloProvider client={client}><Provider store={store}>
     <Layout>
       <Component {...props.pageProps} />
       <ToastContainer />   
     </Layout>
-  </Provider>
+  </Provider></ApolloProvider>
 }
