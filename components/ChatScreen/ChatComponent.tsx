@@ -14,7 +14,7 @@ import { MapMessageData, MessageType } from "@/types/MessageType";
 import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined';
 import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutlined';
 import { selectChatState } from "@/redux/chatSlice";
-import { setCurrentChat, setListFileInRoom, setListImageInRoom, setListMessageInRoom } from "@/services/cache";
+import { setCurrentChat, setListFileInRoom, setListImageInRoom, setListMessageInRoom } from "@/services/CacheService";
 import mime from "mime-types";
 
 export default function ChatComponent({ chat, active }: { chat: ChatType, active: boolean}) {

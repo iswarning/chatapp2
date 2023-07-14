@@ -10,7 +10,7 @@ import sendNotificationFCM from "@/utils/sendNotificationFCM";
 import { getImageTypeFileValid } from "@/utils/getImageTypeFileValid";
 import firebase from "firebase";
 import { selectChatState } from "@/redux/chatSlice";
-import { pushMessageToListChat, setFileUploadDone, setFileUploading, setProgress, setStatusSend } from "@/services/cache";
+import { pushMessageToListChat, setFileUploadDone, setFileUploading, setProgress, setStatusSend } from "@/services/CacheService";
 import { AlertError } from "@/utils/core";
 import { MessageType } from "@/types/MessageType";
 

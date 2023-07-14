@@ -24,7 +24,7 @@ import { requestMedia } from "@/utils/requestPermission";
 import { StatusCallType, selectVideoCallState, setGlobalVideoCallState } from "@/redux/videoCallSlice";
 import {v4 as uuidv4} from 'uuid'
 import firebase from "firebase";
-import { pushMessageToListChat, setStatusSend } from "@/services/cache";
+import { pushMessageToListChat, setStatusSend } from "@/services/CacheService";
 import { AlertError } from "@/utils/core";
 export default function ChatScreen({ chat, messages }: { chat: ChatType, messages: Array<MessageType> }) {
   const [user] = useAuthState(auth);

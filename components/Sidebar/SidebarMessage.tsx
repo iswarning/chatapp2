@@ -8,7 +8,7 @@ import { selectAppState } from "@/redux/appSlice";
 import { v4 as uuidv4 } from 'uuid';
 import ChatComponent from "../ChatScreen/ChatComponent";
 import { selectChatState } from "@/redux/chatSlice";
-import { getLocalStorage } from "@/services/cache";
+import { getLocalStorage } from "@/services/CacheService";
 
 export default function SidebarMessage() {
   const [user] = useAuthState(auth);

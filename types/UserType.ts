@@ -1,7 +1,7 @@
 import firebase from "firebase";
 
 export interface UserType {
-  id: string;
+  _id: string;
   email: string;
   photoURL: string;
   fullName: string;
@@ -13,7 +13,7 @@ export function MapUserData(
   userInfo: firebase.firestore.DocumentSnapshot<firebase.firestore.DocumentData>
 ): UserType {
   let user: UserType = {} as UserType;
-  user.id = userInfo?.id;
+  user._id = userInfo?.id;
   user.email = userInfo?.data()?.email;
   user.photoURL = userInfo?.data()?.photoURL;
   user.fullName = userInfo?.data()?.fullName;

@@ -9,7 +9,7 @@ import styled from 'styled-components';
 import { selectChatState } from '@/redux/chatSlice';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import StatusSend from './StatusSend';
-import { setFileUploading } from '@/services/cache';
+import { setFileUploading } from '@/services/CacheService';
 
 export default function SenderTemplateFile({ 
     file,

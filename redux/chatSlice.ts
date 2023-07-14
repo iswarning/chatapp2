@@ -2,7 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import { AppState } from "./store";
 import { HYDRATE } from "next-redux-wrapper";
 import { ChatType, FileInfo } from "@/types/ChatType";
-import { setLocalStorage } from "@/services/cache";
+import { setLocalStorage } from "@/services/CacheService";
 
 // Type for our state
 export interface InitialState {
