@@ -6,10 +6,11 @@ import { setGlobalFriendState } from "@/redux/friendSlice";
 import { ChatType, FileInfo } from "@/types/ChatType";
 import { FriendRequestType } from "@/types/FriendRequestType";
 import { FriendType } from "@/types/FriendType";
-import { MapMessageData, MessageType } from "@/types/MessageType";
+import { MessageType } from "@/types/MessageType";
 import { UserType } from "@/types/UserType";
 import { AnyAction, Dispatch } from "@reduxjs/toolkit";
 import CryptoJS from 'crypto-js';
+import { getAllMessagesByChatRoomId, getLastMessage } from "./MessageService";
 
 const SECRET_KEY = process.env.NEXT_PUBLIC_FIREBASE_SERVER_KEY!
 
@@ -33,12 +34,40 @@ export function setListFriendRequest(listFriendRequest: FriendRequestType[], dis
     setLocalStorage("ListFriendRequest", listFriendRequest)
 }
 
+export function addNewFriendRequest(newFriendRequest: FriendRequestType, dispatch: Dispatch<AnyAction>) {
+    dispatch(setGlobalFriendRequestState({
+        type: "addNewFriendRequest",
+        data: newFriendRequest
+    }))
+}
+
+export function removeFriendRequest(friendRequest: FriendRequestType, dispatch: Dispatch<AnyAction>) {
+    dispatch(setGlobalFriendRequestState({
+        type: "removeFriendRequest",
+        data: friendRequest._id
+    }))
+}
+
 export function setListFriend(listFriend: FriendType[], dispatch: Dispatch<AnyAction>) {
     dispatch(setGlobalFriendState({
         type: "setListFriend",
         data: listFriend
     }))
     setLocalStorage("ListFriend", listFriend)
+}
+
+export function addNewFriend(newFriend: FriendType, dispatch: Dispatch<AnyAction>) {
+    dispatch(setGlobalFriendState({
+        type: "addNewFriend",
+        data: newFriend
+    }))
+}
+
+export function removeFriend(friend: FriendType, dispatch: Dispatch<AnyAction>) {
+    dispatch(setGlobalFriendState({
+        type: "removeFriend",
+        data: friend._id
+    }))
 }
 
 export function setCurrentChat(chat: ChatType, dispatch: Dispatch<AnyAction>) {
@@ -84,44 +113,34 @@ export function setListFileInRoom(chatId: string, listFile: FileInfo[], dispatch
     }))
 }
 
-export function setListMessageInRoom(chatId: string, messages: MessageType[], dispatch: Dispatch<AnyAction>) {
-    getLastMessage(chatId).then((lastMsg) => {
-        if(messages[messages.length - 1].id === lastMsg.id) {
-            dispatch(setGlobalChatState({
-                type: "setListMessageInRoom",
-                data: {
-                    chatId,
-                    newMessages: messages
-                }
-            }))
-        } else {
-            db.collection("chats").doc(chatId).collection("messages").get().then((snap) => {
-                let newMessages = snap.docs.map((m) => MapMessageData(m))
+export function setListMessageInRoom(chatId: string, messages: MessageType[] | undefined, dispatch: Dispatch<AnyAction>) {
+    getLastMessage(chatId).then((lastMsg: MessageType) => {
+        if(messages?.length! > 0) {
+            if(messages?.[messages.length - 1]._id === lastMsg._id) {
                 dispatch(setGlobalChatState({
                     type: "setListMessageInRoom",
                     data: {
                         chatId,
-                        newMessages
+                        newMessages: messages
                     }
                 }))
-            })
+            } else {
+                getAllMessagesByChatRoomId(chatId).then((newMessages) => {
+                    dispatch(setGlobalChatState({
+                        type: "setListMessageInRoom",
+                        data: {
+                            chatId,
+                            newMessages
+                        }
+                    }))
+                })
+            }
         }
     })
 }
 
-async function getLastMessage(chatId: string) {
-    return MapMessageData(
-        (await db
-            .collection("chats")
-            .doc(chatId)
-            .collection("messages")
-            .orderBy("timestamp")
-            .limitToLast(1)
-            .get()
-        ).docs?.[0])
-}
-
 export function pushMessageToListChat(chatId: string, newMessage: MessageType, dispatch: Dispatch<AnyAction>) {
+    console.log(11111)
     dispatch(setGlobalChatState({
         type: "pushMessageToListChat",
         data: {

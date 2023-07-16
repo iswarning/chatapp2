@@ -20,6 +20,7 @@ export default function DropdownAttach({ chatId, scrollToBottom, recipient }: { 
   const [user] = useAuthState(auth);
   const dispatch = useDispatch()
   const chatState = useSelector(selectChatState)
+  const appState = useSelector(selectAppState)
 
   function onImageChange(event: any) {
     event.preventDefault();
@@ -45,7 +46,7 @@ export default function DropdownAttach({ chatId, scrollToBottom, recipient }: { 
           return;
         }      
         let key = uuidv4(); 
-        let path = `public/chat-room/${chatState.currentChat.id}/photos/${key}`
+        let path = `public/chat-room/${chatState.currentChat._id}/photos/${key}`
         storage
         .ref(path)
         .put(file)
@@ -68,19 +69,19 @@ export default function DropdownAttach({ chatId, scrollToBottom, recipient }: { 
     }   
 
     let newMessage = {} as MessageType
-      newMessage.id = uuidv4()
-      newMessage.timestamp = firebase.firestore.FieldValue.serverTimestamp()
-      newMessage.user = user?.email!
+      newMessage._id = uuidv4()
+      newMessage.createdAt = new Date().toLocaleString()
+      newMessage.senderId = appState.userInfo._id!
       newMessage.type = "image"
       newMessage.images = JSON.stringify(newArray)
 
-      pushMessageToListChat(chatState.currentChat.id, newMessage, dispatch)
+      pushMessageToListChat(chatState.currentChat._id!, newMessage, dispatch)
 
       db
       .collection("chats")
       .doc(chatId)
       .collection("messages")
-      .doc(newMessage.id)
+      .doc(newMessage._id)
       .set({...newMessage, images: JSON.stringify(JSON.parse(newMessage.images).map((img: any) => img.key))})
       .catch(err => console.log(err))
       scrollToBottom();
@@ -109,15 +110,15 @@ export default function DropdownAttach({ chatId, scrollToBottom, recipient }: { 
           return;
         }
         let newMessage = {} as MessageType
-        newMessage.id = uuidv4()
+        newMessage._id = uuidv4()
         newMessage.file = JSON.stringify({
           key: key,
           name: file.name,
           size: fileSize
         })
         newMessage.type = "file-uploading"
-        newMessage.user = user?.email!
-        newMessage.timestamp = firebase.firestore.FieldValue.serverTimestamp()
+        newMessage.senderId = appState.userInfo._id!
+        newMessage.createdAt = new Date().toLocaleString()
         result.push({
           key: key,
           file: file

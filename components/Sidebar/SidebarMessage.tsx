@@ -2,7 +2,6 @@ import { auth, db } from "../../firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useCollection } from "react-firebase-hooks/firestore";
 import UserOnlineComponent from "@/components/UserOnlineComponent";
-import { MapChatData } from "@/types/ChatType";
 import { useSelector } from 'react-redux'
 import { selectAppState } from "@/redux/appSlice";
 import { v4 as uuidv4 } from 'uuid';
@@ -14,7 +13,7 @@ export default function SidebarMessage() {
   const [user] = useAuthState(auth);
   const appState = useSelector(selectAppState)
   const chatState = useSelector(selectChatState)
-
+console.log(chatState.listChat)
   return (
     <>
 
@@ -41,9 +40,9 @@ export default function SidebarMessage() {
         {chatState.listChat.length! > 0
           ? chatState.listChat.map((chat) => (
               <ChatComponent
-                key={chat.id}
+                key={chat._id}
                 chat={chat}
-                active={chatState.currentChat?.id === chat.id}
+                active={chatState.currentChat?._id === chat._id}
               />
             ))
         : null}

@@ -66,7 +66,7 @@ export default function UserOnlineComponent({ userOn }: { userOn: string }) {
                 let data = {
                     sender: user?.email,
                     recipient: userInfo.email,
-                    chatId: chatInfo?.data().id,
+                    chatId: chatInfo?.data()._id,
                     isGroup: chatInfo?.data().isGroup,
                     photoURL: userInfo.photoURL,
                 }

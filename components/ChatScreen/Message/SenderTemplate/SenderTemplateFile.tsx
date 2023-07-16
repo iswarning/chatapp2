@@ -26,7 +26,7 @@ export default function SenderTemplateFile({
     const appState = useSelector(selectAppState)
     const chatState = useSelector(selectChatState)
     const dispatch = useDispatch()
-    const storageRef = storage.ref(`public/chat-room/${chatState.currentChat.id}/files/${file.key}`)
+    const storageRef = storage.ref(`public/chat-room/${chatState.currentChat._id}/files/${file.key}`)
 
     const [downloadUrl] = useDownloadURL(storageRef)
 

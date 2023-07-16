@@ -24,8 +24,9 @@ import { requestMedia } from "@/utils/requestPermission";
 import { StatusCallType, selectVideoCallState, setGlobalVideoCallState } from "@/redux/videoCallSlice";
 import {v4 as uuidv4} from 'uuid'
 import firebase from "firebase";
-import { pushMessageToListChat, setStatusSend } from "@/services/CacheService";
+import { pushMessageToListChat, setCurrentChat, setStatusSend } from "@/services/CacheService";
 import { AlertError } from "@/utils/core";
+import { createMessage } from "@/services/MessageService";
 export default function ChatScreen({ chat, messages }: { chat: ChatType, messages: Array<MessageType> }) {
   const [user] = useAuthState(auth);
   const endOfMessageRef: any = useRef(null);
@@ -33,6 +34,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
   const dispatch = useDispatch()
   const appState = useSelector(selectAppState)
   const videoCallState = useSelector(selectVideoCallState)
+  const [input, setInput] = useState("")
 
   // const [recipientSnapshot] = useCollection(
   //   db
@@ -52,7 +54,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
 
   const getRecipientAvatar = () => {
     if (chat?.isGroup) {
-      if (chat?.photoURL.length > 0) return chat?.photoURL;
+      if (chat?.photoURL!.length > 0) return chat?.photoURL;
       else return "/images/group-default.jpg";
     } else {
       let photoUrl = chat?.recipientInfo?.photoURL;
@@ -64,78 +66,50 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
   const showMessage = () => {
     return messages?.map((message: MessageType, index) => (
       <Message
-        key={message.id}
+        key={message._id}
         message={message}
-        timestamp={message.timestamp}
-        chatId={chat.id}
+        timestamp={""}
+        chatId={chat._id!}
         lastIndex={messages[index] === messages[messages.length - 1]}
         scrollToBottom={() => scrollToBottom()}
       />
     ));
   };
 
-  const sendMessage = async (e: any): Promise<any> => {
+  const sendMessage = (e: any) => {
     setStatusSend(StatusSendType.SENDING, dispatch)
     e.preventDefault();
 
-    let { listElementImg, message } = handleImageInMessage();
-
     let newMessage = {} as MessageType
-    newMessage.id = uuidv4()
-    newMessage.message = message
-    newMessage.timestamp = firebase.firestore.FieldValue.serverTimestamp()
-    newMessage.user = user?.email!
+    newMessage._id = uuidv4()
+    newMessage.message = input
+    newMessage.createdAt = new Date().toLocaleString()
+    newMessage.senderId = appState.userInfo._id!
+    newMessage.type = "text"
 
-    if (listElementImg.length === 0) {
-      newMessage.type = "text"
-    } else {
-      newMessage.type = "text-image"
-        let newArray = []
-        for(const item of listElementImg) {
-          newArray.push({
-            key: item.key,
-            downloadUrl: item.element.src
-        })
-        newMessage.images = JSON.stringify(newArray)
-      }
-    }
+    pushMessageToListChat(chat._id!, newMessage, dispatch)
 
-    pushMessageToListChat(chat.id, newMessage, dispatch)
+    setCurrentChat({
+      ...chat,
+      messages: [
+        ...chat.messages!,
+        newMessage
+      ]
+    }, dispatch)
 
-    pushMessageToListChat(chat.id, newMessage, dispatch)
-
-    let str = ""
-    if (listElementImg.length > 0) {
-      let arrayImg: any[] = []
-      for(const item of listElementImg) {
-          const response = await fetch(item.element.src);
-          const blob = await response.blob();
-          let path = `public/chat-room/${chat.id}/photos/${item.key}`
-          const res = await storage.ref(path).put(blob)
-          if (res) {
-            const downloadUrl = await storage.ref(path).getDownloadURL()
-            arrayImg.push({
-              key: item.key,
-              downloadUrl: downloadUrl
-            })
-          }   
-      }
-      str = JSON.stringify(arrayImg.map((img) => img.key))
-    }
-
-    db
-    .collection("chats")
-    .doc(chat.id)
-    .collection("messages")
-    .doc(newMessage.id)
-    .set({ ...newMessage, images: str.length > 0 ? str : undefined })
-    .then(() => {
+    createMessage({
+      chatRoomId: chat._id,
+      message: newMessage.message,
+      senderId: newMessage.senderId,
+      type: newMessage.type
+    })
+    .then((data: MessageType) => {
       appState.socket.emit("send-notify", JSON.stringify(
         { 
-          recipient: chat.users.filter((u) => user?.email !== u), 
-          message: `${chat.isGroup ? chat.name : user?.displayName}: ${newMessage.message}`,
+          recipient: chat.members.filter((u) => appState.userInfo._id !== u), 
+          message: `${chat.isGroup ? chat.name : user?.displayName}: ${data.message}`,
           type: "send-message",
-          data: JSON.stringify(newMessage)
+          data: JSON.stringify(data)
         }
       ))
     })
@@ -149,15 +123,12 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
       scrollToBottom();
     })
 
-    const element = document.getElementById("input-message");
-    if (element) element.innerHTML = "";
+    setInput("")
 
   };
 
   const addEmoji = (e: number) => {
-    const inputMess = document.getElementById("input-message")?.innerHTML;
-    document.getElementById("input-message")!.innerHTML =
-      inputMess + String.fromCodePoint(e);
+    setInput(input + + String.fromCodePoint(e))
     setShowEmoji(false);
   };
 
@@ -192,7 +163,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
             let data = {
                 sender: user?.email,
                 recipient: userInfo.email,
-                chatId: chatInfo.id,
+                chatId: chatInfo._id,
                 isGroup: chatInfo.isGroup,
                 photoURL: userInfo.photoURL,
             }
@@ -235,13 +206,19 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
         </ScrollBarCustom>
 
         <div className="intro-y chat-input box border-theme-3 dark:bg-dark-2 dark:border-dark-2 border flex items-center px-5 py-4">
-        <DropdownAttach chatId={chat.id} scrollToBottom={scrollToBottom} recipient={chat.recipientInfo} />
-        <InputMessage
+        <DropdownAttach chatId={chat._id!} scrollToBottom={scrollToBottom} recipient={chat.recipientInfo} />
+        <input 
+        onChange={(e) => setInput(e.target.value)} 
+        className="form-control h-12 shadow-none resize-none border-transparent px-5 py-3 focus:outline-none truncate" 
+        placeholder="Type your message..."
+        style={{ marginRight: "10px", marginLeft: "10px" }}
+        value={input}/>
+        {/* <InputMessage
           contentEditable="true"
           className="w-full block outline-none py-4 px-4 bg-transparent"
           style={{overflowY: 'auto'}}
           id="input-message"
-        />
+        /> */}
         
         <div className="dropdown relative mr-3 sm:mr-5">
         <a href="javascript:void(0)" className="text-gray-600 hover:text-theme-1 w-4 h-4 sm:w-5 sm:h-5 block" onClick={() => setShowEmoji(!showEmoji)}> 

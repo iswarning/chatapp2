@@ -8,7 +8,7 @@ export interface ImageInMessageType {
 
 export const MapImageInMessageData = (imageInMessage: firebase.firestore.QueryDocumentSnapshot<firebase.firestore.DocumentData>): ImageInMessageType => {
     let data: ImageInMessageType = {} as ImageInMessageType;
-    data.id = imageInMessage.id;
+    data._id = imageInMessage._id;
     data.url = imageInMessage?.data()?.url;
     data.key = imageInMessage?.data()?.key;
     return data;

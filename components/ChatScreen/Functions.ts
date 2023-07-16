@@ -1,7 +1,7 @@
 import { db, storage } from "@/firebase";
 import { toast } from "react-toastify";
 import firebase from "firebase";
-import { MapMessageData, MessageType } from "@/types/MessageType";
+import {  MessageType } from "@/types/MessageType";
 import { ChatType } from "@/types/ChatType";
 import sendNotificationFCM from "@/utils/sendNotificationFCM";
 import { getImageTypeFileValid } from "@/utils/getImageTypeFileValid";
@@ -18,7 +18,7 @@ export function setSeenMessage(
       .collection("chats")
       .doc(chatId)
       .collection("messages")
-      .doc(m.id);
+      .doc(m._id);
     const res = await msgRef.get();
     if (res?.data()?.user === userEmail) return;
     if (res?.data()?.seen?.includes(userEmail)) return;

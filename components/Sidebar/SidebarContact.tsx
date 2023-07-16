@@ -25,7 +25,7 @@ export default function SidebarContact() {
 <div className="intro-x">
 
 {
-  friendState ? friendState.listFriend.map((friend) => <FriendElement key={friend.id} userInfo={friend.userInfo!} />) : null
+  friendState ? friendState.listFriend.map((friend) => <FriendElement key={friend._id} userInfo={friend.userInfo!} />) : null
 }
 
 </div>

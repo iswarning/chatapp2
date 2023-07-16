@@ -1,24 +1,26 @@
 import firebase from "firebase";
 
 export interface UserType {
-  _id: string;
+  _id?: string;
   email: string;
-  photoURL: string;
+  photoURL?: string;
   fullName: string;
-  phoneNumber: string;
-  fcm_token: string;
+  phoneNumber?: string;
+  fcmToken?: string;
+  createdAt?: string
+  updatedAt?: string
 }
 
 export function MapUserData(
   userInfo: firebase.firestore.DocumentSnapshot<firebase.firestore.DocumentData>
 ): UserType {
   let user: UserType = {} as UserType;
-  user._id = userInfo?.id;
+  user._id = userInfo?._id;
   user.email = userInfo?.data()?.email;
   user.photoURL = userInfo?.data()?.photoURL;
   user.fullName = userInfo?.data()?.fullName;
   user.phoneNumber = userInfo?.data()?.phoneNumber;
-  user.fcm_token = userInfo?.data()?.fcm_token;
+  user.fcmToken = userInfo?.data()?.fcm_token;
   return user;
 }
 

@@ -3,21 +3,21 @@ import type { AppProps } from "next/app";
 import { useAuthState } from "react-firebase-hooks/auth";
 import Login from "./login";
 import { ReactElement, ReactNode, useEffect } from "react";
-import createNewUser from "@/utils/createNewUser";
 // import "bootstrap/dist/css/bootstrap.css";
-import { auth, db, getMessagingToken, onMessageListener } from "@/firebase";
+import { auth, db, getMessagingToken } from "@/firebase";
 import Loading from "@/components/Loading";
 import "react-toastify/dist/ReactToastify.css";
-import { ToastContainer, toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import { NextPage } from "next";
 import { config } from "@fortawesome/fontawesome-svg-core";
 import "../node_modules/@fortawesome/fontawesome-svg-core/styles.css";
 import requestPermission from "@/utils/requestPermission";
-import { io } from "socket.io-client";
 import { wrapper } from "../redux/store";
 import { Provider } from "react-redux";
 import { ApolloProvider, ApolloClient, InMemoryCache } from "@apollo/client";
 import Layout from "@/components/Layout/Layout";
+import { createNewUser } from "@/services/UserService";
+import { setUserInfo } from "@/services/CacheService";
 config.autoAddCss = false;
 
 export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
@@ -41,11 +41,15 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
     if (user) {
       requestPermission();
 
-      getMessagingToken()
-      .then((token) => {
-        createNewUser(user, token).catch((err) => console.log(err));
-      })
-      .catch((err) => console.log(err));
+      // getMessagingToken()
+      // .then((token) => {
+      //   createNewUser({
+      //     email: user?.email!,
+      //     fullName: user?.displayName!,
+      //     fcmToken: token
+      //   })
+      // })
+      // .catch((err) => console.log(err));
     }
   }, [user]);
 

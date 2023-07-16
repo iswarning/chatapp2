@@ -21,9 +21,9 @@ import RecieverTemplateFile from "./RecieverTemplate/RecieverTemplateFile";
 import { parseTimeStamp } from "@/utils/core";
 import {useSelector} from 'react-redux'
 import { selectChatState } from "@/redux/chatSlice";
+import { selectAppState } from "@/redux/appSlice";
 export default function Message({
   message,
-  timestamp,
   chatId,
   lastIndex,
   scrollToBottom
@@ -39,12 +39,13 @@ export default function Message({
   const [isShowImageFullscreen, setShowImageFullscreen] = useState(false);
   const [urlImage, setUrlImage] = useState("");
   const chatState = useSelector(selectChatState)
+  const appState = useSelector(selectAppState)
   // const [reactionSnapshot] = useCollection(
   //   db
   //     .collection("chats")
   //     .doc(chatId)
   //     .collection("messages")
-  //     .doc(message.id)
+  //     .doc(message._id)
   //     .collection("reaction")
   //     .orderBy("timestamp")
   //     .limitToLast(1)
@@ -61,7 +62,7 @@ export default function Message({
   //       .collection("chats")
   //       .doc(chatId)
   //       .collection("messages")
-  //       .doc(message.id)
+  //       .doc(message._id)
   //       .collection("reaction")
   //       .add({
   //         senderEmail: userLoggedIn?.email,
@@ -87,7 +88,7 @@ export default function Message({
       .collection("chats")
       .doc(chatId)
       .collection("messages")
-      .doc(message.id)
+      .doc(message._id)
       .collection("imageInMessage")
   );
 
@@ -96,7 +97,7 @@ export default function Message({
       .collection("chats")
       .doc(chatId)
       .collection("messages")
-      .doc(message.id)
+      .doc(message._id)
       .collection("fileInMessage")
       .limit(1)
   );
@@ -106,7 +107,7 @@ export default function Message({
   //     .collection("chats")
   //     .doc(chatId)
   //     .collection("messages")
-  //     .doc(message.id)
+  //     .doc(message._id)
   //     .collection("imageAttach")
   // );
 
@@ -117,48 +118,33 @@ export default function Message({
     <>
       {
         // Sender
-        message.user === userLoggedIn?.email ? 
+        message.senderId === appState.userInfo._id ? 
           <>
             {
-              message.type === "text" ? <SenderTemplateText message={message} timestamp={parseTimeStamp(timestamp)} lastIndex={lastIndex} /> : null
+              message.type === "text" ? <SenderTemplateText message={message} timestamp={message.createdAt} lastIndex={lastIndex} /> : null
             }
             {
-              message.type === "text-image" ? <SenderTemplateTextImage 
-              message={message}
-              imgs={imageFiltered!}
-              timestamp={parseTimeStamp(timestamp)} 
-              lastIndex={lastIndex} 
-              onShowImage={(urlImage: any) => {setUrlImage(urlImage);setShowImageFullscreen(true)}} 
-              scrollToBottom={() => scrollToBottom()} /> : null
-            }
-            {
-              message.type === "file" || message.type === "file-uploading" ? <SenderTemplateFile file={JSON.parse(message.file ?? "")} lastIndex={lastIndex} timestamp={parseTimeStamp(timestamp)} type={message.type} /> : null
+              message.type === "file" || message.type === "file-uploading" ? <SenderTemplateFile file={JSON.parse(message.file ?? "")} lastIndex={lastIndex} timestamp={message.createdAt} type={message.type} /> : null
             }
             {
               message.type === "image" ? <SenderTemplateImage 
               files={fileFiltered!} 
-              timestamp={parseTimeStamp(timestamp)} 
+              timestamp={message.createdAt} 
               onShowImage={(urlImage: any) => {setUrlImage(urlImage);setShowImageFullscreen(true)}} 
               lastIndex={lastIndex} /> : null
             }
           </> : 
           <>
             {
-              message.type === "text" ? <RecieverTemplateText message={message} timestamp={parseTimeStamp(timestamp)} lastIndex={lastIndex} /> : null
+              message.type === "text" ? <RecieverTemplateText message={message} timestamp={message.createdAt} lastIndex={lastIndex} /> : null
             }
             {
-              message.type === "text-image" ? <RecieverTemplateTextImage 
-              message={message} 
-              timestamp={parseTimeStamp(timestamp)} 
-              lastIndex={lastIndex} /> : null
-            }
-            {
-              message.type === "file" ? <RecieverTemplateFile file={message} lastIndex={lastIndex} timestamp={parseTimeStamp(timestamp)} /> : null
+              message.type === "file" ? <RecieverTemplateFile file={message} lastIndex={lastIndex} timestamp={message.createdAt} /> : null
             }
             {
               message.type === "image" ? <RecieverTemplateImage 
               files={fileFiltered!} 
-              timestamp={parseTimeStamp(timestamp)} 
+              timestamp={message.createdAt} 
               lastIndex={lastIndex} 
               onShowImage={(urlImage: any) => {setUrlImage(urlImage);setShowImageFullscreen(true)}} /> : null
             }

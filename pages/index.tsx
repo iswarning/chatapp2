@@ -18,9 +18,9 @@ import ChatScreen from "@/components/ChatScreen/ChatScreen";
 import { selectChatState, setGlobalChatState } from "@/redux/chatSlice";
 import { StatusCallType, selectVideoCallState, setGlobalVideoCallState } from "@/redux/videoCallSlice";
 import { selectFriendState, setGlobalFriendState } from "@/redux/friendSlice";
-import { setShowImageFullScreen } from "@/services/CacheService";
+import { getLocalStorage, setCurrentChat, setListChat, setListFriend, setListFriendRequest, setShowImageFullScreen, setUserInfo } from "@/services/CacheService";
 import ShowImageFullScreen from "@/components/ChatScreen/Message/ShowImageFullScreen";
-import { getInitialDataOfUser } from "@/services/UserService";
+import { createNewUser, getInitialDataOfUser } from "@/services/UserService";
 
 // import '@/styles/tailwind.min.css'
 const Page: NextPageWithLayout = () => {
@@ -30,33 +30,36 @@ const Page: NextPageWithLayout = () => {
   const dispatch = useDispatch();
   const appState = useSelector(selectAppState);
   const chatState = useSelector(selectChatState);
-  const friendState = useSelector(selectFriendState);
   const videoCallState = useSelector(selectVideoCallState);
 
   useEffect(() => {
-    getInitialDataOfUser("64afb4462827588683b367ff").then((response) => {
-      if(response) {
-        console.log(response.data)
+    setLoading(true)
+    localStorage.clear()
+    createNewUser({
+      email: user?.email!,
+      fullName: user?.displayName!,
+      photoURL: user?.photoURL!
+    }).then(userInfo => {
+      if (!getLocalStorage("UserInfo")) {
+        getInitialDataOfUser(userInfo?._id).then((data) => {
+          if(data) {
+            setUserInfo(data.userInfo, dispatch)
+            setListFriend(data.listFriend, dispatch)
+            setListFriendRequest(data.listFriendRequest, dispatch)
+            setListChat(data.listChatRoom, dispatch)
+          }
+        })
+        .catch(err => console.log(err))
+        .finally(() => setLoading(false))
+      } else {
+        setUserInfo(getLocalStorage("UserInfo"), dispatch)
+        setListFriend(getLocalStorage("ListFriend"), dispatch)
+        setListFriendRequest(getLocalStorage("ListFriendRequest"), dispatch)
+        setListChat(getLocalStorage("ListChat"), dispatch)
+        getLocalStorage("CurrentChat") ? setCurrentChat(getLocalStorage("CurrentChat"), dispatch) : null;
+        setLoading(false)
       }
-    })
-    // setLoading(true)
-    // if (!getLocalStorage("UserInfo")) {
-    //   getInitialState(user?.uid).then((data) => {
-    //     setUserInfo(data.userInfo, dispatch)
-    //     setListFriend(data.listFriend, dispatch)
-    //     setListFriendRequest(data.listFriendRequest, dispatch)
-    //     setListChat(data.listChat, dispatch)
-    //   })
-    //   .catch(err => console.log(err))
-    //   .finally(() => setLoading(false))
-    // } else {
-    //   setUserInfo(getLocalStorage("UserInfo"), dispatch)
-    //   setListFriend(getLocalStorage("ListFriend"), dispatch)
-    //   setListFriendRequest(getLocalStorage("ListFriendRequest"), dispatch)
-    //   setListChat(getLocalStorage("ListChat"), dispatch)
-    //   getLocalStorage("CurrentChat") ? setCurrentChat(getLocalStorage("CurrentChat"), dispatch) : null;
-    //   setLoading(false)
-    // }
+    })  
   },[])
 
   useEffect(() => {

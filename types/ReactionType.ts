@@ -8,7 +8,7 @@ export interface ReactionType {
 
 export const MapReactionData = (react: firebase.firestore.QueryDocumentSnapshot<firebase.firestore.DocumentData>): ReactionType => {
     let data: ReactionType = {} as ReactionType;
-    data.id = react.id;
+    data._id = react._id;
     data.senderEmail = react?.data()?.senderEmail;
     data.emoji = react?.data()?.emoji;
     return data;

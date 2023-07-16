@@ -45,7 +45,7 @@ export default function MemberElement({ info, handleAddMemberToGroup, listMember
                 type="checkbox" 
                 name="addMember" 
                 onChange={(event) => handleAddMemberToGroup(event.target.checked, info)} 
-                defaultChecked={listMember.filter((mem) => mem?.id === info.id).length > 0}/>
+                defaultChecked={listMember.filter((mem) => mem?._id === info._id).length > 0}/>
             </div>
         </div> : null
     }

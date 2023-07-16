@@ -4,16 +4,21 @@ import Image from 'next/image'
 import React, { useState } from 'react'
 import {useSelector,useDispatch} from 'react-redux'
 import {useForm} from 'react-hook-form'
-import { db, storage } from '@/firebase'
+import { storage } from '@/firebase'
 import { toast } from 'react-toastify'
-import { MapChatData } from '@/types/ChatType'
+import { ChatType } from '@/types/ChatType'
 import { v4 as uuidv4 } from 'uuid'
-import { useCollection } from 'react-firebase-hooks/firestore'
-import { useQuery } from '@tanstack/react-query'
 import MemberElement from '../MemberElement'
-import getRecipientEmail from '@/utils/getRecipientEmail'
-import firebase from 'firebase'
 import { selectFriendState } from '@/redux/friendSlice'
+import { createChatRoom, updateChatRoom } from '@/services/ChatRoomService'
+import { setListChat } from '@/services/CacheService'
+import { selectChatState } from '@/redux/chatSlice'
+import {ObjectId} from 'bson'
+import { AlertError, AlertSuccess } from '@/utils/core'
+import LoadingButton from '@mui/lab/LoadingButton';
+import { Button } from '@mui/material'
+import AddIcon from '@mui/icons-material/Add'
+
 export default function SidebarGroups() {
 
     const [active, setActive] = useState("Members")
@@ -22,10 +27,11 @@ export default function SidebarGroups() {
     const CLASS_ACTIVE = "hover:bg-gray-100 dark:hover:bg-dark-2 flex-1 py-2 rounded-md text-center active"
     const CLASS_NOT_ACTIVE = "hover:bg-gray-100 dark:hover:bg-dark-2 flex-1 py-2 rounded-md text-center"
     const appState = useSelector(selectAppState)
+    const chatState = useSelector(selectChatState)
     const friendState = useSelector(selectFriendState)
     const [image, setImage]: any = useState(null);
     const dispatch = useDispatch()
-
+    const [loading, setLoading] = useState(false)
     const {
         register,
         handleSubmit,
@@ -46,7 +52,7 @@ export default function SidebarGroups() {
 
     const removeMember = (userInfo: UserType | undefined) => {
         let array = [...listMember]; // make a separate copy of the array
-        let itemExist = listMember.findIndex((mem: UserType | undefined) => mem?.id === userInfo?.id);
+        let itemExist = listMember.findIndex((mem: UserType | undefined) => mem?._id === userInfo?._id);
         if (listMember.length === 1) {
           setListMember([]);
           return;
@@ -58,56 +64,41 @@ export default function SidebarGroups() {
     };
 
     const handleCreateNewGroupChat = (data: any) => {
-        let members = listMember.map((m: any) => m.email);
-        db.collection('chats').add({
-            users: [...members, appState.userInfo.email],
-            photoURL: "",
-            isGroup: true,
-            name: data.groupName,
-            admin: appState.userInfo.email,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-        })
-        .then(doc => {
-            doc.get().then(snap => {
-                if (image) {
-                    fetch(image)
-                    .then((response) => response.blob())
-                    .then((blob) => {
-                        let key = uuidv4()
-                        let path = `public/chat-room/${snap.id}/avatar-group/${key}`
-                        storage
-                        .ref(path)
-                        .put(blob)
-                        .on(
-                            "state_changed",
-                            () => {
-
-                            },
-                            (err) => console.log(err),
-                            () => {
-                                storage
-                                .ref(path)
-                                .getDownloadURL()
-                                .then((url) => {
-                                    db
-                                    .collection("chats")
-                                    .doc(snap.id)
-                                    .update({ photoURL: url })
-                                })
-                            }
-                        )
+        setLoading(true)
+        let members: any = listMember.map((m) => m?._id);
+        if (image) {
+            fetch(image)
+            .then((response) => response.blob())
+            .then((blob) => {
+                let path = `public/avatar-group/${uuidv4()}`
+                storage
+                .ref(path)
+                .put(blob)
+                .then(() => {
+                    storage
+                    .ref(path)
+                    .getDownloadURL()
+                    .then((url) => {
+                        createChatRoom({
+                            members: [...members, appState.userInfo._id],
+                            name: data.groupName,
+                            admin: appState.userInfo._id,
+                            isGroup: true,
+                            photoURL: url
+                        })
+                        .then((chatRoom: ChatType) => {
+                            setListChat([...chatState.listChat, chatRoom], dispatch)
+                        })
+                        .catch(() => AlertError("Error when create group"))
+                        .finally(() => {
+                            AlertSuccess("Created group successfully !")
+                            setLoading(false)
+                        })
                     })
-                }
+                })
             })
-        })
-        .finally(() => {
-            toast("Created group successfully !", {
-                hideProgressBar: true,
-                type: "info",
-                autoClose: 5000,
-            });
-        })
+        }
+        
     };
 
     const onImageChange = (event: any) => {
@@ -160,7 +151,7 @@ export default function SidebarGroups() {
                                 {
                                     friendState ? friendState.listFriend.map((friend) => 
                                         <MemberElement 
-                                        key={friend.id}
+                                        key={friend._id}
                                         info={friend.userInfo}
                                         handleAddMemberToGroup={(checked: boolean, userInfo: UserType) => handleAddMemberToGroup(checked, userInfo)} 
                                         listMember={listMember}
@@ -209,7 +200,18 @@ export default function SidebarGroups() {
                                     <label htmlFor="create-group-form-5" className="form-label">Description</label>
                                     <textarea className="form-control" rows={5} id="create-group-form-5" {...register('description')}></textarea>
                                 </div>
-                                <button type='submit' className="btn btn-primary w-full mt-3" disabled={listMember.length < 2}>Create Group</button>
+                                {
+                                    loading ? <LoadingButton
+                                        loading
+                                        loadingPosition="center"
+                                        startIcon={<AddIcon />}
+                                        variant="outlined"
+                                        className="w-full mt-3" disabled={listMember.length < 2}
+                                        >
+                                    </LoadingButton> : <button type='submit' className="btn btn-primary w-full mt-3" disabled={listMember.length < 2}>
+                                        Create Group
+                                    </button>
+                                }
                             </div>
                             </form>
 

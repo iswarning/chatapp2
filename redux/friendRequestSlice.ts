@@ -2,6 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import { AppState } from "./store";
 import { HYDRATE } from "next-redux-wrapper";
 import { FriendRequestType } from '../types/FriendRequestType'
+import { setLocalStorage } from "@/services/CacheService";
 // Type for our state
 export interface InitialState {
   data: {
@@ -34,10 +35,12 @@ export const friendRequestSlice = createSlice({
                 ...state.data.listFriendRequest,
                 action.payload.data
             ]
+            setLocalStorage("ListFriendRequest", state.data.listFriendRequest)
             break;
         case "removeFriendRequest":
-          let index = state.data.listFriendRequest.findIndex((fR) => fR.id === action.payload.data)
+          let index = state.data.listFriendRequest.findIndex((fR) => fR._id === action.payload.data)
           state.data.listFriendRequest = state.data.listFriendRequest.splice(index, 1)
+          setLocalStorage("ListFriendRequest", state.data.listFriendRequest)
           break;
         default:
             return    

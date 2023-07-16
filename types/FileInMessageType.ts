@@ -10,7 +10,7 @@ export interface FileInMessageType {
 
 export const MapFileInMessageData = (fileInMessage: firebase.firestore.QueryDocumentSnapshot<firebase.firestore.DocumentData>): FileInMessageType => {
     let data = {} as FileInMessageType;
-    data.id = fileInMessage?.id;
+    data._id = fileInMessage?._id;
     data.key = fileInMessage?.data()?.key;
     data.name = fileInMessage?.data()?.name;
     data.size = fileInMessage?.data()?.size;

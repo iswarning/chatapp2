@@ -38,26 +38,23 @@ export const chatSlice = createSlice({
             setLocalStorage("ListChat", state.data.listChat)
             break;
         case "pushMessageToListChat":
-            let chatExist = state.data.listChat.find((chat) => chat.id === action.payload.data.chatId);
-            if (chatExist?.messages) {
-                state.data.listChat = [
-                    ...state.data.listChat,
-                    {
-                        ...chatExist,
-                        messages: [
-                            ...chatExist.messages,
-                            action.payload.data.newMessage
-                        ]
-                    }
-                ]
-            } else {
-                return
-            }
+            state.data.listChat = state.data.listChat.map((chat) => {
+              if(chat._id === action.payload.data.chatId) {
+                let newData = chat.messages !== undefined ? chat.messages : []
+                newData?.push(action.payload.data.newMessage)
+                return {
+                  ...chat,
+                  messages: newData
+                }
+              } else {
+                return chat
+              }
+            })
             setLocalStorage("ListChat", state.data.listChat)
             break;
         case "setListMessageInRoom":
           state.data.listChat = state.data.listChat.map((chat) => {
-            if (chat.id === action.payload.data.chatId) {
+            if (chat._id === action.payload.data.chatId) {
               return {
                 ...chat,
                 messages: action.payload.data.newMessages
@@ -70,7 +67,7 @@ export const chatSlice = createSlice({
           break;
         case "setListImageInRoom":
             state.data.listChat = state.data.listChat.map((chat) => {
-              if (chat.id === action.payload.data.chatId) {
+              if (chat._id === action.payload.data.chatId) {
                 return {
                   ...chat,
                   listImage: action.payload.data.listImage
@@ -83,7 +80,7 @@ export const chatSlice = createSlice({
             break;
         case "setListFileInRoom":
               state.data.listChat = state.data.listChat.map((chat) => {
-                if (chat.id === action.payload.data.chatId) {
+                if (chat._id === action.payload.data.chatId) {
                   return {
                     ...chat,
                     listFile: action.payload.data.listFile

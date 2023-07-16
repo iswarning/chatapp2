@@ -10,7 +10,7 @@ export default function RecieverTemplateFile({ file, lastIndex, timestamp }: { f
 
     const chatState = useSelector(selectChatState)
     
-    const storageRef = storage.ref(`public/chat-room/${chatState.currentChat.id}/files/${file?.key}`)
+    const storageRef = storage.ref(`public/chat-room/${chatState.currentChat._id}/files/${file?.key}`)
 
     const [downloadUrl] = useDownloadURL(storageRef)
 

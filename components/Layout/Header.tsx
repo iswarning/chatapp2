@@ -4,10 +4,7 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import Image from "next/image";
 import NotificationScreen from "../NotificationScreen";
 import { useState } from "react";
-import { useCollection } from "react-firebase-hooks/firestore";
-import { MapFriendRequestData } from "@/types/FriendRequestType";
 import { useDispatch, useSelector } from 'react-redux'
-import { selectAppState } from "@/redux/appSlice";
 import { selectFriendRequestState } from "@/redux/friendRequestSlice";
 
 export default function Header() {
