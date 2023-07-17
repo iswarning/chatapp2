@@ -40,8 +40,8 @@ export default function DropdownAttach({ chatId, scrollToBottom, recipient }: { 
           return;
         }
 
-        if (appState.prepareImages.length >= 5) {
-          AlertError("Maximum image attach !")
+        if (appState.prepareImages.length >= 6) {
+          AlertError("Maximum files is 5 !")
           return;
         }   
 
@@ -51,7 +51,9 @@ export default function DropdownAttach({ chatId, scrollToBottom, recipient }: { 
               if(appState.prepareImages.length > 0 && appState.prepareImages.find((image) => image.size === fileSize)) return
               addPrepareImage({
                 size: fileSize,
-                url: fr.result
+                url: fr.result,
+                type: "image",
+                extension: file.name.split(".").pop()
               },dispatch)
             }
             fr.readAsDataURL(file);

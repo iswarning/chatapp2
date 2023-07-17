@@ -26,14 +26,19 @@ export default function PrepareSendImageScreen() {
     <>
       <div className="box">
           <hr/>
-          <div className="flex p-2">
+          <div className="flex p-2 overflow-y-auto">
             {
-              appState.prepareImages.map((image) => <div key={uuidv4()} style={{position: "relative"}}>
-                <ImageGridItem src={image.url} />
-                <RemoveButton onClick={() => removeItem(image.size)}>
+              appState.prepareImages.map((image) => image.type === "file" ? <ContainerFile key={uuidv4()}>  
+                <TextFile>{image.extension.toUpperCase()}</TextFile>
+                <RemoveButton onClick={() => removeItem(image.size)} style={{top: "-8px", right: "-8px"}}>
                   <CancelIcon fontSize="small" />
                 </RemoveButton>
-              </div>)
+              </ContainerFile> : <ContainerImage key={uuidv4()}>
+                <ImageGridItem src={image.url} />
+                <RemoveButton onClick={() => removeItem(image.size)} style={{top: "-4px", right: "-4px"}}>
+                  <CancelIcon fontSize="small" />
+                </RemoveButton>
+              </ContainerImage>)
             }
           </div>
         </div>
@@ -41,12 +46,29 @@ export default function PrepareSendImageScreen() {
   )
 }
 
+const ContainerImage = styled.div`
+  position: relative;
+`
+
+const ContainerFile = styled.div`
+  position: relative;
+  background: #AFBFCB;
+  width: 75px;
+  height: 75px;
+  border-radius: 10px;
+  margin: 5px;
+`
+
+const TextFile = styled.p`
+  color: white;
+  text-align: center;
+  line-height: 75px;
+`
+
 const RemoveButton = styled.button`
   position: absolute;
   top: 0;
   right: 0;
-  margin-right: 10px;
-  margin-top: 5px;
   
   &:hover {
     opacity: 0.7;
@@ -58,8 +80,8 @@ const RemoveButton = styled.button`
 `
 
 const ImageGridItem = styled.img`
-  width: 100px;
-  height: 100px;
+  width: 75px;
+  height: 75px;
   border-radius: 10px;
   margin: 5px;
 `

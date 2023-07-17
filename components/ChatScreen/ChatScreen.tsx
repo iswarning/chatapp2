@@ -180,59 +180,43 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
   }
 
   const handlePaste = (files: any) => {
-    if (appState.prepareImages.length >= 5) {
-      AlertError("Maximum image attach !")
-      return;
-    } 
-    if(files) {
-      let fileSize = files[0].size
+    for(const file of files) {
+      if (appState.prepareImages.length >= 6) {
+        AlertError("Maximum files is 5 !")
+        return;
+      } 
+      let fileSize = file.size
+      let extension = file.name.split(".").pop()
+      let type = extension === "png" || extension === "jpg" || extension === "jpeg"  ? "image" : "file"
       if (FileReader) {
         let fr = new FileReader();
         fr.onload = function () {
           if(appState.prepareImages.length > 0 && appState.prepareImages.find((image) => image.size === fileSize)) return
           addPrepareImage({
             size: fileSize,
-            url: fr.result
+            url: fr.result,
+            type: type,
+            extension: extension
           },dispatch)
         }
-        fr.readAsDataURL(files[0]);
-     }
+        fr.readAsDataURL(file);
+      }
     }
   }
 
-  const handleDragFile = (data: any) => {
-    if(data?.items) {
-      const valid = 
-      // the "accept" value was not supplied
-      !accept ||
-      // the "accept" value was a wild card
-      accept === "*/*" ||
-      accept === "*" ||
-      // the "dataTransfer.items" is not iterable in older ES versions
-      // therefore, we need to convert it into an Array
-      // Thankfully since it has a "length" property, we can use Array.from
-      Array
-          .from(e.dataTransfer.items)
-          // every item must return "true"
-          .every(item => {
-              const { kind, type } = item;
-              if (kind === "file") {
-                  // the type is */* format
-                  const [ namespace, friendlyName ] = type.split("/");
-
-                  // now iterate over the accepted file types
-                  return acceptArr
-                      .every(accepted => {
-                          const [ acceptedNs, acceptedName ] = accepted;
-
-                          return
-                              (acceptedNs === "*" || acceptedNs === namespace) &&
-                              (acceptedName === "*" || acceptedName === friendlyName) 
-                      });
-              } else {
-                  return false; // not a file
-              }
+  const handleDrag = (e: any) => {
+    e.preventDefault();
+    e.stopPropagation();
+    switch(e.type){
+      case 'dragover':
+        break;
+      case 'dragleave':
+        break;
     }
+  }
+
+  const handleDrop = (e: any) => {
+    handlePaste(e.dataTransfer.files)
   }
 
   return (
@@ -277,7 +261,9 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
         style={{ marginRight: "10px", marginLeft: "10px" }}
         value={input}
         onPaste={(e) => handlePaste(e.clipboardData.files)}
-        onDragOver={(e) => handleDragFile(e.dataTransfer)}/>
+        onDragLeave={handleDrag}
+        onDragOver={handleDrag}
+        onDrop={handleDrop}/>
         {/* <InputMessage
           contentEditable="true"
           className="w-full block outline-none py-4 px-4 bg-transparent"
