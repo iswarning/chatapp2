@@ -19,14 +19,17 @@ import EmojiContainerComponent from "@/components/ChatScreen/EmojiContainerCompo
 import styled from "styled-components";
 import DropdownAttach from "@/components/ChatScreen/DropdownAttach";
 import CallIcon from '@mui/icons-material/Call';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 import getUserBusy from "@/utils/getUserBusy";
 import { requestMedia } from "@/utils/requestPermission";
 import { StatusCallType, selectVideoCallState, setGlobalVideoCallState } from "@/redux/videoCallSlice";
 import {v4 as uuidv4} from 'uuid'
-import firebase from "firebase";
-import { pushMessageToListChat, setCurrentChat, setStatusSend } from "@/services/CacheService";
+import { addPrepareImage, pushMessageToListChat, setCurrentChat, setShowGroupInfo, setStatusSend } from "@/services/CacheService";
 import { AlertError } from "@/utils/core";
 import { createMessage } from "@/services/MessageService";
+import PrepareSendImageScreen from "./PrepareSendImageScreen";
+
+
 export default function ChatScreen({ chat, messages }: { chat: ChatType, messages: Array<MessageType> }) {
   const [user] = useAuthState(auth);
   const endOfMessageRef: any = useRef(null);
@@ -176,9 +179,66 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
     }
   }
 
+  const handlePaste = (files: any) => {
+    if (appState.prepareImages.length >= 5) {
+      AlertError("Maximum image attach !")
+      return;
+    } 
+    if(files) {
+      let fileSize = files[0].size
+      if (FileReader) {
+        let fr = new FileReader();
+        fr.onload = function () {
+          if(appState.prepareImages.length > 0 && appState.prepareImages.find((image) => image.size === fileSize)) return
+          addPrepareImage({
+            size: fileSize,
+            url: fr.result
+          },dispatch)
+        }
+        fr.readAsDataURL(files[0]);
+     }
+    }
+  }
+
+  const handleDragFile = (data: any) => {
+    if(data?.items) {
+      const valid = 
+      // the "accept" value was not supplied
+      !accept ||
+      // the "accept" value was a wild card
+      accept === "*/*" ||
+      accept === "*" ||
+      // the "dataTransfer.items" is not iterable in older ES versions
+      // therefore, we need to convert it into an Array
+      // Thankfully since it has a "length" property, we can use Array.from
+      Array
+          .from(e.dataTransfer.items)
+          // every item must return "true"
+          .every(item => {
+              const { kind, type } = item;
+              if (kind === "file") {
+                  // the type is */* format
+                  const [ namespace, friendlyName ] = type.split("/");
+
+                  // now iterate over the accepted file types
+                  return acceptArr
+                      .every(accepted => {
+                          const [ acceptedNs, acceptedName ] = accepted;
+
+                          return
+                              (acceptedNs === "*" || acceptedNs === namespace) &&
+                              (acceptedName === "*" || acceptedName === friendlyName) 
+                      });
+              } else {
+                  return false; // not a file
+              }
+    }
+  }
+
   return (
     <>
-      <div className="chat-box border-theme-5 col-span-12 xl:col-span-6 flex flex-col overflow-hidden xl:border-l xl:border-r p-6">
+      <div className="chat-box border-theme-5 flex flex-col overflow-hidden xl:border-l xl:border-r p-6" 
+      style={{ gridColumn: appState.showGroupInfo ? "span 6 / span 12" : "span 9 / span 12" }}>
         <div className="intro-y box border border-theme-3 dark:bg-dark-2 dark:border-dark-2 flex items-center px-5 py-4">
           <div className="flex items-center mr-auto">
             <div className="w-12 h-12 flex-none image-fit mr-1">
@@ -196,7 +256,10 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
           </div>
           <a className="text-gray-600 hover:text-theme-1" href="javascript:void(0)" onClick={handleCalling}> 
             <CallIcon fontSize="small" />
-           </a>
+          </a>&nbsp;&nbsp;
+          <a className="text-gray-600 hover:text-theme-1" href="javascript:void(0)" onClick={() => setShowGroupInfo(!appState.showGroupInfo, dispatch)}> 
+            <MoreVertIcon fontSize="small" />
+          </a>
         </div>
 
         <ScrollBarCustom className="overflow-y-auto pt-5 flex-1 px-4">
@@ -212,7 +275,9 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
         className="form-control h-12 shadow-none resize-none border-transparent px-5 py-3 focus:outline-none truncate" 
         placeholder="Type your message..."
         style={{ marginRight: "10px", marginLeft: "10px" }}
-        value={input}/>
+        value={input}
+        onPaste={(e) => handlePaste(e.clipboardData.files)}
+        onDragOver={(e) => handleDragFile(e.dataTransfer)}/>
         {/* <InputMessage
           contentEditable="true"
           className="w-full block outline-none py-4 px-4 bg-transparent"
@@ -241,11 +306,9 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
           </svg> 
         </a>
         </div>
-        {/* {
-          progress > 0 && progress < 100 ? <div className="w-full bg-gray-200 rounded-full dark:bg-gray-700">
-            <div className="text-xs font-medium text-center p-0.5 leading-none rounded-full" style={{width: `${progress}%`, background: '#6775F5', color: 'white', height: '15px'}}>{progress}%</div>
-          </div> : null
-        } */}
+        {
+          appState.prepareImages.length > 0 ? <PrepareSendImageScreen /> : null
+        }
       </div>
       {
         showEmoji ?  <EmojiContainerComponent onAddEmoji={(emoji: number) => addEmoji(emoji)} /> : null

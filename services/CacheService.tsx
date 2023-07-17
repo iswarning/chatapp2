@@ -184,6 +184,13 @@ export function setShowImageFullScreen(urlImage: string, isShow: boolean, dispat
     }))
 }
 
+export function setShowGroupInfo(showGroupInfo: boolean,dispatch: Dispatch<AnyAction>) {
+    dispatch(setAppGlobalState({
+        type: "setShowGroupInfo",
+        data: showGroupInfo
+    }))
+}
+
 export function setStatusSend(status: StatusSendType, dispatch: Dispatch<AnyAction>) {
     dispatch(setAppGlobalState({
         type: "setStatusSend",
@@ -191,3 +198,16 @@ export function setStatusSend(status: StatusSendType, dispatch: Dispatch<AnyActi
     }))
 }
 
+export function setPrepareImages(prepareImages: any, dispatch: Dispatch<AnyAction>) {
+    dispatch(setAppGlobalState({
+        type: "setPrepareImages",
+        data: prepareImages
+    }))
+}
+
+export function addPrepareImage(image: any, dispatch: Dispatch<AnyAction>) {
+    dispatch(setAppGlobalState({
+        type: "addPrepareImage",
+        data: image
+    }))
+}

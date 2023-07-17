@@ -3,6 +3,7 @@ import { AppState } from "./store";
 import { HYDRATE } from "next-redux-wrapper";
 import { UserType } from "@/types/UserType";
 import { Socket, io } from "socket.io-client";
+import { FileInfo } from "@/types/ChatType";
 
 export enum SidebarType {
   CHAT,
@@ -30,7 +31,9 @@ export interface InitialState {
     statusSend?: StatusSendType,
     fileUploading: any,
     fileUploadDone: any,
-    showImageFullScreenData: any
+    showImageFullScreenData: any,
+    showGroupInfo: boolean,
+    prepareImages: Array<any>
   },
   
 }
@@ -50,7 +53,9 @@ const initialState: InitialState = {
     showImageFullScreenData: {
       isShow: false,
       urlImage: ""
-    }
+    },
+    showGroupInfo: false,
+    prepareImages: []
   },
 
 };
@@ -93,6 +98,18 @@ export const appSlice = createSlice({
         case "setShowImageFullScreen":
             state.data.showImageFullScreenData = action.payload.data
             break
+        case "setShowGroupInfo":
+            state.data.showGroupInfo = action.payload.data
+          break
+        case "setPrepareImages":
+            state.data.prepareImages = action.payload.data
+          break
+        case "addPrepareImage":
+            state.data.prepareImages = [
+              ...state.data.prepareImages,
+              action.payload.data
+            ]
+          break
         default:
           return
       }

@@ -14,6 +14,7 @@ export async function createChatRoom(input: ChatType) {
                 'Content-Type': 'application/json'
             }
         })
+        console.log(response.data)
         return response.data.data.createChatRoom
     } catch (error) {
         console.log(error)

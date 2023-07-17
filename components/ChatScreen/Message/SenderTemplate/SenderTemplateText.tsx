@@ -20,16 +20,16 @@ export default function SenderTemplateText(
     const appState = useSelector(selectAppState)
 
     const handleMessage = () => {
-        let messageExport: string = message.message;
+        let messageExport: string = message.message!;
         return <div 
             dangerouslySetInnerHTML={{ __html: messageExport }} 
-            style={{fontSize: message.type === 'text' && getEmojiIcon.includes(message.message) && message.message.length === 2 ? '50px' : '' }}>
+            style={{fontSize: message.type === 'text' && getEmojiIcon.includes(message.message!) && message.message!.length === 2 ? '50px' : '' }}>
             </div>;
     }
 
     return (
         <>
-        <div className="intro-x chat-text-box flex items-end float-right mb-4" title={timestamp}>
+        <div className="chat-text-box flex items-end float-right mb-4" title={timestamp}>
             <div className="w-full">
                 <div>
                     <div className="chat-text-box__content flex items-center float-right" >

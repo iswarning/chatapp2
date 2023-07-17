@@ -247,7 +247,7 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
   return (
 <div className="intro-x" onClick={() => handleShowChatScreen()}>
 {/* <div className="intro-x"> */}
-<div className="zoom-in">
+<div>
 <div className={ active ? "chat-list box cursor-pointer relative flex items-center px-4 py-3 mt-4 bg-theme-1 dark:bg-theme-1" : "chat-list box cursor-pointer relative flex items-center px-4 py-3 mt-4"}>
 <div className="w-12 h-12 flex-none image-fit mr-1">
 {

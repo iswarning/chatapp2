@@ -5,12 +5,12 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { auth, db, storage } from "../../firebase";
 import { useDispatch, useSelector } from 'react-redux'
 import { StatusSendType, selectAppState } from "@/redux/appSlice";
-import { v4 as uuidv4, v5 } from 'uuid'
+import { v4 as uuidv4 } from 'uuid'
 import sendNotificationFCM from "@/utils/sendNotificationFCM";
 import { getImageTypeFileValid } from "@/utils/getImageTypeFileValid";
 import firebase from "firebase";
 import { selectChatState } from "@/redux/chatSlice";
-import { pushMessageToListChat, setFileUploadDone, setFileUploading, setProgress, setStatusSend } from "@/services/CacheService";
+import { addPrepareImage, pushMessageToListChat, setFileUploadDone, setFileUploading, setPrepareImages, setProgress, setStatusSend } from "@/services/CacheService";
 import { AlertError } from "@/utils/core";
 import { MessageType } from "@/types/MessageType";
 
@@ -24,7 +24,6 @@ export default function DropdownAttach({ chatId, scrollToBottom, recipient }: { 
 
   function onImageChange(event: any) {
     event.preventDefault();
-    let newArray: any[] = []
     if (event.target.files && event.target.files.length > 0) {
       for (const file of event.target.files) {
         let imgType = file["type"];
@@ -41,50 +40,52 @@ export default function DropdownAttach({ chatId, scrollToBottom, recipient }: { 
           return;
         }
 
-        if (event.target.files.length >= 5) {
+        if (appState.prepareImages.length >= 5) {
           AlertError("Maximum image attach !")
           return;
-        }      
-        let key = uuidv4(); 
-        let path = `public/chat-room/${chatState.currentChat._id}/photos/${key}`
-        storage
-        .ref(path)
-        .put(file)
-        .on(
-          "state_changed",
-          () => {
+        }   
 
-          },
-          (err) => console.log(err),
-          () => {
-            storage.ref(path).getDownloadURL().then((url) => {
-              newArray.push({
-                key: key,
-                downloadUrl: url
-              })
-            })
-          }
-        );
+        if (FileReader) {
+            let fr = new FileReader();
+            fr.onload = function () {
+              if(appState.prepareImages.length > 0 && appState.prepareImages.find((image) => image.size === fileSize)) return
+              addPrepareImage({
+                size: fileSize,
+                url: fr.result
+              },dispatch)
+            }
+            fr.readAsDataURL(file);
+        }
+        
+        // Not supported
+        else {
+            // fallback -- perhaps submit the input to an iframe and temporarily store
+            // them on the server until the user's session ends.
+        }
+        // let key = uuidv4(); 
+        // let path = `public/chat-room/${chatState.currentChat._id}/photos/${key}`
+        // storage
+        // .ref(path)
+        // .put(file)
+        // .on(
+        //   "state_changed",
+        //   () => {
+
+        //   },
+        //   (err) => console.log(err),
+        //   () => {
+            
+        //     // storage.ref(path).getDownloadURL().then((url) => {
+        //     //   newArray.push({
+        //     //     key: key,
+        //     //     downloadUrl: url
+        //     //   })
+        //     // })
+        //   }
+        // );
       }
     }   
-
-    let newMessage = {} as MessageType
-      newMessage._id = uuidv4()
-      newMessage.createdAt = new Date().toLocaleString()
-      newMessage.senderId = appState.userInfo._id!
-      newMessage.type = "image"
-      newMessage.images = JSON.stringify(newArray)
-
-      pushMessageToListChat(chatState.currentChat._id!, newMessage, dispatch)
-
-      db
-      .collection("chats")
-      .doc(chatId)
-      .collection("messages")
-      .doc(newMessage._id)
-      .set({...newMessage, images: JSON.stringify(JSON.parse(newMessage.images).map((img: any) => img.key))})
-      .catch(err => console.log(err))
-      scrollToBottom();
+    console.log(appState.prepareImages)
   }
 
   const handleAttachFile = (event: any) => {

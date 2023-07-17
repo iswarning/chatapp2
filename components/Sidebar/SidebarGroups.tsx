@@ -66,6 +66,7 @@ export default function SidebarGroups() {
     const handleCreateNewGroupChat = (data: any) => {
         setLoading(true)
         let members: any = listMember.map((m) => m?._id);
+        members.push(appState.userInfo._id)
         if (image) {
             fetch(image)
             .then((response) => response.blob())
@@ -80,7 +81,7 @@ export default function SidebarGroups() {
                     .getDownloadURL()
                     .then((url) => {
                         createChatRoom({
-                            members: [...members, appState.userInfo._id],
+                            members: members,
                             name: data.groupName,
                             admin: appState.userInfo._id,
                             isGroup: true,

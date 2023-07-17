@@ -203,19 +203,23 @@ const Page: NextPageWithLayout = () => {
         {
           Object.keys(chatState.currentChat).length > 0 ? <>
             <ChatScreen chat={chatState.currentChat} messages={chatState.currentChat.messages!} />
-            <InfoContentScreen />
+            {
+              appState.showGroupInfo ? <InfoContentScreen /> : null
+            }
           </>  : null
         }
 
-        { videoCallState.showVideoCallScreen ? <VideoCallScreen open={videoCallState.showVideoCallScreen} /> : null }
-
-        {
-          appState.showImageFullScreenData.isShow ? <ShowImageFullScreen 
-          urlImage={appState.showImageFullScreenData.urlImage} 
-          onHide={() => setShowImageFullScreen(appState.showImageFullScreenData.urlImage,!appState.showImageFullScreenData.isShow, dispatch)}  /> : null
-        }
+        
         </div>
       </div>
+
+      { videoCallState.showVideoCallScreen ? <VideoCallScreen open={videoCallState.showVideoCallScreen} /> : null }
+
+      {
+        appState.showImageFullScreenData.isShow ? <ShowImageFullScreen 
+        urlImage={appState.showImageFullScreenData.urlImage} 
+        onHide={() => setShowImageFullScreen(appState.showImageFullScreenData.urlImage,!appState.showImageFullScreenData.isShow, dispatch)}  /> : null
+      }
     </>
   );
 };

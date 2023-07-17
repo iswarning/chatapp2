@@ -37,6 +37,17 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
     cache: new InMemoryCache()
   });
 
+  if(typeof window != "undefined") {
+    window.addEventListener("dragover",function(e){
+      e = e || event;
+      e.preventDefault();
+    },false);
+    window.addEventListener("drop",function(e){
+      e = e || event;
+      e.preventDefault();
+    },false);
+  }
+
   useEffect(() => {
     if (user) {
       requestPermission();

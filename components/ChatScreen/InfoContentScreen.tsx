@@ -21,7 +21,7 @@ export default function InfoContentScreen() {
 
     const getRecipientAvatar = () => {
         if (chatState.currentChat?.isGroup) {
-          if (chatState.currentChat?.photoURL.length > 0) return chatState.currentChat?.photoURL;
+          if (chatState.currentChat?.photoURL!.length > 0) return chatState.currentChat?.photoURL;
           else return "/images/group-default.jpg";
         } else {
           let photoUrl = recipientInfo?.photoURL ?? null;
