@@ -112,7 +112,8 @@ export default function Message({
   // );
 
   const fileFiltered = message?.file ? chatState.currentChat.listFile?.filter((file) => JSON.parse(message.file ?? "").find((f: any) => f.key === file.key)) : null
-  const imageFiltered = message.images ? chatState.currentChat.listImage?.filter((file) => JSON.parse(message.images ?? "").find((f: any) => f.key === file.key)) : null
+  console.log()
+  const imageFiltered = message.message ? chatState.currentChat.listImage?.filter((file) => (JSON.parse(message.message ?? "") as string[]).find((f) => f === file.key)) : null
 
   return (
     <>
@@ -128,7 +129,7 @@ export default function Message({
             }
             {
               message.type === "image" ? <SenderTemplateImage 
-              files={fileFiltered!} 
+              message={message.message!} 
               timestamp={message.createdAt} 
               onShowImage={(urlImage: any) => {setUrlImage(urlImage);setShowImageFullscreen(true)}} 
               lastIndex={lastIndex} /> : null

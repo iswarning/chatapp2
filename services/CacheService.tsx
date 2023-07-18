@@ -103,6 +103,16 @@ export function setListImageInRoom(chatId: string, listImage: FileInfo[], dispat
     }))
 }
 
+export function addNewImageInRoom(chatId: string, newImage: FileInfo, dispatch: Dispatch<AnyAction>) {
+    dispatch(setGlobalChatState({
+        type: "addNewImageInRoom",
+        data: {
+            chatId,
+            newImage
+        }
+    }))
+}
+
 export function setListFileInRoom(chatId: string, listFile: FileInfo[], dispatch: Dispatch<AnyAction>) {
     dispatch(setGlobalChatState({
         type: "setListFileInRoom",
@@ -114,33 +124,16 @@ export function setListFileInRoom(chatId: string, listFile: FileInfo[], dispatch
 }
 
 export function setListMessageInRoom(chatId: string, messages: MessageType[] | undefined, dispatch: Dispatch<AnyAction>) {
-    getLastMessage(chatId).then((lastMsg: MessageType) => {
-        if(messages?.length! > 0) {
-            if(messages?.[messages.length - 1]._id === lastMsg._id) {
-                dispatch(setGlobalChatState({
-                    type: "setListMessageInRoom",
-                    data: {
-                        chatId,
-                        newMessages: messages
-                    }
-                }))
-            } else {
-                getAllMessagesByChatRoomId(chatId).then((newMessages) => {
-                    dispatch(setGlobalChatState({
-                        type: "setListMessageInRoom",
-                        data: {
-                            chatId,
-                            newMessages
-                        }
-                    }))
-                })
-            }
+    dispatch(setGlobalChatState({
+        type: "setListMessageInRoom",
+        data: {
+            chatId,
+            newMessages: messages
         }
-    })
+    }))
 }
 
 export function pushMessageToListChat(chatId: string, newMessage: MessageType, dispatch: Dispatch<AnyAction>) {
-    console.log(11111)
     dispatch(setGlobalChatState({
         type: "pushMessageToListChat",
         data: {
@@ -198,16 +191,16 @@ export function setStatusSend(status: StatusSendType, dispatch: Dispatch<AnyActi
     }))
 }
 
-export function setPrepareImages(prepareImages: any, dispatch: Dispatch<AnyAction>) {
+export function setPrepareSendFiles(prepareFiles: File[], dispatch: Dispatch<AnyAction>) {
     dispatch(setAppGlobalState({
-        type: "setPrepareImages",
-        data: prepareImages
+        type: "setPrepareSendFiles",
+        data: prepareFiles
     }))
 }
 
-export function addPrepareImage(image: any, dispatch: Dispatch<AnyAction>) {
+export function addPrepareSendFiles(file: File, dispatch: Dispatch<AnyAction>) {
     dispatch(setAppGlobalState({
-        type: "addPrepareImage",
-        data: image
+        type: "addPrepareSendFiles",
+        data: file
     }))
 }

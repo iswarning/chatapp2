@@ -33,7 +33,7 @@ export interface InitialState {
     fileUploadDone: any,
     showImageFullScreenData: any,
     showGroupInfo: boolean,
-    prepareImages: Array<any>
+    prepareSendFiles: Array<File>
   },
   
 }
@@ -55,7 +55,7 @@ const initialState: InitialState = {
       urlImage: ""
     },
     showGroupInfo: false,
-    prepareImages: []
+    prepareSendFiles: []
   },
 
 };
@@ -101,12 +101,12 @@ export const appSlice = createSlice({
         case "setShowGroupInfo":
             state.data.showGroupInfo = action.payload.data
           break
-        case "setPrepareImages":
-            state.data.prepareImages = action.payload.data
+        case "setPrepareSendFiles":
+            state.data.prepareSendFiles = action.payload.data
           break
-        case "addPrepareImage":
-            state.data.prepareImages = [
-              ...state.data.prepareImages,
+        case "addPrepareSendFiles":
+            state.data.prepareSendFiles = [
+              ...state.data.prepareSendFiles,
               action.payload.data
             ]
           break

@@ -24,10 +24,11 @@ import getUserBusy from "@/utils/getUserBusy";
 import { requestMedia } from "@/utils/requestPermission";
 import { StatusCallType, selectVideoCallState, setGlobalVideoCallState } from "@/redux/videoCallSlice";
 import {v4 as uuidv4} from 'uuid'
-import { addPrepareImage, pushMessageToListChat, setCurrentChat, setShowGroupInfo, setStatusSend } from "@/services/CacheService";
+import { addNewImageInRoom, addPrepareSendFiles, pushMessageToListChat, setCurrentChat, setListFileInRoom, setPrepareSendFiles, setShowGroupInfo, setStatusSend } from "@/services/CacheService";
 import { AlertError } from "@/utils/core";
 import { createMessage } from "@/services/MessageService";
-import PrepareSendImageScreen from "./PrepareSendImageScreen";
+import PrepareSendFileScreen from "./PrepareSendFileScreen";
+import { selectChatState } from "@/redux/chatSlice";
 
 
 export default function ChatScreen({ chat, messages }: { chat: ChatType, messages: Array<MessageType> }) {
@@ -36,6 +37,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
   const [showEmoji, setShowEmoji] = useState(false);
   const dispatch = useDispatch()
   const appState = useSelector(selectAppState)
+  const chatState = useSelector(selectChatState)
   const videoCallState = useSelector(selectVideoCallState)
   const [input, setInput] = useState("")
 
@@ -79,16 +81,52 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
     ));
   };
 
-  const sendMessage = (e: any) => {
-    setStatusSend(StatusSendType.SENDING, dispatch)
+  const sendMessage = async(e: any) => {
+    
     e.preventDefault();
 
+    let listPrepareFile = appState.prepareSendFiles
+
+    if (listPrepareFile.length > 0) {
+      let images = listPrepareFile.filter((file) => 
+      file.name.split(".").pop() === "png"  || 
+      file.name.split(".").pop() === "jpg" || 
+      file.name.split(".").pop() === "jpeg")
+      let keys = await Promise.all(images.map(async(image) => {
+        let key = uuidv4()
+        let ref = storage
+        .ref(`public/chat-room/${chat._id}/photos/${key}`)
+        ref
+        .put(image)
+        .then(() => {
+          ref
+          .getMetadata()
+          .then(async(metadata) => {
+            addNewImageInRoom(chat._id!, {
+              url: await ref.getDownloadURL(),
+              key,
+              size: image.size,
+              name: metadata.name,
+              timeCreated: metadata.timeCreated
+            }, dispatch)
+          })
+        })
+        return key
+      }))
+      setPrepareSendFiles([], dispatch)
+      processSendMessage("image", JSON.stringify(keys))
+    }
+    setInput("")
+  };
+
+  const processSendMessage = (type: string, message: string) => {
+    setStatusSend(StatusSendType.SENDING, dispatch)
     let newMessage = {} as MessageType
     newMessage._id = uuidv4()
-    newMessage.message = input
+    newMessage.message = message
     newMessage.createdAt = new Date().toLocaleString()
     newMessage.senderId = appState.userInfo._id!
-    newMessage.type = "text"
+    newMessage.type = type
 
     pushMessageToListChat(chat._id!, newMessage, dispatch)
 
@@ -107,6 +145,15 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
       type: newMessage.type
     })
     .then((data: MessageType) => {
+      pushMessageToListChat(chat._id!, newMessage, dispatch)
+
+    setCurrentChat({
+      ...chat,
+      messages: [
+        ...chat.messages!,
+        newMessage
+      ]
+    }, dispatch)
       appState.socket.emit("send-notify", JSON.stringify(
         { 
           recipient: chat.members.filter((u) => appState.userInfo._id !== u), 
@@ -125,10 +172,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
       setStatusSend(StatusSendType.SENT, dispatch)
       scrollToBottom();
     })
-
-    setInput("")
-
-  };
+  }
 
   const addEmoji = (e: number) => {
     setInput(input + + String.fromCodePoint(e))
@@ -181,26 +225,13 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
 
   const handlePaste = (files: any) => {
     for(const file of files) {
-      if (appState.prepareImages.length >= 6) {
-        AlertError("Maximum files is 5 !")
+      if (appState.prepareSendFiles.length >= 10) {
+        AlertError("Maximum files is 10 !")
         return;
       } 
       let fileSize = file.size
-      let extension = file.name.split(".").pop()
-      let type = extension === "png" || extension === "jpg" || extension === "jpeg"  ? "image" : "file"
-      if (FileReader) {
-        let fr = new FileReader();
-        fr.onload = function () {
-          if(appState.prepareImages.length > 0 && appState.prepareImages.find((image) => image.size === fileSize)) return
-          addPrepareImage({
-            size: fileSize,
-            url: fr.result,
-            type: type,
-            extension: extension
-          },dispatch)
-        }
-        fr.readAsDataURL(file);
-      }
+      if(appState.prepareSendFiles.length > 0 && appState.prepareSendFiles.find((image) => image.size === fileSize)) return
+      addPrepareSendFiles(file,dispatch)
     }
   }
 
@@ -293,7 +324,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
         </a>
         </div>
         {
-          appState.prepareImages.length > 0 ? <PrepareSendImageScreen /> : null
+          appState.prepareSendFiles.length > 0 ? <PrepareSendFileScreen /> : null
         }
       </div>
       {

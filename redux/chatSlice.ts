@@ -78,6 +78,26 @@ export const chatSlice = createSlice({
             })
             setLocalStorage("ListChat", state.data.listChat)
             break;
+        case "addNewImageInRoom":
+          let index = state.data.listChat.findIndex((chat) => chat._id === action.payload.data.chatId)
+          state.data.listChat[index].listImage = [
+            ...state.data.listChat[index].listImage!,
+            action.payload.data.newImage
+          ]
+          // state.data.listChat = state.data.listChat.map((chat) => {
+          //   if (chat._id === action.payload.data.chatId) {
+          //     let listImage = chat.listImage
+          //     listImage?.push(action.payload.data.newImage)
+          //     return {
+          //       ...chat,
+          //       listImage: listImage
+          //     }
+          //   } else {
+          //     return chat
+          //   }
+          // })
+          setLocalStorage("ListChat", state.data.listChat)
+          break;
         case "setListFileInRoom":
               state.data.listChat = state.data.listChat.map((chat) => {
                 if (chat._id === action.payload.data.chatId) {

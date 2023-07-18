@@ -1,37 +1,41 @@
-import Image from "next/image";
-import StatusSend from "./StatusSend";
-import { FileInfo } from "@/types/ChatType";
 
+import {useSelector} from 'react-redux'
+import { selectChatState } from "@/redux/chatSlice";
+import styled from "@emotion/styled";
+import StatusSend from './StatusSend';
 export default function SenderTemplateImage(
     { 
-        files, 
+        message, 
         timestamp, 
         onShowImage,
         lastIndex
     }: { 
-        files: Array<FileInfo> | undefined , 
+        message: string , 
         timestamp: any, 
         onShowImage: any,
         lastIndex: boolean
     }) {
 
+    const chatState = useSelector(selectChatState)
+    const data = chatState.listChat.find((chat) => chatState.currentChat._id === chat._id)?.listImage?.filter((image) => JSON.parse(message).find((key: string) => key === image.key))
+
     return (
         <>
-        <div className="intro-x chat-text-box flex items-end float-right mb-4" title={timestamp}>
+        {/* <div className="flex items-end float-right mb-4">
+        <div className="w-full">
+        
+
+        </div>
+        </div> */}
+        <div className="chat-text-box flex items-end float-right mb-4" title={timestamp}>
             <div className="w-full">
                 <div>
                     <div className="chat-text-box__content flex items-center float-right" title={timestamp}>
-                        <div className="rounded-md text-gray-700 chat-text-box__content__text--image flex justify-end mt-3">
+                        <div className="rounded-md text-gray-700 chat-text-box__content__text--image flex justify-end mt-3" style={{flexWrap: "wrap-reverse"}}>
                             {
-                                files?.map((img, i) => <div key={img.key} className={ i === 0 ? "tooltip w-16 h-16 image-fit zoom-in" : "tooltip w-16 h-16 image-fit zoom-in ml-2"} onClick={() => onShowImage(img.url)}>
-                                    <Image 
-                                        src={img.url}
-                                        className="rounded-md"
-                                        width={64}
-                                        height={64}
-                                        alt=""
-                                    />
-                                </div>)
+                                data?.map((file) => {
+                                    return <Image loading='lazy' decoding='async' key={file.key} src={file.url}/>
+                                })
                             }
                         </div>
                     </div> 
@@ -43,3 +47,11 @@ export default function SenderTemplateImage(
         </>
     )
 }
+
+const Image = styled.img`
+    border-radius: 10px;
+    padding: 4px;
+    width: 150px;
+    height: 150px;
+    flex: 33%;
+`

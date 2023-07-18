@@ -10,7 +10,7 @@ import sendNotificationFCM from "@/utils/sendNotificationFCM";
 import { getImageTypeFileValid } from "@/utils/getImageTypeFileValid";
 import firebase from "firebase";
 import { selectChatState } from "@/redux/chatSlice";
-import { addPrepareImage, pushMessageToListChat, setFileUploadDone, setFileUploading, setPrepareImages, setProgress, setStatusSend } from "@/services/CacheService";
+import { addPrepareSendFiles, pushMessageToListChat, setFileUploadDone, setFileUploading, setProgress, setStatusSend } from "@/services/CacheService";
 import { AlertError } from "@/utils/core";
 import { MessageType } from "@/types/MessageType";
 
@@ -40,54 +40,16 @@ export default function DropdownAttach({ chatId, scrollToBottom, recipient }: { 
           return;
         }
 
-        if (appState.prepareImages.length >= 6) {
-          AlertError("Maximum files is 5 !")
+        if (appState.prepareSendFiles.length >= 10) {
+          AlertError("Maximum files is 10 !")
           return;
         }   
 
-        if (FileReader) {
-            let fr = new FileReader();
-            fr.onload = function () {
-              if(appState.prepareImages.length > 0 && appState.prepareImages.find((image) => image.size === fileSize)) return
-              addPrepareImage({
-                size: fileSize,
-                url: fr.result,
-                type: "image",
-                extension: file.name.split(".").pop()
-              },dispatch)
-            }
-            fr.readAsDataURL(file);
-        }
-        
-        // Not supported
-        else {
-            // fallback -- perhaps submit the input to an iframe and temporarily store
-            // them on the server until the user's session ends.
-        }
-        // let key = uuidv4(); 
-        // let path = `public/chat-room/${chatState.currentChat._id}/photos/${key}`
-        // storage
-        // .ref(path)
-        // .put(file)
-        // .on(
-        //   "state_changed",
-        //   () => {
+        if(appState.prepareSendFiles.length > 0 && appState.prepareSendFiles.find((file) => file.size === fileSize)) return
+        addPrepareSendFiles(file,dispatch)
 
-        //   },
-        //   (err) => console.log(err),
-        //   () => {
-            
-        //     // storage.ref(path).getDownloadURL().then((url) => {
-        //     //   newArray.push({
-        //     //     key: key,
-        //     //     downloadUrl: url
-        //     //   })
-        //     // })
-        //   }
-        // );
       }
     }   
-    console.log(appState.prepareImages)
   }
 
   const handleAttachFile = (event: any) => {
