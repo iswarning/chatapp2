@@ -33,6 +33,15 @@ export const chatSlice = createSlice({
         case "setCurrentChat":
             state.data.currentChat = action.payload.data         
             break;
+        case "addMessageToCurrentChat":
+          let messages = state.data.currentChat.messages
+          messages?.push(action.payload.data.newMessage)
+          state.data.currentChat = {
+            ...state.data.currentChat,
+            messages: messages
+          }
+          setLocalStorage("CurrentChat", state.data.currentChat)
+          break;
         case "setListChat":
             state.data.listChat = action.payload.data
             setLocalStorage("ListChat", state.data.listChat)

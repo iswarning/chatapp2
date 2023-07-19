@@ -24,7 +24,7 @@ import getUserBusy from "@/utils/getUserBusy";
 import { requestMedia } from "@/utils/requestPermission";
 import { StatusCallType, selectVideoCallState, setGlobalVideoCallState } from "@/redux/videoCallSlice";
 import {v4 as uuidv4} from 'uuid'
-import { addNewFileInRoom, addNewImageInRoom, addPrepareSendFiles, pushMessageToListChat, setCurrentChat, setFileUploadDone, setFileUploading, setListFileInRoom, setPrepareSendFiles, setProgress, setShowGroupInfo, setStatusSend } from "@/services/CacheService";
+import { addMessageToCurrentChat, addNewFileInRoom, addNewImageInRoom, addPrepareSendFiles, pushMessageToListChat, setCurrentChat, setFileUploadDone, setFileUploading, setListFileInRoom, setPrepareSendFiles, setProgress, setShowGroupInfo, setStatusSend } from "@/services/CacheService";
 import { AlertError } from "@/utils/core";
 import { createMessage } from "@/services/MessageService";
 import PrepareSendFileScreen from "./PrepareSendFileScreen";
@@ -212,13 +212,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
           size: fileSize
         })
         
-        setCurrentChat({
-          ...chat,
-          messages: [
-            ...chat.messages!,
-            newMessage
-          ]
-        }, dispatch)
+        addMessageToCurrentChat(newMessage, dispatch)
 
         pushMessageToListChat(chat._id!, newMessage, dispatch)
       }

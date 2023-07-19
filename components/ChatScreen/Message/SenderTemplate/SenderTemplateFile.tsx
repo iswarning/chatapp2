@@ -66,7 +66,8 @@ export default function SenderTemplateFile({
     }
 
     const progress = appState.UploadProgressMultipleFile
-    console.log(`${appState?.fileUploading.key} uploading: ${progress}%`)
+    // console.log(`${appState?.fileUploading.key} uploading: ${progress}%`)
+    console.log(chatState.currentChat.messages)
     // console.log(`${appState.fileUploadDone.includes(file?.key)} uploading: ${progress}%`)
     const showFileProgress = () => {
         if (type === "file-uploading") {

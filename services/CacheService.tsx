@@ -78,6 +78,15 @@ export function setCurrentChat(chat: ChatType, dispatch: Dispatch<AnyAction>) {
     setLocalStorage("CurrentChat", chat)
 }
 
+export function addMessageToCurrentChat(newMessage: MessageType, dispatch: Dispatch<AnyAction>) {
+    dispatch(setGlobalChatState({
+        type: "addMessageToCurrentChat",
+        data: {
+            newMessage
+        }
+    }))
+}
+
 export function setListChat(listChat: ChatType[], dispatch: Dispatch<AnyAction>) {
     dispatch(setGlobalChatState({
         type: "setListChat",
