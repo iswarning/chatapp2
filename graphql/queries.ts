@@ -59,6 +59,8 @@ export const QueryGetAllMessagesByChatRoomId = `
         message
         type
         senderId
+        file
+        images
         seen
         chatRoomId
         createdAt
@@ -74,6 +76,8 @@ export const QueryGetLastMessage = `
         message
         type
         senderId
+        file
+        images
         seen
         chatRoomId
         createdAt

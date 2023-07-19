@@ -82,39 +82,7 @@ export default function Message({
   //   }
   //   setIsShown(false);
   // };
-
-  const [imageInMessageSnap] = useCollection(
-    db
-      .collection("chats")
-      .doc(chatId)
-      .collection("messages")
-      .doc(message._id)
-      .collection("imageInMessage")
-  );
-
-  const [fileInMessageSnap] = useCollection(
-    db
-      .collection("chats")
-      .doc(chatId)
-      .collection("messages")
-      .doc(message._id)
-      .collection("fileInMessage")
-      .limit(1)
-  );
-
-  // const [imageAttachSnap] = useCollection(
-  //   db
-  //     .collection("chats")
-  //     .doc(chatId)
-  //     .collection("messages")
-  //     .doc(message._id)
-  //     .collection("imageAttach")
-  // );
-
-  const fileFiltered = message?.file ? chatState.currentChat.listFile?.filter((file) => JSON.parse(message.file ?? "").find((f: any) => f.key === file.key)) : null
-  console.log()
-  const imageFiltered = message.message ? chatState.currentChat.listImage?.filter((file) => (JSON.parse(message.message ?? "") as string[]).find((f) => f === file.key)) : null
-
+console.log(chatState.listChat)
   return (
     <>
       {
@@ -125,14 +93,20 @@ export default function Message({
               message.type === "text" ? <SenderTemplateText message={message} timestamp={message.createdAt} lastIndex={lastIndex} /> : null
             }
             {
-              message.type === "file" || message.type === "file-uploading" ? <SenderTemplateFile file={JSON.parse(message.file ?? "")} lastIndex={lastIndex} timestamp={message.createdAt} type={message.type} /> : null
+              message.type === "file" || message.type === "file-uploading" ? <SenderTemplateFile 
+              message={message}
+              lastIndex={lastIndex} 
+              timestamp={message.createdAt} 
+              type={message.type} /> : null
             }
             {
               message.type === "image" ? <SenderTemplateImage 
               message={message.message!} 
               timestamp={message.createdAt} 
               onShowImage={(urlImage: any) => {setUrlImage(urlImage);setShowImageFullscreen(true)}} 
-              lastIndex={lastIndex} /> : null
+              lastIndex={lastIndex} 
+              scroll={scrollToBottom} /> : null
+              
             }
           </> : 
           <>
@@ -144,10 +118,11 @@ export default function Message({
             }
             {
               message.type === "image" ? <RecieverTemplateImage 
-              files={fileFiltered!} 
+              message={message.message!} 
               timestamp={message.createdAt} 
               lastIndex={lastIndex} 
-              onShowImage={(urlImage: any) => {setUrlImage(urlImage);setShowImageFullscreen(true)}} /> : null
+              onShowImage={(urlImage: any) => {setUrlImage(urlImage);setShowImageFullscreen(true)}}
+              scroll={scrollToBottom} /> : null
             }
           </>
       }

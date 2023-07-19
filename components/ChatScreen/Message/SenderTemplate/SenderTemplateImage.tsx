@@ -8,14 +8,15 @@ export default function SenderTemplateImage(
         message, 
         timestamp, 
         onShowImage,
-        lastIndex
+        lastIndex,
+        scroll
     }: { 
         message: string , 
         timestamp: any, 
         onShowImage: any,
-        lastIndex: boolean
+        lastIndex: boolean,
+        scroll: any
     }) {
-
     const chatState = useSelector(selectChatState)
     const data = chatState.listChat.find((chat) => chatState.currentChat._id === chat._id)?.listImage?.filter((image) => JSON.parse(message).find((key: string) => key === image.key))
 
@@ -27,14 +28,20 @@ export default function SenderTemplateImage(
 
         </div>
         </div> */}
-        <div className="chat-text-box flex items-end float-right mb-4" title={timestamp}>
+        <div className="chat-text-box flex items-end float-right mb-4" title={timestamp} style={{maxWidth: "500px"}}>
             <div className="w-full">
                 <div>
                     <div className="chat-text-box__content flex items-center float-right" title={timestamp}>
                         <div className="rounded-md text-gray-700 chat-text-box__content__text--image flex justify-end mt-3" style={{flexWrap: "wrap-reverse"}}>
                             {
                                 data?.map((file) => {
-                                    return <Image loading='lazy' decoding='async' key={file.key} src={file.url}/>
+                                    return <Image 
+                                    onLoad={() => scroll()} 
+                                    loading='lazy' 
+                                    decoding='async' 
+                                    key={file.key} 
+                                    src={file.url}
+                                    />
                                 })
                             }
                         </div>
@@ -53,5 +60,6 @@ const Image = styled.img`
     padding: 4px;
     width: 150px;
     height: 150px;
+    max-width: 150px;
     flex: 33%;
 `

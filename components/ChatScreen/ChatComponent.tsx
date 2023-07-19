@@ -67,9 +67,10 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
       return {
         url: await result.getDownloadURL(),
         key: result.name,
-        name: result.name + mime.extension(metadata.contentType),
+        name: result.name,
         size: metadata.size,
-        timeCreated: metadata.timeCreated
+        timeCreated: metadata.timeCreated,
+        extension: mime.extension(metadata.contentType)
       }
     })) as FileInfo[]
   }
@@ -83,9 +84,10 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
       return {
         url: await result.getDownloadURL(),
         key: result.name,
-        name: result.name + mime.extension(metadata.contentType),
+        name: result.name,
         size: metadata.size,
-        timeCreated: metadata.timeCreated
+        timeCreated: metadata.timeCreated,
+        extension: mime.extension(metadata.contentType)
       }
     })) as FileInfo[]
   } 

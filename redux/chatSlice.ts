@@ -66,36 +66,28 @@ export const chatSlice = createSlice({
           setLocalStorage("ListChat", state.data.listChat)
           break;
         case "setListImageInRoom":
-            state.data.listChat = state.data.listChat.map((chat) => {
-              if (chat._id === action.payload.data.chatId) {
-                return {
-                  ...chat,
-                  listImage: action.payload.data.listImage
-                }
-              } else {
-                return chat
-              }
-            })
+            let indexListImage = state.data.listChat.findIndex((chat) => chat._id === action.payload.data.chatId)
+            state.data.listChat[indexListImage].listImage = action.payload.data.listImage
             setLocalStorage("ListChat", state.data.listChat)
             break;
+            // state.data.listChat = state.data.listChat.map((chat) => {
+            //   if (chat._id === action.payload.data.chatId) {
+            //     return {
+            //       ...chat,
+            //       listImage: action.payload.data.listImage
+            //     }
+            //   } else {
+            //     return chat
+            //   }
+            // })
+            // setLocalStorage("ListChat", state.data.listChat)
+            // break;
         case "addNewImageInRoom":
-          let index = state.data.listChat.findIndex((chat) => chat._id === action.payload.data.chatId)
-          state.data.listChat[index].listImage = [
-            ...state.data.listChat[index].listImage!,
+          let indexImage = state.data.listChat.findIndex((chat) => chat._id === action.payload.data.chatId)
+          state.data.listChat[indexImage].listImage = [
+            ...state.data.listChat[indexImage].listImage!,
             action.payload.data.newImage
           ]
-          // state.data.listChat = state.data.listChat.map((chat) => {
-          //   if (chat._id === action.payload.data.chatId) {
-          //     let listImage = chat.listImage
-          //     listImage?.push(action.payload.data.newImage)
-          //     return {
-          //       ...chat,
-          //       listImage: listImage
-          //     }
-          //   } else {
-          //     return chat
-          //   }
-          // })
           setLocalStorage("ListChat", state.data.listChat)
           break;
         case "setListFileInRoom":
@@ -111,6 +103,14 @@ export const chatSlice = createSlice({
               })
               setLocalStorage("ListChat", state.data.listChat)
               break;
+        case "addNewFileInRoom":
+          let indexFile = state.data.listChat.findIndex((chat) => chat._id === action.payload.data.chatId)
+          state.data.listChat[indexFile].listFile = [
+            ...state.data.listChat[indexFile].listFile!,
+            action.payload.data.newFile
+          ]
+          setLocalStorage("ListChat", state.data.listChat)
+          break;
         default:
             return
       }

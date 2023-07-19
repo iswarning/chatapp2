@@ -24,11 +24,12 @@ import getUserBusy from "@/utils/getUserBusy";
 import { requestMedia } from "@/utils/requestPermission";
 import { StatusCallType, selectVideoCallState, setGlobalVideoCallState } from "@/redux/videoCallSlice";
 import {v4 as uuidv4} from 'uuid'
-import { addNewImageInRoom, addPrepareSendFiles, pushMessageToListChat, setCurrentChat, setListFileInRoom, setPrepareSendFiles, setShowGroupInfo, setStatusSend } from "@/services/CacheService";
+import { addNewFileInRoom, addNewImageInRoom, addPrepareSendFiles, pushMessageToListChat, setCurrentChat, setFileUploadDone, setFileUploading, setListFileInRoom, setPrepareSendFiles, setProgress, setShowGroupInfo, setStatusSend } from "@/services/CacheService";
 import { AlertError } from "@/utils/core";
 import { createMessage } from "@/services/MessageService";
 import PrepareSendFileScreen from "./PrepareSendFileScreen";
 import { selectChatState } from "@/redux/chatSlice";
+import { getImageTypeFileValid } from "@/utils/getImageTypeFileValid";
 
 
 export default function ChatScreen({ chat, messages }: { chat: ChatType, messages: Array<MessageType> }) {
@@ -92,29 +93,41 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
       file.name.split(".").pop() === "png"  || 
       file.name.split(".").pop() === "jpg" || 
       file.name.split(".").pop() === "jpeg")
-      let keys = await Promise.all(images.map(async(image) => {
-        let key = uuidv4()
-        let ref = storage
-        .ref(`public/chat-room/${chat._id}/photos/${key}`)
-        ref
-        .put(image)
-        .then(() => {
+      if (images.length > 0) {
+        let keys = await Promise.all(images.map(async(image) => {
+          let key = uuidv4()
+          let ref = storage
+          .ref(`public/chat-room/${chat._id}/photos/${key}`)
           ref
-          .getMetadata()
-          .then(async(metadata) => {
-            addNewImageInRoom(chat._id!, {
-              url: await ref.getDownloadURL(),
-              key,
-              size: image.size,
-              name: metadata.name,
-              timeCreated: metadata.timeCreated
-            }, dispatch)
+          .put(image)
+          .then(() => {
+            ref
+            .getMetadata()
+            .then(async(metadata) => {
+              addNewImageInRoom(chat._id!, {
+                url: await ref.getDownloadURL(),
+                key,
+                size: image.size,
+                name: image.name.split(".")[0],
+                timeCreated: metadata.timeCreated,
+                extension: image.name.split(".").pop()!
+              }, dispatch)
+            })
           })
-        })
-        return key
-      }))
-      setPrepareSendFiles([], dispatch)
-      processSendMessage("image", JSON.stringify(keys))
+          return key
+        }))
+        setPrepareSendFiles([], dispatch)
+        processSendMessage("image", JSON.stringify(keys))
+      }
+
+      let files = listPrepareFile.filter((file) => 
+      file.name.split(".").pop() !== "png"  && 
+      file.name.split(".").pop() !== "jpg" && 
+      file.name.split(".").pop() !== "jpeg")
+      if (files.length > 0) {
+        processAttachFile(files)
+        setPrepareSendFiles([], dispatch)
+      }
     }
     setInput("")
   };
@@ -129,14 +142,6 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
     newMessage.type = type
 
     pushMessageToListChat(chat._id!, newMessage, dispatch)
-
-    setCurrentChat({
-      ...chat,
-      messages: [
-        ...chat.messages!,
-        newMessage
-      ]
-    }, dispatch)
 
     createMessage({
       chatRoomId: chat._id,
@@ -173,6 +178,128 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
       scrollToBottom();
     })
   }
+
+  const processAttachFile = (files: File[]) => {
+    setStatusSend(StatusSendType.SENDING, dispatch)
+    let result = []
+    for(const file of files) {
+      if (file) {
+        let key = uuidv4()
+        let fileSize = file.size / 1024 / 1024;
+        if (!getImageTypeFileValid().includes(file.name.split(".").pop() ?? "")) {
+          AlertError("File upload invalid !")
+          return;
+        } 
+        if (fileSize > 100) {
+          AlertError("Size file no larger than 100 MB !")
+          return;
+        }
+        let newMessage = {} as MessageType
+        newMessage._id = uuidv4()
+        newMessage.message = input
+        newMessage.file = JSON.stringify({
+          key: key,
+          name: file.name.split(".")[0],
+          size: fileSize,
+          extension: file.name.split(".").pop()
+        })
+        newMessage.type = "file-uploading"
+        newMessage.senderId = appState.userInfo._id!
+        newMessage.createdAt = new Date().toLocaleString()
+        result.push({
+          key: key,
+          file: file,
+          size: fileSize
+        })
+        
+        setCurrentChat({
+          ...chat,
+          messages: [
+            ...chat.messages!,
+            newMessage
+          ]
+        }, dispatch)
+
+        pushMessageToListChat(chat._id!, newMessage, dispatch)
+      }
+    }
+    if(result.length > 0){
+      uploadFileQueuing(result)
+    }
+  }
+
+  let count = 0
+
+  const uploadFileQueuing = (result: any) => {
+    console.log(chatState.currentChat.messages)
+    let path = `public/chat-room/${chat._id!}/files/${result[count].key}`
+    storage
+      .ref(path)
+      .put(result[count].file)
+      .on(
+        "state_changed",
+        (snapshot) => {
+          let progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100)
+          setProgress(progress, dispatch)
+          if (progress === 100) {
+            setFileUploading(result[count].key, "done", dispatch)
+            setFileUploadDone(result[count].key, dispatch)
+            if (count === result.length - 1) {
+              setStatusSend(StatusSendType.SENT, dispatch)
+              return
+            }
+            count++
+            uploadFileQueuing(result)
+          } else if(progress > 1 && progress < 100) {
+            setFileUploading(result[count].key, "uploading", dispatch)
+          }
+        },
+        (err) => {throw new Error(err.message)},
+        () => {
+          createMessage({
+            message: input,
+            type: "file",
+            senderId: appState.userInfo._id!,
+            file: result[count].key,
+            chatRoomId: chat._id
+          })
+          .then(() => {
+            storage
+            .ref(path)
+            .getMetadata()
+            .then(async(metadata) => {
+              addNewFileInRoom(chat._id!, {
+                url: await storage.ref(path).getDownloadURL(),
+                key: result[count].key,
+                size: result[count].size,
+                name: result[count].file.name.split(".")[0],
+                extension: result[count].file.name.split(".").pop(),
+                timeCreated: metadata.timeCreated
+              }, dispatch)
+            })
+          })
+          .catch(err => {
+            console.log(err);
+            setStatusSend(StatusSendType.ERROR, dispatch)
+            AlertError("Error when send message !")
+          })
+        }
+      );
+      
+    // NotifyMessage()
+  }
+
+  // const NotifyMessage = () => {
+  //   let bodyNotify = "";
+
+  //   if (chatState.currentChat.isGroup) {
+  //     bodyNotify = chatState.currentChat.name + " sent a file "
+  //   } else {
+  //     bodyNotify = recipient.data().fullName + " sent a file "
+  //   }
+
+    
+  // }
 
   const addEmoji = (e: number) => {
     setInput(input + + String.fromCodePoint(e))
@@ -284,7 +411,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
         </ScrollBarCustom>
 
         <div className="intro-y chat-input box border-theme-3 dark:bg-dark-2 dark:border-dark-2 border flex items-center px-5 py-4">
-        <DropdownAttach chatId={chat._id!} scrollToBottom={scrollToBottom} recipient={chat.recipientInfo} />
+        <DropdownAttach />
         <input 
         onChange={(e) => setInput(e.target.value)} 
         className="form-control h-12 shadow-none resize-none border-transparent px-5 py-3 focus:outline-none truncate" 
@@ -294,7 +421,8 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
         onPaste={(e) => handlePaste(e.clipboardData.files)}
         onDragLeave={handleDrag}
         onDragOver={handleDrag}
-        onDrop={handleDrop}/>
+        onDrop={handleDrop}
+        disabled={appState.prepareSendFiles.length > 0}/>
         {/* <InputMessage
           contentEditable="true"
           className="w-full block outline-none py-4 px-4 bg-transparent"

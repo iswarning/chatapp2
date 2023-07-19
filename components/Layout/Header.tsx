@@ -25,7 +25,7 @@ export default function Header() {
         <div className="-intro-y top-bar__content bg-white border-theme-3 dark:bg-dark-2 dark:border-dark-2 border-b w-full h-full flex px-5">
         <a className="hidden md:flex items-center h-full mr-auto" href="http://localhost/page/dashboard">
         <img alt="Topson Messenger Tailwind HTML Admin Template" className="h-8" src="https://topson.left4code.com/dist/images/logo.svg"/>
-        <div className="text-base font-light ml-4"> <span className="font-medium">Clone</span> Messenger </div>
+        <div className="text-base font-light ml-4"> <span className="font-medium">Chat</span> App </div>
         </a>
         <a className="mobile-menu-toggler flex md:hidden items-center h-full mr-auto px-5 -ml-5" href="javascript:void(0)"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-bar-chart-2 w-5 h-5 transform rotate-90"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg> </a>
         <div className="h-full flex items-center">

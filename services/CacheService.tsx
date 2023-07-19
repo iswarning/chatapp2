@@ -113,6 +113,16 @@ export function addNewImageInRoom(chatId: string, newImage: FileInfo, dispatch: 
     }))
 }
 
+export function addNewFileInRoom(chatId: string, newFile: FileInfo, dispatch: Dispatch<AnyAction>) {
+    dispatch(setGlobalChatState({
+        type: "addNewFileInRoom",
+        data: {
+            chatId,
+            newFile
+        }
+    }))
+}
+
 export function setListFileInRoom(chatId: string, listFile: FileInfo[], dispatch: Dispatch<AnyAction>) {
     dispatch(setGlobalChatState({
         type: "setListFileInRoom",

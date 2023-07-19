@@ -9,31 +9,32 @@ import styled from 'styled-components';
 import { selectChatState } from '@/redux/chatSlice';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import StatusSend from './StatusSend';
-import { setFileUploading } from '@/services/CacheService';
+import { FileInfo } from '@/types/ChatType';
 
 export default function SenderTemplateFile({ 
-    file,
+    message,
     lastIndex,
     timestamp,
     type
 }: { 
-    file: any,
+    message: MessageType,
     lastIndex: boolean,
     timestamp: any,
     type: string
 }) {
-
     const appState = useSelector(selectAppState)
     const chatState = useSelector(selectChatState)
-    const dispatch = useDispatch()
-    const storageRef = storage.ref(`public/chat-room/${chatState.currentChat._id}/files/${file.key}`)
 
+    const data = chatState.listChat.find((chat) => chatState.currentChat._id === chat._id)?.listFile?.find((image) => image.key === message.file)
+
+    const storageRef = storage.ref(`public/chat-room/${chatState.currentChat._id}/files/${message.file}`)
+    const file = type === "file-uploading" ? JSON.parse(message.file!) : data
     const [downloadUrl] = useDownloadURL(storageRef)
 
     const handleDownloadFile = async() => {
         const response = await fetch(downloadUrl!);
         const blob = await response.blob();
-        downloadBlob(blob, file.name!)
+        downloadBlob(blob, file?.name!)
     }
 
     function downloadBlob(blob: Blob, name: string) {
@@ -64,27 +65,26 @@ export default function SenderTemplateFile({
         document.body.removeChild(link);
     }
 
-    const fileName = file?.name!.split(".")[0]
-    const fileExtension = file?.name!.split(".").pop()
     const progress = appState.UploadProgressMultipleFile
+    console.log(`${appState?.fileUploading.key} uploading: ${progress}%`)
+    // console.log(`${appState.fileUploadDone.includes(file?.key)} uploading: ${progress}%`)
     const showFileProgress = () => {
         if (type === "file-uploading") {
-            if (appState?.fileUploading?.value === "uploading" && appState?.fileUploading?.key === file.key) {
+            if (appState?.fileUploading?.value === "uploading" && appState?.fileUploading?.key === file?.key) {
                 return <>
-                    Size: { Number(progress * Number(file.size) / 100).toFixed(1) + "/" + file.size.toFixed(1) } MB
+                    Size: { Number(progress * Number(file?.size) / 100).toFixed(1) + "/" + file?.size.toFixed(1) } MB
                     &nbsp;<CancelIcon fontSize='small' style={{fontSize: "15px"}} />
                     <ProgressBar style={{width: `${progress}%`}} />
                 </>
-            }
-            if(appState.fileUploadDone.includes(file.key)) { 
+            } else { 
                 return <>
-                    Size: { file.size.toFixed(1) + "/" + file.size.toFixed(1) } MB
+                    Size: { file?.size.toFixed(1) + "/" + file?.size.toFixed(1) } MB
                     &nbsp;<DoneIcon fontSize='small' style={{marginBottom: "3px"}} />
                 </>
             }
         } else {
             return <>
-                Size: { file.size.toFixed(1) } MB
+                Size: { (file?.size! / 1024 / 1024).toFixed(1) } MB
             </>
         }
     }
@@ -92,19 +92,19 @@ export default function SenderTemplateFile({
     return (
     <>
     {
-        <div className="chat-text-box flex items-end float-right mb-4" title={timestamp}>
+        file ? <div className="chat-text-box flex items-end float-right mb-4 pr-4" title={timestamp}>
             <div className="w-full">
                 <div>
                     <div className="chat-text-box__content flex items-center float-right">
                         <div className="box leading-relaxed text-gray-700 dark:text-gray-300 flex flex-col sm:flex-row items-center mt-3 p-3">
                             <div className="chat-text-box__content__icon text-white w-12 flex-none bg-contain relative bg-no-repeat bg-center block">
-                                <div className="absolute m-auto top-0 left-0 right-0 bottom-0 flex items-center justify-center">{fileExtension?.toUpperCase()}</div>
+                                <div className="absolute m-auto top-0 left-0 right-0 bottom-0 flex items-center justify-center">{file.extension?.toUpperCase()}</div>
                             </div>
                             <div className="sm:ml-3 mt-3 sm:mt-0 text-center sm:text-left">
                                 <div className="text-gray-700 dark:text-gray-300 whitespace-nowrap font-medium truncate">
-                                    { fileName.length >= 20 ? 
-                                        fileName.substring(0, 20) + "..." + fileExtension
-                                        : fileName + "." + fileExtension}
+                                    { file.name?.length! >= 20 ? 
+                                        file.name?.substring(0, 20) + "..." + file.extension
+                                        : file.name + "." + file.extension}
                                 </div>
                                 <div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">
                                     {showFileProgress()}
@@ -118,8 +118,8 @@ export default function SenderTemplateFile({
                                         <line x1="12" y1="15" x2="12" y2="3"></line>
                                     </svg> 
                                 </a>
-                                <ShareButton />
-                                <MoreButton />
+                                {/* <ShareButton /> */}
+                                {/* <MoreButton /> */}
                             </div>
 
                         </div>
@@ -129,7 +129,7 @@ export default function SenderTemplateFile({
                 
             </div>
             <StatusSend lastIndex={lastIndex} />
-        </div>
+        </div> : null
     }
     <div className="clear-both"></div> 
     </>

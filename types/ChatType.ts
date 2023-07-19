@@ -23,5 +23,6 @@ export interface FileInfo {
     name: string
     size: number
     url: string
+    extension: string
     timeCreated: string
 }

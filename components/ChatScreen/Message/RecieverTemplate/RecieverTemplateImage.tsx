@@ -1,9 +1,12 @@
-import { ImageAttachType } from "@/types/ImageAttachType";
-import DropdownActionMessage from "../DropdownActionMessage";
-import { FileInfo } from "@/types/ChatType";
+import {useSelector} from 'react-redux'
+import { selectChatState } from "@/redux/chatSlice";
+import styled from "@emotion/styled";
+import DropdownActionMessage from '../DropdownActionMessage';
 
-export default function RecieverTemplateImage({files, timestamp, lastIndex, onShowImage}: { files: Array<FileInfo> | undefined, timestamp: any, lastIndex: boolean, onShowImage: any }) {
+export default function RecieverTemplateImage({message, timestamp, lastIndex, onShowImage, scroll}: { message: string, timestamp: any, lastIndex: boolean, onShowImage: any, scroll: any }) {
 
+    const chatState = useSelector(selectChatState)
+    const data = chatState.listChat.find((chat) => chatState.currentChat._id === chat._id)?.listImage?.filter((image) => JSON.parse(message).find((key: string) => key === image.key))
 
     return (
         <>
@@ -16,9 +19,9 @@ export default function RecieverTemplateImage({files, timestamp, lastIndex, onSh
                         <div className="chat-text-box__content flex items-center float-left" title={ timestamp }>
                             <div className="rounded-md text-gray-700 chat-text-box__content__text--image flex justify-end mt-3">
                             {
-                                files && files?.length > 0 ? files.map((img, i) => <div key={img.key} className={ i === 0 ? "tooltip w-16 h-16 image-fit zoom-in" : "tooltip w-16 h-16 image-fit zoom-in ml-2"} onClick={() => onShowImage(img.url)}>
-                                    <img alt="" className="rounded-md" src={img.url}/>
-                                </div> ) : null
+                                data?.map((file) => {
+                                    return <Image onLoad={() => scroll()} loading='lazy' decoding='async' key={file.key} src={file.url}/>
+                                })
                             }
                             </div>
                             <DropdownActionMessage />
@@ -32,3 +35,11 @@ export default function RecieverTemplateImage({files, timestamp, lastIndex, onSh
 
     )
 }
+
+const Image = styled.img`
+    border-radius: 10px;
+    padding: 4px;
+    width: 150px;
+    height: 150px;
+    flex: 33%;
+`
