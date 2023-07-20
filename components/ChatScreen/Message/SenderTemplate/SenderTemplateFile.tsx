@@ -102,7 +102,7 @@ export default function SenderTemplateFile({
                                 <div className="absolute m-auto top-0 left-0 right-0 bottom-0 flex items-center justify-center">{file.extension?.toUpperCase()}</div>
                             </div>
                             <div className="sm:ml-3 mt-3 sm:mt-0 text-center sm:text-left">
-                                <div className="text-gray-700 dark:text-gray-300 whitespace-nowrap font-medium truncate">
+                                <div className="text-gray-700 dark:text-gray-300 whitespace-nowrap font-medium truncate" style={{maxWidth: "150px"}}>
                                     { file.name?.length! >= 20 ? 
                                         file.name?.substring(0, 20) + "..." + file.extension
                                         : file.name + "." + file.extension}

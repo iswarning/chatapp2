@@ -10,7 +10,7 @@ export default function FileElement({ file }: any) {
 
     const fileName = file.name.length > 20 ? file.name.slice(0, 20) + "..." + file.extension : file.name + "." + file.extension
 
-const [value, loading, error] = useDownloadURL(
+    const [value, loading, error] = useDownloadURL(
     storage
     .ref(file.path));
 

@@ -15,106 +15,132 @@ import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import Peer from 'peerjs';
 import { selectVideoCallState } from '@/redux/videoCallSlice';
+// import AgoraUIKit from 'agora-react-uikit';
 
+const AgoraUIKit = dynamic(() => import('agora-react-uikit'), {
+    ssr: false
+});
 
 export default function OneToOneScreen({ chatRoomId, showCam, showMic, disconnectCall }: { chatRoomId: string,showCam: boolean, showMic: boolean, disconnectCall: any }) {
     
-    const remoteVideoRef: any = useRef(null);
-    const appState = useSelector(selectAppState)
-    const videoCallState = useSelector(selectVideoCallState)
-    const [user] = useAuthState(auth);
-    const localVideoRef: any = useRef(null)
-    const [userCam, setUserCam] = useState(false)
-    const [userMic, setUserMic] = useState(false)
+    // const remoteVideoRef: any = useRef(null);
+    // const appState = useSelector(selectAppState)
+    // const videoCallState = useSelector(selectVideoCallState)
+    // const [user] = useAuthState(auth);
+    // const localVideoRef: any = useRef(null)
+    // const [userCam, setUserCam] = useState(false)
+    // const [userMic, setUserMic] = useState(false)
 
-    import('peerjs').then(({ default: Peer }) => {
+    // import('peerjs').then(({ default: Peer }) => {
             
-        const peers: any = {};
-        const myPeer = new Peer();
+    //     const peers: any = {};
+    //     const myPeer = new Peer();
 
-        navigator.mediaDevices.getUserMedia({
-            video: true,
-            audio: true
-        }).then((stream) => {
-            myPeer.on('call', call => {
+    //     navigator.mediaDevices.getUserMedia({
+    //         video: true,
+    //         audio: true
+    //     }).then((stream) => {
+    //         myPeer.on('call', call => {
 
-                stream.getVideoTracks()[0].enabled = showCam
+    //             stream.getVideoTracks()[0].enabled = showCam
     
-                call.answer(stream)    
+    //             call.answer(stream)    
                 
-                call.on('stream', userVideoStream => {
-                    remoteVideoRef.current.srcObject = userVideoStream;
-                })
-            })
+    //             call.on('stream', userVideoStream => {
+    //                 remoteVideoRef.current.srcObject = userVideoStream;
+    //             })
+    //         })
     
-            appState.socket.on('user-connected', (response: any) => {
-                let data = JSON.parse(response);
-                connectToNewUser(data.clientId, stream);
-            })
-        })
+    //         appState.socket.on('user-connected', (response: any) => {
+    //             let data = JSON.parse(response);
+    //             connectToNewUser(data.clientId, stream);
+    //         })
+    //     })
         
-        appState.socket.on('user-disconnected', (response: any) => {
-            let dataRes: any = JSON.parse(response);
-            if(peers[dataRes.clientId]) { 
+    //     appState.socket.on('user-disconnected', (response: any) => {
+    //         let dataRes: any = JSON.parse(response);
+    //         if(peers[dataRes.clientId]) { 
                 
-                db.collection("chats").doc(dataRes.chatRoomId).get().then((chat) => {
-                    let dataSend: any = {
-                        sender: dataRes.sender,
-                        name: dataRes.name,
-                        chatId: dataRes.chatRoomId,
-                        recipient: chat?.data()?.users.filter((user: any) => user === user?.email),
-                        isGroup: false
-                    }
-                    appState.socket.emit("disconnect-call", JSON.stringify(dataSend))
-                    peers[dataRes.clientId].close();
-                }).catch((err) => console.log(err));
-                peers[dataRes.clientId].close();
-                disconnectCall()
-            }
-        })
+    //             db.collection("chats").doc(dataRes.chatRoomId).get().then((chat) => {
+    //                 let dataSend: any = {
+    //                     sender: dataRes.sender,
+    //                     name: dataRes.name,
+    //                     chatId: dataRes.chatRoomId,
+    //                     recipient: chat?.data()?.users.filter((user: any) => user === user?.email),
+    //                     isGroup: false
+    //                 }
+    //                 appState.socket.emit("disconnect-call", JSON.stringify(dataSend))
+    //                 peers[dataRes.clientId].close();
+    //             }).catch((err) => console.log(err));
+    //             peers[dataRes.clientId].close();
+    //             disconnectCall()
+    //         }
+    //     })
 
-        myPeer.on('open', id => {
-            let data = {
-                clientId: id,
-                chatRoomId: videoCallState.dataVideoCall.chatId,
-                sender: user?.email,
-                name: user?.displayName
-            }
-            appState.socket.emit('join-room', JSON.stringify(data));
-        })
+    //     myPeer.on('open', id => {
+    //         let data = {
+    //             clientId: id,
+    //             chatRoomId: videoCallState.dataVideoCall.chatId,
+    //             sender: user?.email,
+    //             name: user?.displayName
+    //         }
+    //         appState.socket.emit('join-room', JSON.stringify(data));
+    //     })
 
-        const connectToNewUser = (userId: any, stream: any) => {
-            const call = myPeer.call(userId, stream);
-            call.on('stream', userVideoStream => {
-                remoteVideoRef.current.srcObject = userVideoStream;
-            })
-            peers[userId] = call
-        }
+    //     const connectToNewUser = (userId: any, stream: any) => {
+    //         const call = myPeer.call(userId, stream);
+    //         call.on('stream', userVideoStream => {
+    //             remoteVideoRef.current.srcObject = userVideoStream;
+    //         })
+    //         peers[userId] = call
+    //     }
 
-        return () => {
-            appState.socket.disconnect();
-        }
+    //     return () => {
+    //         appState.socket.disconnect();
+    //     }
 
-    }).catch((err) => console.log(err)); 
+    // }).catch((err) => console.log(err)); 
 
-    return (
-        <>
-            <VideoContainer>
-                <Video ref={remoteVideoRef} autoPlay />
-                {
-                    <MyVideo ref={localVideoRef} muted autoPlay />
-                }
-                <ActionContainer className='flex'>
-                    {
-                        userMic ? <MicIcon fontSize="large" className='cursor-pointer' /> : <MicOffIcon fontSize="large" className='cursor-pointer' />
-                    }
-                    {
-                        userCam ? <VideocamIcon fontSize="large" className='cursor-pointer' /> : <VideocamOffIcon fontSize="large" className='cursor-pointer' />
-                    }
-                </ActionContainer>
-            </VideoContainer>
-        </>    
-    )
+    // return (
+    //     <>
+    //         <VideoContainer>
+    //             <Video ref={remoteVideoRef} autoPlay />
+    //             {
+    //                 <MyVideo ref={localVideoRef} muted autoPlay />
+    //             }
+    //             <ActionContainer className='flex'>
+    //                 {
+    //                     userMic ? <MicIcon fontSize="large" className='cursor-pointer' /> : <MicOffIcon fontSize="large" className='cursor-pointer' />
+    //                 }
+    //                 {
+    //                     userCam ? <VideocamIcon fontSize="large" className='cursor-pointer' /> : <VideocamOffIcon fontSize="large" className='cursor-pointer' />
+    //                 }
+    //             </ActionContainer>
+    //         </VideoContainer>
+    //     </>    
+    // )
+
+    const [videoCall, setVideoCall] = useState(true);
+    
+    const channel = 'test'
+
+    const rtcProps = {
+        appId: process.env.NEXT_PUBLIC_AGORA_APP_ID!,
+        channel: channel,
+        token: process.env.NEXT_PUBLIC_AGORA_TOKEN!
+    };
+
+    const callbacks = {
+        EndCall: () => setVideoCall(false),
+    };
+    
+    return videoCall ? (
+        <div style={{display: 'flex', width: '100vw', height: '100vh'}}>
+        <AgoraUIKit rtcProps={rtcProps} callbacks={callbacks} />
+        </div>
+    ) : (
+        <h3 onClick={() => setVideoCall(true)}>Start Call</h3>
+    );    
 }
 
 const ActionContainer = styled.div`

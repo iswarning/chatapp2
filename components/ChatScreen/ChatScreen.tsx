@@ -417,13 +417,6 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
         onDragOver={handleDrag}
         onDrop={handleDrop}
         disabled={appState.prepareSendFiles.length > 0}/>
-        {/* <InputMessage
-          contentEditable="true"
-          className="w-full block outline-none py-4 px-4 bg-transparent"
-          style={{overflowY: 'auto'}}
-          id="input-message"
-        /> */}
-        
         <div className="dropdown relative mr-3 sm:mr-5">
         <a href="javascript:void(0)" className="text-gray-600 hover:text-theme-1 w-4 h-4 sm:w-5 sm:h-5 block" onClick={() => setShowEmoji(!showEmoji)}> 
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-smile w-full h-full">
