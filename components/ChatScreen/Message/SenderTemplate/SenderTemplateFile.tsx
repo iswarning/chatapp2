@@ -3,13 +3,12 @@ import { MessageType } from '@/types/MessageType';
 import React from 'react'
 import { useDownloadURL } from 'react-firebase-hooks/storage';
 import { selectAppState } from '@/redux/appSlice';
-import {useSelector,useDispatch} from 'react-redux'
+import {useSelector} from 'react-redux'
 import CancelIcon from '@mui/icons-material/Cancel';
 import styled from 'styled-components';
 import { selectChatState } from '@/redux/chatSlice';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import StatusSend from './StatusSend';
-import { FileInfo } from '@/types/ChatType';
 
 export default function SenderTemplateFile({ 
     message,
@@ -25,9 +24,9 @@ export default function SenderTemplateFile({
     const appState = useSelector(selectAppState)
     const chatState = useSelector(selectChatState)
 
-    const data = chatState.listChat.find((chat) => chatState.currentChat._id === chat._id)?.listFile?.find((image) => image.key === message.file)
+    const data = chatState.listChat.find((chat) => chatState.currentChat === chat._id)?.listFile?.find((image) => image.key === message.file)
 
-    const storageRef = storage.ref(`public/chat-room/${chatState.currentChat._id}/files/${message.file}`)
+    const storageRef = storage.ref(`public/chat-room/${chatState.currentChat}/files/${message.file}`)
     const file = type === "file-uploading" ? JSON.parse(message.file!) : data
     const [downloadUrl] = useDownloadURL(storageRef)
 
@@ -66,9 +65,6 @@ export default function SenderTemplateFile({
     }
 
     const progress = appState.UploadProgressMultipleFile
-    // console.log(`${appState?.fileUploading.key} uploading: ${progress}%`)
-    console.log(chatState.currentChat.messages)
-    // console.log(`${appState.fileUploadDone.includes(file?.key)} uploading: ${progress}%`)
     const showFileProgress = () => {
         if (type === "file-uploading") {
             if (appState?.fileUploading?.value === "uploading" && appState?.fileUploading?.key === file?.key) {
@@ -77,7 +73,8 @@ export default function SenderTemplateFile({
                     &nbsp;<CancelIcon fontSize='small' style={{fontSize: "15px"}} />
                     <ProgressBar style={{width: `${progress}%`}} />
                 </>
-            } else { 
+            }
+            if (appState.fileUploadDone.includes(file?.key)) {
                 return <>
                     Size: { file?.size.toFixed(1) + "/" + file?.size.toFixed(1) } MB
                     &nbsp;<DoneIcon fontSize='small' style={{marginBottom: "3px"}} />
@@ -112,15 +109,13 @@ export default function SenderTemplateFile({
                                 </div>
                             </div>
                             <div className="sm:ml-20 mt-3 sm:mt-0 flex">
-                                <a onClick={() => handleDownloadFile()} href="javascript:void(0)" className="tooltip w-8 h-8 block border rounded-full flex-none flex items-center justify-center ml-2 outline-none"> 
+                                <BtnDownload onClick={() => handleDownloadFile()}> 
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-download w-4 h-4">
                                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                                         <polyline points="7 10 12 15 17 10"></polyline>
                                         <line x1="12" y1="15" x2="12" y2="3"></line>
                                     </svg> 
-                                </a>
-                                {/* <ShareButton /> */}
-                                {/* <MoreButton /> */}
+                                </BtnDownload>
                             </div>
 
                         </div>
@@ -137,6 +132,14 @@ export default function SenderTemplateFile({
   )
 }
 
+const BtnDownload = styled.button.attrs(() => ({
+    className: "tooltip w-8 h-8 block border rounded-full flex-none flex items-center justify-center ml-2 outline-none"
+}))`
+    &:focus {
+        outline: none;
+    }
+`
+
 const DoneIcon = styled(CheckCircleOutlineIcon)`
     font-size: 15px;
     color: rgb(193, 174, 252);
@@ -148,20 +151,4 @@ const ProgressBar = styled.div`
     border-radius: 5px; 
     margin-top: 5px
 `
-
-const ShareButton = () => <a href="javascript:void(0)" className="tooltip w-8 h-8 block border rounded-full flex-none flex items-center justify-center ml-2"> 
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share w-4 h-4">
-        <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
-        <polyline points="16 6 12 2 8 6"></polyline>
-        <line x1="12" y1="2" x2="12" y2="15"></line>
-    </svg> 
-</a>
-
-const MoreButton = () => <a href="javascript:void(0)" className="tooltip w-8 h-8 block border rounded-full flex-none flex items-center justify-center ml-2"> 
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-horizontal w-4 h-4">
-        <circle cx="12" cy="12" r="1"></circle>
-        <circle cx="19" cy="12" r="1"></circle>
-        <circle cx="5" cy="12" r="1"></circle>
-    </svg> 
-</a>
 

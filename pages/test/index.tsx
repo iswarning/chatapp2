@@ -5,13 +5,15 @@ import { createMessage } from "@/services/MessageService";
 import { Modal, styled } from "@mui/material";
 import dynamic from "next/dynamic";
 import useSWR from 'swr'
-import { request, gql } from "graphql-request";
+// import { request, gql } from "graphql-request";
+import { gql, useQuery, useSubscription } from "@apollo/client";
+import { useEffect } from "react";
 
 const AgoraUIKit = dynamic(() => import('agora-react-uikit'), {
     ssr: false
 });
 
-const fetcher = (query: string) => request(process.env.NEXT_PUBLIC_GRAPHQL_ENPOINT!, query);
+// const fetcher = (query: string) => request(process.env.NEXT_PUBLIC_GRAPHQL_ENPOINT!, query);
 
 // const subscribeData = async(...args: any[]) => {
 //     return subscribe(SubscriptionOnNotify)
@@ -39,12 +41,14 @@ export default function Page() {
     // ) : (
     //     <h3 onClick={() => setVideoCall(true)}>Start Call</h3>
     // );
-    const MANGAS_QUERY = gql`
+
+    const COMMENTS_SUBSCRIPTION = gql`
         subscription {
             onSub {
                 message
                 senderId
                 recipientId
+                type
                 dataNotify {
                     message {
                         message
@@ -53,13 +57,11 @@ export default function Page() {
                 }
             }
         }
-    `;
+    `
 
-    const { data, error } = useSWR<any>(MANGAS_QUERY, fetcher);
-
-    // if(!data) {
-    //     return <div>Loading...</div>
-    // }
+    const { data, error, loading } = useSubscription(
+        COMMENTS_SUBSCRIPTION
+    );
 
     const click = () => {
          createMessage({
@@ -70,18 +72,18 @@ export default function Page() {
         })
     }
 
-    console.log("data: " +  data)
-
-    // if(loading) return <div style={{marginTop: "100px", marginLeft: "100px"}}>Loading...</div>
-
     return (
         <>
         <div style={{marginTop: "100px", marginLeft: "100px"}}>
             <button onClick={click} >CLick</button>
+            {
+                loading ? <div>Loading...</div> : null
+            }
             <div>
-                {data?.onSub?.data?.message?.message}
+                { data ? data?.onSub?.message : null }
             </div>
         </div>
+
         
         {/* <ModalContainer open={true}>
             <div className="text-center">

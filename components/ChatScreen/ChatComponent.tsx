@@ -46,16 +46,16 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
     
     if (!chatExist?.messages) {
       newMessages = await getAllMessagesByChatRoomId(chat._id!)
-      setListMessageInRoom(chat._id!, newMessages, dispatch)
     }
 
-    setCurrentChat({
-      ...chatExist as ChatType,
-      messages: newMessages
-    }, dispatch)
+    setListMessageInRoom(chatExist?._id!, newMessages, dispatch)
 
-    setListImageInRoom(chat._id!, await getListImage(), dispatch)
-    setListFileInRoom(chat._id!, await getListFile(), dispatch)
+    setCurrentChat(chatExist?._id!, dispatch)
+
+    setListImageInRoom(chatExist?._id!, await getListImage(), dispatch)
+
+    setListFileInRoom(chatExist?._id!, await getListFile(), dispatch)
+
   };
 
   const getListImage = async() => {
@@ -91,16 +91,6 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
       }
     })) as FileInfo[]
   } 
-
-  // const getMessage = async (id: string) => {
-  //   const ref = db
-  //     .collection("chats")
-  //     .doc(id)
-  //     .collection("messages")
-  //     .orderBy("timestamp")
-  //   const snap = await ref.get();
-  //   return snap.docs.map((msg) => MapMessageData(msg)); 
-  // };
 
   const getRecipientAvatar = () => {
     if (chat?.isGroup) {

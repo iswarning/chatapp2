@@ -42,7 +42,7 @@ console.log(chatState.listChat)
               <ChatComponent
                 key={chat._id}
                 chat={chat}
-                active={chatState.currentChat?._id === chat._id}
+                active={chatState.currentChat === chat._id}
               />
             ))
         : null}

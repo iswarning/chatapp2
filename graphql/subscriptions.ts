@@ -1,13 +1,24 @@
-export const SubscriptionOnNotify = `
+import { gql } from "@apollo/client";
+
+export const SubscriptionOnNotify = gql`
     subscription {
         onSub {
             message
             senderId
             recipientId
-            data {
+            type
+            dataNotify {
                 message {
+                    _id
                     message
+                    type
+                    senderId
+                    file
+                    images
+                    seen
+                    chatRoomId
                     createdAt
+                    updatedAt
                 }
             }
         }

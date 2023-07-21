@@ -15,9 +15,13 @@ import requestPermission from "@/utils/requestPermission";
 import { wrapper } from "../redux/store";
 import { Provider } from "react-redux";
 import { ApolloProvider, ApolloClient, InMemoryCache, HttpLink, split, ApolloLink } from "@apollo/client";
-import { GraphQLWsLink } from "@apollo/client/link/subscriptions";
-import { createClient } from "graphql-ws";
+import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
+import { createClient } from 'graphql-ws';
+import { getMainDefinition } from '@apollo/client/utilities';
+import { WebSocketLink } from '@apollo/link-ws'
+import { onError } from '@apollo/link-error';
 import Layout from "@/components/Layout/Layout";
+import ApolloConfig from "@/graphql/config";
 
 config.autoAddCss = false;
 
@@ -33,54 +37,7 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
   const { store, props } = wrapper.useWrappedStore(rest);
   const [user, loading] = useAuthState(auth);
 
-  const httpLink = new HttpLink({
-    uri: process.env.NEXT_PUBLIC_GRAPHQL_ENPOINT
-  });
-  
-  const wsLink = () => {
-    return new GraphQLWsLink(createClient({
-      url: 'ws://localhost:5000/graphql'
-    }));
-  }
-  
-  const client = new ApolloClient({
-      link: typeof window === 'undefined' ? httpLink : wsLink(),
-      cache: new InMemoryCache(),
-  });
-  
 
-  // const httpLink = new HttpLink({
-  //   uri: process.env.NEXT_PUBLIC_GRAPHQL_ENPOINT
-  // })
-
-  // const link = split(
-  //   ({ query }) => {
-  //     const definition = getMainDefinition(query);
-  //     return (
-  //       definition.kind === 'OperationDefinition' &&
-  //       definition.operation === 'subscription'
-  //     )
-  //   },
-  //   wsLink,
-  //   httpLink
-  // )
-
-  // const subClient = new ApolloClient({
-  //   uri: process.env.NEXT_PUBLIC_GRAPHQL_ENPOINT,
-  //   cache: new InMemoryCache(),
-  //   link
-  // });
-
-  if(typeof window != "undefined") {
-    window.addEventListener("dragover",function(e){
-      e = e || event;
-      e.preventDefault();
-    },false);
-    window.addEventListener("drop",function(e){
-      e = e || event;
-      e.preventDefault();
-    },false);
-  }
 
   useEffect(() => {
     if (user) {
@@ -102,7 +59,7 @@ export default function App({ Component, ...rest }: AppPropsWithLayout) {
 
   if (loading) return <Loading />;
 
-  return <ApolloProvider client={client}><Provider store={store}>
+  return <ApolloProvider client={ApolloConfig}><Provider store={store}>
     <Layout>
       <Component {...props.pageProps} />
       <ToastContainer />   

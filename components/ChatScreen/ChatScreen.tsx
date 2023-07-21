@@ -24,7 +24,7 @@ import getUserBusy from "@/utils/getUserBusy";
 import { requestMedia } from "@/utils/requestPermission";
 import { StatusCallType, selectVideoCallState, setGlobalVideoCallState } from "@/redux/videoCallSlice";
 import {v4 as uuidv4} from 'uuid'
-import { addMessageToCurrentChat, addNewFileInRoom, addNewImageInRoom, addPrepareSendFiles, pushMessageToListChat, setCurrentChat, setFileUploadDone, setFileUploading, setListFileInRoom, setPrepareSendFiles, setProgress, setShowGroupInfo, setStatusSend } from "@/services/CacheService";
+import { addNewFileInRoom, addNewImageInRoom, addPrepareSendFiles, pushMessageToListChat, setFileUploadDone, setFileUploading, setPrepareSendFiles, setProgress, setShowGroupInfo, setStatusSend } from "@/services/CacheService";
 import { AlertError } from "@/utils/core";
 import { createMessage } from "@/services/MessageService";
 import PrepareSendFileScreen from "./PrepareSendFileScreen";
@@ -49,7 +49,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
   // );
 
   // const recipientInfo = MapUserData(recipientSnapshot?.docs?.[0]!)
-
+console.log(messages)
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
@@ -128,6 +128,8 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
         processAttachFile(files)
         setPrepareSendFiles([], dispatch)
       }
+    } else {
+      processSendMessage("text", input)
     }
     setInput("")
   };
@@ -150,23 +152,15 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
       type: newMessage.type
     })
     .then((data: MessageType) => {
-      pushMessageToListChat(chat._id!, newMessage, dispatch)
 
-    setCurrentChat({
-      ...chat,
-      messages: [
-        ...chat.messages!,
-        newMessage
-      ]
-    }, dispatch)
-      appState.socket.emit("send-notify", JSON.stringify(
-        { 
-          recipient: chat.members.filter((u) => appState.userInfo._id !== u), 
-          message: `${chat.isGroup ? chat.name : user?.displayName}: ${data.message}`,
-          type: "send-message",
-          data: JSON.stringify(data)
-        }
-      ))
+      // appState.socket.emit("send-notify", JSON.stringify(
+      //   { 
+      //     recipient: chat.members.filter((u) => appState.userInfo._id !== u), 
+      //     message: `${chat.isGroup ? chat.name : user?.displayName}: ${data.message}`,
+      //     type: "send-message",
+      //     data: JSON.stringify(data)
+      //   }
+      // ))
     })
     .catch(err => {
       setStatusSend(StatusSendType.ERROR, dispatch)
@@ -212,9 +206,8 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
           size: fileSize
         })
         
-        addMessageToCurrentChat(newMessage, dispatch)
-
         pushMessageToListChat(chat._id!, newMessage, dispatch)
+
       }
     }
     if(result.length > 0){
@@ -225,7 +218,6 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
   let count = 0
 
   const uploadFileQueuing = (result: any) => {
-    console.log(chatState.currentChat.messages)
     let path = `public/chat-room/${chat._id!}/files/${result[count].key}`
     storage
       .ref(path)
@@ -279,21 +271,8 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
           })
         }
       );
-      
-    // NotifyMessage()
+
   }
-
-  // const NotifyMessage = () => {
-  //   let bodyNotify = "";
-
-  //   if (chatState.currentChat.isGroup) {
-  //     bodyNotify = chatState.currentChat.name + " sent a file "
-  //   } else {
-  //     bodyNotify = recipient.data().fullName + " sent a file "
-  //   }
-
-    
-  // }
 
   const addEmoji = (e: number) => {
     setInput(input + + String.fromCodePoint(e))

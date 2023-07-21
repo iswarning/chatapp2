@@ -1,5 +1,5 @@
 import { MutationCreateMessage } from "@/graphql/mutations"
-import { QueryGetAllMessagesByChatRoomId, QueryGetLastMessage } from "@/graphql/queries"
+import { QueryGetAllMessagesByChatRoomId, QueryGetFileByKey, QueryGetLastMessage } from "@/graphql/queries"
 import { SubscriptionOnNotify } from "@/graphql/subscriptions"
 import { MessageType } from "@/types/MessageType"
 import axios from "axios"
@@ -62,16 +62,19 @@ export async function createMessage(input: MessageType) {
     return null
 }
 
-export async function onSub() {
+export async function getFileByKey(key: string): Promise<MessageType | null> {
     try {
         const response = await axios.post(process.env.NEXT_PUBLIC_GRAPHQL_ENPOINT!, {
-            query: SubscriptionOnNotify,
+            query: QueryGetFileByKey,
+            variables: {
+                key
+            }
         }, {
             headers: {
                 'Content-Type': 'application/json'
             }
         })
-        return response.data.data.onSub
+        return response.data.data.getFileByKey
     } catch (error) {
         console.log(error)
     }

@@ -82,7 +82,7 @@ export default function Message({
   //   }
   //   setIsShown(false);
   // };
-console.log(chatState.listChat)
+
   return (
     <>
       {

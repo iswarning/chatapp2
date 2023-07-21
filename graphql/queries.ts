@@ -85,3 +85,21 @@ export const QueryGetLastMessage = `
       }
     }
 `
+
+
+export const QueryGetFileByKey = `
+    query($key: String!){
+      getFileByKey(key: $key){
+        _id
+        message
+        type
+        senderId
+        file
+        images
+        seen
+        chatRoomId
+        createdAt
+        updatedAt
+      }
+    }
+`

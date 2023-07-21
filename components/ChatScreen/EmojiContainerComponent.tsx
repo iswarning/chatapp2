@@ -45,5 +45,5 @@ const Container = styled.div`
     position: absolute;
     inset: auto auto 0px 0px;
     margin: 0px;
-    transform: translate(736.8px, -75.6px);
+    transform: translate(calc(100vw - 450px), -75.6px);
 `

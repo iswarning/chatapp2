@@ -70,21 +70,12 @@ export function removeFriend(friend: FriendType, dispatch: Dispatch<AnyAction>) 
     }))
 }
 
-export function setCurrentChat(chat: ChatType, dispatch: Dispatch<AnyAction>) {
+export function setCurrentChat(chatRoomId: string, dispatch: Dispatch<AnyAction>) {
     dispatch(setGlobalChatState({
         type: "setCurrentChat",
-        data: chat
+        data: chatRoomId
     }))
-    setLocalStorage("CurrentChat", chat)
-}
-
-export function addMessageToCurrentChat(newMessage: MessageType, dispatch: Dispatch<AnyAction>) {
-    dispatch(setGlobalChatState({
-        type: "addMessageToCurrentChat",
-        data: {
-            newMessage
-        }
-    }))
+    setLocalStorage("CurrentChat", chatRoomId)
 }
 
 export function setListChat(listChat: ChatType[], dispatch: Dispatch<AnyAction>) {
@@ -158,6 +149,16 @@ export function pushMessageToListChat(chatId: string, newMessage: MessageType, d
         data: {
             chatId,
             newMessage
+        }
+    }))
+}
+
+export function removeMessageInListChat(messageId: string, chatId: string, dispatch: Dispatch<AnyAction>) {
+    dispatch(setGlobalChatState({
+        type: "removeMessageInListChat",
+        data: {
+            chatId,
+            messageId
         }
     }))
 }

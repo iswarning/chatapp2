@@ -13,12 +13,23 @@ export function AlertError(message: string) {
     });
 }
 
-export function AlertInfo(message: string) {
-    toast(message, {
-        hideProgressBar: true,
-        type: "info",
-        autoClose: 5000,
-    });
+export function AlertInfo(message: string , title: string = "") {
+    if(title.length > 0) {
+        toast([  
+            title,
+            message
+        ].join(''), {
+            hideProgressBar: true,
+            type: "info",
+            autoClose: 5000,
+        });
+    } else {    
+        toast(message, {
+            hideProgressBar: true,
+            type: "info",
+            autoClose: 5000,
+        });
+    }
 }
 
 export function AlertSuccess(message: string) {
