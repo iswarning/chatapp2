@@ -8,13 +8,13 @@ const wsLink =
 typeof window !== "undefined"
     ? new GraphQLWsLink(
             createClient({
-                url: "ws://localhost:5000/subscriptions",
+                url: process.env.NEXT_PUBLIC_GRAPHQL_SUB_ENPOINT!,
             })
       )
     : null;
 
 const httpLink = new HttpLink({
-  uri: `http://localhost:5000/graphql`,
+  uri: process.env.NEXT_PUBLIC_GRAPHQL_ENPOINT,
 });
 
 const link =

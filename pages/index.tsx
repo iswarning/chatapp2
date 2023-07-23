@@ -15,14 +15,18 @@ import InfoContentScreen from "@/components/ChatScreen/InfoContentScreen";
 import ChatScreen from "@/components/ChatScreen/ChatScreen";
 import { selectChatState } from "@/redux/chatSlice";
 import { selectVideoCallState } from "@/redux/videoCallSlice";
-import { getLocalStorage, pushMessageToListChat, removeMessageInListChat, setCurrentChat, setListChat, setListFriend, setListFriendRequest, setShowImageFullScreen, setUserInfo } from "@/services/CacheService";
+import { getLocalStorage, pushMessageToListChat, removeFriendGlobal, removeMessageInListChat, setCurrentChat, setListChat, setListFriend, setListFriendRequest, setShowImageFullScreen, setUserInfo } from "@/services/CacheService";
 import ShowImageFullScreen from "@/components/ChatScreen/Message/ShowImageFullScreen";
-import { createNewUser, getInitialDataOfUser } from "@/services/UserService";
+import { createNewUser, findUserInInitialData, getInitialDataOfUser } from "@/services/UserService";
 import { SubscriptionOnNotify } from "@/graphql/subscriptions";
 import { useSubscription } from "@apollo/client";
 import { AlertInfo } from "@/utils/core";
 import { getFileByKey } from "@/services/MessageService";
 import { MessageType } from "@/types/MessageType";
+import { selectFriendState } from "@/redux/friendSlice";
+import { selectFriendRequestState } from "@/redux/friendRequestSlice";
+import Skeleton from 'react-loading-skeleton';
+import SidebarFriendRequest from "@/components/Sidebar/SidebarFriendRequest";
 
 // import '@/styles/tailwind.min.css'
 const Page: NextPageWithLayout = () => {
@@ -32,11 +36,13 @@ const Page: NextPageWithLayout = () => {
   const dispatch = useDispatch();
   const appState = useSelector(selectAppState);
   const chatState = useSelector(selectChatState);
+  const friendState = useSelector(selectFriendState);
+  const friendRequestState = useSelector(selectFriendRequestState);
   const videoCallState = useSelector(selectVideoCallState);
 
   useEffect(() => {
     setLoading(true)
-    // localStorage.clear()
+    localStorage.clear()
     createNewUser({
       email: user?.email!,
       fullName: user?.displayName!,
@@ -195,8 +201,20 @@ const Page: NextPageWithLayout = () => {
   );
 
   useEffect(() => {
-    if(data?.onSub?.recipientId?.includes(appState.userInfo._id) && data?.onSub?.senderId !== appState.userInfo._id)
-      AlertInfo(data?.onSub?.message, "New Message !")
+    if(data?.onSub?.recipientId?.includes(appState.userInfo._id) && data?.onSub?.senderId !== appState.userInfo._id) {
+      switch(data?.onSub?.type){
+        case "send-message": {  
+          pushMessageToListChat(data?.onSub?.dataNotify?.message?.chatRoomId, data?.onSub?.dataNotify?.message, dispatch)
+          AlertInfo( data?.onSub?.message)
+          break
+        }
+        case "unfriend": {
+          removeFriendGlobal(data?.onSub?.message, dispatch)
+          break
+        }
+      }
+    }
+    
   },[data])
   
   return (
@@ -208,6 +226,7 @@ const Page: NextPageWithLayout = () => {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
+      
       <div className="md:pl-16 pt-16">
         <div className="-mt-16 ml-auto xl:-ml-16 mr-auto xl:pl-16 pt-16 xl:h-screen w-auto sm:w-3/5 xl:w-auto grid grid-cols-12 gap-6">
         {
@@ -220,6 +239,10 @@ const Page: NextPageWithLayout = () => {
 
         {
           appState.currentSidebar === SidebarType.CONTACTS ? <SidebarContact /> : null
+        }
+
+        {
+          appState.currentSidebar === SidebarType.SUGGESTION ? <SidebarFriendRequest /> : null
         }
 
         {

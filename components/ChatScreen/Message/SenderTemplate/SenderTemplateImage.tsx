@@ -9,16 +9,18 @@ export default function SenderTemplateImage(
         timestamp, 
         onShowImage,
         lastIndex,
-        scroll
+        scroll,
+        handleReaction
     }: { 
         message: string , 
         timestamp: any, 
         onShowImage: any,
         lastIndex: boolean,
-        scroll: any
+        scroll: any,
+        handleReaction: any
     }) {
     const chatState = useSelector(selectChatState)
-    const data = chatState.listChat.find((chat) => chatState.currentChat._id === chat._id)?.listImage?.filter((image) => JSON.parse(message).find((key: string) => key === image.key))
+    const data = chatState.listChat.find((chat) => chatState.currentChat === chat._id)?.listImage?.filter((image) => JSON.parse(message).find((key: string) => key === image.key))
 
     return (
         <>

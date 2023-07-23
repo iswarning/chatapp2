@@ -38,11 +38,13 @@ export const friendSlice = createSlice({
             ]
             setLocalStorage("ListFriend", state.data.listFriend)
             break;
-        case "removeFriend":
-            let index = state.data.listFriend.findIndex((f) => f._id === action.payload.data)
-            state.data.listFriend = state.data.listFriend.splice(index, 1)
-            setLocalStorage("ListFriend", state.data.listFriend)
-            break;
+        case "removeFriend": {
+          state.data.listFriend = state.data.listFriend.splice(
+            state.data.listFriend.findIndex((f) => f._id === action.payload.data.friendId
+          ), 1)
+          setLocalStorage("ListFriend", state.data.listFriend)
+          break;
+        }
         default:
             return    
 

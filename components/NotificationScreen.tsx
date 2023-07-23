@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { FriendRequestType } from '@/types/FriendRequestType';
 import { createFriend } from '@/services/FriendService';
 import { FriendType } from '@/types/FriendType';
-import { addNewFriend, removeFriendRequest } from '@/services/CacheService';
+import { addNewFriend, removeFriendRequestGlobal } from '@/services/CacheService';
 import {useDispatch} from 'react-redux'
 import { deleteFR } from '@/services/FriendRequestService';
 
@@ -12,25 +12,33 @@ export default function NotificationScreen({ friendR }: { friendR: Array<FriendR
 
   return (
     <>
-        <Container className="notification-dropdown__content dropdown-menu show">
-            <div className="dropdown-menu__content box dark:bg-dark-2 px-4 pt-4 pb-5">
-                <div className="text-base font-medium leading-tight mb-4">Friend Requests</div>
-                {
+        <Container>
+            <BoxItem>
+                <Title>Friend Requests</Title>
+                {/* {
                     friendR && friendR?.length > 0 ? friendR?.map((friend: FriendRequestType) => <FriendRequestElement key={friend._id} friend={friend} />) : "No friend request !"
-                }
-            </div>
+                } */}
+                <div className='flex'>
+                    <div>
+                        
+                        <div></div>
+                    </div>
+                    <div className='flex'>
+                        <div>
+                            <button className="">aerwarwarawr</button>
+                            <small className="">01:10 PM</small>
+                        </div>
+                        <div className='flex-column'>
+                            <BtnCustom>Accept</BtnCustom>
+                            <BtnCustom>Deny</BtnCustom>
+                        </div>
+                    </div>
+                </div>
+            </BoxItem>
         </Container>
     </>
   )
 }
-
-const Container = styled.div`
-    width: 350px;
-    position: absolute;
-    inset: 0px auto auto 0px;
-    margin: 0px;
-    transform: translate(1140px, 63px);
-`
 
 function FriendRequestElement({ friend }: { friend: FriendRequestType }) {
 
@@ -43,7 +51,7 @@ function FriendRequestElement({ friend }: { friend: FriendRequestType }) {
         })
         .then((data: FriendType) => {
             addNewFriend(data, dispatch)
-            removeFriendRequest(friend, dispatch)
+            removeFriendRequestGlobal(friend, dispatch)
             // push notify
         })
     }
@@ -51,22 +59,22 @@ function FriendRequestElement({ friend }: { friend: FriendRequestType }) {
     const handleDeny = () => {
         deleteFR(friend._id!)
         .then(() => {
-            removeFriendRequest(friend, dispatch)
+            removeFriendRequestGlobal(friend, dispatch)
         })
     }
 
     return (
-        <div className="cursor-pointer relative flex items-center mt-6 hover:bg-blue-400" onClick={() => console.log(111)}>
-            <div className="w-10 h-10 flex-none image-fit mr-1">
+        <div onClick={() => console.log(111)}>
+            <div>
                 {
                     friend?.userInfo?.photoURL ? <Image src={friend?.userInfo?.photoURL} width={40} height={40} alt='' className='rounded-full' /> : null
                 }
-                <div className="w-3 h-3 absolute right-0 bottom-0 bg-theme-1 border-white rounded-full border-2"></div>
+                <div></div>
             </div>
-            <div className="ml-2 overflow-hidden">
-                <div className="flex items-center">
-                    <a href="javascript:void(0);" className="font-medium truncate mr-5">{friend?.userInfo?.fullName}</a>
-                    <div className="text-opacity-50 text-gray-800 text-xs ml-auto whitespace-nowrap -mt-0.5">01:10 PM</div>
+            <div>
+                <div>
+                    <button className="">{friend?.userInfo?.fullName}</button>
+                    <div className="">01:10 PM</div>
                 </div>
                 <div className='mt-0.5'>
                     <BtnCustom onClick={handleAccept}>Accept</BtnCustom>
@@ -76,7 +84,7 @@ function FriendRequestElement({ friend }: { friend: FriendRequestType }) {
         </div>
     )
 }
-    
+
 const BtnCustom = styled.button`
     background-color: #3A8DF5;
     color: white;
@@ -87,4 +95,27 @@ const BtnCustom = styled.button`
         opacity: 0.9;
     }
 `
+
+const Title = styled.p`
+    font-size: 18px;
+    margin: 10px
+`
+
+const BoxItem = styled.div`
+    padding: 10px;
+`
+
+const Container = styled.div.attrs(() => ({
+    className: "box"
+}))`
+    width: 350px;
+    position: absolute;
+    height: 200px;
+    background-color: white;
+    border-radius: 10px;
+    right: 11.3%;
+    top: 8%;
+`
+    
+
 

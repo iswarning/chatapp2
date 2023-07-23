@@ -59,14 +59,38 @@ export const chatSlice = createSlice({
           break;
         }
 
-        case "removeMessageInListChat": {
-          let chatExist = state.data.listChat.find((chat) => chat._id === action.payload.data.chatId)
-          let index = chatExist?.messages?.findIndex((msg) => msg._id === action.payload.data.messageId)
+        case "updateMessageInListChat": {
+          console.log(state.data.listChat)
           state.data.listChat = state.data.listChat.map((chat) => {
             if (chat._id === action.payload.data.chatId) {
               return {
                 ...chat,
-                messages: chatExist?.messages?.splice(index!, 1)
+                messages: chat.messages?.map((msg) => {
+                  if (msg._id === action.payload.data.messageId) {
+                    return {
+                      ...action.payload.data.newMessage
+                    }
+                  } else {
+                    return msg
+                  }
+                })
+              }
+            } else {
+              return chat
+            }
+          })
+          setLocalStorage("ListChat", state.data.listChat)
+          break;
+        }
+
+        case "removeMessageInListChat": {
+          state.data.listChat = state.data.listChat.map((chat) => {
+            if (chat._id === action.payload.data.chatId) {
+              return {
+                ...chat,
+                messages: chat?.messages?.splice(
+                  chat?.messages?.findIndex((msg) => msg._id === action.payload.data.messageId)!
+                  , 1)
               }
             } else {
               return chat

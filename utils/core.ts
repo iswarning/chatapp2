@@ -16,9 +16,9 @@ export function AlertError(message: string) {
 export function AlertInfo(message: string , title: string = "") {
     if(title.length > 0) {
         toast([  
-            title,
+            title + ", ",
             message
-        ].join(''), {
+        ].join('').replaceAll(",", ""), {
             hideProgressBar: true,
             type: "info",
             autoClose: 5000,

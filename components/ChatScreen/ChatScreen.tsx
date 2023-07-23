@@ -24,12 +24,13 @@ import getUserBusy from "@/utils/getUserBusy";
 import { requestMedia } from "@/utils/requestPermission";
 import { StatusCallType, selectVideoCallState, setGlobalVideoCallState } from "@/redux/videoCallSlice";
 import {v4 as uuidv4} from 'uuid'
-import { addNewFileInRoom, addNewImageInRoom, addPrepareSendFiles, pushMessageToListChat, setFileUploadDone, setFileUploading, setPrepareSendFiles, setProgress, setShowGroupInfo, setStatusSend } from "@/services/CacheService";
+import { addNewFileInRoom, addNewImageInRoom, addPrepareSendFiles, pushMessageToListChat, setFileUploadDone, setFileUploading, setPrepareSendFiles, setProgress, setShowGroupInfo, setStatusSend, updateMessageInListChat } from "@/services/CacheService";
 import { AlertError } from "@/utils/core";
-import { createMessage } from "@/services/MessageService";
+import { createMessage, updateMessage } from "@/services/MessageService";
 import PrepareSendFileScreen from "./PrepareSendFileScreen";
 import { selectChatState } from "@/redux/chatSlice";
 import { getImageTypeFileValid } from "@/utils/getImageTypeFileValid";
+import App from "@/pages/_app";
 
 
 export default function ChatScreen({ chat, messages }: { chat: ChatType, messages: Array<MessageType> }) {
@@ -49,7 +50,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
   // );
 
   // const recipientInfo = MapUserData(recipientSnapshot?.docs?.[0]!)
-console.log(messages)
+
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
@@ -74,10 +75,16 @@ console.log(messages)
       <Message
         key={message._id}
         message={message}
-        timestamp={""}
-        chatId={chat._id!}
+        chat={chat}
         lastIndex={messages[index] === messages[messages.length - 1]}
         scrollToBottom={() => scrollToBottom()}
+        showAvatar={
+          messages[0].senderId !== appState.userInfo._id
+          &&(
+          messages[messages.length - 1].senderId !== appState.userInfo._id
+          ||
+          messages[index].senderId !== messages[index + 1].senderId )
+}
       />
     ));
   };
@@ -152,15 +159,7 @@ console.log(messages)
       type: newMessage.type
     })
     .then((data: MessageType) => {
-
-      // appState.socket.emit("send-notify", JSON.stringify(
-      //   { 
-      //     recipient: chat.members.filter((u) => appState.userInfo._id !== u), 
-      //     message: `${chat.isGroup ? chat.name : user?.displayName}: ${data.message}`,
-      //     type: "send-message",
-      //     data: JSON.stringify(data)
-      //   }
-      // ))
+      updateMessageInListChat(chat._id!, data, newMessage._id!, dispatch)
     })
     .catch(err => {
       setStatusSend(StatusSendType.ERROR, dispatch)
@@ -171,6 +170,8 @@ console.log(messages)
       setStatusSend(StatusSendType.SENT, dispatch)
       scrollToBottom();
     })
+
+    console.log(chatState.listChat)
   }
 
   const processAttachFile = (files: File[]) => {

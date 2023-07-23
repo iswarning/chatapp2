@@ -61,6 +61,7 @@ export const QueryGetAllMessagesByChatRoomId = `
         senderId
         file
         images
+        reaction
         seen
         chatRoomId
         createdAt
@@ -78,6 +79,7 @@ export const QueryGetLastMessage = `
         senderId
         file
         images
+        reaction
         seen
         chatRoomId
         createdAt
@@ -98,6 +100,36 @@ export const QueryGetFileByKey = `
         images
         seen
         chatRoomId
+        createdAt
+        updatedAt
+      }
+    }
+`
+
+export const QueryFindUserSuggestion = `
+    query($userId: String!){
+      findUserSuggestion(userId: $userId){
+        _id
+        fullName
+        email
+        photoURL
+        phoneNumber
+        fcmToken
+        createdAt
+        updatedAt
+      }
+    }
+`
+
+export const QueryFindAllUser = `
+    query{
+      users{
+        _id
+        fullName
+        email
+        photoURL
+        phoneNumber
+        fcmToken
         createdAt
         updatedAt
       }

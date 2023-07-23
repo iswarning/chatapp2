@@ -41,7 +41,7 @@ export function addNewFriendRequest(newFriendRequest: FriendRequestType, dispatc
     }))
 }
 
-export function removeFriendRequest(friendRequest: FriendRequestType, dispatch: Dispatch<AnyAction>) {
+export function removeFriendRequestGlobal(friendRequest: FriendRequestType, dispatch: Dispatch<AnyAction>) {
     dispatch(setGlobalFriendRequestState({
         type: "removeFriendRequest",
         data: friendRequest._id
@@ -63,10 +63,12 @@ export function addNewFriend(newFriend: FriendType, dispatch: Dispatch<AnyAction
     }))
 }
 
-export function removeFriend(friend: FriendType, dispatch: Dispatch<AnyAction>) {
+export function removeFriendGlobal(friendId: string, dispatch: Dispatch<AnyAction>) {
     dispatch(setGlobalFriendState({
         type: "removeFriend",
-        data: friend._id
+        data: {
+            friendId
+        }
     }))
 }
 
@@ -158,6 +160,17 @@ export function removeMessageInListChat(messageId: string, chatId: string, dispa
         type: "removeMessageInListChat",
         data: {
             chatId,
+            messageId
+        }
+    }))
+}
+
+export function updateMessageInListChat(chatId: string, newMessage: MessageType, messageId: string, dispatch: Dispatch<AnyAction>) {
+    dispatch(setGlobalChatState({
+        type: "updateMessageInListChat",
+        data: {
+            chatId,
+            newMessage,
             messageId
         }
     }))

@@ -1,4 +1,4 @@
-import { MutationCreateMessage } from "@/graphql/mutations"
+import { MutationCreateMessage, MutationUpdateMessage } from "@/graphql/mutations"
 import { QueryGetAllMessagesByChatRoomId, QueryGetFileByKey, QueryGetLastMessage } from "@/graphql/queries"
 import { SubscriptionOnNotify } from "@/graphql/subscriptions"
 import { MessageType } from "@/types/MessageType"
@@ -56,6 +56,25 @@ export async function createMessage(input: MessageType) {
             }
         })
         return response.data.data.createMessage
+    } catch (error) {
+        console.log(error)
+    }
+    return null
+}
+
+export async function updateMessage(input: MessageType) {
+    try {
+        const response = await axios.post(process.env.NEXT_PUBLIC_GRAPHQL_ENPOINT!, {
+            query: MutationUpdateMessage,
+            variables: {
+                input
+            }
+        }, {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        return response.data.data.updateMessage
     } catch (error) {
         console.log(error)
     }

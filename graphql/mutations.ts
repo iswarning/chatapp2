@@ -52,9 +52,32 @@ export const MutationCreateFriend = `
     }
 `
 
+
+export const MutationRemoveFriend = `
+    mutation($_id: String!){
+        removeFriend(_id: $_id){
+            _id
+            senderId
+            recipientId
+            createdAt
+        }
+    }
+`
+
 export const MutationRemoveFriendRequest = `
     mutation($_id: String!){
         removeFriendRequest(_id: $_id){
+            _id
+            senderId
+            recipientId
+            createdAt
+        }
+    }
+`
+
+export const MutationCreateFriendRequest = `
+    mutation($input: CreateFriendRequestInput!){
+        createFriendRequest(createFriendRequestInput: $input){
             _id
             senderId
             recipientId
@@ -70,6 +93,23 @@ export const MutationCreateMessage = `
             message
             type
             senderId
+            reaction
+            seen
+            chatRoomId
+            createdAt
+            updatedAt
+        }
+    }
+`
+
+export const MutationUpdateMessage = `
+    mutation($input: UpdateMessageInput!){
+        updateMessage(updateMessageInput: $input){
+            _id
+            message
+            type
+            senderId
+            reaction
             seen
             chatRoomId
             createdAt

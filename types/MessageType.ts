@@ -8,7 +8,7 @@ export interface MessageType {
     type: string
     senderId: string
     seen?: Array<string>
-    reaction?: Array<ReactionType>
+    reaction?: string
     userInfo?: UserType
     file?: string
     images?: string

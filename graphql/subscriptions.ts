@@ -20,6 +20,28 @@ export const SubscriptionOnNotify = gql`
                     createdAt
                     updatedAt
                 }
+                chatRoom {
+                    _id
+                    members
+                    photoURL
+                    isGroup
+                    name
+                    admin
+                    createdAt
+                    updatedAt
+                }
+                friend {
+                    _id
+                    senderId
+                    recipientId
+                    createdAt
+                }
+                friendRequest {
+                    _id
+                    senderId
+                    recipientId
+                    createdAt
+                }
             }
         }
     }

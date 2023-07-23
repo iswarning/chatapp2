@@ -1,38 +1,32 @@
-import { auth, db } from "@/firebase";
+import { auth } from "@/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
 import styled from "styled-components";
-import { useEffect, useState } from "react";
-import { useCollection } from "react-firebase-hooks/firestore";
-import sendNotificationFCM from "@/utils/sendNotificationFCM";
+import { useState } from "react";
 import { MessageType } from "@/types/MessageType";
-import firebase from "firebase";
 import SenderTemplateText from "./SenderTemplate/SenderTemplateText";
-import { MapImageAttachData } from "@/types/ImageAttachType";
 import SenderTemplateImage from "./SenderTemplate/SenderTemplateImage";
 import RecieverTemplateText from "./RecieverTemplate/RecieverTemplateText";
 import RecieverTemplateImage from "./RecieverTemplate/RecieverTemplateImage";
-import ShowImageFullScreen from "./ShowImageFullScreen";
-import SenderTemplateTextImage from "./SenderTemplate/SenderTemplateTextImage";
-import RecieverTemplateTextImage from "./RecieverTemplate/RecieverTemplateTextImage";
-import { MapImageInMessageData } from "@/types/ImageInMessageType";
 import SenderTemplateFile from "./SenderTemplate/SenderTemplateFile";
-import { MapFileInMessageData } from "@/types/FileInMessageType";
 import RecieverTemplateFile from "./RecieverTemplate/RecieverTemplateFile";
-import { parseTimeStamp } from "@/utils/core";
-import {useSelector} from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 import { selectChatState } from "@/redux/chatSlice";
 import { selectAppState } from "@/redux/appSlice";
+import { ChatType } from "@/types/ChatType";
+import { updateMessage } from "@/services/MessageService";
+import { updateMessageInListChat } from "@/services/CacheService";
 export default function Message({
   message,
-  chatId,
+  chat,
   lastIndex,
-  scrollToBottom
+  scrollToBottom,
+  showAvatar
 }: {
   message: MessageType;
-  timestamp: any;
-  chatId: string;
+  chat: ChatType;
   lastIndex: boolean;
-  scrollToBottom: any
+  scrollToBottom: any;
+  showAvatar: boolean
 }) {
   const [userLoggedIn] = useAuthState(auth);
   const [isShown, setIsShown] = useState(false);
@@ -40,6 +34,7 @@ export default function Message({
   const [urlImage, setUrlImage] = useState("");
   const chatState = useSelector(selectChatState)
   const appState = useSelector(selectAppState)
+  const dispatch = useDispatch()
   // const [reactionSnapshot] = useCollection(
   //   db
   //     .collection("chats")
@@ -55,33 +50,60 @@ export default function Message({
   //   db.collection("users").where("email", "==", message.user)
   // );
 
-  // const handleReaction = async (event: any, emoji: number) => {
-  //   event.preventDefault();
-  //   try {
-  //     await db
-  //       .collection("chats")
-  //       .doc(chatId)
-  //       .collection("messages")
-  //       .doc(message._id)
-  //       .collection("reaction")
-  //       .add({
-  //         senderEmail: userLoggedIn?.email,
-  //         emoji: String.fromCodePoint(emoji),
-  //         timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-  //       });
-  //     await sendNotificationFCM(
-  //       "Notification",
-  //       userLoggedIn?.displayName +
-  //         " dropped an emotion " +
-  //         String.fromCodePoint(emoji) +
-  //         " into your message",
-  //       recipientSnapshot?.docs?.[0]?.data().fcm_token
-  //     );
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  //   setIsShown(false);
-  // };
+  function _delete(obj: any, prop: any) {
+    if (obj[prop] && ! obj[prop].length) delete obj[prop];
+  }
+
+  const handleReaction = (event: any, emoji: number) => {
+    event.preventDefault();
+    let messageExist = message
+
+    if (message.reaction?.length! > 0) {
+      let reaction = JSON.parse(message.reaction!)
+      let emojiExist = reaction?.find((reac: any) => reac.emoji === emoji)   
+      if (emojiExist) {
+        reaction = reaction.map((react: any) => {
+          if (react.emoji === emoji) {
+            return {
+              ...react,
+              amount: react?.amount + 1
+            }
+          }
+          else return react
+        })
+        updateMessage({
+          ...messageExist,
+          reaction: JSON.stringify(reaction)
+        }).then((data: MessageType) => {
+          updateMessageInListChat(chat._id!, data, data._id!, dispatch)
+        })
+      } else {
+        reaction.push({
+          senderId: appState.userInfo._id,
+          emoji: emoji,
+          amount: 1
+        })
+        updateMessage({
+          ...messageExist,
+          reaction: JSON.stringify(reaction)
+        }).then((data: MessageType) => {
+          updateMessageInListChat(chat._id!, data, data._id!, dispatch)
+        })
+      }
+    } else {
+      updateMessage({
+        ...messageExist,
+        reaction: JSON.stringify([{
+          senderId: appState.userInfo._id,
+          emoji: emoji,
+          amount: 1
+        }])
+      }).then((data: MessageType) => {
+        updateMessageInListChat(chat._id!, data, data._id!, dispatch)
+      })
+    }
+    console.log(chatState.listChat)
+  };
 
   return (
     <>
@@ -90,14 +112,19 @@ export default function Message({
         message.senderId === appState.userInfo._id ? 
           <>
             {
-              message.type === "text" ? <SenderTemplateText message={message} timestamp={message.createdAt} lastIndex={lastIndex} /> : null
+              message.type === "text" ? <SenderTemplateText 
+              message={message} 
+              timestamp={message.createdAt} 
+              lastIndex={lastIndex}
+              handleReaction={handleReaction} /> : null
             }
             {
               message.type === "file" || message.type === "file-uploading" ? <SenderTemplateFile 
               message={message}
               lastIndex={lastIndex} 
               timestamp={message.createdAt} 
-              type={message.type} /> : null
+              type={message.type}
+              handleReaction={handleReaction} /> : null
             }
             {
               message.type === "image" ? <SenderTemplateImage 
@@ -105,24 +132,39 @@ export default function Message({
               timestamp={message.createdAt} 
               onShowImage={(urlImage: any) => {setUrlImage(urlImage);setShowImageFullscreen(true)}} 
               lastIndex={lastIndex} 
-              scroll={scrollToBottom} /> : null
-              
+              scroll={scrollToBottom}
+              handleReaction={handleReaction} /> : null
             }
           </> : 
           <>
             {
-              message.type === "text" ? <RecieverTemplateText message={message} timestamp={message.createdAt} lastIndex={lastIndex} /> : null
+              message.type === "text" ? <RecieverTemplateText 
+              chat={chat}
+              message={message} 
+              timestamp={message.createdAt} 
+              lastIndex={lastIndex}
+              showAvatar={showAvatar}
+              handleReaction={handleReaction} /> : null
             }
             {
-              message.type === "file" ? <RecieverTemplateFile file={message} lastIndex={lastIndex} timestamp={message.createdAt} /> : null
+              message.type === "file" ? <RecieverTemplateFile 
+              chat={chat}
+              message={message}
+              lastIndex={lastIndex} 
+              timestamp={message.createdAt}
+              showAvatar={showAvatar}
+              handleReaction={handleReaction} /> : null
             }
             {
               message.type === "image" ? <RecieverTemplateImage 
-              message={message.message!} 
+              chat={chat}
+              message={message} 
               timestamp={message.createdAt} 
               lastIndex={lastIndex} 
               onShowImage={(urlImage: any) => {setUrlImage(urlImage);setShowImageFullscreen(true)}}
-              scroll={scrollToBottom} /> : null
+              scroll={scrollToBottom}
+              showAvatar={showAvatar}
+              handleReaction={handleReaction} /> : null
             }
           </>
       }

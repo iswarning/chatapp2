@@ -14,12 +14,14 @@ export default function SenderTemplateFile({
     message,
     lastIndex,
     timestamp,
-    type
+    type,
+    handleReaction
 }: { 
     message: MessageType,
     lastIndex: boolean,
     timestamp: any,
-    type: string
+    type: string,
+    handleReaction: any
 }) {
     const appState = useSelector(selectAppState)
     const chatState = useSelector(selectChatState)

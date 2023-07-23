@@ -1,16 +1,34 @@
 import { storage } from '@/firebase';
 import { selectAppState } from '@/redux/appSlice';
 import { selectChatState } from '@/redux/chatSlice';
+import { ChatType } from '@/types/ChatType';
 import { MessageType } from '@/types/MessageType';
 import React from 'react'
 import { useDownloadURL } from 'react-firebase-hooks/storage';
 import {useSelector} from 'react-redux'
+import styled from 'styled-components';
+import Image from 'next/image';
 
-export default function RecieverTemplateFile({ file, lastIndex, timestamp }: { file: MessageType, lastIndex: boolean, timestamp: any }) {
+export default function RecieverTemplateFile({ 
+    showAvatar, 
+    chat, 
+    message, 
+    lastIndex, 
+    timestamp, 
+    handleReaction 
+}: { 
+    showAvatar: boolean, 
+    chat: ChatType, 
+    message: MessageType, 
+    lastIndex: boolean,
+    timestamp: any,
+    handleReaction: any }) {
 
     const chatState = useSelector(selectChatState)
+
+    const storageRef = storage.ref(`public/chat-room/${chatState.currentChat}/files/${message.file}`)
     
-    const storageRef = storage.ref(`public/chat-room/${chatState.currentChat._id}/files/${file?.key}`)
+    const file = chatState.listChat.find((chat) => chatState.currentChat === chat._id)?.listFile?.find((image) => image.key === message.file)
 
     const [downloadUrl] = useDownloadURL(storageRef)
 
@@ -56,31 +74,39 @@ export default function RecieverTemplateFile({ file, lastIndex, timestamp }: { f
     {
         <div className="-intro-x chat-text-box flex items-end float-left mb-4" title={timestamp}>
             {
-                chatState.currentChat.isGroup && lastIndex ? <div className="chat-text-box__photo w-10 h-10 hidden sm:block flex-none image-fit relative mr-4">
-                    <img alt="Topson Messenger Tailwind HTML Admin Template" className="rounded-full" src="https://topson.left4code.com/dist/images/profile-9.jpg"/>
-                </div> : null
+                chat.isGroup && showAvatar ? <div className="chat-text-box__photo w-10 h-10 hidden sm:block flex-none image-fit relative mr-4">
+                    <Image
+                    src={chat.listRecipientInfo?.find((info) => info._id === message.senderId)?.photoURL!}
+                    width={64}
+                    height={64}
+                    alt=""
+                    className="rounded-full mt-6"
+                    />
+                </div> : <div className="chat-text-box__photo w-10 h-10 hidden sm:block flex-none image-fit relative mr-4"></div>
             }
             <div className="w-full">
                 <div>
                     <div className="chat-text-box__content flex items-center float-left">
                         <div className="box leading-relaxed text-gray-700 dark:text-gray-300 flex flex-col sm:flex-row items-center mt-3 p-3">
                             <div className="chat-text-box__content__icon text-white w-12 flex-none bg-contain relative bg-no-repeat bg-center block">
-                                <div className="absolute m-auto top-0 left-0 right-0 bottom-0 flex items-center justify-center">{fileExtension?.toUpperCase()}</div>
+                                <div className="absolute m-auto top-0 left-0 right-0 bottom-0 flex items-center justify-center">{file?.extension?.toUpperCase()}</div>
                             </div>
                             <div className="sm:ml-3 mt-3 sm:mt-0 text-center sm:text-left">
-                                <div className="text-gray-700 dark:text-gray-300 whitespace-nowrap font-medium truncate">{fileName?.length! >= 20 ? fileName?.substring(0, 20) + "..." + fileExtension : fileName + "." + fileExtension}</div>
-                                <div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">Size: { file?.size! } MB</div>
+                                <div className="text-gray-700 dark:text-gray-300 whitespace-nowrap font-medium truncate">
+                                { file?.name?.length! >= 20 ? 
+                                        file?.name?.substring(0, 20) + "..." + file?.extension
+                                        : file?.name + "." + file?.extension}
+                                </div>
+                                <div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">Size: { (file?.size! / 1024 / 1024).toFixed(1) } MB</div>
                             </div>
                             <div className="sm:ml-20 mt-3 sm:mt-0 flex">
-                                <a href='javascript:void(0)' onClick={() => handleDownloadFile()} className="tooltip w-8 h-8 block border rounded-full flex-none flex items-center justify-center ml-2 outline-none"> 
+                                <BtnDownload onClick={() => handleDownloadFile()}> 
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-download w-4 h-4">
                                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                                         <polyline points="7 10 12 15 17 10"></polyline>
                                         <line x1="12" y1="15" x2="12" y2="3"></line>
                                     </svg> 
-                                </a>
-                                <a href="javascript:void(0)" className="tooltip w-8 h-8 block border rounded-full flex-none flex items-center justify-center ml-2"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-share w-4 h-4"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg> </a>
-                                <a href="javascript:void(0)" className="tooltip w-8 h-8 block border rounded-full flex-none flex items-center justify-center ml-2"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-horizontal w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg> </a>
+                                </BtnDownload>
                             </div>
                         </div>
                     </div>
@@ -92,3 +118,11 @@ export default function RecieverTemplateFile({ file, lastIndex, timestamp }: { f
     </>
   )
 }
+
+const BtnDownload = styled.button.attrs(() => ({
+    className: "tooltip w-8 h-8 block border rounded-full flex-none flex items-center justify-center ml-2 outline-none"
+}))`
+    &:focus {
+        outline: none;
+    }
+`
