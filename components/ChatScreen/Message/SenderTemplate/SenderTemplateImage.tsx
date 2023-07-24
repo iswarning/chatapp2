@@ -24,12 +24,6 @@ export default function SenderTemplateImage(
 
     return (
         <>
-        {/* <div className="flex items-end float-right mb-4">
-        <div className="w-full">
-        
-
-        </div>
-        </div> */}
         <div className="chat-text-box flex items-end float-right mb-4" title={timestamp} style={{maxWidth: "500px"}}>
             <div className="w-full">
                 <div>

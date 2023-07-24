@@ -10,23 +10,24 @@ import { SidebarType, selectAppState } from "@/redux/appSlice";
 import SidebarGroups from "@/components/Sidebar/SidebarGroups";
 import SidebarContact from "@/components/Sidebar/SidebarContact";
 import SidebarProfile from "@/components/Sidebar/SidebarProfile";
-import VideoCallScreen from "@/components/VideoCallScreen/VideoCallScreen";
 import InfoContentScreen from "@/components/ChatScreen/InfoContentScreen";
 import ChatScreen from "@/components/ChatScreen/ChatScreen";
 import { selectChatState } from "@/redux/chatSlice";
-import { selectVideoCallState } from "@/redux/videoCallSlice";
-import { getLocalStorage, pushMessageToListChat, removeFriendGlobal, removeMessageInListChat, setCurrentChat, setListChat, setListFriend, setListFriendRequest, setShowImageFullScreen, setUserInfo } from "@/services/CacheService";
+import { StatusCallType, selectVideoCallState, setGlobalVideoCallState } from "@/redux/videoCallSlice";
+import { getLocalStorage, pushMessageToListChat, removeFriendGlobal, removeMessageInListChat, setCurrentChat, setDataVideoCall, setListChat, setListFriend, setListFriendRequest, setShowImageFullScreen, setUserInfo } from "@/services/CacheService";
 import ShowImageFullScreen from "@/components/ChatScreen/Message/ShowImageFullScreen";
 import { createNewUser, findUserInInitialData, getInitialDataOfUser } from "@/services/UserService";
-import { SubscriptionOnNotify } from "@/graphql/subscriptions";
+import { SubscriptionOnCall, SubscriptionOnNotify } from "@/graphql/subscriptions";
 import { useSubscription } from "@apollo/client";
 import { AlertInfo } from "@/utils/core";
 import { getFileByKey } from "@/services/MessageService";
 import { MessageType } from "@/types/MessageType";
 import { selectFriendState } from "@/redux/friendSlice";
 import { selectFriendRequestState } from "@/redux/friendRequestSlice";
-import Skeleton from 'react-loading-skeleton';
 import SidebarFriendRequest from "@/components/Sidebar/SidebarFriendRequest";
+import PopupVideoCall from "@/components/VideoCallScreen/PopupVideoCall";
+import { NotifyResponseType } from "@/types/NotifyResponseType";
+import ModalVideoCall from "@/components/VideoCallScreen/ModalVideoCall";
 
 // import '@/styles/tailwind.min.css'
 const Page: NextPageWithLayout = () => {
@@ -196,26 +197,60 @@ const Page: NextPageWithLayout = () => {
   //   }
   // },[])
 
-  const { data } = useSubscription(
+  const { data: resNotify } = useSubscription(
     SubscriptionOnNotify
   );
-
+  
   useEffect(() => {
-    if(data?.onSub?.recipientId?.includes(appState.userInfo._id) && data?.onSub?.senderId !== appState.userInfo._id) {
-      switch(data?.onSub?.type){
+    if(resNotify?.onSub?.recipientId?.includes(appState.userInfo._id) && resNotify?.onSub?.senderId !== appState.userInfo._id) {
+      switch(resNotify?.onSub?.type){
         case "send-message": {  
-          pushMessageToListChat(data?.onSub?.dataNotify?.message?.chatRoomId, data?.onSub?.dataNotify?.message, dispatch)
-          AlertInfo( data?.onSub?.message)
+          pushMessageToListChat(resNotify?.onSub?.dataNotify?.message?.chatRoomId, resNotify?.onSub?.dataNotify?.message, dispatch)
+          AlertInfo( resNotify?.onSub?.message)
           break
         }
         case "unfriend": {
-          removeFriendGlobal(data?.onSub?.message, dispatch)
+          removeFriendGlobal(resNotify?.onSub?.message, dispatch)
           break
         }
       }
     }
-    
-  },[data])
+  },[resNotify])
+
+  const { data: resCall } = useSubscription(
+    SubscriptionOnCall
+  );
+
+  useEffect(() => {
+    if(resCall?.onCall?.recipientId?.includes(appState.userInfo._id) && resCall?.onCall?.senderId !== appState.userInfo._id) {
+      switch(resCall?.onCall?.type){
+        case "send-call": {  
+          dispatch(setGlobalVideoCallState({
+            type: "setShowVideoCallScreen",
+            data: true
+          }))
+          dispatch(setGlobalVideoCallState({
+            type: "setStatusCall",
+            data: StatusCallType.INCOMING_CALL
+          }));
+          setDataVideoCall(resCall?.onCall, dispatch)
+          break
+        }
+        case "accept-call": {
+          dispatch(setGlobalVideoCallState({
+            type: "setShowVideoCallScreen",
+            data: false
+          }))
+          dispatch(setGlobalVideoCallState({
+            type: "setStatusCall",
+            data: StatusCallType.CALLED
+          }));
+          setDataVideoCall(resCall?.onCall, dispatch)
+          break
+        }
+      }
+    }
+  },[resCall])
   
   return (
     <>
@@ -250,7 +285,7 @@ const Page: NextPageWithLayout = () => {
         }
 
         {
-          chatState.currentChat ? <>
+          chatState.currentChat?.length! > 0 ? <>
             <ChatScreen 
             chat={chatState.listChat.find((chat) => chat._id === chatState.currentChat)!} 
             messages={chatState.listChat.find((chat) => chat._id === chatState.currentChat)?.messages!} />
@@ -259,12 +294,13 @@ const Page: NextPageWithLayout = () => {
             }
           </>  : null
         }
-
         
         </div>
       </div>
 
-      { videoCallState.showVideoCallScreen ? <VideoCallScreen open={videoCallState.showVideoCallScreen} /> : null }
+      { videoCallState.showVideoCallScreen ? <PopupVideoCall show={videoCallState.showVideoCallScreen} /> : null }
+
+      { videoCallState.statusCall === StatusCallType.CALLED ? <ModalVideoCall /> : null }
 
       {
         appState.showImageFullScreenData.isShow ? <ShowImageFullScreen 

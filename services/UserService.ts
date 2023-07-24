@@ -1,5 +1,5 @@
 import { MutationCreateUser } from "@/graphql/mutations";
-import { QueryFindAllUser, QueryFindUserSuggestion, QueryGetInitialDataOfUser, QueryGetUserInfoById } from "@/graphql/queries";
+import { QueryFindAllUser, QueryFindUserSuggestion, QueryGenerateRtcToken, QueryGetInitialDataOfUser, QueryGetUserInfoById } from "@/graphql/queries";
 import { ChatType } from "@/types/ChatType";
 import { FriendRequestType } from "@/types/FriendRequestType";
 import { FriendType } from "@/types/FriendType";
@@ -160,6 +160,25 @@ export async function findAllUser() {
             }
         })
         return response.data.data.users
+    } catch (error) {
+        console.log(error)
+    }
+    return null
+}
+
+export async function generateRtcToken(input: { chatRoomId: string, userId: string }) {
+    try {
+        const response = await axios.post(process.env.NEXT_PUBLIC_GRAPHQL_ENPOINT!, {
+            query: QueryGenerateRtcToken,
+            variables: {
+                input
+            }
+        }, {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        return response.data.data.generateRtcToken
     } catch (error) {
         console.log(error)
     }

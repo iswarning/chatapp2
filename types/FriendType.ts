@@ -1,5 +1,4 @@
-import firebase from "firebase";
-import { MapUserData, UserType } from "./UserType";
+import { UserType } from "./UserType";
 
 export interface FriendType {
   _id?: string;

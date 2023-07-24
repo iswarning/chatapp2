@@ -3,14 +3,15 @@ import { StatusSendType, setAppGlobalState } from "@/redux/appSlice";
 import { setGlobalChatState } from "@/redux/chatSlice";
 import { setGlobalFriendRequestState } from "@/redux/friendRequestSlice";
 import { setGlobalFriendState } from "@/redux/friendSlice";
+import { setGlobalVideoCallState } from "@/redux/videoCallSlice";
 import { ChatType, FileInfo } from "@/types/ChatType";
 import { FriendRequestType } from "@/types/FriendRequestType";
 import { FriendType } from "@/types/FriendType";
 import { MessageType } from "@/types/MessageType";
+import { NotifyResponseType } from "@/types/NotifyResponseType";
 import { UserType } from "@/types/UserType";
 import { AnyAction, Dispatch } from "@reduxjs/toolkit";
 import CryptoJS from 'crypto-js';
-import { getAllMessagesByChatRoomId, getLastMessage } from "./MessageService";
 
 const SECRET_KEY = process.env.NEXT_PUBLIC_FIREBASE_SERVER_KEY!
 
@@ -235,5 +236,12 @@ export function addPrepareSendFiles(file: File, dispatch: Dispatch<AnyAction>) {
     dispatch(setAppGlobalState({
         type: "addPrepareSendFiles",
         data: file
+    }))
+}
+
+export function setDataVideoCall(notifyResponse: NotifyResponseType, dispatch: Dispatch<AnyAction>) {
+    dispatch(setGlobalVideoCallState({
+        type: "setDataVideoCall",
+        data: notifyResponse
     }))
 }

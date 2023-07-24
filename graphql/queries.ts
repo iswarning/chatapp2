@@ -70,6 +70,12 @@ export const QueryGetAllMessagesByChatRoomId = `
     }
 `
 
+export const QueryGenerateRtcToken = `
+  query($input: GenerateRtcTokenInput!){
+    generateRtcToken(generateRtcTokenInput: $input)
+  }
+`
+
 export const QueryGetLastMessage = `
     query($chatRoomId: String!){
       getLastMessage(chatRoomId: $chatRoomId){

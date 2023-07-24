@@ -3,6 +3,7 @@ import { AppState } from "./store";
 import { HYDRATE } from "next-redux-wrapper";
 import { ChatType } from "@/types/ChatType";
 import { MessageType } from "@/types/MessageType";
+import { NotifyResponseType } from "@/types/NotifyResponseType";
 
 export enum StatusCallType {
   INCOMING_CALL,
@@ -16,7 +17,7 @@ export interface InitialState {
   data: {
     statusCall: StatusCallType | null,
     showVideoCallScreen: boolean,
-    dataVideoCall: any,
+    notifyResponse: NotifyResponseType,
     acceptedCall: boolean,
   },
   
@@ -27,7 +28,7 @@ const initialState: InitialState = {
   data: {
     statusCall: null,
     showVideoCallScreen: false,
-    dataVideoCall: {},
+    notifyResponse: {} as NotifyResponseType,
     acceptedCall: false,
   },
 
@@ -48,7 +49,7 @@ export const videoCallSlice = createSlice({
             state.data.showVideoCallScreen = action.payload.data
             break;
         case "setDataVideoCall":
-            state.data.dataVideoCall = action.payload.data
+            state.data.notifyResponse = action.payload.data
             break;
         case "setAcceptedCall":
             state.data.acceptedCall = action.payload.data

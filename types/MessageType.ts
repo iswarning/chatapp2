@@ -1,4 +1,3 @@
-import { ReactionType } from "./ReactionType";
 import { UserType } from "./UserType";
 
 export interface MessageType {

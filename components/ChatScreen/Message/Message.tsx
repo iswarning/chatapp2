@@ -1,6 +1,3 @@
-import { auth } from "@/firebase";
-import { useAuthState } from "react-firebase-hooks/auth";
-import styled from "styled-components";
 import { useState } from "react";
 import { MessageType } from "@/types/MessageType";
 import SenderTemplateText from "./SenderTemplate/SenderTemplateText";
@@ -28,31 +25,11 @@ export default function Message({
   scrollToBottom: any;
   showAvatar: boolean
 }) {
-  const [userLoggedIn] = useAuthState(auth);
-  const [isShown, setIsShown] = useState(false);
   const [isShowImageFullscreen, setShowImageFullscreen] = useState(false);
   const [urlImage, setUrlImage] = useState("");
   const chatState = useSelector(selectChatState)
   const appState = useSelector(selectAppState)
   const dispatch = useDispatch()
-  // const [reactionSnapshot] = useCollection(
-  //   db
-  //     .collection("chats")
-  //     .doc(chatId)
-  //     .collection("messages")
-  //     .doc(message._id)
-  //     .collection("reaction")
-  //     .orderBy("timestamp")
-  //     .limitToLast(1)
-  // );
-
-  // const [recipientSnapshot] = useCollection(
-  //   db.collection("users").where("email", "==", message.user)
-  // );
-
-  function _delete(obj: any, prop: any) {
-    if (obj[prop] && ! obj[prop].length) delete obj[prop];
-  }
 
   const handleReaction = (event: any, emoji: number) => {
     event.preventDefault();
@@ -102,7 +79,6 @@ export default function Message({
         updateMessageInListChat(chat._id!, data, data._id!, dispatch)
       })
     }
-    console.log(chatState.listChat)
   };
 
   return (
@@ -172,26 +148,3 @@ export default function Message({
     </>
   );
 }
-const ReactionContainer = styled.div`
-  border-radius: 50%;
-  background-color: #fffdfd;
-  color: silver;
-  position: absolute;
-  width: 25px;
-  height: 25px;
-  /* padding: 5px; */
-  padding-bottom: 27px;
-  text-align: center;
-  align-items: center;
-  /* margin-left: 30px; */
-`;
-
-const ReactionContainerReciever = styled(ReactionContainer)`
-  left: 0;
-  /* margin-left: 30px; */
-`;
-
-const ReactionContainerSender = styled(ReactionContainer)`
-  right: 0;
-  /* margin-left: 30px; */
-`;

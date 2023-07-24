@@ -46,3 +46,20 @@ export const SubscriptionOnNotify = gql`
         }
     }
 `
+
+export const SubscriptionOnCall = gql`
+    subscription {
+        onCall {
+            message
+            senderId
+            recipientId
+            type
+            dataVideoCall {
+                fullName
+                photoURL
+                chatRoomId
+                isGroup
+            }
+        }
+    }
+`

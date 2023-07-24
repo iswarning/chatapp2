@@ -24,13 +24,15 @@ import getUserBusy from "@/utils/getUserBusy";
 import { requestMedia } from "@/utils/requestPermission";
 import { StatusCallType, selectVideoCallState, setGlobalVideoCallState } from "@/redux/videoCallSlice";
 import {v4 as uuidv4} from 'uuid'
-import { addNewFileInRoom, addNewImageInRoom, addPrepareSendFiles, pushMessageToListChat, setFileUploadDone, setFileUploading, setPrepareSendFiles, setProgress, setShowGroupInfo, setStatusSend, updateMessageInListChat } from "@/services/CacheService";
+import { addNewFileInRoom, addNewImageInRoom, addPrepareSendFiles, pushMessageToListChat, setDataVideoCall, setFileUploadDone, setFileUploading, setPrepareSendFiles, setProgress, setShowGroupInfo, setStatusSend, updateMessageInListChat } from "@/services/CacheService";
 import { AlertError } from "@/utils/core";
 import { createMessage, updateMessage } from "@/services/MessageService";
 import PrepareSendFileScreen from "./PrepareSendFileScreen";
 import { selectChatState } from "@/redux/chatSlice";
 import { getImageTypeFileValid } from "@/utils/getImageTypeFileValid";
 import App from "@/pages/_app";
+import { NotifyResponseType } from "@/types/NotifyResponseType";
+import { videoCall } from "@/services/ChatRoomService";
 
 
 export default function ChatScreen({ chat, messages }: { chat: ChatType, messages: Array<MessageType> }) {
@@ -170,8 +172,6 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
       setStatusSend(StatusSendType.SENT, dispatch)
       scrollToBottom();
     })
-
-    console.log(chatState.listChat)
   }
 
   const processAttachFile = (files: File[]) => {
@@ -280,48 +280,78 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
     setShowEmoji(false);
   };
 
-  const handleCalling = async(chatInfo: any = chat ,  userInfo: any = chat.recipientInfo) => {
+  const handleCalling = () => {
 
-    let userBusy = await getUserBusy();
-
-    if(!videoCallState.showVideoCallScreen) {
-
-        if(userBusy.includes(userInfo.email) || !appState.userOnline.find((userOn) => userInfo.email === userOn)) {
-
-            toast(`${userInfo.fullName} is busy`, { hideProgressBar: true, autoClose: 5000, type: 'info' })
-            return;
-
-        } else {
-
-            const checkPermission = await requestMedia()
-
-            if (!checkPermission) {
-              toast(`Please allow using camera and microphone`, { hideProgressBar: true, autoClose: 5000, type: 'info' })
-              return;
-            }
-
-            dispatch(setGlobalVideoCallState({
-              type: "setShowVideoCallScreen",
-              data: true
-            }))
-            dispatch(setGlobalVideoCallState({
-              type: "setStatusCall",
-              data: StatusCallType.CALLING
-            }));
-            let data = {
-                sender: user?.email,
-                recipient: userInfo.email,
-                chatId: chatInfo._id,
-                isGroup: chatInfo.isGroup,
-                photoURL: userInfo.photoURL,
-            }
-            dispatch(setGlobalVideoCallState({
-              type: "setDataVideoCall",
-              data: data
-            }))
-            appState.socket.emit("call-video-one-to-one", JSON.stringify(data));
+    dispatch(setGlobalVideoCallState({
+      type: "setShowVideoCallScreen",
+      data: true
+    }))
+    dispatch(setGlobalVideoCallState({
+      type: "setStatusCall",
+      data: StatusCallType.CALLING
+    }));
+    let data = {
+        type: "send-call",
+        senderId: appState.userInfo._id!,
+        recipientId: chat.isGroup ? JSON.stringify(chat?.listRecipientInfo?.map((re) => re._id)) : chat.recipientInfo?._id!,
+        dataVideoCall: {
+          chatRoomId: chat._id,
+          fullName: appState.userInfo.fullName,
+          photoURL: chat.isGroup ? chat.photoURL : chat.recipientInfo?.photoURL,
+          isGroup: chat.isGroup
         }
     }
+    setDataVideoCall(data, dispatch)
+    videoCall({
+      type: "send-call",
+      senderId: appState.userInfo._id!,
+      recipientId: chat.isGroup ? JSON.stringify(chat?.listRecipientInfo?.map((re) => re._id)) : chat.recipientInfo?._id!,
+      chatRoomId: chat._id,
+      fullName: appState.userInfo.fullName,
+      photoURL: chat.isGroup ? chat.photoURL : appState.userInfo.photoURL,
+      isGroup: chat.isGroup
+    })
+
+    // let userBusy = await getUserBusy();
+
+    // if(!videoCallState.showVideoCallScreen) {
+
+    //     if(userBusy.includes(userInfo.email) || !appState.userOnline.find((userOn) => userInfo.email === userOn)) {
+
+    //         toast(`${userInfo.fullName} is busy`, { hideProgressBar: true, autoClose: 5000, type: 'info' })
+    //         return;
+
+    //     } else {
+
+    //         const checkPermission = await requestMedia()
+
+    //         if (!checkPermission) {
+    //           toast(`Please allow using camera and microphone`, { hideProgressBar: true, autoClose: 5000, type: 'info' })
+    //           return;
+    //         }
+
+    //         dispatch(setGlobalVideoCallState({
+    //           type: "setShowVideoCallScreen",
+    //           data: true
+    //         }))
+    //         dispatch(setGlobalVideoCallState({
+    //           type: "setStatusCall",
+    //           data: StatusCallType.CALLING
+    //         }));
+    //         let data = {
+    //             sender: user?.email,
+    //             recipient: userInfo.email,
+    //             chatId: chatInfo._id,
+    //             isGroup: chatInfo.isGroup,
+    //             photoURL: userInfo.photoURL,
+    //         }
+    //         dispatch(setGlobalVideoCallState({
+    //           type: "setDataVideoCall",
+    //           data: data
+    //         }))
+    //         // appState.socket.emit("call-video-one-to-one", JSON.stringify(data));
+    //     }
+    // }
   }
 
   const handlePaste = (files: any) => {
