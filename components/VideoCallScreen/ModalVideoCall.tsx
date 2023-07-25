@@ -1,38 +1,24 @@
 import { Modal } from '@mui/material'
 import dynamic from 'next/dynamic';
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { useSelector } from 'react-redux'
 import { selectChatState } from '@/redux/chatSlice';
-import { generateRtcToken } from '@/services/UserService';
-import { selectAppState } from '@/redux/appSlice';
 
-export default function ModalVideoCall() {
+export default function ModalVideoCall({ token }: { token: string }) {
 
     const chatState = useSelector(selectChatState)
-    const appState = useSelector(selectAppState)
-    const [videoCall, setVideoCall] = useState(false);
-    const [token, setToken] = useState("")
-
+    const [videoCall, setVideoCall] = useState(true);
+console.log(token)
     const AgoraUIKit = dynamic(() => import('agora-react-uikit'), {
         ssr: false
     });
 
     const channel = chatState.currentChat!
 
-    useEffect(() => {
-        generateRtcToken({
-            chatRoomId: channel,
-            userId: appState.userInfo._id!
-        })
-        .then(setToken)
-        .finally(() => setVideoCall(true))
-    },[])
-
-
     const rtcProps = {
         appId: process.env.NEXT_PUBLIC_AGORA_APP_ID!,
         channel: channel,
-        token: token
+        token
     };
 
     const callbacks = {
@@ -45,7 +31,7 @@ export default function ModalVideoCall() {
         <Modal open={true} style={{background: "white"}}>
             <>
                 {
-                videoCall ? (
+                videoCall && token ? (
                     <div style={{display: 'flex', width: '100vw', height: '100vh'}}>
                         <AgoraUIKit rtcProps={rtcProps} callbacks={callbacks} />
                     </div>

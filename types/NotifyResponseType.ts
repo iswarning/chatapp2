@@ -17,6 +17,7 @@ export interface DataVideoCall {
     photoURL?: string
     chatRoomId?: string
     isGroup?: boolean
+    accessToken?: string
 }
 
 export interface DataNotify {

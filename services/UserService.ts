@@ -166,7 +166,7 @@ export async function findAllUser() {
     return null
 }
 
-export async function generateRtcToken(input: { chatRoomId: string, userId: string }) {
+export async function generateRtcToken(input: { chatRoomId: string }) {
     try {
         const response = await axios.post(process.env.NEXT_PUBLIC_GRAPHQL_ENPOINT!, {
             query: QueryGenerateRtcToken,

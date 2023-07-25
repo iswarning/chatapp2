@@ -8,6 +8,7 @@ import { selectAppState } from "@/redux/appSlice";
 import { setDataVideoCall } from "@/services/CacheService";
 import { videoCall } from "@/services/ChatRoomService";
 import { selectChatState } from "@/redux/chatSlice";
+import { generateRtcToken } from "@/services/UserService";
 
 export default function PopupVideoCall({ show }: { show: boolean }) {
 
@@ -28,7 +29,7 @@ export default function PopupVideoCall({ show }: { show: boolean }) {
         }));
     }
 
-    const handleAccept = () => {
+    const handleAccept = async() => {
         dispatch(setGlobalVideoCallState({
             type: "setShowVideoCallScreen",
             data: false
@@ -37,13 +38,15 @@ export default function PopupVideoCall({ show }: { show: boolean }) {
             type: "setStatusCall",
             data: StatusCallType.CALLED
         }));
+        const accessToken = await generateRtcToken({chatRoomId: chat?._id!})
         let data = {
             type: "accept-call",
             senderId: appState.userInfo._id!,
             recipientId: chat?.isGroup ? JSON.stringify(chat?.listRecipientInfo?.map((re) => re._id))  : chat?.recipientInfo?._id!,
             dataVideoCall: {
               chatRoomId: chat?._id,
-              isGroup: chat?.isGroup
+              isGroup: chat?.isGroup,
+              accessToken
             }
         }
         setDataVideoCall(data, dispatch)
@@ -52,7 +55,8 @@ export default function PopupVideoCall({ show }: { show: boolean }) {
           senderId: appState.userInfo._id!,
           recipientId: chat?.isGroup ? JSON.stringify(chat?.listRecipientInfo?.map((re) => re._id))  : chat?.recipientInfo?._id!,
           chatRoomId: chat?._id,
-          isGroup: chat?.isGroup
+          isGroup: chat?.isGroup,
+          accessToken
         })
     }
 

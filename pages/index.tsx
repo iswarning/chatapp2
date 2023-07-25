@@ -37,8 +37,6 @@ const Page: NextPageWithLayout = () => {
   const dispatch = useDispatch();
   const appState = useSelector(selectAppState);
   const chatState = useSelector(selectChatState);
-  const friendState = useSelector(selectFriendState);
-  const friendRequestState = useSelector(selectFriendRequestState);
   const videoCallState = useSelector(selectVideoCallState);
 
   useEffect(() => {
@@ -300,7 +298,7 @@ const Page: NextPageWithLayout = () => {
 
       { videoCallState.showVideoCallScreen ? <PopupVideoCall show={videoCallState.showVideoCallScreen} /> : null }
 
-      { videoCallState.statusCall === StatusCallType.CALLED ? <ModalVideoCall /> : null }
+      { videoCallState.statusCall === StatusCallType.CALLED ? <ModalVideoCall token={videoCallState?.notifyResponse?.dataVideoCall?.accessToken!} /> : null }
 
       {
         appState.showImageFullScreenData.isShow ? <ShowImageFullScreen 
