@@ -73,12 +73,12 @@ export function removeFriendGlobal(friendId: string, dispatch: Dispatch<AnyActio
     }))
 }
 
-export function setCurrentChat(chatRoomId: string, dispatch: Dispatch<AnyAction>) {
+export function setCurrentChat(args: { chatRoomId: string, index: number }, dispatch: Dispatch<AnyAction>) {
     dispatch(setGlobalChatState({
         type: "setCurrentChat",
-        data: chatRoomId
+        data: args
     }))
-    setLocalStorage("CurrentChat", chatRoomId)
+    setLocalStorage("CurrentChat", args)
 }
 
 export function setListChat(listChat: ChatType[], dispatch: Dispatch<AnyAction>) {

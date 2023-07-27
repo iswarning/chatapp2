@@ -80,13 +80,14 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
         chat={chat}
         lastIndex={messages[index] === messages[messages.length - 1]}
         scrollToBottom={() => scrollToBottom()}
+        index={index}
         showAvatar={
           messages[0].senderId !== appState.userInfo._id
           &&(
           messages[messages.length - 1].senderId !== appState.userInfo._id
           ||
           messages[index].senderId !== messages[index + 1].senderId )
-}
+        }
       />
     ));
   };

@@ -30,34 +30,37 @@ export default function PopupVideoCall({ show }: { show: boolean }) {
     }
 
     const handleAccept = async() => {
-        dispatch(setGlobalVideoCallState({
-            type: "setShowVideoCallScreen",
-            data: false
-        }))
-        dispatch(setGlobalVideoCallState({
-            type: "setStatusCall",
-            data: StatusCallType.CALLED
-        }));
-        const accessToken = await generateRtcToken({chatRoomId: chat?._id!})
-        let data = {
-            type: "accept-call",
-            senderId: appState.userInfo._id!,
-            recipientId: chat?.isGroup ? JSON.stringify(chat?.listRecipientInfo?.map((re) => re._id))  : chat?.recipientInfo?._id!,
-            dataVideoCall: {
-              chatRoomId: chat?._id,
-              isGroup: chat?.isGroup,
-              accessToken
+        const accessToken = await generateRtcToken({chatRoomId: chat?._id!})      
+        if (accessToken) {
+            dispatch(setGlobalVideoCallState({
+                type: "setShowVideoCallScreen",
+                data: false
+            }))
+            dispatch(setGlobalVideoCallState({
+                type: "setStatusCall",
+                data: StatusCallType.CALLED
+            }));
+            let data = {
+                type: "accept-call",
+                senderId: appState.userInfo._id!,
+                recipientId: chat?.isGroup ? JSON.stringify(chat?.listRecipientInfo?.map((re) => re._id))  : chat?.recipientInfo?._id!,
+                dataVideoCall: {
+                chatRoomId: chat?._id,
+                isGroup: chat?.isGroup,
+                accessToken
+                }
             }
+            setDataVideoCall(data, dispatch)
+            await videoCall({
+                type: "accept-call",
+                senderId: appState.userInfo._id!,
+                recipientId: chat?.isGroup ? JSON.stringify(chat?.listRecipientInfo?.map((re) => re._id))  : chat?.recipientInfo?._id!,
+                chatRoomId: chat?._id,
+                isGroup: chat?.isGroup,
+                accessToken
+            })
         }
-        setDataVideoCall(data, dispatch)
-        videoCall({
-          type: "accept-call",
-          senderId: appState.userInfo._id!,
-          recipientId: chat?.isGroup ? JSON.stringify(chat?.listRecipientInfo?.map((re) => re._id))  : chat?.recipientInfo?._id!,
-          chatRoomId: chat?._id,
-          isGroup: chat?.isGroup,
-          accessToken
-        })
+        
     }
 
   return (

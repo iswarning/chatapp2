@@ -63,7 +63,8 @@ const Page: NextPageWithLayout = () => {
         setListFriend(getLocalStorage("ListFriend"), dispatch)
         setListFriendRequest(getLocalStorage("ListFriendRequest"), dispatch)
         setListChat(getLocalStorage("ListChat"), dispatch)
-        getLocalStorage("CurrentChat") ? setCurrentChat(getLocalStorage("CurrentChat"), dispatch) : null;
+        if (getLocalStorage("CurrentChat"))
+          setCurrentChat(getLocalStorage("CurrentChat"), dispatch)
         processMessageTypeFile()
         setLoading(false)
       }
@@ -72,14 +73,14 @@ const Page: NextPageWithLayout = () => {
 
   const processMessageTypeFile = () => {
     let listKey = chatState?.listChat?.find((chat) => 
-    chat?._id === chatState?.currentChat)?.messages?.filter((msg) => 
+    chat?._id === chatState?.currentChat.chatRoomId)?.messages?.filter((msg) => 
     msg.type === "file-uploading").map((msg) => msg.file)
     listKey?.forEach((key) => {
       getFileByKey(key!)
       .then((data) => {
         if(!data) return
-        removeMessageInListChat(data._id!, chatState?.currentChat!, dispatch)
-        pushMessageToListChat(chatState?.currentChat! ,data ,dispatch)
+        removeMessageInListChat(data._id!, chatState?.currentChat.chatRoomId, dispatch)
+        pushMessageToListChat(chatState?.currentChat.chatRoomId ,data ,dispatch)
       })
     })
   }
@@ -103,97 +104,6 @@ const Page: NextPageWithLayout = () => {
   //   };
   // }, []);
 
-  // useEffect(() => {
-  //     appState.socket.on("response-call-video-one-to-one", (res: string) => {
-  //       let data = JSON.parse(res);
-  //       if(data.recipient === user?.email) {
-  //           dispatch(setGlobalVideoCallState({
-  //             type: "setDataVideoCall",
-  //             data: {
-  //               chatId: data.chatId,
-  //               sender: user?.email,
-  //               recipient: data.sender,
-  //               isGroup: data.isGroup,
-  //             } 
-  //           }))
-  //           dispatch(setGlobalVideoCallState({
-  //             type: "setShowVideoCallScreen",
-  //             data: true
-  //           }))
-  //           dispatch(setGlobalVideoCallState({
-  //             type: "setStatusCall",
-  //             data: StatusCallType.INCOMING_CALL
-  //           }))
-  //       }
-  //     });
-  //     return () => {
-  //       appState.socket.disconnect();
-  //     };
-  // },[])
-
-  // useEffect(() => {
-  //   appState.socket.on("response-accept-call-one-to-one", (res: string) => {
-  //     let data = JSON.parse(res);
-  //     if(data.sender === user?.email) {
-  //       dispatch(setGlobalVideoCallState({
-  //         type: "setStatusCall",
-  //         data: StatusCallType.CALLED
-  //       }))
-  //     }
-  //   })
-  //   return () => {
-  //     appState.socket.disconnect();
-  //   };
-  // },[])
-
-  // useEffect(() => {
-  //   appState.socket.on('response-reject-call-one-to-one', (res: string) => {
-  //     let data = JSON.parse(res);
-  //     if(data.recipient === user?.email) {
-  //       dispatch(setGlobalVideoCallState({
-  //         type: "setShowVideoCallScreen",
-  //         data: false
-  //       }))
-  //     }
-  //   });
-  //   return () => {
-  //     appState.socket.disconnect();
-  //   };
-  // },[])
-
-  // useEffect(() => {
-  //   appState.socket.on("response-notify", (msg: string) => {
-  //     const data = JSON.parse(msg);
-
-  //     if(data.type === 'send-message' && data.recipient.includes(user?.email)) {
-  //       dispatch(setGlobalChatState({
-  //         type: "pushMessageToListChat",
-  //         data: data.data
-  //       }))
-  //       toast(`${data.message}`, { hideProgressBar: true, autoClose: 5000, type: 'info' })
-  //     }  
-
-  //     if(data.type === 'accept-friend' && data.recipient.includes(user?.email)) {
-  //       dispatch(setGlobalFriendState({
-  //         type: "addNewFriend",
-  //         data: data.data
-  //       }))
-  //       toast(`${data.message}`, { hideProgressBar: true, autoClose: 5000, type: 'info' })
-  //     }
-
-  //     if(data.type === 'send-add-friend' && data.recipient.includes(user?.email)) {
-  //       dispatch(setGlobalFriendState({
-  //         type: "addNewFriendRequest",
-  //         data: data.data
-  //       }))
-  //       toast(`${data.message}`, { hideProgressBar: true, autoClose: 5000, type: 'info' })
-  //     }  
-
-  //   });
-  //   return () => {
-  //     appState.socket.disconnect()
-  //   }
-  // },[])
 
   const { data: resNotify } = useSubscription(
     SubscriptionOnNotify
@@ -243,6 +153,7 @@ const Page: NextPageWithLayout = () => {
             type: "setStatusCall",
             data: StatusCallType.CALLED
           }));
+          console.log(resCall?.onCall)
           setDataVideoCall(resCall?.onCall, dispatch)
           break
         }
@@ -275,7 +186,7 @@ const Page: NextPageWithLayout = () => {
         }
 
         {
-          appState.currentSidebar === SidebarType.SUGGESTION ? <SidebarFriendRequest /> : null
+          appState.currentSidebar === SidebarType.FRIEND_REQUEST ? <SidebarFriendRequest /> : null
         }
 
         {
@@ -283,10 +194,10 @@ const Page: NextPageWithLayout = () => {
         }
 
         {
-          chatState.currentChat?.length! > 0 ? <>
+          chatState.currentChat.chatRoomId ? <>
             <ChatScreen 
-            chat={chatState.listChat.find((chat) => chat._id === chatState.currentChat)!} 
-            messages={chatState.listChat.find((chat) => chat._id === chatState.currentChat)?.messages!} />
+            chat={chatState.listChat.find((chat) => chat._id === chatState.currentChat.chatRoomId)!} 
+            messages={chatState.listChat.find((chat) => chat._id === chatState.currentChat.chatRoomId)?.messages!} />
             {
               appState.showGroupInfo ? <InfoContentScreen /> : null
             }

@@ -9,7 +9,7 @@ export enum SidebarType {
   CHAT,
   GROUPS,
   CONTACTS,
-  SUGGESTION,
+  FRIEND_REQUEST,
   PROFILE,
 }
 

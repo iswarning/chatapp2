@@ -40,11 +40,12 @@ export default function SidebarMessage() {
         <div className="intro-y text-base font-medium leading-tight mt-3">Recent Chats</div>
         <div className="intro-y overflow-y-auto scrollbar-hidden pt-2 mt-3 -mx-5 px-5">
         {chatState.listChat.length! > 0
-          ? chatState.listChat.map((chat) => (
+          ? chatState.listChat.map((chat, index) => (
               <ChatComponent
                 key={chat._id}
                 chat={chat}
-                active={chatState.currentChat === chat._id}
+                active={chatState.currentChat.chatRoomId === chat._id}
+                index={index}
               />
             ))
         : null}

@@ -130,6 +130,7 @@ export const MutationVideoCall = `
                 photoURL
                 chatRoomId
                 isGroup
+                accessToken
             }
         }
     }

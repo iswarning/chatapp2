@@ -17,13 +17,15 @@ export default function Message({
   chat,
   lastIndex,
   scrollToBottom,
-  showAvatar
+  showAvatar,
+  index
 }: {
   message: MessageType;
   chat: ChatType;
   lastIndex: boolean;
   scrollToBottom: any;
   showAvatar: boolean
+  index: number
 }) {
   const [isShowImageFullscreen, setShowImageFullscreen] = useState(false);
   const [urlImage, setUrlImage] = useState("");

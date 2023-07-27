@@ -7,7 +7,10 @@ import { setLocalStorage } from "@/services/CacheService";
 // Type for our state
 export interface InitialState {
   data: {
-    currentChat: string | null,
+    currentChat: {
+      chatRoomId: string,
+      index: number
+    },
     listChat: Array<ChatType>,
   },
   
@@ -16,7 +19,10 @@ export interface InitialState {
 // Initial state
 const initialState: InitialState = {
   data: {
-    currentChat: null,
+    currentChat: {
+      chatRoomId: "",
+      index: -1
+    },
     listChat: Array<ChatType>(),
   },
 
@@ -43,18 +49,20 @@ export const chatSlice = createSlice({
         }
           
         case "pushMessageToListChat": {
-          state.data.listChat = state.data.listChat.map((chat) => {
-            let newListMessage = chat.messages
-            newListMessage?.push(action.payload.data.newMessage)
-            if (chat._id === action.payload.data.chatId) {
-              return {
-                ...chat,
-                messages: newListMessage
-              }
-            } else {
-              return chat
-            }
-          })
+          let index = state.data.listChat.findIndex(chat => chat._id === action.payload.data.chatId)
+          state?.data?.listChat?.[index]?.messages?.push(action.payload.data.newMessage)
+          // state.data.listChat = state.data.listChat.map((chat) => {
+          //   let newListMessage = chat.messages
+          //   newListMessage?.push(action.payload.data.newMessage)
+          //   if (chat._id === action.payload.data.chatId) {
+          //     return {
+          //       ...chat,
+          //       messages: newListMessage
+          //     }
+          //   } else {
+          //     return chat
+          //   }
+          // })
           setLocalStorage("ListChat", state.data.listChat)
           break;
         }

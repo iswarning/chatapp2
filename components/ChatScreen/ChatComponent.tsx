@@ -17,7 +17,7 @@ import { setCurrentChat, setListFileInRoom, setListImageInRoom, setListMessageIn
 import mime from "mime-types";
 import { getAllMessagesByChatRoomId } from "@/services/MessageService";
 
-export default function ChatComponent({ chat, active }: { chat: ChatType, active: boolean}) {
+export default function ChatComponent({ chat, active, index }: { chat: ChatType, active: boolean, index: number}) {
   const [user] = useAuthState(auth);
   const appState = useSelector(selectAppState)
   const chatState = useSelector(selectChatState)
@@ -41,7 +41,7 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
   // );
 
   const handleShowChatScreen = async() => {
-    let chatExist = chatState.listChat.find((chatExist) => chatExist._id === chat._id)
+    let chatExist = chatState.listChat[index]
     let newMessages = chatExist?.messages
     
     if (!chatExist?.messages) {
@@ -50,7 +50,7 @@ export default function ChatComponent({ chat, active }: { chat: ChatType, active
 
     setListMessageInRoom(chatExist?._id!, newMessages, dispatch)
 
-    setCurrentChat(chatExist?._id!, dispatch)
+    setCurrentChat({ chatRoomId: chatExist?._id!, index }, dispatch)
 
     setListImageInRoom(chatExist?._id!, await getListImage(), dispatch)
 

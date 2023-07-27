@@ -59,6 +59,7 @@ export const SubscriptionOnCall = gql`
                 photoURL
                 chatRoomId
                 isGroup
+                accessToken
             }
         }
     }
