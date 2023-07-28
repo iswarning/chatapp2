@@ -51,24 +51,11 @@ export const chatSlice = createSlice({
         case "pushMessageToListChat": {
           let index = state.data.listChat.findIndex(chat => chat._id === action.payload.data.chatId)
           state?.data?.listChat?.[index]?.messages?.push(action.payload.data.newMessage)
-          // state.data.listChat = state.data.listChat.map((chat) => {
-          //   let newListMessage = chat.messages
-          //   newListMessage?.push(action.payload.data.newMessage)
-          //   if (chat._id === action.payload.data.chatId) {
-          //     return {
-          //       ...chat,
-          //       messages: newListMessage
-          //     }
-          //   } else {
-          //     return chat
-          //   }
-          // })
           setLocalStorage("ListChat", state.data.listChat)
           break;
         }
 
         case "updateMessageInListChat": {
-          console.log(state.data.listChat)
           state.data.listChat = state.data.listChat.map((chat) => {
             if (chat._id === action.payload.data.chatId) {
               return {
@@ -179,6 +166,38 @@ export const chatSlice = createSlice({
             return
       }
     },
+
+    setGlobalMessageState(state, action) {
+      switch(action.payload.type) {
+
+        case "pushMessageToListChat": {
+          state.data.listChat[action.payload.data.index].messages?.push(action.payload.data.newMessage)
+          break
+        }
+        case "reactionToMessage": {
+          let reactionExist = JSON.parse(
+            state.data.listChat[action.payload.data.indexChat].messages?.[action.payload.data.indexMessage].reaction!
+          ) ?? null
+          if (reactionExist) {
+            if (reactionExist.emoji === action.payload.data.reaction.emoji) {
+              JSON.stringify(
+                JSON.parse(
+                  state.data.listChat[action.payload.data.indexChat].messages?.[action.payload.data.indexMessage].reaction!
+                ).find((react: any) => react.emoji === action.payload.data.reaction.emoji)
+              )
+            } else {
+              JSON.stringify(
+                JSON.parse(
+                  state.data.listChat[action.payload.data.indexChat].messages?.[action.payload.data.indexMessage].reaction!
+                ).push(action.payload.data.reaction)
+              )
+            }
+          }
+          break
+        }
+
+      }
+    }
     
   },
 

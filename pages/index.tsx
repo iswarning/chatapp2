@@ -16,17 +16,13 @@ import { selectChatState } from "@/redux/chatSlice";
 import { StatusCallType, selectVideoCallState, setGlobalVideoCallState } from "@/redux/videoCallSlice";
 import { getLocalStorage, pushMessageToListChat, removeFriendGlobal, removeMessageInListChat, setCurrentChat, setDataVideoCall, setListChat, setListFriend, setListFriendRequest, setShowImageFullScreen, setUserInfo } from "@/services/CacheService";
 import ShowImageFullScreen from "@/components/ChatScreen/Message/ShowImageFullScreen";
-import { createNewUser, findUserInInitialData, getInitialDataOfUser } from "@/services/UserService";
+import { createNewUser, getInitialDataOfUser } from "@/services/UserService";
 import { SubscriptionOnCall, SubscriptionOnNotify } from "@/graphql/subscriptions";
 import { useSubscription } from "@apollo/client";
 import { AlertInfo } from "@/utils/core";
 import { getFileByKey } from "@/services/MessageService";
-import { MessageType } from "@/types/MessageType";
-import { selectFriendState } from "@/redux/friendSlice";
-import { selectFriendRequestState } from "@/redux/friendRequestSlice";
 import SidebarFriendRequest from "@/components/Sidebar/SidebarFriendRequest";
 import PopupVideoCall from "@/components/VideoCallScreen/PopupVideoCall";
-import { NotifyResponseType } from "@/types/NotifyResponseType";
 import ModalVideoCall from "@/components/VideoCallScreen/ModalVideoCall";
 
 // import '@/styles/tailwind.min.css'
@@ -41,7 +37,6 @@ const Page: NextPageWithLayout = () => {
 
   useEffect(() => {
     setLoading(true)
-    localStorage.clear()
     createNewUser({
       email: user?.email!,
       fullName: user?.displayName!,
@@ -209,7 +204,7 @@ const Page: NextPageWithLayout = () => {
 
       { videoCallState.showVideoCallScreen ? <PopupVideoCall show={videoCallState.showVideoCallScreen} /> : null }
 
-      { videoCallState.statusCall === StatusCallType.CALLED ? <ModalVideoCall token={videoCallState?.notifyResponse?.dataVideoCall?.accessToken!} /> : null }
+      { videoCallState.statusCall === StatusCallType.CALLED ? <ModalVideoCall token={videoCallState?.notifyResponse?.dataVideoCall?.accessToken!} channel={videoCallState?.notifyResponse?.dataVideoCall?.chatRoomId!} /> : null }
 
       {
         appState.showImageFullScreenData.isShow ? <ShowImageFullScreen 

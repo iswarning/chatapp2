@@ -1,5 +1,5 @@
 import { MutationCreateUser } from "@/graphql/mutations";
-import { QueryFindAllUser, QueryFindUserSuggestion, QueryGenerateRtcToken, QueryGetInitialDataOfUser, QueryGetUserInfoById } from "@/graphql/queries";
+import { QueryFindAllUser, QueryGenerateRtcToken, QueryGetInitialDataOfUser, QueryGetUserInfoById } from "@/graphql/queries";
 import { ChatType } from "@/types/ChatType";
 import { FriendRequestType } from "@/types/FriendRequestType";
 import { FriendType } from "@/types/FriendType";
@@ -41,41 +41,40 @@ export async function getInitialDataOfUser(userId: string) {
         }
 
         let listChatRoom: ChatType[] = response.data.data.getInitialDataOfUser.listChatRoom
-        response.data.data.getInitialDataOfUser.userInfo._id === userId
         if (listChatRoom.length > 0) {
             listChatRoom = await Promise.all(listChatRoom.map(async(chatRoom) => {
                 let listMember = chatRoom?.members
 
                 let { infoByListFriend, infoByListFriendR } = findUserInInitialData(listFriend, listFriendR, listMember)
-                let userInfo = {} as UserType
+                let userInfoOfChat = {} as UserType
 
-                if (response.data.data.getInitialDataOfUser.userInfo._id === userId) 
-                    userInfo = response.data.data.getInitialDataOfUser.userInfo
-
-                if (infoByListFriend)
-                    userInfo = infoByListFriend
-
-                if (infoByListFriendR)
-                    userInfo = infoByListFriendR
-
-                if (Object.keys(userInfo).length > 0) 
-                    userInfo = await getUserById(listMember.find((m) => m !== userId)!)
-
+                if (infoByListFriend) {
+                    userInfoOfChat = infoByListFriend
+                } else if (infoByListFriendR) {
+                    userInfoOfChat = infoByListFriendR
+                }
+                    
                 if(chatRoom.isGroup) {
                     return {
                         ...chatRoom,
                         listRecipientInfo: await Promise.all(listMember.map(async(member) => {
-                            const userInfo = await getUserById(member)
-                            return {
-                                _id: member,
-                                ...userInfo
+                            let userInfoOfRecipient: UserType
+                            if (infoByListFriend?._id === member) {
+                                userInfoOfRecipient = infoByListFriend
+                            } else if (infoByListFriendR?._id === member) {
+                                userInfoOfRecipient = infoByListFriendR
+                            } else if(response.data.data.getInitialDataOfUser.userInfo._id === member) {
+                                userInfoOfRecipient = response.data.data.getInitialDataOfUser.userInfo
+                            } else {
+                                userInfoOfRecipient = await getUserById(member)
                             }
+                            return userInfoOfRecipient
                         }))
                     }
                 } else {
                     return {
                         ...chatRoom,
-                        recipientInfo: userInfo
+                        recipientInfo: userInfoOfChat
                     }
                 }
             }))

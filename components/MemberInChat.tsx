@@ -27,7 +27,7 @@ export default function MemberInChat({info}: {info: UserType | undefined}) {
               showAction ? <ActionContainer className='box'>
               <ActionElement className='mb-2'><AccountCircleIcon fontSize='small' /> Profile</ActionElement>
                 {
-                  chatState.currentChat.admin === appState.userInfo.email ? <ActionElement><ExitToAppIcon fontSize='small' /> This user leave group</ActionElement> : null
+                  chatState.listChat[chatState.currentChat.index].admin === appState.userInfo.email ? <ActionElement><ExitToAppIcon fontSize='small' /> This user leave group</ActionElement> : null
                 }
               </ActionContainer>: null
             }
