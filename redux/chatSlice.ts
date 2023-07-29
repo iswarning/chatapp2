@@ -79,18 +79,7 @@ export const chatSlice = createSlice({
         }
 
         case "removeMessageInListChat": {
-          state.data.listChat = state.data.listChat.map((chat) => {
-            if (chat._id === action.payload.data.chatId) {
-              return {
-                ...chat,
-                messages: chat?.messages?.splice(
-                  chat?.messages?.findIndex((msg) => msg._id === action.payload.data.messageId)!
-                  , 1)
-              }
-            } else {
-              return chat
-            }
-          })
+          state.data.listChat[action.payload.data.indexChat].messages?.splice(action.payload.data.indexMessage, 1)
           setLocalStorage("ListChat", state.data.listChat)
           break;
         }

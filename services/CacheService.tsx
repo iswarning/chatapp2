@@ -156,12 +156,12 @@ export function pushMessageToListChat(chatId: string, newMessage: MessageType, d
     }))
 }
 
-export function removeMessageInListChat(messageId: string, chatId: string, dispatch: Dispatch<AnyAction>) {
+export function removeMessageInListChat(indexMessage: number, indexChat: number, dispatch: Dispatch<AnyAction>) {
     dispatch(setGlobalChatState({
         type: "removeMessageInListChat",
         data: {
-            chatId,
-            messageId
+            indexMessage,
+            indexChat
         }
     }))
 }
