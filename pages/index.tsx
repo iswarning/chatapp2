@@ -20,7 +20,7 @@ import { createNewUser, getInitialDataOfUser } from "@/services/UserService";
 import { SubscriptionOnCall, SubscriptionOnNotify } from "@/graphql/subscriptions";
 import { useSubscription } from "@apollo/client";
 import { AlertInfo } from "@/utils/core";
-import { getFileByKey } from "@/services/MessageService";
+import { getFileByKey, updateMessage } from "@/services/MessageService";
 import SidebarFriendRequest from "@/components/Sidebar/SidebarFriendRequest";
 import PopupVideoCall from "@/components/VideoCallScreen/PopupVideoCall";
 import ModalVideoCall from "@/components/VideoCallScreen/ModalVideoCall";
@@ -69,36 +69,14 @@ const Page: NextPageWithLayout = () => {
   const processMessageTypeFile = () => {
     let listKey = chatState?.listChat?.find((chat) => 
     chat?._id === chatState?.currentChat.chatRoomId)?.messages?.filter((msg) => 
-    msg.type === "file-uploading").map((msg) => msg.file)
-    listKey?.forEach((key) => {
-      getFileByKey(key!)
-      .then((data) => {
-        if(!data) return
-        removeMessageInListChat(data._id!, chatState?.currentChat.chatRoomId, dispatch)
-        pushMessageToListChat(chatState?.currentChat.chatRoomId ,data ,dispatch)
+    msg.type === "file-uploading")
+    listKey?.forEach((message) => {
+      updateMessage({
+        ...message,
+        type: "file",
       })
     })
   }
-
-  // useEffect(() => {
-  //   appState.socket.emit("login", { userId: user?.email });
-  //   return () => {
-  //     appState.socket.disconnect();
-  //   };
-  // }, []);
-
-  // useEffect(() => {
-  //   appState.socket.on("get-user-online", (data) => {
-  //     dispatch(setAppGlobalState({
-  //       type: "setUserOnline",
-  //       data: data
-  //     }))
-  //   });
-  //   return () => {
-  //     appState.socket.disconnect();
-  //   };
-  // }, []);
-
 
   const { data: resNotify } = useSubscription(
     SubscriptionOnNotify
