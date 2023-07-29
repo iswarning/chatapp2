@@ -4,7 +4,7 @@ import { useCollection } from 'react-firebase-hooks/firestore'
 import Image from 'next/image'
 import {useSelector} from 'react-redux'
 import { selectAppState } from '@/redux/appSlice'
-import { MapUserData, UserType } from '@/types/UserType'
+import { UserType } from '@/types/UserType'
 
 export default function MemberElement({ info, handleAddMemberToGroup, listMember }: { info: UserType | undefined, handleAddMemberToGroup: any, listMember: Array<UserType | undefined> }) {
 

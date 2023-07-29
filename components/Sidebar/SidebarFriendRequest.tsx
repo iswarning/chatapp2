@@ -61,7 +61,7 @@ export default function SidebarFriendRequest() {
           }
 
           {
-            input.length > 0 && result.length > 0 ? result.map((info) => <UserElement userInfo={info} resetInput={() => setInput("")} />)  : null
+            input.length > 0 && result.length > 0 ? result.map((info) => <UserElement key={info._id} userInfo={info} resetInput={() => setInput("")} />)  : null
           }
 
           </div>

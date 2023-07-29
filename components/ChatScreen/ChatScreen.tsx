@@ -1,15 +1,10 @@
 import { auth, db, storage } from "@/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
 import Message from "./Message/Message";
-import { useEffect, useRef, useState } from "react";
+import { DragEvent, useEffect, useRef, useState } from "react";
 import {
   EndOfMessage,
-  InputMessage,
 } from "./ChatScreenStyled";
-import { toast } from "react-toastify";
-import {
-  handleImageInMessage,
-} from "./Functions";
 import { useSelector, useDispatch } from 'react-redux';
 import { StatusSendType, selectAppState } from "@/redux/appSlice";
 import { ChatType } from "@/types/ChatType";
@@ -20,18 +15,14 @@ import styled from "styled-components";
 import DropdownAttach from "@/components/ChatScreen/DropdownAttach";
 import CallIcon from '@mui/icons-material/Call';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import getUserBusy from "@/utils/getUserBusy";
-import { requestMedia } from "@/utils/requestPermission";
 import { StatusCallType, selectVideoCallState, setGlobalVideoCallState } from "@/redux/videoCallSlice";
 import {v4 as uuidv4} from 'uuid'
 import { addNewFileInRoom, addNewImageInRoom, addPrepareSendFiles, pushMessageToListChat, setDataVideoCall, setFileUploadDone, setFileUploading, setPrepareSendFiles, setProgress, setShowGroupInfo, setStatusSend, updateMessageInListChat } from "@/services/CacheService";
 import { AlertError } from "@/utils/core";
-import { createMessage, updateMessage } from "@/services/MessageService";
+import { createMessage } from "@/services/MessageService";
 import PrepareSendFileScreen from "./PrepareSendFileScreen";
 import { selectChatState } from "@/redux/chatSlice";
 import { getImageTypeFileValid } from "@/utils/getImageTypeFileValid";
-import App from "@/pages/_app";
-import { NotifyResponseType } from "@/types/NotifyResponseType";
 import { videoCall } from "@/services/ChatRoomService";
 
 
@@ -312,47 +303,6 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
       photoURL: chat.isGroup ? chat.photoURL : appState.userInfo.photoURL,
       isGroup: chat.isGroup
     })
-
-    // let userBusy = await getUserBusy();
-
-    // if(!videoCallState.showVideoCallScreen) {
-
-    //     if(userBusy.includes(userInfo.email) || !appState.userOnline.find((userOn) => userInfo.email === userOn)) {
-
-    //         toast(`${userInfo.fullName} is busy`, { hideProgressBar: true, autoClose: 5000, type: 'info' })
-    //         return;
-
-    //     } else {
-
-    //         const checkPermission = await requestMedia()
-
-    //         if (!checkPermission) {
-    //           toast(`Please allow using camera and microphone`, { hideProgressBar: true, autoClose: 5000, type: 'info' })
-    //           return;
-    //         }
-
-    //         dispatch(setGlobalVideoCallState({
-    //           type: "setShowVideoCallScreen",
-    //           data: true
-    //         }))
-    //         dispatch(setGlobalVideoCallState({
-    //           type: "setStatusCall",
-    //           data: StatusCallType.CALLING
-    //         }));
-    //         let data = {
-    //             sender: user?.email,
-    //             recipient: userInfo.email,
-    //             chatId: chatInfo._id,
-    //             isGroup: chatInfo.isGroup,
-    //             photoURL: userInfo.photoURL,
-    //         }
-    //         dispatch(setGlobalVideoCallState({
-    //           type: "setDataVideoCall",
-    //           data: data
-    //         }))
-    //         // appState.socket.emit("call-video-one-to-one", JSON.stringify(data));
-    //     }
-    // }
   }
 
   const handlePaste = (files: any) => {
@@ -367,10 +317,10 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
     }
   }
 
-  const handleDrag = (e: any) => {
-    e.preventDefault();
-    e.stopPropagation();
-    switch(e.type){
+  const handleDrag = (event: DragEvent<HTMLInputElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    switch(event.type){
       case 'dragover':
         break;
       case 'dragleave':
@@ -378,8 +328,8 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
     }
   }
 
-  const handleDrop = (e: any) => {
-    handlePaste(e.dataTransfer.files)
+  const handleDrop = (event: DragEvent<HTMLInputElement>) => {
+    handlePaste(event.dataTransfer.files)
   }
 
   return (
@@ -424,9 +374,9 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
         style={{ marginRight: "10px", marginLeft: "10px" }}
         value={input}
         onPaste={(e) => handlePaste(e.clipboardData.files)}
-        onDragLeave={handleDrag}
-        onDragOver={handleDrag}
-        onDrop={handleDrop}
+        onDragLeave={(event) => handleDrag(event)}
+        onDragOver={(event) => handleDrag(event)}
+        onDrop={(event) => handleDrop(event)}
         disabled={appState.prepareSendFiles.length > 0}/>
         <div className="dropdown relative mr-3 sm:mr-5">
         <a href="javascript:void(0)" className="text-gray-600 hover:text-theme-1 w-4 h-4 sm:w-5 sm:h-5 block" onClick={() => setShowEmoji(!showEmoji)}> 

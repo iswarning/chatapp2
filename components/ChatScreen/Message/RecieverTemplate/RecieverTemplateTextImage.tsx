@@ -1,4 +1,3 @@
-import { ImageInMessageType } from "@/types/ImageInMessageType";
 import { MessageType } from "@/types/MessageType";
 import { getEmojiIcon } from "@/utils/getEmojiData";
 import DropdownActionMessage from "../DropdownActionMessage";
@@ -16,7 +15,7 @@ export default function RecieverTemplateTextImage(
     }) {
 
         const handleMessage = () => {
-            let messageExport: string = message.message;
+            let messageExport: string = message.message!;
             let images = JSON.parse(message.images!)
             if (message.type === "text-image") {
                 images?.forEach((image: any) => {
@@ -33,7 +32,7 @@ export default function RecieverTemplateTextImage(
             }
             return <div 
                     dangerouslySetInnerHTML={{ __html: messageExport }} 
-                    style={{fontSize: message.type === 'text' && getEmojiIcon.includes(message.message) && message.message.length === 2 ? '50px' : '' }}>
+                    style={{fontSize: message.type === 'text' && getEmojiIcon.includes(message?.message!) && message?.message!.length === 2 ? '50px' : '' }}>
                     </div>;
         };
 

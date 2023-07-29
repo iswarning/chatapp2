@@ -28,7 +28,7 @@ export default function RecieverTemplateFile({
 
     const storageRef = storage.ref(`public/chat-room/${chatState.currentChat}/files/${message.file}`)
     
-    const file = chatState.listChat.find((chat) => chatState.currentChat === chat._id)?.listFile?.find((image) => image.key === message.file)
+    const file = chatState.listChat.find((chat) => chatState.currentChat.chatRoomId === chat._id)?.listFile?.find((image) => image.key === message.file)
 
     const [downloadUrl] = useDownloadURL(storageRef)
 

@@ -21,8 +21,8 @@ function SharedFile() {
     },[])
 
     function getAllFile() {
-        let pathFile = `public/chat-room/${chatState.currentChat._id}/files`;
-        let pathPhoto = `public/chat-room/${chatState.currentChat._id}/photos`
+        let pathFile = `public/chat-room/${chatState.currentChat.chatRoomId}/files`;
+        let pathPhoto = `public/chat-room/${chatState.currentChat.chatRoomId}/photos`
         storage.ref(pathFile).listAll().then((results) => {
             results.items.forEach((result) => {
                 result.getMetadata().then((meta) => {

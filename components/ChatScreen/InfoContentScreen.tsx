@@ -16,12 +16,13 @@ export default function InfoContentScreen() {
     const [showCustom, setShowCustom] = useState(false)
     const [showMember, setShowMember] = useState(false)
 
-    const recipientInfo = chatState.currentChat.recipientInfo
-    const listRecipientInfo = chatState.currentChat.listRecipientInfo ?? []
-
+    const currentChat = chatState.listChat[chatState.currentChat.index]
+    const recipientInfo = currentChat.recipientInfo
+    const listRecipientInfo = currentChat.listRecipientInfo ?? []
+    
     const getRecipientAvatar = () => {
-        if (chatState.currentChat?.isGroup) {
-          if (chatState.currentChat?.photoURL!.length > 0) return chatState.currentChat?.photoURL;
+        if (currentChat.isGroup) {
+          if (currentChat.photoURL!.length > 0) return currentChat.photoURL;
           else return "/images/group-default.jpg";
         } else {
           let photoUrl = recipientInfo?.photoURL ?? null;
@@ -41,7 +42,7 @@ export default function InfoContentScreen() {
                                     getRecipientAvatar() ? <Image src={getRecipientAvatar()!} width={100} height={100} alt='' className='rounded-full' /> : null
                                 }
                             </div>
-                        <div className="text-base font-medium text-center mt-3">{ chatState.currentChat.isGroup ? "Group: " + chatState.currentChat.name : recipientInfo?.fullName}</div>
+                        <div className="text-base font-medium text-center mt-3">{ currentChat.isGroup ? "Group: " + currentChat.name : recipientInfo?.fullName}</div>
                     </div>
                 </div>
                 <div className="py-2">
@@ -65,7 +66,7 @@ export default function InfoContentScreen() {
                     </div>
                 </div>
                 {
-                    chatState.currentChat.isGroup ? <div className="py-2">
+                    currentChat.isGroup ? <div className="py-2">
                         <div className="intro-y h-full box p-4">
                             <div className="text-base font-medium cursor-pointer" onClick={() => setShowMember(!showMember)}>Members in chat { showMember ? <ArrowDropDownIcon fontSize='small' /> : <ArrowDropUpIcon fontSize='small' />}</div>
                             

@@ -166,38 +166,6 @@ export const chatSlice = createSlice({
             return
       }
     },
-
-    setGlobalMessageState(state, action) {
-      switch(action.payload.type) {
-
-        case "pushMessageToListChat": {
-          state.data.listChat[action.payload.data.index].messages?.push(action.payload.data.newMessage)
-          break
-        }
-        case "reactionToMessage": {
-          let reactionExist = JSON.parse(
-            state.data.listChat[action.payload.data.indexChat].messages?.[action.payload.data.indexMessage].reaction!
-          ) ?? null
-          if (reactionExist) {
-            if (reactionExist.emoji === action.payload.data.reaction.emoji) {
-              JSON.stringify(
-                JSON.parse(
-                  state.data.listChat[action.payload.data.indexChat].messages?.[action.payload.data.indexMessage].reaction!
-                ).find((react: any) => react.emoji === action.payload.data.reaction.emoji)
-              )
-            } else {
-              JSON.stringify(
-                JSON.parse(
-                  state.data.listChat[action.payload.data.indexChat].messages?.[action.payload.data.indexMessage].reaction!
-                ).push(action.payload.data.reaction)
-              )
-            }
-          }
-          break
-        }
-
-      }
-    }
     
   },
 

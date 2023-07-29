@@ -7,7 +7,7 @@ import InsertEmoticonIcon from '@mui/icons-material/InsertEmoticon';
 import ReplyIcon from '@mui/icons-material/Reply';
 import { useState } from "react";
 import styled from "styled-components";
-
+import { v4 as uuidv4 } from 'uuid'
 
 export default function RecieverTemplateText({ 
     showAvatar, 
@@ -60,7 +60,7 @@ export default function RecieverTemplateText({
                                 {handleMessage()}
                                 {
                                     message.reaction?.length! > 0 ? JSON.parse(message.reaction!).map((react: any) => 
-                                        <EmojiExist>{react.emoji}</EmojiExist>
+                                        <EmojiExist key={uuidv4()}>{react.emoji}</EmojiExist>
                                     ) : null
                                 }
                             </div>

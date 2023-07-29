@@ -50,8 +50,8 @@ export default function Navbar() {
                 </Btn>
 
                 <Btn 
-                    onClick={() => dispatch(setAppGlobalState({ type: "setCurrentSidebar", data: SidebarType.SUGGESTION }))} 
-                    className={appState.currentSidebar === SidebarType.SUGGESTION ? CLASS_ACTIVE : CLASS_NOT_ACTIVE} 
+                    onClick={() => dispatch(setAppGlobalState({ type: "setCurrentSidebar", data: SidebarType.FRIEND_REQUEST }))} 
+                    className={appState.currentSidebar === SidebarType.FRIEND_REQUEST ? CLASS_ACTIVE : CLASS_NOT_ACTIVE} 
                     data-placement="right" 
                     data-content="contacts"> 
 

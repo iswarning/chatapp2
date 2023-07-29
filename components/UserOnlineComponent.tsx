@@ -1,15 +1,10 @@
-import { auth, db } from "@/firebase";
+import { auth } from "@/firebase";
 import { selectAppState } from "@/redux/appSlice";
 import { selectFriendState } from "@/redux/friendSlice";
-import { StatusCallType, selectVideoCallState, setGlobalVideoCallState } from "@/redux/videoCallSlice";
-import getRecipientEmail from "@/utils/getRecipientEmail";
-import getUserBusy from "@/utils/getUserBusy";
-import { requestMedia } from "@/utils/requestPermission";
+import { selectVideoCallState } from "@/redux/videoCallSlice";
 import Image from "next/image";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { useCollection } from "react-firebase-hooks/firestore";
 import { useSelector, useDispatch } from 'react-redux'
-import { toast } from "react-toastify";
 
 export default function UserOnlineComponent({ userOn }: { userOn: string }) {
     const [user] = useAuthState(auth);
@@ -22,45 +17,6 @@ export default function UserOnlineComponent({ userOn }: { userOn: string }) {
 
     const handleCalling = async(event: any, userInfo: any) => {
         event.preventDefault()
-        // let userBusy = await getUserBusy();
-
-        // if(!videoCallState.showVideoCallScreen) {
-
-        //     if(userBusy.includes(userInfo.email) || !appState.userOnline.find((userOn) => userInfo.email === userOn)) {
-
-        //         toast(`${userInfo.fullName} is busy`, { hideProgressBar: true, autoClose: 5000, type: 'info' })
-        //         return;
-
-        //     } else {
-        //         const checkPermission = await requestMedia()
-
-        //         if (!checkPermission) {
-        //             toast(`Please allow using camera and microphone`, { hideProgressBar: true, autoClose: 5000, type: 'info' })
-        //             return;
-        //         }
-
-        //         dispatch(setGlobalVideoCallState({
-        //             type: "setShowVideoCallScreen",
-        //             data: true
-        //         }))
-        //         dispatch(setGlobalVideoCallState({
-        //             type: "setStatusCall",
-        //             data: StatusCallType.CALLING
-        //         }));
-        //         let data = {
-        //             sender: user?.email,
-        //             recipient: userInfo.email,
-        //             // chatId: chatInfo?.data()._id,
-        //             // isGroup: chatInfo?.data().isGroup,
-        //             photoURL: userInfo.photoURL,
-        //         }
-        //         dispatch(setGlobalVideoCallState({
-        //             type: "setDataVideoCall",
-        //             data: data
-        //         }))
-        //         appState.socket.emit("call-video-one-to-one", JSON.stringify(data));
-        //     }
-        // }
     }
     
     return (

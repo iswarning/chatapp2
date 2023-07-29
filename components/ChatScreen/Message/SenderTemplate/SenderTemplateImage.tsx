@@ -20,7 +20,7 @@ export default function SenderTemplateImage(
         handleReaction: any
     }) {
     const chatState = useSelector(selectChatState)
-    const data = chatState.listChat.find((chat) => chatState.currentChat === chat._id)?.listImage?.filter((image) => JSON.parse(message).find((key: string) => key === image.key))
+    const data = chatState.listChat.find((chat) => chatState.currentChat.chatRoomId === chat._id)?.listImage?.filter((image) => JSON.parse(message).find((key: any) => key === image.key))
 
     return (
         <>

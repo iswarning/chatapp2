@@ -28,7 +28,7 @@ export default function ShowImageFullScreen(
     const [urlImg, setUrlImg] = useState(urlImage)
     const appState = useSelector(selectAppState)
     const chatState = useSelector(selectChatState)
-    const urls = chatState.currentChat.listImage?.sort((item1: any, item2: any) => item2.timeCreated - item1.timeCreated).map((image) => image.url)
+    const urls = chatState.listChat[chatState.currentChat.index].listImage?.sort((item1: any, item2: any) => item2.timeCreated - item1.timeCreated).map((image) => image.url)
 
     const handleEnlarge = () => {
         if(scale >= 100 && scale < 500)
