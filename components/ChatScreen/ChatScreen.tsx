@@ -17,9 +17,9 @@ import CallIcon from '@mui/icons-material/Call';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { StatusCallType, selectVideoCallState, setGlobalVideoCallState } from "@/redux/videoCallSlice";
 import {v4 as uuidv4} from 'uuid'
-import { addNewFileInRoom, addNewImageInRoom, addPrepareSendFiles, pushMessageToListChat, setDataVideoCall, setFileUploadDone, setFileUploading, setPrepareSendFiles, setProgress, setShowGroupInfo, setStatusSend, updateMessageInListChat } from "@/services/CacheService";
+import { addNewFileInRoom, addNewImageInRoom, addPrepareSendFiles, pushMessageToListChat, setDataVideoCall, setFileUploadDone, setFileUploading, setListMessageInRoom, setPrepareSendFiles, setProgress, setShowGroupInfo, setStatusSend, updateMessageInListChat } from "@/services/CacheService";
 import { AlertError } from "@/utils/core";
-import { createMessage, updateMessage } from "@/services/MessageService";
+import { createMessage, paginateMessage, updateMessage } from "@/services/MessageService";
 import PrepareSendFileScreen from "./PrepareSendFileScreen";
 import { selectChatState } from "@/redux/chatSlice";
 import { getImageTypeFileValid } from "@/utils/getImageTypeFileValid";
@@ -35,6 +35,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
   const chatState = useSelector(selectChatState)
   const videoCallState = useSelector(selectVideoCallState)
   const [input, setInput] = useState("")
+  const [scrollToTopCount, setScrollToTopCount] = useState(0)
 
   // const [recipientSnapshot] = useCollection(
   //   db
@@ -334,6 +335,27 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
     handlePaste(event.dataTransfer.files)
   }
 
+  const onScroll = async (scoll: number) => {
+    if (scrollToTopCount !== -1 && scoll === 0) {
+      setScrollToTopCount(scrollToTopCount + 1)
+      const data = await paginateMessage({
+        chatRoomId: chatState.currentChat.chatRoomId,
+        n: scrollToTopCount
+      })
+      if (data?.length === 0) {
+        setScrollToTopCount(-1)
+        return
+      } else {
+        setListMessageInRoom(
+          chatState.currentChat.index, 
+          data?.reverse().concat(chatState.listChat[chatState.currentChat.index].messages!),
+          dispatch
+        )
+      }
+      console.log(chatState.listChat[chatState.currentChat.index].messages!.concat(data?.reverse()!))
+    }
+  }
+
   return (
     <>
       <div className="chat-box border-theme-5 flex flex-col overflow-hidden xl:border-l xl:border-r p-6" 
@@ -361,7 +383,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
           </a>
         </div>
 
-        <ScrollBarCustom className="overflow-y-auto pt-5 flex-1 px-4">
+        <ScrollBarCustom className="overflow-y-auto pt-5 flex-1 px-4" onScroll={(e) => onScroll(e.currentTarget.scrollTop)}>
         {showMessage()}
         <EndOfMessage ref={endOfMessageRef} /> 
 

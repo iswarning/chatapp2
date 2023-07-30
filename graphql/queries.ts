@@ -68,6 +68,22 @@ export const QueryGetAllMessagesByChatRoomId = `
     }
 `
 
+export const QueryPaginate = `
+    query($input: PaginateInput!){
+      paginateMessage(paginateInput: $input){
+        _id
+        message
+        type
+        senderId
+        reaction
+        seen
+        chatRoomId
+        createdAt
+        updatedAt
+      }
+    }
+`
+
 export const QueryGenerateRtcToken = `
   query($input: GenerateRtcTokenInput!){
     generateRtcToken(generateRtcTokenInput: $input)

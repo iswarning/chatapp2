@@ -15,7 +15,7 @@ import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutl
 import { selectChatState } from "@/redux/chatSlice";
 import { setCurrentChat, setListFileInRoom, setListImageInRoom, setListMessageInRoom } from "@/services/CacheService";
 import mime from "mime-types";
-import { getAllMessagesByChatRoomId } from "@/services/MessageService";
+import { getAllMessagesByChatRoomId, paginateMessage } from "@/services/MessageService";
 
 export default function ChatComponent({ chat, active, index }: { chat: ChatType, active: boolean, index: number}) {
   const [user] = useAuthState(auth);
@@ -45,10 +45,8 @@ export default function ChatComponent({ chat, active, index }: { chat: ChatType,
     let newMessages = chatExist?.messages
     
     if (!chatExist?.messages) {
-      newMessages = await getAllMessagesByChatRoomId(chat._id!)
+      newMessages = (await paginateMessage({ chatRoomId: chatExist._id!, n: 0 }))?.reverse()
     }
-
-    console.log(newMessages)
 
     setListMessageInRoom(index, newMessages, dispatch)
 

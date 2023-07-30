@@ -21,13 +21,16 @@ export default function MemberInChat({info}: {info: UserType | undefined}) {
             <div className="text-gray-700 dark:text-gray-300 whitespace-nowrap font-medium truncate">{info?.fullName}</div>
             <div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">{info?.email}</div>
         </div>
-        <div className="">
-            <a onClick={() => setShowAction(!showAction)} className="" href="javascript:;" aria-expanded="false"> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> </a>
+        <div>
+            <BtnMore onClick={() => setShowAction(!showAction)}> 
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-more-vertical w-4 h-4">
+              <circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg> 
+            </BtnMore>
             {
               showAction ? <ActionContainer className='box'>
               <ActionElement className='mb-2'><AccountCircleIcon fontSize='small' /> Profile</ActionElement>
                 {
-                  chatState.listChat[chatState.currentChat.index].admin === appState.userInfo.email ? <ActionElement><ExitToAppIcon fontSize='small' /> This user leave group</ActionElement> : null
+                  chatState.listChat[chatState.currentChat.index].admin === appState.userInfo._id ? <ActionElement><ExitToAppIcon fontSize='small' /> This user leave group</ActionElement> : null
                 }
               </ActionContainer>: null
             }
@@ -36,7 +39,13 @@ export default function MemberInChat({info}: {info: UserType | undefined}) {
   )
 }
 
-const ActionContainer = styled.div`
+export const BtnMore = styled.button`
+  &:focus{
+    outline: none;
+  }
+`
+
+export const ActionContainer = styled.div`
 border: 1px solid silver;
   width: max-content;
   position: absolute;
@@ -47,7 +56,7 @@ border: 1px solid silver;
   right: 0;
 `
 
-const ActionElement = styled.div`
+export const ActionElement = styled.div`
   cursor: pointer;
   :hover {
     background-color: whitesmoke;

@@ -12,9 +12,7 @@ import {v4 as uuidv4} from 'uuid'
 export default function InfoContentScreen() {
 
     const chatState = useSelector(selectChatState)
-    const [showSharedFile, setShowSharedFile] = useState(false)
-    const [showCustom, setShowCustom] = useState(false)
-    const [showMember, setShowMember] = useState(false)
+    const [show, setShow] = useState<string>()
 
     const currentChat = chatState.listChat[chatState.currentChat.index]
     const recipientInfo = currentChat.recipientInfo
@@ -30,6 +28,10 @@ export default function InfoContentScreen() {
           else return "/images/avatar-default.png";
         }
     };
+
+    const showCustom = show === "custom"
+    const showSharedFile = show === "shared"
+    const showMember = show === "member"
 
   return (
     <>
@@ -47,20 +49,20 @@ export default function InfoContentScreen() {
                 </div>
                 <div className="py-2">
                     <div className="intro-y h-full box p-4">
-                        <div className="text-base font-medium cursor-pointer" onClick={() => setShowSharedFile(!showSharedFile)}>Custom chat { showSharedFile ? <ArrowDropDownIcon fontSize='small' /> : <ArrowDropUpIcon fontSize='small' />}</div>
+                        <div className="text-base font-medium cursor-pointer" onClick={() => setShow("custom")}>Custom chat { showSharedFile ? <ArrowDropDownIcon fontSize='small' /> : <ArrowDropUpIcon fontSize='small' />}</div>
                         
                         {
-                                showSharedFile ? <CustomChat /> : null
+                            showCustom ? <CustomChat /> : null
                         }
                         
                     </div>
                 </div>
                 <div className="py-2">
                     <div className="intro-y h-full box p-4">
-                        <div className="text-base font-medium cursor-pointer" onClick={() => setShowCustom(!showCustom)}>Shared Files { showCustom ? <ArrowDropDownIcon fontSize='small' /> : <ArrowDropUpIcon fontSize='small' />}</div>
+                        <div className="text-base font-medium cursor-pointer" onClick={() => setShow("shared")}>Shared Files { showCustom ? <ArrowDropDownIcon fontSize='small' /> : <ArrowDropUpIcon fontSize='small' />}</div>
                         
                         {
-                                showCustom ? <SharedFile /> : null
+                            showSharedFile ? <SharedFile /> : null
                         }
                         
                     </div>
@@ -68,7 +70,7 @@ export default function InfoContentScreen() {
                 {
                     currentChat.isGroup ? <div className="py-2">
                         <div className="intro-y h-full box p-4">
-                            <div className="text-base font-medium cursor-pointer" onClick={() => setShowMember(!showMember)}>Members in chat { showMember ? <ArrowDropDownIcon fontSize='small' /> : <ArrowDropUpIcon fontSize='small' />}</div>
+                            <div className="text-base font-medium cursor-pointer" onClick={() => setShow("member")}>Members in chat { showMember ? <ArrowDropDownIcon fontSize='small' /> : <ArrowDropUpIcon fontSize='small' />}</div>
                             
                             <div className="overflow-x-hidden overflow-y-auto" style={{maxHeight: '450px'}}>
                                 {

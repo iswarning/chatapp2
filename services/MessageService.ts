@@ -1,5 +1,5 @@
 import { MutationCreateMessage, MutationUpdateMessage } from "@/graphql/mutations"
-import { QueryGetAllMessagesByChatRoomId, QueryGetFileByKey, QueryGetLastMessage } from "@/graphql/queries"
+import { QueryGetAllMessagesByChatRoomId, QueryGetFileByKey, QueryGetLastMessage, QueryPaginate } from "@/graphql/queries"
 import { SubscriptionOnNotify } from "@/graphql/subscriptions"
 import { MessageType } from "@/types/MessageType"
 import axios from "axios"
@@ -98,4 +98,23 @@ export async function getFileByKey(key: string): Promise<MessageType | null> {
         console.log(error)
     }
     return null
+}
+
+export async function paginateMessage(input: { chatRoomId: string, n: number }): Promise<MessageType[] | undefined> {
+    try {
+        const response = await axios.post(process.env.NEXT_PUBLIC_GRAPHQL_ENPOINT!, {
+            query: QueryPaginate,
+            variables: {
+                input
+            }
+        }, {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        return response.data.data.paginateMessage
+    } catch (error) {
+        console.log(error)
+    }
+    return undefined
 }

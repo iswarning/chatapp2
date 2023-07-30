@@ -4,11 +4,6 @@ import styled from "@emotion/styled";
 import { ChatType } from '@/types/ChatType';
 import { MessageType } from '@/types/MessageType';
 import { useState } from 'react';
-import InsertEmoticonIcon from '@mui/icons-material/InsertEmoticon';
-import ReplyIcon from '@mui/icons-material/Reply';
-import { EmojiContainer, EmojiExist } from './RecieverTemplateText';
-import { getEmojiIcon } from '@/utils/getEmojiData';
-import { v4 as uuidv4 } from 'uuid'
 import Image from 'next/image';
 import DownloadIcon from '@mui/icons-material/Download';
 
