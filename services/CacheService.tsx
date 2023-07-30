@@ -96,61 +96,61 @@ export function setUserInfo(userInfo: UserType, dispatch: Dispatch<AnyAction>) {
     setLocalStorage("UserInfo", userInfo)
 }
 
-export function setListImageInRoom(chatId: string, listImage: FileInfo[], dispatch: Dispatch<AnyAction>) {
+export function setListImageInRoom(index: number, listImage: FileInfo[], dispatch: Dispatch<AnyAction>) {
     dispatch(setGlobalChatState({
         type: "setListImageInRoom",
         data: {
-            chatId,
+            index,
             listImage
         }
     }))
 }
 
-export function addNewImageInRoom(chatId: string, newImage: FileInfo, dispatch: Dispatch<AnyAction>) {
+export function addNewImageInRoom(index: number, newImage: FileInfo, dispatch: Dispatch<AnyAction>) {
     dispatch(setGlobalChatState({
         type: "addNewImageInRoom",
         data: {
-            chatId,
+            index,
             newImage
         }
     }))
 }
 
-export function addNewFileInRoom(chatId: string, newFile: FileInfo, dispatch: Dispatch<AnyAction>) {
+export function addNewFileInRoom(index: number, newFile: FileInfo, dispatch: Dispatch<AnyAction>) {
     dispatch(setGlobalChatState({
         type: "addNewFileInRoom",
         data: {
-            chatId,
+            index,
             newFile
         }
     }))
 }
 
-export function setListFileInRoom(chatId: string, listFile: FileInfo[], dispatch: Dispatch<AnyAction>) {
+export function setListFileInRoom(index: number, listFile: FileInfo[], dispatch: Dispatch<AnyAction>) {
     dispatch(setGlobalChatState({
         type: "setListFileInRoom",
         data: {
-            chatId,
+            index,
             listFile
         }
     }))
 }
 
-export function setListMessageInRoom(chatId: string, messages: MessageType[] | undefined, dispatch: Dispatch<AnyAction>) {
+export function setListMessageInRoom(index: number, messages: MessageType[] | undefined, dispatch: Dispatch<AnyAction>) {
     dispatch(setGlobalChatState({
         type: "setListMessageInRoom",
         data: {
-            chatId,
+            index,
             newMessages: messages
         }
     }))
 }
 
-export function pushMessageToListChat(chatId: string, newMessage: MessageType, dispatch: Dispatch<AnyAction>) {
+export function pushMessageToListChat(index: number, newMessage: MessageType, dispatch: Dispatch<AnyAction>) {
     dispatch(setGlobalChatState({
         type: "pushMessageToListChat",
         data: {
-            chatId,
+            index,
             newMessage
         }
     }))

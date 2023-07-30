@@ -59,8 +59,6 @@ export const QueryGetAllMessagesByChatRoomId = `
         message
         type
         senderId
-        file
-        images
         reaction
         seen
         chatRoomId
@@ -83,8 +81,6 @@ export const QueryGetLastMessage = `
         message
         type
         senderId
-        file
-        images
         reaction
         seen
         chatRoomId
@@ -102,8 +98,6 @@ export const QueryGetFileByKey = `
         message
         type
         senderId
-        file
-        images
         seen
         chatRoomId
         createdAt

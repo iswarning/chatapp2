@@ -1,6 +1,5 @@
 import { MessageType } from "@/types/MessageType";
 import { getEmojiIcon } from "@/utils/getEmojiData";
-import MoreVertIcon from '@mui/icons-material/MoreVert'
 import { ChatType } from "@/types/ChatType";
 import Image from "next/image";
 import InsertEmoticonIcon from '@mui/icons-material/InsertEmoticon';

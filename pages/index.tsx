@@ -3,7 +3,7 @@ import SidebarMessage from "@/components/Sidebar/SidebarMessage";
 import { useEffect, useState } from "react";
 import { NextPageWithLayout } from "./_app";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { auth } from "@/firebase";
+import { auth, storage } from "@/firebase";
 import Loading from "@/components/Loading";
 import {useDispatch, useSelector} from 'react-redux'
 import { SidebarType, selectAppState } from "@/redux/appSlice";
@@ -14,16 +14,18 @@ import InfoContentScreen from "@/components/ChatScreen/InfoContentScreen";
 import ChatScreen from "@/components/ChatScreen/ChatScreen";
 import { selectChatState } from "@/redux/chatSlice";
 import { StatusCallType, selectVideoCallState, setGlobalVideoCallState } from "@/redux/videoCallSlice";
-import { getLocalStorage, pushMessageToListChat, removeFriendGlobal, removeMessageInListChat, setCurrentChat, setDataVideoCall, setListChat, setListFriend, setListFriendRequest, setShowImageFullScreen, setUserInfo } from "@/services/CacheService";
+import { addNewImageInRoom, getLocalStorage, pushMessageToListChat, removeFriendGlobal, removeMessageInListChat, setCurrentChat, setDataVideoCall, setListChat, setListFriend, setListFriendRequest, setShowImageFullScreen, setUserInfo } from "@/services/CacheService";
 import ShowImageFullScreen from "@/components/ChatScreen/Message/ShowImageFullScreen";
 import { createNewUser, getInitialDataOfUser } from "@/services/UserService";
 import { SubscriptionOnCall, SubscriptionOnNotify } from "@/graphql/subscriptions";
 import { useSubscription } from "@apollo/client";
 import { AlertInfo } from "@/utils/core";
-import { getFileByKey, updateMessage } from "@/services/MessageService";
+import { updateMessage } from "@/services/MessageService";
 import SidebarFriendRequest from "@/components/Sidebar/SidebarFriendRequest";
 import PopupVideoCall from "@/components/VideoCallScreen/PopupVideoCall";
 import ModalVideoCall from "@/components/VideoCallScreen/ModalVideoCall";
+import { DataNotify } from "@/types/NotifyResponseType";
+import mime from 'mime-types'
 
 // import '@/styles/tailwind.min.css'
 const Page: NextPageWithLayout = () => {
@@ -37,6 +39,7 @@ const Page: NextPageWithLayout = () => {
 
   useEffect(() => {
     setLoading(true)
+    localStorage.clear()
     createNewUser({
       email: user?.email!,
       fullName: user?.displayName!,
@@ -60,23 +63,23 @@ const Page: NextPageWithLayout = () => {
         setListChat(getLocalStorage("ListChat"), dispatch)
         if (getLocalStorage("CurrentChat"))
           setCurrentChat(getLocalStorage("CurrentChat"), dispatch)
-        processMessageTypeFile()
+        // processMessageTypeFile()
         setLoading(false)
       }
     })  
   },[])
 
-  const processMessageTypeFile = () => {
-    let listKey = chatState?.listChat?.find((chat) => 
-    chat?._id === chatState?.currentChat.chatRoomId)?.messages?.filter((msg) => 
-    msg.type === "file-uploading")
-    listKey?.forEach((message) => {
-      updateMessage({
-        ...message,
-        type: "file",
-      })
-    })
-  }
+  // const processMessageTypeFile = () => {
+  //   let listKey = chatState?.listChat?.find((chat) => 
+  //   chat?._id === chatState?.currentChat.chatRoomId)?.messages?.filter((msg) => 
+  //   msg.type === "file-uploading")
+  //   listKey?.forEach((message) => {
+  //     updateMessage({
+  //       ...message,
+  //       type: "file",
+  //     })
+  //   })
+  // }
 
   const { data: resNotify } = useSubscription(
     SubscriptionOnNotify
@@ -86,8 +89,54 @@ const Page: NextPageWithLayout = () => {
     if(resNotify?.onSub?.recipientId?.includes(appState.userInfo._id) && resNotify?.onSub?.senderId !== appState.userInfo._id) {
       switch(resNotify?.onSub?.type){
         case "send-message": {  
-          pushMessageToListChat(resNotify?.onSub?.dataNotify?.message?.chatRoomId, resNotify?.onSub?.dataNotify?.message, dispatch)
-          AlertInfo( resNotify?.onSub?.message)
+          const dataNotify: DataNotify = resNotify?.onSub?.dataNotify
+          if (chatState.currentChat.index !== -1) {
+            if (chatState.currentChat.chatRoomId === dataNotify.message?.chatRoomId) {
+              pushMessageToListChat(chatState.currentChat.index, dataNotify.message, dispatch)
+              if (dataNotify.message.type === "image") {
+                const listKey: string[] = JSON.parse(dataNotify.message.message!)
+                for (const key in listKey) {
+                  const ref = storage.ref(key)
+                  ref.getMetadata().then(metadata => {
+                    ref.getDownloadURL().then(url => {
+                      addNewImageInRoom(chatState.currentChat.index, {
+                        url,
+                        key,
+                        name: key,
+                        size: metadata.size,
+                        extension: String(mime.extension(metadata.contentType)),
+                        timeCreated: metadata.timeCreated
+                      }, dispatch)
+                    })
+                  })
+                }
+              }
+
+              if (dataNotify.message.type === "file") { 
+                const ref = storage.ref(dataNotify.message.message)
+                  ref.getMetadata().then(metadata => {
+                    ref.getDownloadURL().then(url => {
+                      addNewImageInRoom(chatState.currentChat.index, {
+                        url,
+                        key: dataNotify.message?.message!,
+                        name: dataNotify.message?.message!,
+                        size: metadata.size,
+                        extension: String(mime.extension(metadata.contentType)),
+                        timeCreated: metadata.timeCreated
+                      }, dispatch)
+                    })
+                })
+              }
+
+              AlertInfo(resNotify?.onSub?.message)
+            } else {
+              const index = chatState.listChat.findIndex((chat) => chat._id === dataNotify.message?.chatRoomId)
+              if (index !== -1 && chatState.listChat[index].messages?.length! > 0) {
+                pushMessageToListChat(index, dataNotify.message!, dispatch)
+                AlertInfo( resNotify?.onSub?.message)
+              }
+            }
+          }
           break
         }
         case "unfriend": {
@@ -169,8 +218,8 @@ const Page: NextPageWithLayout = () => {
         {
           chatState.currentChat.chatRoomId ? <>
             <ChatScreen 
-            chat={chatState.listChat.find((chat) => chat._id === chatState.currentChat.chatRoomId)!} 
-            messages={chatState.listChat.find((chat) => chat._id === chatState.currentChat.chatRoomId)?.messages!} />
+            chat={chatState.listChat[chatState.currentChat.index]} 
+            messages={chatState.listChat[chatState.currentChat.index].messages!} />
             {
               appState.showGroupInfo ? <InfoContentScreen /> : null
             }

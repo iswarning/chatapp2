@@ -13,8 +13,7 @@ export const SubscriptionOnNotify = gql`
                     message
                     type
                     senderId
-                    file
-                    images
+                    reaction
                     seen
                     chatRoomId
                     createdAt

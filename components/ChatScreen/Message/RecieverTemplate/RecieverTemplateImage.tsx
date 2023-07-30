@@ -1,9 +1,16 @@
 import {useSelector} from 'react-redux'
 import { selectChatState } from "@/redux/chatSlice";
 import styled from "@emotion/styled";
-import DropdownActionMessage from '../DropdownActionMessage';
 import { ChatType } from '@/types/ChatType';
 import { MessageType } from '@/types/MessageType';
+import { useState } from 'react';
+import InsertEmoticonIcon from '@mui/icons-material/InsertEmoticon';
+import ReplyIcon from '@mui/icons-material/Reply';
+import { EmojiContainer, EmojiExist } from './RecieverTemplateText';
+import { getEmojiIcon } from '@/utils/getEmojiData';
+import { v4 as uuidv4 } from 'uuid'
+import Image from 'next/image';
+import DownloadIcon from '@mui/icons-material/Download';
 
 export default function RecieverTemplateImage({ 
     showAvatar, 
@@ -25,12 +32,15 @@ export default function RecieverTemplateImage({
     handleReaction: any 
 }) {
 
+    const [showAction, setShowAction] = useState(false)
+    const [showEmoji, setShowEmoji] = useState(false)
+
     const chatState = useSelector(selectChatState)
-    const data = chatState.listChat.find((c) => chat._id === c._id)?.listImage?.filter((image) => JSON.parse(message.message!).find((key: string) => key === image.key))
+    const data = chatState.listChat[chatState.currentChat.index].listImage?.filter((image) => JSON.parse(message.message!).find((key: string) => key === image.key))
 
     return (
         <>
-            <div className="-intro-x chat-text-box flex items-end float-left mb-4" title={timestamp}>
+            <div className="chat-text-box flex items-end float-left mb-4" title={timestamp}>
                 {
                     chat.isGroup && showAvatar ? <div className="chat-text-box__photo w-10 h-10 hidden sm:block flex-none image-fit relative mr-4">
                         <Image
@@ -44,15 +54,26 @@ export default function RecieverTemplateImage({
                 }
                 <div className="w-full">
                     <div>
-                        <div className="chat-text-box__content flex items-center float-left" title={ timestamp }>
+                        <div 
+                        className="chat-text-box__content flex items-center float-left" 
+                        title={timestamp}
+                        onMouseEnter={() => setShowAction(true)}
+                        onMouseLeave={() => {setShowAction(false); setShowEmoji(false)}}>
                             <div className="rounded-md text-gray-700 chat-text-box__content__text--image flex justify-end mt-3">
                             {
                                 data?.map((file) => {
-                                    return <Image onLoad={() => scroll()} loading='lazy' decoding='async' key={file.key} src={file.url}/>
+                                    return <ImageItem onLoad={() => scroll()} loading='lazy' decoding='async' key={file.key} src={file.url}/>
                                 })
                             }
                             </div>
-                            <DropdownActionMessage />
+                            {
+                                showAction ? <div className="hidden sm:block dropdown relative ml-3 mt-3">
+                                    <DownloadIcon 
+                                    fontSize='small' 
+                                    className="cursor-pointer"
+                                    onMouseEnter={() => setShowEmoji(true)}  />
+                                </div> : null
+                            }
                         </div>
                         
                     </div>
@@ -64,7 +85,7 @@ export default function RecieverTemplateImage({
     )
 }
 
-const Image = styled.img`
+const ImageItem = styled.img`
     border-radius: 10px;
     padding: 4px;
     width: 150px;

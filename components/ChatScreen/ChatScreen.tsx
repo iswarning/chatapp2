@@ -19,7 +19,7 @@ import { StatusCallType, selectVideoCallState, setGlobalVideoCallState } from "@
 import {v4 as uuidv4} from 'uuid'
 import { addNewFileInRoom, addNewImageInRoom, addPrepareSendFiles, pushMessageToListChat, setDataVideoCall, setFileUploadDone, setFileUploading, setPrepareSendFiles, setProgress, setShowGroupInfo, setStatusSend, updateMessageInListChat } from "@/services/CacheService";
 import { AlertError } from "@/utils/core";
-import { createMessage } from "@/services/MessageService";
+import { createMessage, updateMessage } from "@/services/MessageService";
 import PrepareSendFileScreen from "./PrepareSendFileScreen";
 import { selectChatState } from "@/redux/chatSlice";
 import { getImageTypeFileValid } from "@/utils/getImageTypeFileValid";
@@ -72,12 +72,16 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
         lastIndex={messages[index] === messages[messages.length - 1]}
         scrollToBottom={() => scrollToBottom()}
         index={index}
+        // showAvatar={
+        //   messages[0].senderId !== appState.userInfo._id
+        //   &&(
+        //   messages[messages.length - 1].senderId !== appState.userInfo._id
+        //   ||
+        //   messages[index].senderId !== messages[index + 1].senderId )
+        // }
         showAvatar={
-          messages[0].senderId !== appState.userInfo._id
-          &&(
-          messages[messages.length - 1].senderId !== appState.userInfo._id
-          ||
-          messages[index].senderId !== messages[index + 1].senderId )
+          messages[index].senderId !== messages[messages.length - 1].senderId &&
+          messages[index].senderId === messages[index + 1].senderId
         }
       />
     ));
@@ -105,7 +109,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
             ref
             .getMetadata()
             .then(async(metadata) => {
-              addNewImageInRoom(chat._id!, {
+              addNewImageInRoom(chatState.currentChat.index, {
                 url: await ref.getDownloadURL(),
                 key,
                 size: image.size,
@@ -144,7 +148,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
     newMessage.senderId = appState.userInfo._id!
     newMessage.type = type
 
-    pushMessageToListChat(chat._id!, newMessage, dispatch)
+    pushMessageToListChat(chatState.currentChat.index, newMessage, dispatch)
 
     createMessage({
       chatRoomId: chat._id,
@@ -199,7 +203,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
           size: fileSize
         })
         
-        pushMessageToListChat(chat._id!, newMessage, dispatch)
+        pushMessageToListChat(chatState.currentChat.index, newMessage, dispatch)
 
       }
     }
@@ -229,40 +233,38 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
             }
             count++
             uploadFileQueuing(result)
+            createMessage({
+              message: input,
+              type: "file",
+              senderId: appState.userInfo._id!,
+              file: result[count].key,
+              chatRoomId: chat._id
+            })
+            .then((data: MessageType) => {
+              storage
+              .ref(path)
+              .getMetadata()
+              .then(async(metadata) => {
+                addNewFileInRoom(chatState.currentChat.index, {
+                  url: await storage.ref(path).getDownloadURL(),
+                  key: result[count].key,
+                  size: result[count].size,
+                  name: result[count].file.name.split(".")[0],
+                  extension: result[count].file.name.split(".").pop(),
+                  timeCreated: metadata.timeCreated
+                }, dispatch)
+              })
+            })
+            .catch(err => {
+              console.log(err);
+              setStatusSend(StatusSendType.ERROR, dispatch)
+              AlertError("Error when send message !")
+            })
           } else if(progress > 1 && progress < 100) {
             setFileUploading(result[count].key, "uploading", dispatch)
           }
         },
         (err) => {throw new Error(err.message)},
-        () => {
-          createMessage({
-            message: input,
-            type: "file",
-            senderId: appState.userInfo._id!,
-            file: result[count].key,
-            chatRoomId: chat._id
-          })
-          .then(() => {
-            storage
-            .ref(path)
-            .getMetadata()
-            .then(async(metadata) => {
-              addNewFileInRoom(chat._id!, {
-                url: await storage.ref(path).getDownloadURL(),
-                key: result[count].key,
-                size: result[count].size,
-                name: result[count].file.name.split(".")[0],
-                extension: result[count].file.name.split(".").pop(),
-                timeCreated: metadata.timeCreated
-              }, dispatch)
-            })
-          })
-          .catch(err => {
-            console.log(err);
-            setStatusSend(StatusSendType.ERROR, dispatch)
-            AlertError("Error when send message !")
-          })
-        }
       );
 
   }

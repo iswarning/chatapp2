@@ -48,13 +48,15 @@ export default function ChatComponent({ chat, active, index }: { chat: ChatType,
       newMessages = await getAllMessagesByChatRoomId(chat._id!)
     }
 
-    setListMessageInRoom(chatExist?._id!, newMessages, dispatch)
+    console.log(newMessages)
+
+    setListMessageInRoom(index, newMessages, dispatch)
 
     setCurrentChat({ chatRoomId: chatExist?._id!, index }, dispatch)
 
-    setListImageInRoom(chatExist?._id!, await getListImage(), dispatch)
+    setListImageInRoom(index, await getListImage(), dispatch)
 
-    setListFileInRoom(chatExist?._id!, await getListFile(), dispatch)
+    setListFileInRoom(index, await getListFile(), dispatch)
 
   };
 

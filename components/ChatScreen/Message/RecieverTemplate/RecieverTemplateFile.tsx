@@ -65,14 +65,11 @@ export default function RecieverTemplateFile({
         // Remove link from body
         document.body.removeChild(link);
     }
-
-    const fileName = file?.name!.split(".")[0]
-    const fileExtension = file?.name!.split(".").pop()
   
     return (
     <>
     {
-        <div className="-intro-x chat-text-box flex items-end float-left mb-4" title={timestamp}>
+        <div className="chat-text-box flex items-end float-left mb-4" title={timestamp}>
             {
                 chat.isGroup && showAvatar ? <div className="chat-text-box__photo w-10 h-10 hidden sm:block flex-none image-fit relative mr-4">
                     <Image

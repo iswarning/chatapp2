@@ -26,7 +26,7 @@ export default function SenderTemplateFile({
     const appState = useSelector(selectAppState)
     const chatState = useSelector(selectChatState)
 
-    const data = chatState.listChat.find((chat) => chatState.currentChat.chatRoomId === chat._id)?.listFile?.find((image) => image.key === message.file)
+    const data = chatState.listChat[chatState.currentChat.index].listFile?.find((image) => image.key === message.file)
 
     const storageRef = storage.ref(`public/chat-room/${chatState.currentChat.chatRoomId}/files/${message.file}`)
     const file = type === "file-uploading" ? JSON.parse(message.file!) : data
