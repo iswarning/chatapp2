@@ -35,7 +35,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
   const chatState = useSelector(selectChatState)
   const videoCallState = useSelector(selectVideoCallState)
   const [input, setInput] = useState("")
-  const [scrollToTopCount, setScrollToTopCount] = useState(0)
+  const [scrollToTopCount, setScrollToTopCount] = useState(1)
 
   // const [recipientSnapshot] = useCollection(
   //   db
@@ -73,16 +73,9 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
         lastIndex={messages[index] === messages[messages.length - 1]}
         scrollToBottom={() => scrollToBottom()}
         index={index}
-        // showAvatar={
-        //   messages[0].senderId !== appState.userInfo._id
-        //   &&(
-        //   messages[messages.length - 1].senderId !== appState.userInfo._id
-        //   ||
-        //   messages[index].senderId !== messages[index + 1].senderId )
-        // }
         showAvatar={
           messages[index].senderId !== messages[messages.length - 1].senderId &&
-          messages[index].senderId === messages[index + 1].senderId
+          messages[index].senderId !== messages[index + 1].senderId
         }
       />
     ));
@@ -205,7 +198,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
         })
         
         pushMessageToListChat(chatState.currentChat.index, newMessage, dispatch)
-
+        scrollToBottom()
       }
     }
     if(result.length > 0){
@@ -234,38 +227,39 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
             }
             count++
             uploadFileQueuing(result)
-            createMessage({
-              message: input,
-              type: "file",
-              senderId: appState.userInfo._id!,
-              file: result[count].key,
-              chatRoomId: chat._id
-            })
-            .then((data: MessageType) => {
-              storage
-              .ref(path)
-              .getMetadata()
-              .then(async(metadata) => {
-                addNewFileInRoom(chatState.currentChat.index, {
-                  url: await storage.ref(path).getDownloadURL(),
-                  key: result[count].key,
-                  size: result[count].size,
-                  name: result[count].file.name.split(".")[0],
-                  extension: result[count].file.name.split(".").pop(),
-                  timeCreated: metadata.timeCreated
-                }, dispatch)
-              })
-            })
-            .catch(err => {
-              console.log(err);
-              setStatusSend(StatusSendType.ERROR, dispatch)
-              AlertError("Error when send message !")
-            })
           } else if(progress > 1 && progress < 100) {
             setFileUploading(result[count].key, "uploading", dispatch)
           }
         },
         (err) => {throw new Error(err.message)},
+        () => {
+          createMessage({
+            message: result[count].key,
+            type: "file",
+            senderId: appState.userInfo._id!,
+            chatRoomId: chat._id
+          })
+          .then((data: MessageType) => {
+            storage
+            .ref(path)
+            .getMetadata()
+            .then(async(metadata) => {
+              addNewFileInRoom(chatState.currentChat.index, {
+                url: await storage.ref(path).getDownloadURL(),
+                key: result[count].key,
+                size: result[count].size,
+                name: result[count].file.name.split(".")[0],
+                extension: result[count].file.name.split(".").pop(),
+                timeCreated: metadata.timeCreated
+              }, dispatch)
+            })
+          })
+          .catch(err => {
+            console.log(err);
+            setStatusSend(StatusSendType.ERROR, dispatch)
+            AlertError("Error when send message !")
+          })
+        }
       );
 
   }
@@ -337,7 +331,6 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
 
   const onScroll = async (scoll: number) => {
     if (scrollToTopCount !== -1 && scoll === 0) {
-      setScrollToTopCount(scrollToTopCount + 1)
       const data = await paginateMessage({
         chatRoomId: chatState.currentChat.chatRoomId,
         n: scrollToTopCount
@@ -351,8 +344,8 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
           data?.reverse().concat(chatState.listChat[chatState.currentChat.index].messages!),
           dispatch
         )
+        setScrollToTopCount(scrollToTopCount + 1)
       }
-      console.log(chatState.listChat[chatState.currentChat.index].messages!.concat(data?.reverse()!))
     }
   }
 

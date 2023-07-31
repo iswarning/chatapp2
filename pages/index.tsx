@@ -26,6 +26,7 @@ import PopupVideoCall from "@/components/VideoCallScreen/PopupVideoCall";
 import ModalVideoCall from "@/components/VideoCallScreen/ModalVideoCall";
 import { DataNotify } from "@/types/NotifyResponseType";
 import mime from 'mime-types'
+import DownloadMultipleFile from "@/components/DownloadMultipleFile";
 
 // import '@/styles/tailwind.min.css'
 const Page: NextPageWithLayout = () => {
@@ -238,6 +239,8 @@ const Page: NextPageWithLayout = () => {
         urlImage={appState.showImageFullScreenData.urlImage} 
         onHide={() => setShowImageFullScreen(appState.showImageFullScreenData.urlImage,!appState.showImageFullScreenData.isShow, dispatch)}  /> : null
       }
+
+      { appState.showDownloadMultipleFile ? <DownloadMultipleFile /> : null }
     </>
   );
 };

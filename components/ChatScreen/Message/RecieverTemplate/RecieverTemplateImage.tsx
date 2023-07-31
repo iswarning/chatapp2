@@ -44,6 +44,10 @@ export default function RecieverTemplateImage({
                         height={64}
                         alt=""
                         className="rounded-full mt-6"
+                        onLoad={() => {
+                            if (lastIndex)
+                                scroll()
+                        }}
                         />
                     </div> : <div className="chat-text-box__photo w-10 h-10 hidden sm:block flex-none image-fit relative mr-4"></div>
                 }
@@ -53,7 +57,7 @@ export default function RecieverTemplateImage({
                         className="chat-text-box__content flex items-center float-left" 
                         title={timestamp}
                         onMouseEnter={() => setShowAction(true)}
-                        onMouseLeave={() => {setShowAction(false); setShowEmoji(false)}}>
+                        onMouseLeave={() => setShowAction(false)}>
                             <div className="rounded-md text-gray-700 chat-text-box__content__text--image flex justify-end mt-3">
                             {
                                 data?.map((file) => {
@@ -65,8 +69,7 @@ export default function RecieverTemplateImage({
                                 showAction ? <div className="hidden sm:block dropdown relative ml-3 mt-3">
                                     <DownloadIcon 
                                     fontSize='small' 
-                                    className="cursor-pointer"
-                                    onMouseEnter={() => setShowEmoji(true)}  />
+                                    className="cursor-pointer"  />
                                 </div> : null
                             }
                         </div>

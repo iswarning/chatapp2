@@ -121,7 +121,7 @@ export default function Message({
               message={message} 
               timestamp={message.createdAt} 
               lastIndex={lastIndex}
-              showAvatar={!showAvatar}
+              showAvatar={showAvatar}
               handleReaction={handleReaction} /> : null
             }
             {
@@ -130,7 +130,7 @@ export default function Message({
               message={message}
               lastIndex={lastIndex} 
               timestamp={message.createdAt}
-              showAvatar={!showAvatar}
+              showAvatar={showAvatar}
               handleReaction={handleReaction} /> : null
             }
             {
@@ -141,7 +141,7 @@ export default function Message({
               lastIndex={lastIndex} 
               onShowImage={(urlImage: any) => {setUrlImage(urlImage);setShowImageFullscreen(true)}}
               scroll={scrollToBottom}
-              showAvatar={!showAvatar}
+              showAvatar={showAvatar}
               handleReaction={handleReaction} /> : null
             }
           </>

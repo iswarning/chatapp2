@@ -34,7 +34,8 @@ export interface InitialState {
     fileUploadDone: any,
     showImageFullScreenData: any,
     showGroupInfo: boolean,
-    prepareSendFiles: Array<File>
+    prepareSendFiles: Array<File>,
+    showDownloadMultipleFile: boolean
   },
   
 }
@@ -56,7 +57,8 @@ const initialState: InitialState = {
       urlImage: ""
     },
     showGroupInfo: false,
-    prepareSendFiles: []
+    prepareSendFiles: [],
+    showDownloadMultipleFile: false
   },
 
 };
@@ -86,6 +88,9 @@ export const appSlice = createSlice({
           break;
         case "setStatusSend":
           state.data.statusSend = action.payload.data;
+          break
+        case "setShowDownloadMultipleFile":
+          state.data.showDownloadMultipleFile = action.payload.data;
           break
         case "setFileUploading":
           state.data.fileUploading = action.payload.data

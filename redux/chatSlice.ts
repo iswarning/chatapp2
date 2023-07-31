@@ -84,7 +84,7 @@ export const chatSlice = createSlice({
         }
 
         case "setListMessageInRoom": {
-          state.data.listChat[action.payload.data.index].messages?.concat(action.payload.data.newMessages)
+          state.data.listChat[action.payload.data.index].messages = action.payload.data.newMessages
           setLocalStorage("ListChat", state.data.listChat)
           break
         }

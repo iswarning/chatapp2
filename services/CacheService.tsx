@@ -245,3 +245,10 @@ export function setDataVideoCall(notifyResponse: NotifyResponseType, dispatch: D
         data: notifyResponse
     }))
 }
+
+export function setShowDownloadMultipleFile(show: boolean, dispatch: Dispatch<AnyAction>) {
+    dispatch(setAppGlobalState({
+        type: "setShowDownloadMultipleFile",
+        data: show
+    }))
+}
