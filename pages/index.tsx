@@ -14,7 +14,7 @@ import InfoContentScreen from "@/components/ChatScreen/InfoContentScreen";
 import ChatScreen from "@/components/ChatScreen/ChatScreen";
 import { selectChatState } from "@/redux/chatSlice";
 import { StatusCallType, selectVideoCallState, setGlobalVideoCallState } from "@/redux/videoCallSlice";
-import { addNewImageInRoom, getLocalStorage, pushMessageToListChat, removeFriendGlobal, removeMessageInListChat, setCurrentChat, setDataVideoCall, setListChat, setListFriend, setListFriendRequest, setShowImageFullScreen, setUserInfo } from "@/services/CacheService";
+import { addNewFriend, addNewFriendRequest, addNewImageInRoom, getLocalStorage, pushMessageToListChat, removeFriendGlobal, removeMessageInListChat, setCurrentChat, setDataVideoCall, setListChat, setListFriend, setListFriendRequest, setShowImageFullScreen, setUserInfo } from "@/services/CacheService";
 import ShowImageFullScreen from "@/components/ChatScreen/Message/ShowImageFullScreen";
 import { createNewUser, getInitialDataOfUser } from "@/services/UserService";
 import { SubscriptionOnCall, SubscriptionOnNotify } from "@/graphql/subscriptions";
@@ -138,6 +138,22 @@ const Page: NextPageWithLayout = () => {
               }
             }
           }
+          break
+        }
+        case "send-friend-request": {
+          addNewFriendRequest({
+            senderId: resNotify?.onSub?.senderId,
+            recipientId: resNotify?.onSub?.recipientId
+          }, dispatch)
+          AlertInfo(resNotify?.onSub?.message)
+          break
+        }
+        case "accept-friend-request": {
+          addNewFriend({
+            senderId: resNotify?.onSub?.senderId,
+            recipientId: resNotify?.onSub?.recipientId
+          }, dispatch)
+          AlertInfo(resNotify?.onSub?.message)
           break
         }
         case "unfriend": {
