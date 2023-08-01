@@ -42,10 +42,10 @@ export function addNewFriendRequest(newFriendRequest: FriendRequestType, dispatc
     }))
 }
 
-export function removeFriendRequestGlobal(friendRequest: FriendRequestType, dispatch: Dispatch<AnyAction>) {
+export function removeFriendRequestGlobal(index: number, dispatch: Dispatch<AnyAction>) {
     dispatch(setGlobalFriendRequestState({
         type: "removeFriendRequest",
-        data: friendRequest._id
+        data: {index}
     }))
 }
 

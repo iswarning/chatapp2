@@ -57,11 +57,11 @@ export default function SidebarFriendRequest() {
           <div>
 
           {
-            friendRequestState && input.length === 0 ? friendRequestState.listFriendRequest.map((fR) => <FriendElement key={fR._id} fR={fR} />) : null
+            friendRequestState && input.length === 0 ? friendRequestState.listFriendRequest.map((fR, index) => <FriendElement key={fR._id} fR={fR} index={index} />) : null
           }
 
           {
-            input.length > 0 && result.length > 0 ? result.map((info) => <UserElement key={info._id} userInfo={info} resetInput={() => setInput("")} />)  : null
+            input.length > 0 && result.length > 0 ? result.map((info, index) => <UserElement key={info._id} userInfo={info} resetInput={() => setInput("")} index={index} />)  : null
           }
 
           </div>
@@ -71,7 +71,7 @@ export default function SidebarFriendRequest() {
   )
 }
 
-function UserElement({ userInfo, resetInput }: { userInfo: UserType | null, resetInput: any }) {
+function UserElement({ userInfo, resetInput, index }: { userInfo: UserType | null, resetInput: any, index: number }) {
 
   const appState = useSelector(selectAppState)
   const dispatch = useDispatch()
@@ -114,7 +114,7 @@ function UserElement({ userInfo, resetInput }: { userInfo: UserType | null, rese
   )
 }
 
-function FriendElement({ fR }: { fR: FriendRequestType }) {
+function FriendElement({ fR, index }: { fR: FriendRequestType, index: number }) {
 
   const appState = useSelector(selectAppState)
   const dispatch = useDispatch()
@@ -127,7 +127,7 @@ function FriendElement({ fR }: { fR: FriendRequestType }) {
     })
     .then((data: FriendType) => {
       addNewFriend(data, dispatch)
-      removeFriendRequestGlobal(fR, dispatch)
+      removeFriendRequestGlobal(index, dispatch)
     })
   }
 
@@ -135,7 +135,7 @@ function FriendElement({ fR }: { fR: FriendRequestType }) {
     event.preventDefault()
     deleteFR(fR._id!)
     .then(() => {
-        removeFriendRequestGlobal(fR, dispatch)
+        removeFriendRequestGlobal(index, dispatch)
     })
   }
 
