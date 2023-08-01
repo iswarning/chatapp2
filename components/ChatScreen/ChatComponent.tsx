@@ -1,21 +1,15 @@
-import { auth, db, storage } from "@/firebase";
-import { useRouter } from "next/router";
+import { auth, storage } from "@/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { useCollection } from "react-firebase-hooks/firestore";
 import styled from "styled-components";
 import Image from "next/image";
-import TimeAgo from "timeago-react";
-import { useState } from "react";
 import {useSelector} from 'react-redux'
 import { selectAppState } from "@/redux/appSlice";
 import { useDispatch } from 'react-redux'
 import { ChatType, FileInfo } from "@/types/ChatType";
-import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined';
-import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutlined';
 import { selectChatState } from "@/redux/chatSlice";
 import { setCurrentChat, setListFileInRoom, setListImageInRoom, setListMessageInRoom } from "@/services/CacheService";
 import mime from "mime-types";
-import { getAllMessagesByChatRoomId, paginateMessage } from "@/services/MessageService";
+import { paginateMessage } from "@/services/MessageService";
 
 export default function ChatComponent({ chat, active, index }: { chat: ChatType, active: boolean, index: number}) {
   const [user] = useAuthState(auth);
@@ -24,21 +18,6 @@ export default function ChatComponent({ chat, active, index }: { chat: ChatType,
   const dispatch = useDispatch()
 
   const recipientInfo = chat.recipientInfo
-
-  // const [lastMessageSnapshot] = useCollection(
-  //   db
-  //     .collection("chats")
-  //     .doc(chat._id)
-  //     .collection("messages")
-  //     .orderBy("timestamp", 'desc')
-  //     .limit(1)
-  // );
-
-  // const lastMessage = MapMessageData(lastMessageSnapshot?.docs?.[0]!)
-
-  // const [userInfoOfLastMessageSnapshot] = useCollection(
-  //   db.collection("users").where("email", "==", String(lastMessage?.user))
-  // );
 
   const handleShowChatScreen = async() => {
     let chatExist = chatState.listChat[index]

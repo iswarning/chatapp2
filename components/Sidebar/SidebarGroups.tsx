@@ -8,15 +8,12 @@ import { storage } from '@/firebase'
 import { toast } from 'react-toastify'
 import { ChatType } from '@/types/ChatType'
 import { v4 as uuidv4 } from 'uuid'
-import MemberElement from '../MemberElement'
 import { selectFriendState } from '@/redux/friendSlice'
-import { createChatRoom, updateChatRoom } from '@/services/ChatRoomService'
+import { createChatRoom } from '@/services/ChatRoomService'
 import { setListChat } from '@/services/CacheService'
 import { selectChatState } from '@/redux/chatSlice'
-import {ObjectId} from 'bson'
 import { AlertError, AlertSuccess } from '@/utils/core'
 import LoadingButton from '@mui/lab/LoadingButton';
-import { Button } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 
 export default function SidebarGroups() {
@@ -37,10 +34,6 @@ export default function SidebarGroups() {
         handleSubmit,
         formState: { errors },
       } = useForm();
-
-    // const [friendSnapshot] = useCollection(
-    //     db.collection("friends").where("users", "array-contains", appState.userInfo?.email)
-    // );
 
     const handleAddMemberToGroup = (checked: any, member: UserType | undefined) => {
         if (checked) {
@@ -226,3 +219,45 @@ export default function SidebarGroups() {
     </>
   )
 }
+
+function MemberElement({ info, handleAddMemberToGroup, listMember }: { info: UserType | undefined, handleAddMemberToGroup: any, listMember: Array<UserType | undefined> }) {
+
+    const appState = useSelector(selectAppState)
+
+  return (
+    <>
+    {
+        info ? <div className="block mt-2">
+            <div className="box dark:bg-dark-3 cursor-pointer relative flex items-center px-4 py-3 zoom-in ">
+                <div className="w-10 h-10 flex-none image-fit mr-1">
+                    {
+                        info?.photoURL ? <Image src={info?.photoURL} width={48} height={48} alt='' className="rounded-full" /> : null
+                    }
+                    {
+                        appState.userOnline?.find((u: any) => u === info?.email) ? (
+                            <div className="border-white w-3 h-3 absolute right-0 bottom-0 rounded-full border-2" style={{background: 'green'}}></div>
+                            ) : (
+                            <span className="border-white w-3 h-3 absolute right-0 bottom-0 rounded-full border-2" style={{background: 'gray'}}></span>
+                            )
+                    }
+                </div>
+                <div className="ml-2 overflow-hidden">
+                    <a href="javascript:void(0)" className="font-medium">{info?.fullName}</a>
+                    <div className="flex items-center text-xs">
+                        <div className="text-gray-600 whitespace-nowrap text-xs mt-0.5">{info?.email}</div>
+                    </div>
+                </div>
+                <input 
+                className="form-check-switch ml-auto" 
+                type="checkbox" 
+                name="addMember" 
+                onChange={(event) => handleAddMemberToGroup(event.target.checked, info)} 
+                defaultChecked={listMember.filter((mem) => mem?._id === info._id).length > 0}/>
+            </div>
+        </div> : null
+    }
+    </>
+    
+  )
+}
+

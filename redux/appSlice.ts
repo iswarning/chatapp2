@@ -2,8 +2,6 @@ import { createSlice } from "@reduxjs/toolkit";
 import { AppState } from "./store";
 import { HYDRATE } from "next-redux-wrapper";
 import { UserType } from "@/types/UserType";
-import { Socket, io } from "socket.io-client";
-import { FileInfo } from "@/types/ChatType";
 
 export enum SidebarType {
   CHAT,
@@ -35,7 +33,10 @@ export interface InitialState {
     showImageFullScreenData: any,
     showGroupInfo: boolean,
     prepareSendFiles: Array<File>,
-    showDownloadMultipleFile: boolean
+    downloadMultipleFile: {
+      isShow: boolean,
+      keys: string[]
+    }
   },
   
 }
@@ -58,7 +59,10 @@ const initialState: InitialState = {
     },
     showGroupInfo: false,
     prepareSendFiles: [],
-    showDownloadMultipleFile: false
+    downloadMultipleFile: {
+      isShow: false,
+      keys: []
+    }
   },
 
 };
@@ -89,8 +93,8 @@ export const appSlice = createSlice({
         case "setStatusSend":
           state.data.statusSend = action.payload.data;
           break
-        case "setShowDownloadMultipleFile":
-          state.data.showDownloadMultipleFile = action.payload.data;
+        case "setDownloadMultipleFile":
+          state.data.downloadMultipleFile = action.payload.data;
           break
         case "setFileUploading":
           state.data.fileUploading = action.payload.data

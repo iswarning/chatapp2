@@ -1,5 +1,4 @@
-import { auth, db, storage } from "@/firebase";
-import { useAuthState } from "react-firebase-hooks/auth";
+import { storage } from "@/firebase";
 import Message from "./Message/Message";
 import { DragEvent, useEffect, useRef, useState } from "react";
 import {
@@ -19,7 +18,7 @@ import { StatusCallType, selectVideoCallState, setGlobalVideoCallState } from "@
 import {v4 as uuidv4} from 'uuid'
 import { addNewFileInRoom, addNewImageInRoom, addPrepareSendFiles, pushMessageToListChat, setDataVideoCall, setFileUploadDone, setFileUploading, setListMessageInRoom, setPrepareSendFiles, setProgress, setShowGroupInfo, setStatusSend, updateMessageInListChat } from "@/services/CacheService";
 import { AlertError } from "@/utils/core";
-import { createMessage, paginateMessage, updateMessage } from "@/services/MessageService";
+import { createMessage, paginateMessage } from "@/services/MessageService";
 import PrepareSendFileScreen from "./PrepareSendFileScreen";
 import { selectChatState } from "@/redux/chatSlice";
 import { getImageTypeFileValid } from "@/utils/getImageTypeFileValid";
@@ -27,7 +26,6 @@ import { videoCall } from "@/services/ChatRoomService";
 
 
 export default function ChatScreen({ chat, messages }: { chat: ChatType, messages: Array<MessageType> }) {
-  const [user] = useAuthState(auth);
   const endOfMessageRef: any = useRef(null);
   const [showEmoji, setShowEmoji] = useState(false);
   const dispatch = useDispatch()

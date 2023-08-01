@@ -5,7 +5,7 @@ import styled from "@emotion/styled";
 import StatusSend from './StatusSend';
 import { useState } from 'react';
 import DownloadIcon from '@mui/icons-material/Download';
-import { setShowDownloadMultipleFile } from '@/services/CacheService';
+import { setDownloadMultipleFile } from '@/services/CacheService';
 import { selectAppState } from '@/redux/appSlice';
 
 export default function SenderTemplateImage(
@@ -29,7 +29,11 @@ export default function SenderTemplateImage(
     const chatState = useSelector(selectChatState)
     const appState = useSelector(selectAppState)
     const dispatch = useDispatch()
-    const data = chatState.listChat.find((chat) => chatState.currentChat.chatRoomId === chat._id)?.listImage?.filter((image) => JSON.parse(message).find((key: any) => key === image.key))
+    const data = chatState.listChat[chatState.currentChat.index].listImage?.filter((image) => JSON.parse(message).find((key: any) => key === image.key))
+
+    const handleDownload = () => {
+        setDownloadMultipleFile(true, data?.map((f) => f.key)!, dispatch)
+    }
 
     return (
         <>
@@ -47,7 +51,7 @@ export default function SenderTemplateImage(
                                 fontSize='small' 
                                 className="cursor-pointer"
                                 titleAccess='Download'
-                                onClick={() => setShowDownloadMultipleFile(!appState.showDownloadMultipleFile, dispatch)}  />
+                                onClick={handleDownload}  />
                             </div> : null
                         }
                         <div 

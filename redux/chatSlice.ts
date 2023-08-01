@@ -55,24 +55,7 @@ export const chatSlice = createSlice({
         }
 
         case "updateMessageInListChat": {
-          state.data.listChat = state.data.listChat.map((chat) => {
-            if (chat._id === action.payload.data.chatId) {
-              return {
-                ...chat,
-                messages: chat.messages?.map((msg) => {
-                  if (msg._id === action.payload.data.messageId) {
-                    return {
-                      ...action.payload.data.newMessage
-                    }
-                  } else {
-                    return msg
-                  }
-                })
-              }
-            } else {
-              return chat
-            }
-          })
+          state.data.listChat[action.payload.data.indexChat].messages?.splice(action.payload.data.indexMessage, 1, action.payload.data.newMessage)
           setLocalStorage("ListChat", state.data.listChat)
           break;
         }

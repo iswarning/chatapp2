@@ -7,7 +7,7 @@ import Image from 'next/image'
 import { FileInfo } from '@/types/ChatType'
 import DownloadIcon from '@mui/icons-material/Download';
 import CancelIcon from '@mui/icons-material/Cancel';
-import { ActionContainer, ActionElement, BtnMore } from '@/components/MemberInChat'
+import { ActionContainer, ActionElement, BtnMore } from '@/components/ChatScreen/InfoContentScreen'
 import { selectAppState } from '@/redux/appSlice'
 
 function SharedFile() {

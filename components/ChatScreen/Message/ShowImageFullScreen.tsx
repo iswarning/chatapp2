@@ -11,7 +11,6 @@ import { selectAppState } from '@/redux/appSlice'
 import styled from 'styled-components'
 import Image from 'next/image'
 import { v4 as uuidv4 } from 'uuid'
-import html2canvas from 'html2canvas'
 import { selectChatState } from '@/redux/chatSlice'
 
 export default function ShowImageFullScreen(
@@ -61,14 +60,6 @@ export default function ShowImageFullScreen(
         })
         setUrlImg(url);
     } 
-
-    const handleDownload = () => {
-        html2canvas(document.querySelector("body")!).then((canvas) => {
-            let file = canvas.toDataURL("image/png")
-            document.getElementById("download")?.setAttribute("href", file)
-            document.getElementById("download")?.click()
-        }).catch(err => console.log(err))
-    }
 
     return (
         <ScreenContainer>

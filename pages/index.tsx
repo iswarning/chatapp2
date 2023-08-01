@@ -240,7 +240,7 @@ const Page: NextPageWithLayout = () => {
         onHide={() => setShowImageFullScreen(appState.showImageFullScreenData.urlImage,!appState.showImageFullScreenData.isShow, dispatch)}  /> : null
       }
 
-      { appState.showDownloadMultipleFile ? <DownloadMultipleFile /> : null }
+      { appState.downloadMultipleFile.isShow ? <DownloadMultipleFile /> : null }
     </>
   );
 };

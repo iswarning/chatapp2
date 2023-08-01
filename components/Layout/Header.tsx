@@ -2,7 +2,6 @@ import styled from "styled-components";
 import { auth, db } from "@/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
 import Image from "next/image";
-import NotificationScreen from "../NotificationScreen";
 import { useState } from "react";
 import { useDispatch, useSelector } from 'react-redux'
 import { selectFriendRequestState } from "@/redux/friendRequestSlice";
@@ -10,7 +9,6 @@ import { selectFriendRequestState } from "@/redux/friendRequestSlice";
 export default function Header() {
 
     const [user] = useAuthState(auth);
-    const [show, setShow] = useState(false)
     const friendRequestState = useSelector(selectFriendRequestState)
 
     // const [friendR] = useCollection(
@@ -31,17 +29,6 @@ export default function Header() {
         <div className="h-full flex items-center">
         <div className="mr-3">Dark Mode</div>
         <input className="form-check-switch" type="checkbox" id="dark-mode-switcher" onChange={(event) => { if(event.currentTarget.checked) document.documentElement.classList.add("dark"); else document.documentElement.classList.remove("dark") }}/>
-        </div>
-        <div className="hidden md:flex items-center px-5"></div>
-        <div className="notification-dropdown dropdown">
-            <a onClick={() => setShow(!show)} href="javascript:void(0)" className="notification-dropdown__toggler text-gray-600 border-theme-7 dark:border-dark-4 dark:text-gray-300 dropdown-toggle h-full flex items-center px-5 relative -mr-3 md:mr-0 md:border-l md:border-r">
-                <div className="relative">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-bell w-5 h-5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-                    {
-                        friendRequestState.listFriendRequest && friendRequestState.listFriendRequest.length > 0 ? <div className="w-2 h-2 bg-theme-1 text-white flex items-center justify-center absolute -mt-0.5 top-0 right-0 rounded-full"></div> : null
-                    }
-                </div>
-            </a>
         </div>
         <div className="account-dropdown dropdown relative">
         <a href="javascript:void(0)" className="h-full dropdown-toggle flex items-center pl-5">
@@ -77,7 +64,6 @@ export default function Header() {
         </div>
         </div>
         </div>
-        { show ? <NotificationScreen friendR={friendRequestState.listFriendRequest} /> : null }
         </>
     );
 }
