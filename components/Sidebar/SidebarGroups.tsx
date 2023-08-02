@@ -125,8 +125,8 @@ export default function SidebarGroups() {
   return (
     <>
         <div className="side-content col-span-12 xl:col-span-3 -mt-16 xl:mt-0 pt-20 xl:-mr-6 px-6 xl:pt-6 flex-col overflow-hidden side-content--active" data-content="groups">
-            <div className="intro-y text-xl font-medium">Create Group</div>
-            <div className="intro-y box p-2 mt-5 mb-6">
+            <div className="text-xl font-medium">Create Group</div>
+            <div className="box p-2 mt-5 mb-6">
                 <div className="boxed-tabs nav nav-tabs justify-center flex" role="tablist"> 
                     <a onClick={() => setActive("Members")} data-toggle="tab" data-target="#group-members" href="javascript:void(0)" className={active === "Members" ? CLASS_ACTIVE : CLASS_NOT_ACTIVE} id="group-members-tab" role="tab" aria-controls="group-members" aria-selected="true">
                         Members
@@ -136,12 +136,12 @@ export default function SidebarGroups() {
                     </a>
                 </div>
             </div>
-            <div className="intro-y overflow-y-auto scrollbar-hidden -mx-5 px-5">
+            <div className="overflow-y-auto scrollbar-hidden -mx-5 px-5">
                 <div className="tab-content">
                     {
                         active === "Members" ? <div className="tab-pane active" id="group-members" role="tabpanel" aria-labelledby="group-members-tab">
                             <div className="user-list">
-                                <div className="intro-x pb-6">
+                                <div className="pb-6">
                                 {
                                     friendState ? friendState.listFriend.map((friend) => 
                                         <MemberElement 
@@ -228,7 +228,7 @@ function MemberElement({ info, handleAddMemberToGroup, listMember }: { info: Use
     <>
     {
         info ? <div className="block mt-2">
-            <div className="box dark:bg-dark-3 cursor-pointer relative flex items-center px-4 py-3 zoom-in ">
+            <div className="box dark:bg-dark-3 relative flex items-center px-4 py-3 ">
                 <div className="w-10 h-10 flex-none image-fit mr-1">
                     {
                         info?.photoURL ? <Image src={info?.photoURL} width={48} height={48} alt='' className="rounded-full" /> : null

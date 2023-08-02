@@ -19,14 +19,14 @@ export default function SidebarContact() {
   return (
     <>
     <div className="side-content col-span-12 xl:col-span-3 -mt-16 xl:mt-0 pt-20 xl:-mr-6 px-6 xl:pt-6 flex-col overflow-hidden side-content--active" data-content="contacts">
-<div className="intro-y text-xl font-medium">Contacts</div>
-<div className="intro-y relative mt-5 mb-6">
+<div className="text-xl font-medium">Contacts</div>
+<div className="relative mt-5 mb-6">
 <input type="text" className="form-control box py-3 px-4 border-transparent pr-8" placeholder="Search for contacts..."/>
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="feather feather-search text-gray-600 w-5 h-5 absolute inset-y-0 right-0 my-auto mr-3"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
 </div>
-<div className="intro-y overflow-y-auto scrollbar-hidden -mx-5 px-5">
+<div className="overflow-y-auto scrollbar-hidden -mx-5 px-5">
 <div className="user-list">
-<div className="intro-x">
+<div>
 
 {
   friendState ? friendState.listFriend.map((friend) => <FriendElement key={friend._id} friendId={friend._id} userInfo={friend.userInfo!} />) : null
@@ -56,7 +56,7 @@ function FriendElement({ friendId, userInfo }: { friendId: string | undefined, u
 return (
   <>
   {
-      userInfo ? <div className="intro-x block mt-2">
+      userInfo ? <div className="block mt-2">
         <div className="box dark:bg-dark-3 relative flex items-center px-4 py-3">
           <div className="w-10 h-10 flex-none image-fit mr-1">
           {
