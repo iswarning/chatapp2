@@ -3,7 +3,7 @@ import { StatusSendType, setAppGlobalState } from "@/redux/appSlice";
 import { setGlobalChatState } from "@/redux/chatSlice";
 import { setGlobalFriendRequestState } from "@/redux/friendRequestSlice";
 import { setGlobalFriendState } from "@/redux/friendSlice";
-import { setGlobalVideoCallState } from "@/redux/videoCallSlice";
+import { StatusCallType, setGlobalVideoCallState } from "@/redux/videoCallSlice";
 import { ChatType, FileInfo } from "@/types/ChatType";
 import { FriendRequestType } from "@/types/FriendRequestType";
 import { FriendType } from "@/types/FriendType";
@@ -253,5 +253,12 @@ export function setDownloadMultipleFile(isShow: boolean, keys: string[], dispatc
             isShow,
             keys
         }
+    }))
+}
+
+export function setStatusCall(status: StatusCallType, dispatch: Dispatch<AnyAction>) {
+    dispatch(setGlobalVideoCallState({
+        type: "setStatusCall",
+        data: status
     }))
 }

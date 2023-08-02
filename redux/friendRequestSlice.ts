@@ -38,7 +38,7 @@ export const friendRequestSlice = createSlice({
             setLocalStorage("ListFriendRequest", state.data.listFriendRequest)
             break;
         case "removeFriendRequest":
-          state.data.listFriendRequest = state.data.listFriendRequest.splice(action.payload.data.index, 1)
+          state.data.listFriendRequest.splice(action.payload.data.index, 1)
           setLocalStorage("ListFriendRequest", state.data.listFriendRequest)
           break;
         default:

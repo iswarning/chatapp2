@@ -66,12 +66,7 @@ export const MutationRemoveFriend = `
 
 export const MutationRemoveFriendRequest = `
     mutation($_id: String!){
-        removeFriendRequest(_id: $_id){
-            _id
-            senderId
-            recipientId
-            createdAt
-        }
+        removeFriendRequest(_id: $_id)
     }
 `
 

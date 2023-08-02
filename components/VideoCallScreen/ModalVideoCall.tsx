@@ -1,12 +1,14 @@
 import { Modal } from '@mui/material'
 import dynamic from 'next/dynamic';
 import React, {  useState } from 'react'
-import { useSelector } from 'react-redux'
-import { selectChatState } from '@/redux/chatSlice';
+import { useSelector, useDispatch } from 'react-redux'
+import { setStatusCall } from '@/services/CacheService';
+import { StatusCallType, selectVideoCallState } from '@/redux/videoCallSlice';
 
 export default function ModalVideoCall({ token, channel }: { token: string, channel: string }) {
 
     const [videoCall, setVideoCall] = useState(true);
+    const dispatch = useDispatch();
 
     const AgoraUIKit = dynamic(() => import('agora-react-uikit'), {
         ssr: false
@@ -19,7 +21,9 @@ export default function ModalVideoCall({ token, channel }: { token: string, chan
     };
 
     const callbacks = {
-        EndCall: () => setVideoCall(false),
+        EndCall: () => {
+            setStatusCall(StatusCallType.DISCONNECT_CALL, dispatch)
+        },
     };
 
   return (
