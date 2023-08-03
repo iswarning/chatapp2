@@ -89,7 +89,7 @@ export default function DropdownAttach() {
   //         key: key,
   //         file: file
   //       })
-  //       pushMessageToListChat(chatId, newMessage, dispatch)
+  //       pushMessageToCache(chatId, newMessage, dispatch)
   //     }
   //   }
   //   if(result.length > 0)

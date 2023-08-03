@@ -146,9 +146,9 @@ export function setListMessageInRoom(index: number, messages: MessageType[] | un
     }))
 }
 
-export function pushMessageToListChat(index: number, newMessage: MessageType, dispatch: Dispatch<AnyAction>) {
+export function pushMessageToCache(index: number, newMessage: MessageType, dispatch: Dispatch<AnyAction>) {
     dispatch(setGlobalChatState({
-        type: "pushMessageToListChat",
+        type: "pushMessageToCache",
         data: {
             index,
             newMessage
@@ -166,13 +166,13 @@ export function removeMessageInListChat(indexMessage: number, indexChat: number,
     }))
 }
 
-export function updateMessageInListChat(chatId: string, newMessage: MessageType, messageId: string, dispatch: Dispatch<AnyAction>) {
+export function updateMessageToCache(indexChat: number, indexMessage: number, newMessage: MessageType, dispatch: Dispatch<AnyAction>) {
     dispatch(setGlobalChatState({
-        type: "updateMessageInListChat",
+        type: "updateMessageToCache",
         data: {
-            chatId,
-            newMessage,
-            messageId
+            indexChat,
+            indexMessage,
+            newMessage
         }
     }))
 }

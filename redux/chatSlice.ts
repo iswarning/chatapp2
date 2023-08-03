@@ -48,17 +48,23 @@ export const chatSlice = createSlice({
           break;
         }
           
-        case "pushMessageToListChat": {
+        case "pushMessageToCache": {
           state?.data?.listChat?.[action.payload.data.index]?.messages?.push(action.payload.data.newMessage)
           setLocalStorage("ListChat", state.data.listChat)
           break;
         }
 
-        case "updateMessageInListChat": {
+        case "updateMessageToCache": {
           state.data.listChat[action.payload.data.indexChat].messages?.splice(action.payload.data.indexMessage, 1, action.payload.data.newMessage)
           setLocalStorage("ListChat", state.data.listChat)
           break;
         }
+
+        // case "updateReactionToCache": {
+        //   state.data.listChat[action.payload.data.indexChat].messages?.splice(action.payload.data.indexMessage, 1, action.payload.data.newMessage)
+        //   setLocalStorage("ListChat", state.data.listChat)
+        //   break;
+        // }
 
         case "removeMessageInListChat": {
           state.data.listChat[action.payload.data.indexChat].messages?.splice(action.payload.data.indexMessage, 1)

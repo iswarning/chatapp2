@@ -126,6 +126,7 @@ function FriendElement({ fR, index }: { fR: FriendRequestType, index: number }) 
       recipientId: fR.senderId
     })
     .then((data: FriendType) => {
+      console.log(data)
       addNewFriend(data, dispatch)
       removeFriendRequestGlobal(index, dispatch)
     })
@@ -134,9 +135,6 @@ function FriendElement({ fR, index }: { fR: FriendRequestType, index: number }) 
   const handleRemove = (event: any) => {
     event.preventDefault()
     deleteFR(fR._id!)
-    .then(() => {
-        removeFriendRequestGlobal(index, dispatch)
-    })
   }
 
 return (

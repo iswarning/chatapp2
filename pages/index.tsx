@@ -14,7 +14,7 @@ import InfoContentScreen from "@/components/ChatScreen/InfoContentScreen";
 import ChatScreen from "@/components/ChatScreen/ChatScreen";
 import { selectChatState } from "@/redux/chatSlice";
 import { StatusCallType, selectVideoCallState, setGlobalVideoCallState } from "@/redux/videoCallSlice";
-import { addNewFileInRoom, addNewFriend, addNewFriendRequest, addNewImageInRoom, getLocalStorage, pushMessageToListChat, removeFriendGlobal, removeMessageInListChat, setCurrentChat, setDataVideoCall, setListChat, setListFriend, setListFriendRequest, setShowImageFullScreen, setUserInfo } from "@/services/CacheService";
+import { addNewFileInRoom, addNewFriend, addNewFriendRequest, addNewImageInRoom, getLocalStorage, pushMessageToCache, removeFriendGlobal, removeFriendRequestGlobal, removeMessageInListChat, setCurrentChat, setDataVideoCall, setListChat, setListFriend, setListFriendRequest, setShowImageFullScreen, setUserInfo } from "@/services/CacheService";
 import ShowImageFullScreen from "@/components/ChatScreen/Message/ShowImageFullScreen";
 import { createNewUser, getInitialDataOfUser } from "@/services/UserService";
 import { SubscriptionOnCall, SubscriptionOnNotify } from "@/graphql/subscriptions";
@@ -27,6 +27,7 @@ import ModalVideoCall from "@/components/VideoCallScreen/ModalVideoCall";
 import { DataNotify } from "@/types/NotifyResponseType";
 import mime from 'mime-types'
 import DownloadMultipleFile from "@/components/DownloadMultipleFile";
+import { selectFriendRequestState } from "@/redux/friendRequestSlice";
 
 // import '@/styles/tailwind.min.css'
 const Page: NextPageWithLayout = () => {
@@ -36,6 +37,7 @@ const Page: NextPageWithLayout = () => {
   const dispatch = useDispatch();
   const appState = useSelector(selectAppState);
   const chatState = useSelector(selectChatState);
+  const friendRequestState = useSelector(selectFriendRequestState);
   const videoCallState = useSelector(selectVideoCallState);
 
   useEffect(() => {
@@ -87,13 +89,15 @@ const Page: NextPageWithLayout = () => {
   );
   
   useEffect(() => {
-    if(resNotify?.onSub?.recipientId?.includes(appState.userInfo._id) && resNotify?.onSub?.senderId !== appState.userInfo._id) {
+    console.log(1233)
+    if(resNotify?.onSub?.recipientId?.includes(appState.userInfo._id) && resNotify?.onSub?.recipientId?.senderId !== appState.userInfo._id) {
+      console.log(1212)
       switch(resNotify?.onSub?.type){
         case "send-message": {  
           const dataNotify: DataNotify = resNotify?.onSub?.dataNotify
           if (chatState.currentChat.index !== -1) {
             if (chatState.currentChat.chatRoomId === dataNotify.message?.chatRoomId) {
-              pushMessageToListChat(chatState.currentChat.index, dataNotify.message, dispatch)
+              pushMessageToCache(chatState.currentChat.index, dataNotify.message, dispatch)
               if (dataNotify.message.type === "image") {
                 const listKey: string[] = JSON.parse(dataNotify.message.message!)
                 for (const key in listKey) {
@@ -133,7 +137,7 @@ const Page: NextPageWithLayout = () => {
             } else {
               const index = chatState.listChat.findIndex((chat) => chat._id === dataNotify.message?.chatRoomId)
               if (index !== -1 && chatState.listChat[index].messages?.length! > 0) {
-                pushMessageToListChat(index, dataNotify.message!, dispatch)
+                pushMessageToCache(index, dataNotify.message!, dispatch)
                 AlertInfo( resNotify?.onSub?.message)
               }
             }
@@ -154,6 +158,13 @@ const Page: NextPageWithLayout = () => {
             recipientId: resNotify?.onSub?.recipientId
           }, dispatch)
           AlertInfo(resNotify?.onSub?.message)
+          break
+        }
+        case "remove-friend-request": {
+          removeFriendRequestGlobal(
+            friendRequestState.listFriendRequest.findIndex((f) => f._id === resNotify?.onSub?.message), 
+            dispatch
+          )
           break
         }
         case "unfriend": {

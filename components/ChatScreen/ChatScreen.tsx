@@ -16,7 +16,7 @@ import CallIcon from '@mui/icons-material/Call';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { StatusCallType, selectVideoCallState, setGlobalVideoCallState } from "@/redux/videoCallSlice";
 import {v4 as uuidv4} from 'uuid'
-import { addNewFileInRoom, addNewImageInRoom, addPrepareSendFiles, pushMessageToListChat, setDataVideoCall, setFileUploadDone, setFileUploading, setListMessageInRoom, setPrepareSendFiles, setProgress, setShowGroupInfo, setStatusSend, updateMessageInListChat } from "@/services/CacheService";
+import { addNewFileInRoom, addNewImageInRoom, addPrepareSendFiles, pushMessageToCache, setDataVideoCall, setFileUploadDone, setFileUploading, setListMessageInRoom, setPrepareSendFiles, setProgress, setShowGroupInfo, setStatusSend, updateMessageToCache } from "@/services/CacheService";
 import { AlertError } from "@/utils/core";
 import { createMessage, paginateMessage } from "@/services/MessageService";
 import PrepareSendFileScreen from "./PrepareSendFileScreen";
@@ -138,9 +138,10 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
     newMessage.message = message
     newMessage.createdAt = new Date().toLocaleString()
     newMessage.senderId = appState.userInfo._id!
+    newMessage.chatRoomId = chatState.currentChat.chatRoomId
     newMessage.type = type
 
-    pushMessageToListChat(chatState.currentChat.index, newMessage, dispatch)
+    pushMessageToCache(chatState.currentChat.index, newMessage, dispatch)
 
     createMessage({
       chatRoomId: chat._id,
@@ -148,8 +149,8 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
       senderId: newMessage.senderId,
       type: newMessage.type
     })
-    .then((data: MessageType) => {
-      updateMessageInListChat(chat._id!, data, newMessage._id!, dispatch)
+    .then(() => {
+      updateMessageToCache(chatState.currentChat.index, chatState.listChat[chatState.currentChat.index].messages?.length!, newMessage, dispatch)
     })
     .catch(err => {
       setStatusSend(StatusSendType.ERROR, dispatch)
@@ -195,7 +196,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
           size: fileSize
         })
         
-        pushMessageToListChat(chatState.currentChat.index, newMessage, dispatch)
+        pushMessageToCache(chatState.currentChat.index, newMessage, dispatch)
         scrollToBottom()
       }
     }

@@ -32,10 +32,7 @@ export const friendSlice = createSlice({
             state.data.listFriend = action.payload.data
             break;
         case "addNewFriend":
-            state.data.listFriend = [
-                ...state.data.listFriend,
-                action.payload.data
-            ]
+            state.data.listFriend.push(action.payload.data)
             setLocalStorage("ListFriend", state.data.listFriend)
             break;
         case "removeFriend": {
