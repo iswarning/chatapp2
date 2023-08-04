@@ -29,7 +29,7 @@ export default function SidebarContact() {
 <div>
 
 {
-  friendState ? friendState.listFriend.map((friend) => <FriendElement key={friend._id} friendId={friend._id} userInfo={friend.userInfo!} />) : null
+  friendState ? friendState.listFriend.map((friend, i) => <FriendElement key={friend._id} index={i} friendId={friend._id} userInfo={friend.userInfo!} />) : null
 }
 
 </div>
@@ -39,7 +39,7 @@ export default function SidebarContact() {
   )
 }
 
-function FriendElement({ friendId, userInfo }: { friendId: string | undefined, userInfo: UserType }) {
+function FriendElement({ index, friendId, userInfo }: { index: number, friendId: string | undefined, userInfo: UserType }) {
 
   const appState = useSelector(selectAppState)
   const dispatch = useDispatch()
@@ -49,7 +49,7 @@ function FriendElement({ friendId, userInfo }: { friendId: string | undefined, u
     if(!confirm("Do you want to unfriend ?")) return
     removeFriend(friendId!)
     .then(() => {
-      removeFriendGlobal(friendId!, dispatch)
+      removeFriendGlobal(index, dispatch)
     })
   }
 

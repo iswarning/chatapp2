@@ -64,11 +64,11 @@ export function addNewFriend(newFriend: FriendType, dispatch: Dispatch<AnyAction
     }))
 }
 
-export function removeFriendGlobal(friendId: string, dispatch: Dispatch<AnyAction>) {
+export function removeFriendGlobal(index: number, dispatch: Dispatch<AnyAction>) {
     dispatch(setGlobalFriendState({
         type: "removeFriend",
         data: {
-            friendId
+            index
         }
     }))
 }

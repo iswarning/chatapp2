@@ -24,7 +24,7 @@ import { updateMessage } from "@/services/MessageService";
 import SidebarFriendRequest from "@/components/Sidebar/SidebarFriendRequest";
 import PopupVideoCall from "@/components/VideoCallScreen/PopupVideoCall";
 import ModalVideoCall from "@/components/VideoCallScreen/ModalVideoCall";
-import { DataNotify } from "@/types/NotifyResponseType";
+import { DataNotify, NotifyResponseType } from "@/types/NotifyResponseType";
 import mime from 'mime-types'
 import DownloadMultipleFile from "@/components/DownloadMultipleFile";
 import { selectFriendRequestState } from "@/redux/friendRequestSlice";
@@ -180,35 +180,41 @@ const Page: NextPageWithLayout = () => {
   );
 
   useEffect(() => {
-    if(resCall?.onCall?.recipientId?.includes(appState.userInfo._id) && resCall?.onCall?.senderId !== appState.userInfo._id) {
-      switch(resCall?.onCall?.type){
-        case "send-call": {  
-          dispatch(setGlobalVideoCallState({
-            type: "setShowVideoCallScreen",
-            data: true
-          }))
-          dispatch(setGlobalVideoCallState({
-            type: "setStatusCall",
-            data: StatusCallType.INCOMING_CALL
-          }));
-          setDataVideoCall(resCall?.onCall, dispatch)
-          break
-        }
-        case "accept-call": {
-          dispatch(setGlobalVideoCallState({
-            type: "setShowVideoCallScreen",
-            data: false
-          }))
-          dispatch(setGlobalVideoCallState({
-            type: "setStatusCall",
-            data: StatusCallType.CALLED
-          }));
-          console.log(resCall?.onCall)
-          setDataVideoCall(resCall?.onCall, dispatch)
-          break
+    if (resCall) {
+      console.log(resCall)
+      const response = JSON.parse(resCall?.onCall) as NotifyResponseType
+      console.log(response)
+
+      if(response?.recipientId?.includes(appState.userInfo._id!) && response.senderId !== appState.userInfo._id) {
+        switch(response.type){
+          case "send-call": {  
+            dispatch(setGlobalVideoCallState({
+              type: "setShowVideoCallScreen",
+              data: true
+            }))
+            dispatch(setGlobalVideoCallState({
+              type: "setStatusCall",
+              data: StatusCallType.INCOMING_CALL
+            }));
+            setDataVideoCall(response, dispatch)
+            break
+          }
+          case "accept-call": {
+            dispatch(setGlobalVideoCallState({
+              type: "setShowVideoCallScreen",
+              data: false
+            }))
+            dispatch(setGlobalVideoCallState({
+              type: "setStatusCall",
+              data: StatusCallType.CALLED
+            }));
+            setDataVideoCall(response, dispatch)
+            break
+          }
         }
       }
     }
+    
   },[resCall])
   
   return (
