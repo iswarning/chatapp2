@@ -23,6 +23,7 @@ import PrepareSendFileScreen from "./PrepareSendFileScreen";
 import { selectChatState } from "@/redux/chatSlice";
 import { getImageTypeFileValid } from "@/utils/getImageTypeFileValid";
 import { videoCall } from "@/services/ChatRoomService";
+import { pushNotify } from "@/services/UserService";
 
 
 export default function ChatScreen({ chat, messages }: { chat: ChatType, messages: Array<MessageType> }) {
@@ -149,8 +150,17 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
       senderId: newMessage.senderId,
       type: newMessage.type
     })
-    .then(() => {
+    .then((data: MessageType) => {
       updateMessageToCache(chatState.currentChat.index, chatState.listChat[chatState.currentChat.index].messages?.length!, newMessage, dispatch)
+      pushNotify({
+        senderId: appState.userInfo._id!,
+        recipientId: JSON.stringify(chat.members),
+        type: "send-message",
+        message: `${appState.userInfo.fullName} sent a message`,
+        dataNotify: {
+          message: data
+        }
+      })
     })
     .catch(err => {
       setStatusSend(StatusSendType.ERROR, dispatch)

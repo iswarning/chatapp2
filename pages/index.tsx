@@ -89,12 +89,10 @@ const Page: NextPageWithLayout = () => {
   );
   
   useEffect(() => {
-    console.log(1233)
-    if(resNotify?.onSub?.recipientId?.includes(appState.userInfo._id) && resNotify?.onSub?.recipientId?.senderId !== appState.userInfo._id) {
-      console.log(1212)
-      switch(resNotify?.onSub?.type){
+    if(resNotify?.onSubscription?.recipientId?.includes(appState.userInfo._id) && resNotify?.onSubscription?.senderId !== appState.userInfo._id) {
+      switch(resNotify?.onSubscription?.type){
         case "send-message": {  
-          const dataNotify: DataNotify = resNotify?.onSub?.dataNotify
+          const dataNotify: DataNotify = resNotify?.onSubscription?.dataNotify
           if (chatState.currentChat.index !== -1) {
             if (chatState.currentChat.chatRoomId === dataNotify.message?.chatRoomId) {
               pushMessageToCache(chatState.currentChat.index, dataNotify.message, dispatch)
@@ -133,12 +131,12 @@ const Page: NextPageWithLayout = () => {
                 })
               }
 
-              AlertInfo(resNotify?.onSub?.message)
+              AlertInfo(resNotify?.onSubscription?.message)
             } else {
               const index = chatState.listChat.findIndex((chat) => chat._id === dataNotify.message?.chatRoomId)
               if (index !== -1 && chatState.listChat[index].messages?.length! > 0) {
                 pushMessageToCache(index, dataNotify.message!, dispatch)
-                AlertInfo( resNotify?.onSub?.message)
+                AlertInfo( resNotify?.onSubscription?.message)
               }
             }
           }
@@ -146,29 +144,29 @@ const Page: NextPageWithLayout = () => {
         }
         case "send-friend-request": {
           addNewFriendRequest({
-            senderId: resNotify?.onSub?.senderId,
-            recipientId: resNotify?.onSub?.recipientId
+            senderId: resNotify?.onSubscription?.senderId,
+            recipientId: resNotify?.onSubscription?.recipientId
           }, dispatch)
-          AlertInfo(resNotify?.onSub?.message)
+          AlertInfo(resNotify?.onSubscription?.message)
           break
         }
         case "accept-friend-request": {
           addNewFriend({
-            senderId: resNotify?.onSub?.senderId,
-            recipientId: resNotify?.onSub?.recipientId
+            senderId: resNotify?.onSubscription?.senderId,
+            recipientId: resNotify?.onSubscription?.recipientId
           }, dispatch)
-          AlertInfo(resNotify?.onSub?.message)
+          AlertInfo(resNotify?.onSubscription?.message)
           break
         }
         case "remove-friend-request": {
           removeFriendRequestGlobal(
-            friendRequestState.listFriendRequest.findIndex((f) => f._id === resNotify?.onSub?.message), 
+            friendRequestState.listFriendRequest.findIndex((f) => f._id === resNotify?.onSubscription?.message), 
             dispatch
           )
           break
         }
         case "unfriend": {
-          removeFriendGlobal(resNotify?.onSub?.message, dispatch)
+          removeFriendGlobal(resNotify?.onSubscription?.message, dispatch)
           break
         }
       }

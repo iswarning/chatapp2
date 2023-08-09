@@ -1,8 +1,9 @@
-import { MutationCreateUser } from "@/graphql/mutations";
+import { MutationCreateUser, MutationPushNotify } from "@/graphql/mutations";
 import { QueryFindAllUser, QueryGenerateRtcToken, QueryGetInitialDataOfUser, QueryGetUserInfoById } from "@/graphql/queries";
 import { ChatType } from "@/types/ChatType";
 import { FriendRequestType } from "@/types/FriendRequestType";
 import { FriendType } from "@/types/FriendType";
+import { NotifyResponseType } from "@/types/NotifyResponseType";
 import { UserType } from "@/types/UserType";
 import axios from "axios";
 
@@ -178,6 +179,24 @@ export async function generateRtcToken(input: { chatRoomId: string }) {
             }
         })
         return response.data.data.generateRtcToken
+    } catch (error) {
+        console.log(error)
+    }
+    return null
+}
+
+export async function pushNotify(input: NotifyResponseType) {
+    try {
+        await axios.post(process.env.NEXT_PUBLIC_GRAPHQL_ENPOINT!, {
+            query: MutationPushNotify,
+            variables: {
+                input
+            }
+        }, {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
     } catch (error) {
         console.log(error)
     }

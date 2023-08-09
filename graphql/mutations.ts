@@ -130,3 +130,9 @@ export const MutationVideoCall = `
         }
     }
 `
+
+export const MutationPushNotify = `
+    mutation($input: NotifyInput!){
+        pushNotify(notifyInput: $input)
+    }
+`

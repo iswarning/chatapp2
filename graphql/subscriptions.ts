@@ -2,7 +2,7 @@ import { gql } from "@apollo/client";
 
 export const SubscriptionOnNotify = gql`
     subscription {
-        onSub {
+        onSubscription {
             message
             senderId
             recipientId
