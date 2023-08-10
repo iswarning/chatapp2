@@ -10,6 +10,7 @@ import { removeFriendGlobal } from '@/services/CacheService';
 import { removeFriend } from '@/services/FriendService';
 import { FriendType } from '@/types/FriendType';
 import styled from 'styled-components';
+import { pushNotify } from '@/services/UserService';
 
 export default function SidebarContact() {
   
@@ -29,7 +30,7 @@ export default function SidebarContact() {
 <div>
 
 {
-  friendState ? friendState.listFriend.map((friend, i) => <FriendElement key={friend._id} index={i} friendId={friend._id} userInfo={friend.userInfo!} />) : null
+  friendState ? friendState.listFriend.map((friend, i) => <FriendElement key={friend._id} index={i} friend={friend} />) : null
 }
 
 </div>
@@ -39,17 +40,25 @@ export default function SidebarContact() {
   )
 }
 
-function FriendElement({ index, friendId, userInfo }: { index: number, friendId: string | undefined, userInfo: UserType }) {
+function FriendElement({ index, friend }: { index: number, friend: FriendType }) {
 
   const appState = useSelector(selectAppState)
   const dispatch = useDispatch()
 
+  const userInfo = friend.userInfo
+
   const handleUnfriend = (event: any) => {
     event.preventDefault()
     if(!confirm("Do you want to unfriend ?")) return
-    removeFriend(friendId!)
+    removeFriend(friend._id!)
     .then(() => {
       removeFriendGlobal(index, dispatch)
+      pushNotify({
+        senderId: appState.userInfo._id!,
+        recipientId: friend.senderId === appState.userInfo._id ? friend.recipientId : friend.senderId,
+        type: "unfriend",
+        message: friend._id,
+      })
     })
   }
 

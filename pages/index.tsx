@@ -28,6 +28,7 @@ import { DataNotify, NotifyResponseType } from "@/types/NotifyResponseType";
 import mime from 'mime-types'
 import DownloadMultipleFile from "@/components/DownloadMultipleFile";
 import { selectFriendRequestState } from "@/redux/friendRequestSlice";
+import { selectFriendState } from "@/redux/friendSlice";
 
 // import '@/styles/tailwind.min.css'
 const Page: NextPageWithLayout = () => {
@@ -38,6 +39,7 @@ const Page: NextPageWithLayout = () => {
   const appState = useSelector(selectAppState);
   const chatState = useSelector(selectChatState);
   const friendRequestState = useSelector(selectFriendRequestState);
+  const friendState = useSelector(selectFriendState);
   const videoCallState = useSelector(selectVideoCallState);
 
   useEffect(() => {
@@ -166,7 +168,7 @@ const Page: NextPageWithLayout = () => {
           break
         }
         case "unfriend": {
-          removeFriendGlobal(resNotify?.onSubscription?.message, dispatch)
+          removeFriendGlobal(friendState.listFriend.findIndex((item) => item._id === resNotify?.onSubscription?.message), dispatch)
           break
         }
       }
@@ -179,10 +181,7 @@ const Page: NextPageWithLayout = () => {
 
   useEffect(() => {
     if (resCall) {
-      console.log(resCall)
       const response = JSON.parse(resCall?.onCall) as NotifyResponseType
-      console.log(response)
-
       if(response?.recipientId?.includes(appState.userInfo._id!) && response.senderId !== appState.userInfo._id) {
         switch(response.type){
           case "send-call": {  

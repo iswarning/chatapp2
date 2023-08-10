@@ -13,7 +13,7 @@ import { FriendRequestType } from '@/types/FriendRequestType';
 import { FriendType } from '@/types/FriendType';
 import { addNewFriend, addNewFriendRequest, removeFriendRequestGlobal } from '@/services/CacheService';
 import { createFriendRequest, deleteFR } from '@/services/FriendRequestService';
-import { findAllUser } from '@/services/UserService';
+import { findAllUser, pushNotify } from '@/services/UserService';
 import PersonAddAltOutlinedIcon from '@mui/icons-material/PersonAddAltOutlined';
 import { selectFriendState } from '@/redux/friendSlice';
 
@@ -85,6 +85,15 @@ function UserElement({ userInfo, resetInput, index }: { userInfo: UserType | nul
     .then((data: FriendRequestType) => {
       addNewFriendRequest(data, dispatch)
       resetInput()
+      pushNotify({
+        senderId: appState.userInfo._id!,
+        recipientId: data.senderId === appState.userInfo._id ? data.recipientId : data.senderId,
+        type: "send-friend-request",
+        message: `${appState.userInfo.fullName} send a friend request`,
+        dataNotify: {
+          friend: data
+        }
+      })
     })
   }
 
@@ -126,15 +135,29 @@ function FriendElement({ fR, index }: { fR: FriendRequestType, index: number }) 
       recipientId: fR.senderId
     })
     .then((data: FriendType) => {
-      console.log(data)
       addNewFriend(data, dispatch)
       removeFriendRequestGlobal(index, dispatch)
+      pushNotify({
+        senderId: appState.userInfo._id!,
+        recipientId: fR.senderId === appState.userInfo._id ? fR.recipientId : fR.senderId,
+        type: "accept-friend-request",
+        message: `${appState.userInfo.fullName} accepted a friend request`,
+        dataNotify: {
+          friend: data
+        }
+      })
     })
   }
 
   const handleRemove = (event: any) => {
     event.preventDefault()
     deleteFR(fR._id!)
+    pushNotify({
+      senderId: appState.userInfo._id!,
+      recipientId: fR.senderId === appState.userInfo._id ? fR.recipientId : fR.senderId,
+      type: "remove-friend-request",
+      message: fR._id,
+    })
   }
 
 return (
