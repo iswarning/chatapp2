@@ -1,9 +1,9 @@
 import { Modal } from '@mui/material'
 import dynamic from 'next/dynamic';
 import React, {  useState } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
+import { useDispatch } from 'react-redux'
 import { setStatusCall } from '@/services/CacheService';
-import { StatusCallType, selectVideoCallState } from '@/redux/videoCallSlice';
+import { StatusCallType } from '@/redux/videoCallSlice';
 
 export default function ModalVideoCall({ token, channel }: { token: string, channel: string }) {
 

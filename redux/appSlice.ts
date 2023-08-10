@@ -100,10 +100,7 @@ export const appSlice = createSlice({
           state.data.fileUploading = action.payload.data
           break
         case "setFileUploadDone":
-          state.data.fileUploadDone = [
-            ...state.data.fileUploadDone,
-            action.payload.data
-          ]
+          state.data.fileUploadDone.push(action.payload.data)
           break
         case "setShowImageFullScreen":
             state.data.showImageFullScreenData = action.payload.data
@@ -115,10 +112,7 @@ export const appSlice = createSlice({
             state.data.prepareSendFiles = action.payload.data
           break
         case "addPrepareSendFiles":
-            state.data.prepareSendFiles = [
-              ...state.data.prepareSendFiles,
-              action.payload.data
-            ]
+            state.data.prepareSendFiles.push(action.payload.data)
           break
         default:
           return
