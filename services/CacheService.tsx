@@ -262,3 +262,11 @@ export function setStatusCall(status: StatusCallType, dispatch: Dispatch<AnyActi
         data: status
     }))
 }
+
+export function setShowVideoCallScreen(show: boolean, dispatch: Dispatch<AnyAction>) {
+    dispatch(setGlobalVideoCallState({
+        type: "setShowVideoCallScreen",
+        data: show
+    }))
+}
+

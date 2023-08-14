@@ -16,13 +16,12 @@ import CallIcon from '@mui/icons-material/Call';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { StatusCallType, selectVideoCallState, setGlobalVideoCallState } from "@/redux/videoCallSlice";
 import {v4 as uuidv4} from 'uuid'
-import { addNewFileInRoom, addNewImageInRoom, addPrepareSendFiles, pushMessageToCache, setDataVideoCall, setFileUploadDone, setFileUploading, setListMessageInRoom, setPrepareSendFiles, setProgress, setShowGroupInfo, setStatusSend, updateMessageToCache } from "@/services/CacheService";
+import { addNewFileInRoom, addNewImageInRoom, addPrepareSendFiles, pushMessageToCache, setDataVideoCall, setFileUploadDone, setFileUploading, setListMessageInRoom, setPrepareSendFiles, setProgress, setShowGroupInfo, setShowVideoCallScreen, setStatusCall, setStatusSend, updateMessageToCache } from "@/services/CacheService";
 import { AlertError } from "@/utils/core";
 import { createMessage, paginateMessage } from "@/services/MessageService";
 import PrepareSendFileScreen from "./PrepareSendFileScreen";
 import { selectChatState } from "@/redux/chatSlice";
 import { getImageTypeFileValid } from "@/utils/getImageTypeFileValid";
-import { videoCall } from "@/services/ChatRoomService";
 import { pushNotify } from "@/services/UserService";
 
 
@@ -190,8 +189,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
         }
         let newMessage = {} as MessageType
         newMessage._id = uuidv4()
-        newMessage.message = input
-        newMessage.file = JSON.stringify({
+        newMessage.message = JSON.stringify({
           key: key,
           name: file.name.split(".")[0],
           size: fileSize,
@@ -248,7 +246,7 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
             senderId: appState.userInfo._id!,
             chatRoomId: chat._id
           })
-          .then((data: MessageType) => {
+          .then(() => {
             storage
             .ref(path)
             .getMetadata()
@@ -279,15 +277,8 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
   };
 
   const handleCalling = () => {
-
-    dispatch(setGlobalVideoCallState({
-      type: "setShowVideoCallScreen",
-      data: true
-    }))
-    dispatch(setGlobalVideoCallState({
-      type: "setStatusCall",
-      data: StatusCallType.CALLING
-    }));
+    setShowVideoCallScreen(true, dispatch)
+    setStatusCall(StatusCallType.CALLING, dispatch)
     let data = {
         type: "send-call",
         senderId: appState.userInfo._id!,
@@ -300,14 +291,16 @@ export default function ChatScreen({ chat, messages }: { chat: ChatType, message
         }
     }
     setDataVideoCall(data, dispatch)
-    videoCall({
+    pushNotify({
       type: "send-call",
       senderId: appState.userInfo._id!,
       recipientId: chat.isGroup ? JSON.stringify(chat?.listRecipientInfo?.map((re) => re._id)) : chat.recipientInfo?._id!,
-      chatRoomId: chat._id,
-      fullName: appState.userInfo.fullName,
-      photoURL: chat.isGroup ? chat.photoURL : appState.userInfo.photoURL,
-      isGroup: chat.isGroup
+      dataVideoCall: {
+        chatRoomId: chat._id,
+        fullName: appState.userInfo.fullName,
+        photoURL: chat.isGroup ? chat.photoURL : appState.userInfo.photoURL,
+        isGroup: chat.isGroup
+      }
     })
   }
 

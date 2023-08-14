@@ -6,9 +6,8 @@ import { useDispatch, useSelector } from 'react-redux'
 import { StatusCallType, selectVideoCallState, setGlobalVideoCallState } from "@/redux/videoCallSlice";
 import { selectAppState } from "@/redux/appSlice";
 import { setDataVideoCall } from "@/services/CacheService";
-import { videoCall } from "@/services/ChatRoomService";
 import { selectChatState } from "@/redux/chatSlice";
-import { generateRtcToken } from "@/services/UserService";
+import { generateRtcToken, pushNotify } from "@/services/UserService";
 
 export default function PopupVideoCall({ show }: { show: boolean }) {
 
@@ -51,13 +50,15 @@ export default function PopupVideoCall({ show }: { show: boolean }) {
                 }
             }
             setDataVideoCall(data, dispatch)
-            await videoCall({
+            await pushNotify({
                 type: "accept-call",
                 senderId: appState.userInfo._id!,
                 recipientId: chat?.isGroup ? JSON.stringify(chat?.listRecipientInfo?.map((re) => re._id))  : chat?.recipientInfo?._id!,
-                chatRoomId: chat?._id,
-                isGroup: chat?.isGroup,
-                accessToken
+                dataVideoCall: {
+                    chatRoomId: chat?._id,
+                    isGroup: chat?.isGroup,
+                    accessToken
+                }
             })
         }
         

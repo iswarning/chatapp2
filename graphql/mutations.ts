@@ -113,24 +113,6 @@ export const MutationUpdateMessage = `
     }
 `
 
-export const MutationVideoCall = `
-    mutation($input: NotifyInput!){
-        videoCall(notifyInput: $input){
-            message
-            type
-            senderId
-            recipientId
-            dataVideoCall {
-                fullName
-                photoURL
-                chatRoomId
-                isGroup
-                accessToken
-            }
-        }
-    }
-`
-
 export const MutationPushNotify = `
     mutation($input: NotifyInput!){
         pushNotify(notifyInput: $input)

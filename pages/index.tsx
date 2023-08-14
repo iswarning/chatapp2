@@ -13,22 +13,23 @@ import SidebarProfile from "@/components/Sidebar/SidebarProfile";
 import InfoContentScreen from "@/components/ChatScreen/InfoContentScreen";
 import ChatScreen from "@/components/ChatScreen/ChatScreen";
 import { selectChatState } from "@/redux/chatSlice";
-import { StatusCallType, selectVideoCallState, setGlobalVideoCallState } from "@/redux/videoCallSlice";
-import { addNewFileInRoom, addNewFriend, addNewFriendRequest, addNewImageInRoom, getLocalStorage, pushMessageToCache, removeFriendGlobal, removeFriendRequestGlobal, removeMessageInListChat, setCurrentChat, setDataVideoCall, setListChat, setListFriend, setListFriendRequest, setShowImageFullScreen, setUserInfo } from "@/services/CacheService";
+import { StatusCallType, selectVideoCallState } from "@/redux/videoCallSlice";
+import { addNewFileInRoom, addNewFriend, addNewFriendRequest, addNewImageInRoom, getLocalStorage, pushMessageToCache, removeFriendGlobal, removeFriendRequestGlobal, removeMessageInListChat, setCurrentChat, setDataVideoCall, setListChat, setListFriend, setListFriendRequest, setListMessageInRoom, setShowImageFullScreen, setShowVideoCallScreen, setStatusCall, setUserInfo } from "@/services/CacheService";
 import ShowImageFullScreen from "@/components/ChatScreen/Message/ShowImageFullScreen";
 import { createNewUser, getInitialDataOfUser } from "@/services/UserService";
-import { SubscriptionOnCall, SubscriptionOnNotify } from "@/graphql/subscriptions";
+import { SubscriptionOnNotify } from "@/graphql/subscriptions";
 import { useSubscription } from "@apollo/client";
 import { AlertInfo } from "@/utils/core";
-import { updateMessage } from "@/services/MessageService";
+import { getLastMessage, paginateMessage, updateMessage } from "@/services/MessageService";
 import SidebarFriendRequest from "@/components/Sidebar/SidebarFriendRequest";
 import PopupVideoCall from "@/components/VideoCallScreen/PopupVideoCall";
 import ModalVideoCall from "@/components/VideoCallScreen/ModalVideoCall";
-import { DataNotify, NotifyResponseType } from "@/types/NotifyResponseType";
+import { NotifyResponseType } from "@/types/NotifyResponseType";
 import mime from 'mime-types'
 import DownloadMultipleFile from "@/components/DownloadMultipleFile";
 import { selectFriendRequestState } from "@/redux/friendRequestSlice";
 import { selectFriendState } from "@/redux/friendSlice";
+import { MessageType } from "@/types/MessageType";
 
 // import '@/styles/tailwind.min.css'
 const Page: NextPageWithLayout = () => {
@@ -41,6 +42,9 @@ const Page: NextPageWithLayout = () => {
   const friendRequestState = useSelector(selectFriendRequestState);
   const friendState = useSelector(selectFriendState);
   const videoCallState = useSelector(selectVideoCallState);
+
+  const currentIndexChat = chatState.currentChat.index
+  const currentChatRoomId = chatState.currentChat.chatRoomId
 
   useEffect(() => {
     setLoading(true)
@@ -66,153 +70,161 @@ const Page: NextPageWithLayout = () => {
         setListFriend(getLocalStorage("ListFriend"), dispatch)
         setListFriendRequest(getLocalStorage("ListFriendRequest"), dispatch)
         setListChat(getLocalStorage("ListChat"), dispatch)
-        if (getLocalStorage("CurrentChat"))
+        if (getLocalStorage("CurrentChat")) {
           setCurrentChat(getLocalStorage("CurrentChat"), dispatch)
-        // processMessageTypeFile()
+          reloadNewMessages()
+        }
         setLoading(false)
       }
     })  
   },[])
 
-  // const processMessageTypeFile = () => {
-  //   let listKey = chatState?.listChat?.find((chat) => 
-  //   chat?._id === chatState?.currentChat.chatRoomId)?.messages?.filter((msg) => 
-  //   msg.type === "file-uploading")
-  //   listKey?.forEach((message) => {
-  //     updateMessage({
-  //       ...message,
-  //       type: "file",
-  //     })
-  //   })
-  // }
+  const reloadNewMessages = async() => {
+    let listKey = chatState?.listChat?.find((chat) => 
+    chat?._id === chatState?.currentChat.chatRoomId)?.messages?.filter((msg) => 
+    msg.type === "file-uploading")
+    listKey?.forEach((message) => {
+      updateMessage({
+        ...message,
+        message: JSON.parse(message.message!).key,
+        type: "file",
+      })
+    })
+    const lastMessageDB: MessageType = await getLastMessage(currentChatRoomId)
+    const lastMessageCache = chatState.listChat[currentIndexChat].messages?.[chatState.listChat[currentIndexChat].messages?.length! - 1]
+    if (lastMessageCache?.type === "text" && lastMessageDB._id !== lastMessageCache?._id) {
+      setListMessageInRoom(currentIndexChat, await paginateMessage({ chatRoomId: currentChatRoomId, n: 0 }), dispatch)
+    }
+  }
 
   const { data: resNotify } = useSubscription(
     SubscriptionOnNotify
   );
   
   useEffect(() => {
-    if(resNotify?.onSubscription?.recipientId?.includes(appState.userInfo._id) && resNotify?.onSubscription?.senderId !== appState.userInfo._id) {
-      switch(resNotify?.onSubscription?.type){
+    if (!resNotify) return
+    const result = JSON.parse(resNotify?.onSubscription) as NotifyResponseType
+    if(result.recipientId?.includes(appState.userInfo._id!) && result?.senderId !== appState.userInfo._id) {
+      switch(result.type){   
         case "send-message": {  
-          const dataNotify: DataNotify = resNotify?.onSubscription?.dataNotify
-          if (chatState.currentChat.index !== -1) {
-            if (chatState.currentChat.chatRoomId === dataNotify.message?.chatRoomId) {
-              pushMessageToCache(chatState.currentChat.index, dataNotify.message, dispatch)
-              if (dataNotify.message.type === "image") {
-                const listKey: string[] = JSON.parse(dataNotify.message.message!)
-                for (const key in listKey) {
-                  const ref = storage.ref(key)
-                  ref.getMetadata().then(metadata => {
-                    ref.getDownloadURL().then(url => {
-                      addNewImageInRoom(chatState.currentChat.index, {
-                        url,
-                        key,
-                        name: key,
-                        size: metadata.size,
-                        extension: String(mime.extension(metadata.contentType)),
-                        timeCreated: metadata.timeCreated
-                      }, dispatch)
-                    })
-                  })
-                }
-              }
-
-              if (dataNotify.message.type === "file") { 
-                const ref = storage.ref(dataNotify.message.message)
-                  ref.getMetadata().then(metadata => {
-                    ref.getDownloadURL().then(url => {
-                      addNewFileInRoom(chatState.currentChat.index, {
-                        url,
-                        key: dataNotify.message?.message!,
-                        name: dataNotify.message?.message!,
-                        size: metadata.size,
-                        extension: String(mime.extension(metadata.contentType)),
-                        timeCreated: metadata.timeCreated
-                      }, dispatch)
-                    })
-                })
-              }
-
-              AlertInfo(resNotify?.onSubscription?.message)
-            } else {
-              const index = chatState.listChat.findIndex((chat) => chat._id === dataNotify.message?.chatRoomId)
-              if (index !== -1 && chatState.listChat[index].messages?.length! > 0) {
-                pushMessageToCache(index, dataNotify.message!, dispatch)
-                AlertInfo( resNotify?.onSubscription?.message)
-              }
-            }
-          }
+          sendMessage(result)
           break
         }
         case "send-friend-request": {
-          addNewFriendRequest({
-            senderId: resNotify?.onSubscription?.senderId,
-            recipientId: resNotify?.onSubscription?.recipientId
-          }, dispatch)
-          AlertInfo(resNotify?.onSubscription?.message)
+          sendFriendRequest(result)
           break
         }
         case "accept-friend-request": {
-          addNewFriend({
-            senderId: resNotify?.onSubscription?.senderId,
-            recipientId: resNotify?.onSubscription?.recipientId
-          }, dispatch)
-          AlertInfo(resNotify?.onSubscription?.message)
+          acceptFriendRequest(result)
           break
         }
         case "remove-friend-request": {
           removeFriendRequestGlobal(
-            friendRequestState.listFriendRequest.findIndex((f) => f._id === resNotify?.onSubscription?.message), 
+            friendRequestState.listFriendRequest.findIndex((f) => f._id === result.message), 
             dispatch
           )
           break
         }
         case "unfriend": {
-          removeFriendGlobal(friendState.listFriend.findIndex((item) => item._id === resNotify?.onSubscription?.message), dispatch)
+          removeFriendGlobal(
+            friendState.listFriend.findIndex((item) => item._id === result?.message), 
+            dispatch
+          )
+          break
+        }
+        
+        // video call
+        case "send-call": {  
+          sendCall(result)
+          break
+        }
+        case "accept-call": {
+          acceptCall(result)
           break
         }
       }
     }
   },[resNotify])
 
-  const { data: resCall } = useSubscription(
-    SubscriptionOnCall
-  );
+  const sendMessage = (result: NotifyResponseType) => {
+    if (!result?.dataNotify) return
+    const dataNotify = result?.dataNotify
+    if (currentIndexChat !== -1) {
+      if (currentChatRoomId === dataNotify.message?.chatRoomId) {
+        pushMessageToCache(currentIndexChat, dataNotify.message, dispatch)
+        if (dataNotify.message.type === "image") {
+          const listKey: string[] = JSON.parse(dataNotify.message.message!)
+          for (const key in listKey) {
+            const ref = storage.ref(key)
+            ref.getMetadata().then(metadata => {
+              ref.getDownloadURL().then(url => {
+                addNewImageInRoom(currentIndexChat, {
+                  url,
+                  key,
+                  name: key,
+                  size: metadata.size,
+                  extension: String(mime.extension(metadata.contentType)),
+                  timeCreated: metadata.timeCreated
+                }, dispatch)
+              })
+            })
+          }
+        }
 
-  useEffect(() => {
-    if (resCall) {
-      const response = JSON.parse(resCall?.onCall) as NotifyResponseType
-      if(response?.recipientId?.includes(appState.userInfo._id!) && response.senderId !== appState.userInfo._id) {
-        switch(response.type){
-          case "send-call": {  
-            dispatch(setGlobalVideoCallState({
-              type: "setShowVideoCallScreen",
-              data: true
-            }))
-            dispatch(setGlobalVideoCallState({
-              type: "setStatusCall",
-              data: StatusCallType.INCOMING_CALL
-            }));
-            setDataVideoCall(response, dispatch)
-            break
-          }
-          case "accept-call": {
-            dispatch(setGlobalVideoCallState({
-              type: "setShowVideoCallScreen",
-              data: false
-            }))
-            dispatch(setGlobalVideoCallState({
-              type: "setStatusCall",
-              data: StatusCallType.CALLED
-            }));
-            setDataVideoCall(response, dispatch)
-            break
-          }
+        if (dataNotify.message.type === "file") { 
+          const ref = storage.ref(dataNotify.message.message)
+            ref.getMetadata().then(metadata => {
+              ref.getDownloadURL().then(url => {
+                addNewFileInRoom(currentIndexChat, {
+                  url,
+                  key: dataNotify.message?.message!,
+                  name: dataNotify.message?.message!,
+                  size: metadata.size,
+                  extension: String(mime.extension(metadata.contentType)),
+                  timeCreated: metadata.timeCreated
+                }, dispatch)
+              })
+          })
+        }
+
+        AlertInfo(result?.message!)
+      } else {
+        const index = chatState.listChat.findIndex((chat) => chat._id === dataNotify.message?.chatRoomId)
+        if (index !== -1 && chatState.listChat[index].messages?.length! > 0) {
+          pushMessageToCache(index, dataNotify.message!, dispatch)
+          AlertInfo( result?.message!)
         }
       }
     }
-    
-  },[resCall])
+  }
+
+  const sendFriendRequest = (result: NotifyResponseType) => {
+    addNewFriendRequest({
+      senderId: result?.senderId,
+      recipientId: result?.recipientId!
+    }, dispatch)
+    AlertInfo(result?.message!)
+  }
+
+  const acceptFriendRequest = (result: NotifyResponseType) => {
+    addNewFriend({
+      senderId: result.senderId,
+      recipientId: result.recipientId!
+    }, dispatch)
+    AlertInfo(result.message!)
+  }
+
+  const sendCall = (result: NotifyResponseType) => {
+    setShowVideoCallScreen(true, dispatch)
+    setStatusCall(StatusCallType.INCOMING_CALL, dispatch)
+    setDataVideoCall(result, dispatch)
+  }
+
+  const acceptCall = (result: NotifyResponseType) => {
+    setShowVideoCallScreen(false, dispatch)
+    setStatusCall(StatusCallType.CALLED, dispatch)
+    setDataVideoCall(result, dispatch)
+  }
   
   return (
     <>
@@ -247,10 +259,10 @@ const Page: NextPageWithLayout = () => {
         }
 
         {
-          chatState.currentChat.chatRoomId ? <>
+          currentChatRoomId ? <>
             <ChatScreen 
-            chat={chatState.listChat[chatState.currentChat.index]} 
-            messages={chatState.listChat[chatState.currentChat.index].messages!} />
+            chat={chatState.listChat[currentIndexChat]} 
+            messages={chatState.listChat[currentIndexChat].messages!} />
             {
               appState.showGroupInfo ? <InfoContentScreen /> : null
             }
